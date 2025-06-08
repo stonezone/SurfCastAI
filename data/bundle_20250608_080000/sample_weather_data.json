@@ -1,0 +1,44 @@
+{
+  "weather_data": [
+    {
+      "source": "NWS",
+      "timestamp": "2025-06-08T08:00:00Z",
+      "forecast_time": "2025-06-08T12:00:00Z",
+      "conditions": "Partly cloudy with scattered showers",
+      "wind_direction": "ENE",
+      "wind_speed": 15,
+      "wind_gust": 20,
+      "temperature": 27,
+      "precipitation_probability": 30,
+      "uv_index": 11,
+      "tides": [
+        {
+          "time": "2025-06-08T04:23:00Z",
+          "height": 0.3,
+          "type": "LOW"
+        },
+        {
+          "time": "2025-06-08T10:45:00Z",
+          "height": 2.1,
+          "type": "HIGH"
+        },
+        {
+          "time": "2025-06-08T16:50:00Z",
+          "height": 0.5,
+          "type": "LOW"
+        },
+        {
+          "time": "2025-06-08T23:15:00Z",
+          "height": 1.8,
+          "type": "HIGH"
+        }
+      ],
+      "marine_forecast": "Trade winds 15-20 knots. Seas 5-7 feet north, 2-4 feet south. Scattered showers.",
+      "location": {
+        "latitude": 21.3,
+        "longitude": -157.8,
+        "name": "Oahu"
+      }
+    }
+  ]
+}

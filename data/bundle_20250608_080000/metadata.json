@@ -1,0 +1,28 @@
+{
+  "bundle_id": "bundle_20250608_080000",
+  "timestamp": "2025-06-08T08:00:00Z",
+  "region": "Hawaii",
+  "stats": {
+    "total_files": 3,
+    "successful_files": 3,
+    "failed_files": 0,
+    "total_size_mb": 0.025
+  },
+  "agent_results": {
+    "buoy": {
+      "successful": 4,
+      "total": 4,
+      "success_rate": 100.0
+    },
+    "model": {
+      "successful": 2,
+      "total": 2,
+      "success_rate": 100.0
+    },
+    "weather": {
+      "successful": 1,
+      "total": 1,
+      "success_rate": 100.0
+    }
+  }
+}

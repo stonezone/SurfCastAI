@@ -1,0 +1,75 @@
+# SurfCastAI Configuration
+
+general:
+  log_level: INFO
+  log_file: logs/surfcastai.log
+  output_directory: output
+  data_directory: data
+
+openai:
+  model: gpt-4-1106-preview
+  temperature: 0.7
+  max_tokens: 4000
+
+agents:
+  buoy:
+    enabled: true
+    urls:
+      - "https://www.ndbc.noaa.gov/data/realtime2/51001.txt"  # NW Hawaii Buoy
+      - "https://www.ndbc.noaa.gov/data/realtime2/51002.txt"  # SW Hawaii Buoy
+      - "https://www.ndbc.noaa.gov/data/realtime2/51003.txt"  # WNW Hawaii Buoy
+      - "https://www.ndbc.noaa.gov/data/realtime2/51004.txt"  # SE Hawaii Buoy
+    rate_limit: 1  # requests per second
+    retry_count: 3
+    retry_delay: 5  # seconds
+    
+  weather:
+    enabled: true
+    urls:
+      - "https://marine.weather.gov/MapClick.php?lat=21.441&lon=-157.788"  # Oahu
+    rate_limit: 0.5  # requests per second
+    retry_count: 3
+    retry_delay: 10  # seconds
+    
+  model:
+    enabled: true
+    urls:
+      - "https://nomads.ncep.noaa.gov/cgi-bin/filter_wave.pl?file=multi_1.glo_30m.t00z.f000.grib2&lev_surface=on&var_HTSGW=on&var_PERPW=on&var_DIRPW=on&subregion=&leftlon=160W&rightlon=150W&toplat=25N&bottomlat=15N&dir=%2Fmulti_1.20230101"
+    rate_limit: 0.2  # requests per second
+    retry_count: 3
+    retry_delay: 15  # seconds
+    
+  satellite:
+    enabled: true
+    urls:
+      - "https://coastwatch.noaa.gov/cw/satellite-data-products/sea-surface-temperature/g-goes-16-abi/most-recent.html"
+    rate_limit: 0.5  # requests per second
+    retry_count: 2
+    retry_delay: 10  # seconds
+
+processing:
+  buoy:
+    min_confidence: 0.7
+    anomaly_threshold: 3.0  # standard deviations
+    
+  weather:
+    min_confidence: 0.6
+    
+  model:
+    min_confidence: 0.7
+    swell_detection:
+      min_height: 0.5  # meters
+      min_period: 8.0  # seconds
+      min_significance: 0.4  # 0-1 scale
+      
+  fusion:
+    weight_buoy: 0.7
+    weight_model: 0.6
+    weight_weather: 0.5
+    min_combined_confidence: 0.6
+
+forecast:
+  templates_dir: src/forecast_engine/templates
+  refinement_cycles: 2
+  quality_threshold: 0.8
+  formats: markdown,html,pdf

@@ -1,0 +1,70 @@
+{
+  "model_data": [
+    {
+      "model_id": "WaveWatch III",
+      "timestamp": "2025-06-08T08:00:00Z",
+      "forecast_time": "2025-06-08T12:00:00Z",
+      "significant_wave_height": 3.0,
+      "peak_period": 13.0,
+      "peak_direction": 315.0,
+      "wind_wave_height": 1.2,
+      "wind_wave_period": 7.0,
+      "wind_wave_direction": 70.0,
+      "swell_components": [
+        {
+          "height": 2.8,
+          "period": 13.0,
+          "direction": 315.0,
+          "energy": 0.8
+        },
+        {
+          "height": 1.2,
+          "period": 10.0,
+          "direction": 290.0,
+          "energy": 0.4
+        },
+        {
+          "height": 0.8,
+          "period": 8.0,
+          "direction": 190.0,
+          "energy": 0.2
+        }
+      ],
+      "location": {
+        "latitude": 21.5,
+        "longitude": -158.0,
+        "name": "North Shore Oahu"
+      }
+    },
+    {
+      "model_id": "WaveWatch III",
+      "timestamp": "2025-06-08T08:00:00Z",
+      "forecast_time": "2025-06-08T12:00:00Z",
+      "significant_wave_height": 1.5,
+      "peak_period": 8.0,
+      "peak_direction": 190.0,
+      "wind_wave_height": 0.8,
+      "wind_wave_period": 5.0,
+      "wind_wave_direction": 70.0,
+      "swell_components": [
+        {
+          "height": 1.2,
+          "period": 8.0,
+          "direction": 190.0,
+          "energy": 0.7
+        },
+        {
+          "height": 0.6,
+          "period": 12.0,
+          "direction": 300.0,
+          "energy": 0.2
+        }
+      ],
+      "location": {
+        "latitude": 21.3,
+        "longitude": -157.8,
+        "name": "South Shore Oahu"
+      }
+    }
+  ]
+}

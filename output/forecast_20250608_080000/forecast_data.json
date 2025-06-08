@@ -1,0 +1,23 @@
+{
+  "forecast_id": "forecast_20250608_080000",
+  "generated_time": "2025-06-08T03:01:00.667262",
+  "main_forecast": "Error generating forecast: Connection error.",
+  "north_shore": "Error generating forecast: Connection error.",
+  "south_shore": "Error generating forecast: Connection error.",
+  "daily": "Error generating forecast: Connection error.",
+  "metadata": {
+    "source_data": {
+      "swell_events": 3,
+      "locations": 2
+    },
+    "confidence": {
+      "overall_score": 0.8,
+      "factors": {
+        "data_freshness": 0.9,
+        "source_diversity": 0.8,
+        "source_agreement": 0.7,
+        "model_consistency": 0.8
+      }
+    }
+  }
+}

@@ -1,0 +1,88 @@
+# SurfCastAI Configuration
+
+general:
+  log_level: INFO
+  data_directory: ./data
+  output_directory: ./output
+  timezone: Pacific/Honolulu
+
+openai:
+  api_key: YOUR_OPENAI_API_KEY
+  model: gpt-4-1106-preview
+  temperature: 0.7
+  max_tokens: 4000
+
+data_collection:
+  max_concurrent: 10
+  timeout: 30
+  retry_attempts: 3
+  user_agent: "SurfCastAI/1.0 (https://github.com/yourusername/surfCastAI)"
+
+rate_limits:
+  # Domain-specific rate limits (requests per second)
+  "www.ndbc.noaa.gov":
+    requests_per_second: 0.5
+    burst_size: 3
+  "api.weather.gov":
+    requests_per_second: 0.25
+    burst_size: 2
+  "www.weather.gov": 
+    requests_per_second: 0.25
+    burst_size: 2
+  "api.tidesandcurrents.noaa.gov":
+    requests_per_second: 0.2
+    burst_size: 2
+  "services.surfline.com":
+    requests_per_second: 0.1
+    burst_size: 1
+  "magicseaweed.com":
+    requests_per_second: 0.1
+    burst_size: 1
+  default:
+    requests_per_second: 0.2
+    burst_size: 2
+
+data_sources:
+  buoys:
+    enabled: true
+    urls:
+      - "https://www.ndbc.noaa.gov/data/realtime2/51001.txt"  # NW Hawaii
+      - "https://www.ndbc.noaa.gov/data/realtime2/51002.txt"  # SW Hawaii
+      - "https://www.ndbc.noaa.gov/data/realtime2/51003.txt"  # W Hawaii
+      - "https://www.ndbc.noaa.gov/data/realtime2/51004.txt"  # SE Hawaii
+      - "https://www.ndbc.noaa.gov/data/realtime2/51101.txt"  # NW Hawaii (nearshore)
+      - "https://www.ndbc.noaa.gov/data/realtime2/51201.txt"  # Waimea Bay, Oahu
+      - "https://www.ndbc.noaa.gov/data/realtime2/51202.txt"  # Mokapu Point, Oahu
+  weather:
+    enabled: true
+    urls:
+      - "https://api.weather.gov/gridpoints/HNL/12,52/forecast"  # Honolulu
+      - "https://api.weather.gov/gridpoints/HNL/8,65/forecast"  # North Shore
+  models:
+    enabled: true
+    urls:
+      - "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/"  # PacIOOS SWAN
+  satellite:
+    enabled: true
+    urls:
+      - "https://www.star.nesdis.noaa.gov/goes/sector_band.php?sat=G17&sector=hpa&band=GEOCOLOR&length=12"  # GOES-17
+  charts:
+    enabled: true
+    urls:
+      - "https://www.pacioos.hawaii.edu/wp-content/uploads/wave/SWAN-Oahu-forecast-map.png"  # SWAN Oahu
+      - "https://www.ospo.noaa.gov/data/ocean/wave/pac_height/pac_height.gif"  # Pacific Wave Height
+      - "https://www.ospo.noaa.gov/data/ocean/wave/pac_period/pac_period.gif"  # Pacific Wave Period
+
+forecast:
+  refinement_cycles: 3
+  quality_threshold: 0.8
+  shores:
+    - north
+    - south
+  style: pat_caldwell
+  emphasis: auto  # auto, north, south, both
+  length: comprehensive  # brief, standard, comprehensive
+  formats:
+    - markdown
+    - html
+    - pdf

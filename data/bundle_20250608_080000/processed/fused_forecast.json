@@ -1,0 +1,223 @@
+{
+  "forecast_id": "forecast_20250608_080000",
+  "generated_time": "2025-06-08T08:00:00Z",
+  "swell_events": [
+    {
+      "event_id": "event_20250608_nw",
+      "start_time": "2025-06-08T00:00:00Z",
+      "peak_time": "2025-06-08T12:00:00Z",
+      "end_time": "2025-06-09T00:00:00Z",
+      "primary_direction": 315,
+      "primary_direction_cardinal": "NW",
+      "significance": 0.8,
+      "hawaii_scale": 6.0,
+      "source": "model",
+      "dominant_period": 13.0,
+      "metadata": {
+        "confidence": 0.85,
+        "exposure_north_shore": 0.9,
+        "exposure_south_shore": 0.2
+      },
+      "primary_components": [
+        {
+          "height": 2.8,
+          "period": 13.0,
+          "direction": 315,
+          "confidence": 0.9,
+          "source": "model"
+        }
+      ],
+      "secondary_components": [
+        {
+          "height": 1.2,
+          "period": 10.0,
+          "direction": 290,
+          "confidence": 0.8,
+          "source": "model"
+        }
+      ]
+    },
+    {
+      "event_id": "event_20250608_s",
+      "start_time": "2025-06-08T00:00:00Z",
+      "peak_time": "2025-06-08T12:00:00Z",
+      "end_time": "2025-06-09T00:00:00Z",
+      "primary_direction": 190,
+      "primary_direction_cardinal": "S",
+      "significance": 0.5,
+      "hawaii_scale": 3.0,
+      "source": "model",
+      "dominant_period": 8.0,
+      "metadata": {
+        "confidence": 0.75,
+        "exposure_north_shore": 0.1,
+        "exposure_south_shore": 0.9
+      },
+      "primary_components": [
+        {
+          "height": 1.2,
+          "period": 8.0,
+          "direction": 190,
+          "confidence": 0.8,
+          "source": "model"
+        }
+      ],
+      "secondary_components": []
+    },
+    {
+      "event_id": "event_20250608_trade",
+      "start_time": "2025-06-08T00:00:00Z",
+      "peak_time": "2025-06-08T12:00:00Z",
+      "end_time": "2025-06-09T00:00:00Z",
+      "primary_direction": 70,
+      "primary_direction_cardinal": "ENE",
+      "significance": 0.4,
+      "hawaii_scale": 2.0,
+      "source": "buoy",
+      "dominant_period": 7.0,
+      "metadata": {
+        "confidence": 0.9,
+        "exposure_north_shore": 0.4,
+        "exposure_south_shore": 0.1
+      },
+      "primary_components": [
+        {
+          "height": 1.2,
+          "period": 7.0,
+          "direction": 70,
+          "confidence": 0.9,
+          "source": "buoy"
+        }
+      ],
+      "secondary_components": []
+    }
+  ],
+  "locations": [
+    {
+      "name": "Oahu North Shore",
+      "shore": "North Shore",
+      "latitude": 21.6639,
+      "longitude": -158.0529,
+      "facing_direction": 0,
+      "metadata": {
+        "seasonal_factor": 0.7,
+        "wind_factor": 0.6,
+        "overall_quality": 0.75,
+        "popular_breaks": ["Pipeline", "Sunset Beach", "Waimea Bay"]
+      },
+      "swell_events": [
+        {
+          "event_id": "event_20250608_nw",
+          "start_time": "2025-06-08T00:00:00Z",
+          "peak_time": "2025-06-08T12:00:00Z",
+          "end_time": "2025-06-09T00:00:00Z",
+          "primary_direction": 315,
+          "primary_direction_cardinal": "NW",
+          "significance": 0.8,
+          "hawaii_scale": 6.0,
+          "source": "model",
+          "dominant_period": 13.0,
+          "metadata": {
+            "confidence": 0.85,
+            "exposure_north_shore": 0.9,
+            "exposure_south_shore": 0.2
+          }
+        },
+        {
+          "event_id": "event_20250608_trade",
+          "start_time": "2025-06-08T00:00:00Z",
+          "peak_time": "2025-06-08T12:00:00Z",
+          "end_time": "2025-06-09T00:00:00Z",
+          "primary_direction": 70,
+          "primary_direction_cardinal": "ENE",
+          "significance": 0.4,
+          "hawaii_scale": 2.0,
+          "source": "buoy",
+          "dominant_period": 7.0,
+          "metadata": {
+            "confidence": 0.9,
+            "exposure_north_shore": 0.4,
+            "exposure_south_shore": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Oahu South Shore",
+      "shore": "South Shore",
+      "latitude": 21.2749,
+      "longitude": -157.8238,
+      "facing_direction": 180,
+      "metadata": {
+        "seasonal_factor": 0.8,
+        "wind_factor": 0.7,
+        "overall_quality": 0.7,
+        "popular_breaks": ["Waikiki", "Ala Moana", "Kewalos"]
+      },
+      "swell_events": [
+        {
+          "event_id": "event_20250608_s",
+          "start_time": "2025-06-08T00:00:00Z",
+          "peak_time": "2025-06-08T12:00:00Z",
+          "end_time": "2025-06-09T00:00:00Z",
+          "primary_direction": 190,
+          "primary_direction_cardinal": "S",
+          "significance": 0.5,
+          "hawaii_scale": 3.0,
+          "source": "model",
+          "dominant_period": 8.0,
+          "metadata": {
+            "confidence": 0.75,
+            "exposure_north_shore": 0.1,
+            "exposure_south_shore": 0.9
+          }
+        },
+        {
+          "event_id": "event_20250608_nw_wrap",
+          "start_time": "2025-06-08T00:00:00Z",
+          "peak_time": "2025-06-08T12:00:00Z",
+          "end_time": "2025-06-09T00:00:00Z",
+          "primary_direction": 315,
+          "primary_direction_cardinal": "NW",
+          "significance": 0.2,
+          "hawaii_scale": 1.0,
+          "source": "model",
+          "dominant_period": 13.0,
+          "metadata": {
+            "wrapped": true,
+            "parent_event_id": "event_20250608_nw",
+            "confidence": 0.7
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "confidence": {
+      "overall_score": 0.8,
+      "factors": {
+        "data_freshness": 0.9,
+        "source_diversity": 0.8,
+        "source_agreement": 0.7,
+        "model_consistency": 0.8
+      }
+    },
+    "weather": {
+      "wind_direction": "ENE",
+      "wind_speed": 15,
+      "wind_gusts": 20,
+      "temperature": 27,
+      "conditions": "Partly cloudy with scattered showers"
+    },
+    "tides": {
+      "high_tide": [
+        ["10:45", 2.1],
+        ["23:15", 1.8]
+      ],
+      "low_tide": [
+        ["04:23", 0.3],
+        ["16:50", 0.5]
+      ]
+    }
+  }
+}

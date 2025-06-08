@@ -1,0 +1,107 @@
+# Hawaii Surf Forecast
+
+*Generated on June 08, 2025 at 08:00 HST*
+
+## Main Forecast
+
+OAHU SURF FORECAST ISSUED 08 JUNE 2025 0800 HST
+
+### SUMMARY
+
+A moderate **3-5 foot** (Hawaiian) northwest swell will peak today with good conditions during the morning hours. Trade wind swell is adding **2-3 foot** chop to north and east-facing shores. South shores are seeing a small **1-2 foot** south swell. Light to moderate ENE trades will prevail through the forecast period.
+
+### DETAILED FORECAST
+
+The current northwest (315°) swell is from a gale that developed near the Kuril Islands four days ago. This swell began filling in yesterday, will peak today, and gradually decrease through Monday. The peak period of **13 seconds** indicates good quality open-ocean energy, with the most favorable conditions during the morning hours before the trade winds increase.
+
+A small but consistent south (190°) swell is providing some activity on south-facing shores. This is primarily a background southern hemisphere swell with periods of **8 seconds**. It will maintain through the weekend at similar levels.
+
+Trade wind swell from ENE (70°) is affecting primarily east-facing shores with some wrap to north shores. This shorter period (**7 seconds**) energy is a result of the persistent trade wind flow and adds chop to the main swells.
+
+Winds will be ENE at **15-20 knots** with occasional higher gusts, with the lightest winds during the early morning hours. Partly cloudy conditions with scattered showers will persist, mainly affecting windward and mauka areas.
+
+### NORTH SHORE
+
+Northwest swell will provide the best action on the North Shore today. Expect sets of **3-5 feet** (Hawaiian) at exposed breaks like Sunset Beach, with slightly smaller surf at other spots. Wave faces of **6-10 feet** will be common at the better breaks. Early morning will offer the cleanest conditions before trade winds increase. Standout breaks like Pipeline will be working, though not at winter capacity. The steep swell angle (315°) means that exposed west-facing sections of the North Shore will see the largest waves.
+
+### SOUTH SHORE
+
+South shores are seeing smaller but rideable conditions with the current south swell. Expect heights of **1-2 feet** (Hawaiian) or **2-4 foot** faces at the best exposures. Town spots like Ala Moana Bowls and Kaisers can provide some fun rides during the higher tide periods. Some very inconsistent sets from the wrapping northwest swell may occasionally reach well-exposed west-facing sections of the South Shore. Most consistent waves will be at breaks directly exposed to the south, with longer waits between sets.
+
+### OUTLOOK
+
+The northwest swell will gradually diminish through Monday and Tuesday. No significant new north swells are expected in the extended forecast. The small south swell will maintain through the weekend with a slight increase possible by Tuesday from a new southern hemisphere system. Trade winds and associated windward chop will continue through the week at similar levels.
+
+## North Shore Forecast
+
+### NORTH SHORE CONDITIONS
+
+The North Shore is currently experiencing a moderate northwest swell (315°) with **Hawaiian scale heights of 3-5 feet** (**6-10 foot faces**). This swell is characterized by a solid **13-second** period, providing good power and form at the better exposed breaks.
+
+Morning conditions are favorable with lighter trade winds, making this the optimal time for surfing today. As the day progresses, ENE trades will increase to **15-20 knots**, adding chop and side-texture to waves, particularly at spots with less protection.
+
+The primary energy is from a northwest direction, favoring spots like Sunset Beach and Off-The-Wall. Pipeline is working on the larger sets, though not barreling with winter intensity. West-facing sections of Haleiwa may see occasional larger sets due to the steep northwest direction.
+
+Additionally, there is a short-period (**7-second**) trade wind swell adding some chop, particularly at spots with eastern exposure. This is providing **1-2 foot** background energy at spots like Chun's Reef.
+
+### BREAK-SPECIFIC CONDITIONS
+
+**Sunset Beach**: Most consistent spot today with **3-5 foot** sets (Hawaiian). Best during the morning hours before winds increase. Outside peak is connecting through to inside bowl on the larger sets.
+
+**Pipeline**: Working but not exceptional. **2-4 foot** waves (Hawaiian) with occasional larger sets. Some hollow sections during the dropping tide.
+
+**Haleiwa**: West-facing sections catching solid **3-4 foot** waves with good shape during the morning glass-off. Becomes choppy by mid-day.
+
+**Waimea Bay**: Too small for Waimea to break properly. Not recommended today.
+
+**Chun's Reef**: Fun longboard conditions with **2-3 foot** waves and longer shoulders during the morning hours.
+
+Compared to typical early summer conditions, this northwest swell is slightly above average for June. This time of year typically sees declining north swell activity as we transition deeper into summer patterns.
+
+## South Shore Forecast
+
+### SOUTH SHORE CONDITIONS
+
+The South Shore is experiencing a small but consistent south swell (190°) producing **1-2 foot** waves (Hawaiian scale) with **2-4 foot faces** at the best exposed breaks. This swell has an **8-second** period, typical of background southern hemisphere energy during this time of year.
+
+Wind conditions are generally favorable for South Shore breaks in the morning hours, with offshore to side-offshore flow at most spots. By mid-day, the ENE trades at **15-20 knots** will create some texture on the surface, though many town spots remain relatively protected.
+
+A very minimal amount of northwest wrap is reaching some west-facing sections of the South Shore, occasionally mixing with the primary south swell at spots like Tracks or Ala Moana Bowls during the higher tide periods.
+
+For early June, these conditions are fairly typical, though slightly below average. We're entering the prime south swell season, and larger pulses are expected in the coming weeks and months.
+
+### BREAK-SPECIFIC CONDITIONS
+
+**Ala Moana Bowls**: Working on the sets with **1-2 foot** (Hawaiian) waves. Best around mid-tide when there's enough water on the reef but still good shape. Expect long waits between better sets.
+
+**Kaisers**: Catching the south swell at **1-2 feet** with occasional longer rides connecting through the inside section. Most consistent during the mid to high tide.
+
+**Waikiki**: Good conditions for beginners and longboarders with **1-2 foot** waves. Outside breaks like Populars and Canoes are catching small but rideable waves throughout the day.
+
+**Diamond Head**: Inconsistent but picking up some of the swell at **1 foot** (Hawaiian). Very long waits between sets.
+
+**Kewalos**: Catching some of the south swell with **1-2 foot** sets. The steeper faces here make it more rideable despite the small size.
+
+Expect crowds at the more popular spots since conditions are generally fun for longboarding and beginner/intermediate surfing. Early morning sessions will offer the cleanest conditions before the trade winds increase.
+
+## Daily Forecast
+
+### DAILY SURF REPORT FOR JUNE 8, 2025
+
+**North Shore**: Northwest swell providing **3-5 foot** Hawaiian (6-10' faces) waves at exposed breaks. Best early morning before trade winds increase. Standout breaks include Sunset Beach, Pipeline, and Haleiwa. Decent shape with 13-second periods.
+
+**South Shore**: Small but consistent south swell with **1-2 foot** Hawaiian (2-4' faces) conditions. Best spots include Ala Moana Bowls, Kaisers, and Waikiki. Good for longboarding and beginners. Most consistent during mid-tide periods.
+
+**East Shores**: Trade wind swell producing choppy **2-3 foot** conditions. Primarily affected by ENE winds at 15-20 knots.
+
+**West Shores**: Picking up some wrap from the northwest swell, **1-3 foot** waves at exposed spots. Generally inconsistent but occasional good sets.
+
+**Wind/Weather**: ENE trades 15-20 knots, strongest during afternoon. Partly cloudy with scattered showers, mainly affecting windward areas. Temperature around 80°F (27°C).
+
+**Tides**: High tide at 10:45am (2.1ft) and 11:15pm (1.8ft). Low tide at 4:23am (0.3ft) and 4:50pm (0.5ft).
+
+**Best Bets Today**: Morning session at Sunset Beach for intermediate to advanced surfers. South shore town spots for beginners and longboarders throughout the day. Afternoon session at Chun's Reef for fun, manageable conditions.
+
+---
+
+*Generated by SurfCastAI - AI-Powered Surf Forecasting*
