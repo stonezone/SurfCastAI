@@ -93,7 +93,7 @@ Also highlight any particularly strong sections or areas that need enhancement.
     try:
         logger.info("Calling GPT-4.1 API")
         response = await client.chat.completions.create(
-            model="gpt-4-1106-preview",  # Using GPT-4 Turbo as it's widely available
+            model="gpt-4o",  # Updated to current model
             messages=[
                 {"role": "system", "content": "You are an expert Hawaiian surf forecaster with decades of experience, similar to Pat Caldwell. You deeply understand ocean dynamics, swell patterns, and local surf breaks. Analyze the forecast with technical precision and insider knowledge."},
                 {"role": "user", "content": prompt}

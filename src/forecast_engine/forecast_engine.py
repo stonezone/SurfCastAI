@@ -45,7 +45,7 @@ class ForecastEngine:
         
         # Load OpenAI configuration
         self.openai_api_key = self.config.get('openai', 'api_key', os.environ.get('OPENAI_API_KEY'))
-        self.openai_model = self.config.get('openai', 'model', 'gpt-4-1106-preview')
+        self.openai_model = self.config.get('openai', 'model', 'gpt-4o')
         self.temperature = self.config.getfloat('openai', 'temperature', 0.7)
         self.max_tokens = self.config.getint('openai', 'max_tokens', 4000)
         

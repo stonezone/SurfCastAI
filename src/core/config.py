@@ -281,7 +281,7 @@ class Config:
     @property
     def openai_model(self) -> str:
         """Get OpenAI model name."""
-        return self.get('openai', 'model', 'gpt-4-1106-preview')
+        return self.get('openai', 'model', 'gpt-4o')
     
     def __getitem__(self, key: str) -> Any:
         """Allow dictionary-style access to top-level sections."""
