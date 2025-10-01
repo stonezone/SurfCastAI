@@ -16,6 +16,10 @@ from ..agents.buoy_agent import BuoyAgent
 from ..agents.weather_agent import WeatherAgent
 from ..agents.model_agent import ModelAgent
 from ..agents.satellite_agent import SatelliteAgent
+from ..agents.metar_agent import MetarAgent
+from ..agents.tide_agent import TideAgent
+from ..agents.chart_agent import ChartAgent
+from ..agents.tropical_agent import TropicalAgent
 
 
 class DataCollector:
@@ -78,6 +82,18 @@ class DataCollector:
         
         if 'satellite' in enabled_sources:
             self.agents['satellite'] = SatelliteAgent(self.config)
+
+        if 'metar' in enabled_sources:
+            self.agents['metar'] = MetarAgent(self.config)
+
+        if 'tides' in enabled_sources:
+            self.agents['tides'] = TideAgent(self.config)
+
+        if 'charts' in enabled_sources:
+            self.agents['charts'] = ChartAgent(self.config)
+
+        if 'tropical' in enabled_sources:
+            self.agents['tropical'] = TropicalAgent(self.config)
     
     async def _ensure_http_client(self):
         """Ensure HTTP client is available and configured."""

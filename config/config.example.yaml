@@ -16,26 +16,28 @@ data_collection:
   max_concurrent: 10
   timeout: 30
   retry_attempts: 3
-  user_agent: "SurfCastAI/1.0 (https://github.com/yourusername/surfCastAI)"
+  user_agent: "SurfCastAI/1.0 (+https://github.com/yourusername/surfCastAI)"
 
 rate_limits:
-  # Domain-specific rate limits (requests per second)
   "www.ndbc.noaa.gov":
     requests_per_second: 0.5
     burst_size: 3
   "api.weather.gov":
     requests_per_second: 0.25
     burst_size: 2
-  "www.weather.gov": 
-    requests_per_second: 0.25
-    burst_size: 2
+  "tgftp.nws.noaa.gov":
+    requests_per_second: 0.5
+    burst_size: 3
   "api.tidesandcurrents.noaa.gov":
     requests_per_second: 0.2
     burst_size: 2
-  "services.surfline.com":
+  "nomads.ncep.noaa.gov":
+    requests_per_second: 0.15
+    burst_size: 2
+  "ocean.weather.gov":
     requests_per_second: 0.1
     burst_size: 1
-  "magicseaweed.com":
+  "www.nhc.noaa.gov":
     requests_per_second: 0.1
     burst_size: 1
   default:
@@ -46,32 +48,74 @@ data_sources:
   buoys:
     enabled: true
     urls:
-      - "https://www.ndbc.noaa.gov/data/realtime2/51001.txt"  # NW Hawaii
-      - "https://www.ndbc.noaa.gov/data/realtime2/51002.txt"  # SW Hawaii
-      - "https://www.ndbc.noaa.gov/data/realtime2/51003.txt"  # W Hawaii
-      - "https://www.ndbc.noaa.gov/data/realtime2/51004.txt"  # SE Hawaii
-      - "https://www.ndbc.noaa.gov/data/realtime2/51101.txt"  # NW Hawaii (nearshore)
-      - "https://www.ndbc.noaa.gov/data/realtime2/51201.txt"  # Waimea Bay, Oahu
-      - "https://www.ndbc.noaa.gov/data/realtime2/51202.txt"  # Mokapu Point, Oahu
+      - "https://www.ndbc.noaa.gov/data/realtime2/51001.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51002.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51003.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51004.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51101.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51201.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51201.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51202.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51202.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51207.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51207.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51211.txt"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51212.txt"
   weather:
     enabled: true
     urls:
-      - "https://api.weather.gov/gridpoints/HNL/12,52/forecast"  # Honolulu
-      - "https://api.weather.gov/gridpoints/HNL/8,65/forecast"  # North Shore
+      - "https://api.weather.gov/gridpoints/HNL/12,52/forecast"
+      - "https://api.weather.gov/gridpoints/HNL/8,65/forecast"
+  metar:
+    enabled: true
+    urls:
+      - "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHNL.TXT"
+      - "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHJR.TXT"
+  tides:
+    enabled: true
+    urls:
+      - "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=1612340&product=water_level&datum=MLLW&units=metric&time_zone=GMT&date=today&format=csv"
+      - "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=1612340&product=predictions&datum=MLLW&units=metric&time_zone=GMT&interval=1&range=48&format=csv"
   models:
     enabled: true
     urls:
-      - "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/"  # PacIOOS SWAN
+      - "https://nomads.ncep.noaa.gov:9090/dods/gfs_0p25"
+      - "https://nomads.ncep.noaa.gov:9090/dods/wave_multi_1.glo_0.16"
+      - "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/"
   satellite:
     enabled: true
     urls:
-      - "https://www.star.nesdis.noaa.gov/goes/sector_band.php?sat=G17&sector=hpa&band=GEOCOLOR&length=12"  # GOES-17
+      - "https://www.star.nesdis.noaa.gov/goes/sector.php?sat=G17&sector=hin&length=24&img=geocolor"
   charts:
     enabled: true
     urls:
-      - "https://www.pacioos.hawaii.edu/wp-content/uploads/wave/SWAN-Oahu-forecast-map.png"  # SWAN Oahu
-      - "https://www.ospo.noaa.gov/data/ocean/wave/pac_height/pac_height.gif"  # Pacific Wave Height
-      - "https://www.ospo.noaa.gov/data/ocean/wave/pac_period/pac_period.gif"  # Pacific Wave Period
+      - "https://ocean.weather.gov/P_sfc_full_ocean_color.png"
+      - "https://ocean.weather.gov/P_sfc_24hr_ocean_color.png"
+      - "https://ocean.weather.gov/P_sfc_48hr_ocean_color.png"
+      - "https://ocean.weather.gov/P_sfc_96hr_ocean_color.png"
+      - "https://ocean.weather.gov/P_sfc_120hr_ocean_color.png"
+  tropical:
+    enabled: true
+    urls:
+      - "https://www.nhc.noaa.gov/xml/TWOCP.xml"
+
+processing:
+  buoy:
+    min_confidence: 0.7
+    anomaly_threshold: 3.0
+  weather:
+    min_confidence: 0.6
+  model:
+    min_confidence: 0.7
+    swell_detection:
+      min_height: 0.5
+      min_period: 8.0
+      min_significance: 0.4
+  fusion:
+    weight_buoy: 0.7
+    weight_model: 0.6
+    weight_weather: 0.5
+    min_combined_confidence: 0.6
 
 forecast:
   refinement_cycles: 3
@@ -81,8 +125,8 @@ forecast:
     - north
     - south
   style: pat_caldwell
-  emphasis: auto  # auto, north, south, both
-  length: comprehensive  # brief, standard, comprehensive
+  emphasis: auto
+  length: comprehensive
   formats:
     - markdown
     - html

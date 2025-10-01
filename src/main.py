@@ -108,6 +108,18 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
             "message": f"Bundle {bundle_id} not found or has no metadata"
         }
     
+    def _load_agent_json(agent_name: str, pattern: str) -> List[Dict[str, Any]]:
+        agent_path = Path(config.data_directory) / bundle_id / agent_name
+        payloads: List[Dict[str, Any]] = []
+        if agent_path.exists():
+            for file_path in agent_path.glob(pattern):
+                try:
+                    with open(file_path, 'r') as fh:
+                        payloads.append(json.load(fh))
+                except Exception as exc:
+                    logger.warning(f"Failed to load {file_path}: {exc}")
+        return payloads
+
     # Process buoy data
     logger.info("Processing buoy data")
     buoy_processor = BuoyProcessor(config)
@@ -123,6 +135,12 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     wave_model_processor = WaveModelProcessor(config)
     model_results = wave_model_processor.process_bundle(bundle_id, "model_*.json")
     
+    # Load supplemental agent outputs
+    metar_data = _load_agent_json('metar', 'metar_*.json')
+    tide_data = _load_agent_json('tides', 'tide_*.json')
+    tropical_data = _load_agent_json('tropical', 'tropical_outlook.json')
+    chart_data = _load_agent_json('charts', '*.json')
+    
     # Fuse the data
     logger.info("Fusing data from multiple sources")
     fusion_system = DataFusionSystem(config)
@@ -132,7 +150,11 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
         "metadata": metadata,
         "buoy_data": [result.data for result in buoy_results if result.success],
         "weather_data": [result.data for result in weather_results if result.success],
-        "model_data": [result.data for result in model_results if result.success]
+        "model_data": [result.data for result in model_results if result.success],
+        "metar_data": metar_data,
+        "tide_data": tide_data,
+        "tropical_data": tropical_data,
+        "chart_data": chart_data
     }
     
     # Process fusion

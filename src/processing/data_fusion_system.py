@@ -9,7 +9,7 @@ import logging
 from typing import Dict, List, Any, Optional, Union, Tuple
 from pathlib import Path
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import math
 from statistics import mean, median, stdev
 from collections import defaultdict
@@ -98,6 +98,10 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             buoy_data = self._extract_buoy_data(data)
             weather_data = self._extract_weather_data(data)
             model_data = self._extract_model_data(data)
+            metar_data = data.get('metar_data', [])
+            tide_data = data.get('tide_data', [])
+            tropical_data = data.get('tropical_data', [])
+            chart_data = data.get('chart_data', [])
             
             # Identify swell events from all sources
             swell_events = self._identify_swell_events(buoy_data, model_data)
@@ -108,6 +112,12 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             
             # Calculate shore-specific impacts
             self._calculate_shore_impacts(forecast, weather_data)
+
+            # Integrate supplemental datasets
+            self._integrate_metar_data(forecast, metar_data)
+            self._integrate_tide_data(forecast, tide_data)
+            self._integrate_tropical_data(forecast, tropical_data)
+            self._integrate_chart_data(forecast, chart_data)
             
             # Calculate confidence scores
             warnings, metadata = self._calculate_confidence_scores(forecast, buoy_data, weather_data, model_data)
@@ -492,6 +502,150 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         
         return merged_events
     
+    def _integrate_metar_data(self, forecast: SwellForecast, metar_entries: List[Dict[str, Any]]):
+        """Populate forecast metadata with latest METAR observations."""
+        if not metar_entries:
+            return
+        latest = None
+        latest_time = None
+        for entry in metar_entries:
+            issued = self._safe_parse_iso(entry.get('issued'))
+            if issued is None:
+                continue
+            if latest_time is None or issued > latest_time:
+                latest = entry
+                latest_time = issued
+        if not latest:
+            return
+        weather_meta = forecast.metadata.setdefault('weather', {})
+        weather_meta['metar_station'] = latest.get('station')
+        weather_meta['metar_issued'] = latest.get('issued')
+        if latest.get('wind_direction_deg') is not None:
+            weather_meta['wind_direction'] = latest['wind_direction_deg']
+        if latest.get('wind_speed_ms') is not None:
+            weather_meta['wind_speed_ms'] = latest['wind_speed_ms']
+        if latest.get('wind_gust_ms') is not None:
+            weather_meta['wind_gust_ms'] = latest['wind_gust_ms']
+        if latest.get('temperature_c') is not None:
+            weather_meta['temperature'] = latest['temperature_c']
+        if latest.get('pressure_hpa') is not None:
+            weather_meta['pressure_hpa'] = latest['pressure_hpa']
+        weather_meta['metar'] = latest
+
+    def _integrate_tide_data(self, forecast: SwellForecast, tide_entries: List[Dict[str, Any]]):
+        """Build tide summary including upcoming highs/lows and latest observations."""
+        if not tide_entries:
+            return
+        predictions = [entry for entry in tide_entries if entry.get('product') == 'predictions']
+        water_levels = [entry for entry in tide_entries if entry.get('product') != 'predictions']
+        tide_metadata: Dict[str, Any] = {}
+        if predictions:
+            record = predictions[0]
+            units = record.get('units', 'metric')
+            highs, lows = self._extract_tide_extrema(record.get('records', []), units)
+            if highs:
+                tide_metadata['high_tide'] = highs
+            if lows:
+                tide_metadata['low_tide'] = lows
+            tide_metadata['station'] = record.get('station')
+        if water_levels:
+            latest_obs = self._select_latest_tide_observation(water_levels[0].get('records', []))
+            if latest_obs:
+                tide_metadata['latest_water_level'] = latest_obs
+        if tide_metadata:
+            forecast.metadata['tides'] = tide_metadata
+
+    def _integrate_tropical_data(self, forecast: SwellForecast, tropical_entries: List[Dict[str, Any]]):
+        """Attach tropical outlook headline and entries."""
+        if not tropical_entries:
+            return
+        outlook = tropical_entries[0]
+        forecast.metadata['tropical'] = {
+            'headline': outlook.get('headline'),
+            'entries': outlook.get('entries', [])
+        }
+
+    def _integrate_chart_data(self, forecast: SwellForecast, chart_entries: List[Dict[str, Any]]):
+        """Reference downloaded analysis charts for downstream consumers."""
+        charts = []
+        for entry in chart_entries:
+            file_path = entry.get('file_path') or entry.get('manifest_path')
+            if not file_path:
+                continue
+            charts.append({
+                'type': entry.get('chart_type'),
+                'file_path': file_path,
+                'source_url': entry.get('source_url')
+            })
+        if charts:
+            forecast.metadata['charts'] = charts
+
+    def _extract_tide_extrema(self, records: List[Dict[str, Any]], units: str) -> Tuple[List[Tuple[str, float]], List[Tuple[str, float]]]:
+        points: List[Tuple[str, float]] = []
+        for row in records:
+            value = row.get('Prediction') or row.get('Water Level') or row.get('WaterLevel')
+            time_str = row.get('Date Time') or row.get('Time') or row.get('Time (GMT)') or row.get('t')
+            height = self._safe_float(value)
+            if height is None or time_str is None:
+                continue
+            height_ft = round(height * 3.28084, 2) if units == 'metric' else round(height, 2)
+            iso = self._parse_time_guess(time_str)
+            points.append((iso, height_ft))
+        if not points:
+            return [], []
+        highs_sorted = sorted(points, key=lambda item: item[1], reverse=True)[:3]
+        lows_sorted = sorted(points, key=lambda item: item[1])[:3]
+        return highs_sorted, lows_sorted
+
+    def _select_latest_tide_observation(self, records: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        latest = None
+        latest_time = None
+        for row in records:
+            time_str = row.get('Date Time') or row.get('Time') or row.get('t')
+            value = row.get('Water Level') or row.get('WaterLevel') or row.get('Observation')
+            height = self._safe_float(value)
+            if time_str is None or height is None:
+                continue
+            iso = self._parse_time_guess(time_str)
+            dt = self._safe_parse_iso(iso)
+            if dt is None:
+                continue
+            if latest is None or dt > latest_time:
+                latest = {
+                    'time': iso,
+                    'height_ft': round(height * 3.28084, 2)
+                }
+                latest_time = dt
+        return latest
+
+    def _safe_parse_iso(self, value: Optional[str]) -> Optional[datetime]:
+        if not value:
+            return None
+        try:
+            if value.endswith('Z'):
+                value = value.replace('Z', '+00:00')
+            return datetime.fromisoformat(value)
+        except Exception:
+            return None
+
+    def _parse_time_guess(self, value: str) -> str:
+        patterns = ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %H:%M']
+        for pattern in patterns:
+            try:
+                dt = datetime.strptime(value, pattern)
+                if not dt.tzinfo:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt.isoformat().replace('+00:00', 'Z')
+            except ValueError:
+                continue
+        return value
+
+    def _safe_float(self, value: Any) -> Optional[float]:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
     def _calculate_shore_impacts(self, forecast: SwellForecast, 
                                 weather_data: List[WeatherData]) -> None:
         """

@@ -220,6 +220,23 @@ class Config:
         
         return limits
     
+    def _resolve_data_sources(self) -> Dict[str, Dict[str, Any]]:
+        """Return normalized data source configuration (supports legacy agents entries)."""
+        data_sources = self.get('data_sources', None)
+        if isinstance(data_sources, dict) and data_sources:
+            return data_sources
+
+        legacy_agents = self.get('agents', {})
+        normalized: Dict[str, Dict[str, Any]] = {}
+        if isinstance(legacy_agents, dict):
+            for name, cfg in legacy_agents.items():
+                if isinstance(cfg, dict):
+                    normalized[name] = {
+                        'enabled': cfg.get('enabled', False),
+                        'urls': cfg.get('urls', [])
+                    }
+        return normalized
+
     def get_data_source_urls(self, source_type: Optional[str] = None) -> Dict[str, List[str]]:
         """
         Get URLs for data sources.
@@ -231,20 +248,18 @@ class Config:
             Dictionary mapping source types to URL lists
         """
         sources = {}
-        data_sources = self.get('data_sources', {})
-        
+        data_sources = self._resolve_data_sources()
+
         if source_type:
-            # Return URLs for specific source type
             source_config = data_sources.get(source_type, {})
             if isinstance(source_config, dict) and 'urls' in source_config:
-                return {source_type: source_config['urls']}
+                return {source_type: list(source_config.get('urls', []))}
             return {source_type: []}
-        
-        # Return all URLs grouped by source type
+
         for src_type, config in data_sources.items():
             if isinstance(config, dict) and 'urls' in config:
-                sources[src_type] = config['urls']
-        
+                sources[src_type] = list(config.get('urls', []))
+
         return sources
     
     def get_enabled_data_sources(self) -> Set[str]:
@@ -255,12 +270,12 @@ class Config:
             Set of enabled source types
         """
         enabled = set()
-        data_sources = self.get('data_sources', {})
-        
+        data_sources = self._resolve_data_sources()
+
         for source_type, config in data_sources.items():
             if isinstance(config, dict) and config.get('enabled', True):
                 enabled.add(source_type)
-        
+
         return enabled
     
     @property
