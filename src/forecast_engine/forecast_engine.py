@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from .prompt_templates import PromptTemplates
+from .local_generator import LocalForecastGenerator
 from ..processing.models.swell_event import SwellForecast, SwellEvent, ForecastLocation
 from ..core.config import Config
 
@@ -48,7 +49,15 @@ class ForecastEngine:
         self.openai_model = self.config.get('openai', 'model', 'gpt-4o')
         self.temperature = self.config.getfloat('openai', 'temperature', 0.7)
         self.max_tokens = self.config.getint('openai', 'max_tokens', 4000)
-        
+
+        self.use_local_generator = self.config.getboolean(
+            'forecast',
+            'use_local_generator',
+            default=not bool(self.openai_api_key)
+        )
+        if self.use_local_generator:
+            self.logger.info('Using local forecast generator (OpenAI disabled)')
+
         # Set up iterative refinement
         self.refinement_cycles = self.config.getint('forecast', 'refinement_cycles', 2)
         self.quality_threshold = self.config.getfloat('forecast', 'quality_threshold', 0.8)
@@ -304,6 +313,10 @@ class ForecastEngine:
         Returns:
             Generated forecast text
         """
+        if self.use_local_generator:
+            generator = LocalForecastGenerator(forecast_data)
+            return generator.build_main_forecast()
+
         # Generate prompt
         prompt = self.templates.get_caldwell_prompt(forecast_data)
         
@@ -349,6 +362,10 @@ class ForecastEngine:
         Returns:
             Generated shore-specific forecast text
         """
+        if self.use_local_generator:
+            generator = LocalForecastGenerator(forecast_data)
+            return generator.build_shore_forecast(shore)
+
         # Generate prompt
         prompt = self.templates.get_shore_prompt(shore, forecast_data)
         
@@ -385,6 +402,10 @@ class ForecastEngine:
         Returns:
             Generated daily forecast text
         """
+        if self.use_local_generator:
+            generator = LocalForecastGenerator(forecast_data)
+            return generator.build_daily_forecast()
+
         # Get template
         template = self.templates.get_template('daily')
         system_prompt = template.get('system_prompt', '')
@@ -422,6 +443,9 @@ class ForecastEngine:
         Returns:
             Refined forecast text
         """
+        if self.use_local_generator:
+            return initial_forecast
+
         current_forecast = initial_forecast
         
         for i in range(self.refinement_cycles):

@@ -38,15 +38,20 @@ class SwellEvent:
     event_id: str
     start_time: str
     peak_time: str
-    end_time: str
     primary_direction: float
     significance: float
     hawaii_scale: float
-    source: str
+    end_time: str = ''
+    source: str = 'model'
     primary_components: List[SwellComponent] = field(default_factory=list)
     secondary_components: List[SwellComponent] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
+
+    def __post_init__(self) -> None:
+        """Ensure we always have an end time value."""
+        if not self.end_time:
+            self.end_time = self.peak_time
+
     @property
     def primary_direction_cardinal(self) -> str:
         """Get cardinal direction from degrees."""
@@ -54,7 +59,7 @@ class SwellEvent:
                 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
         ix = round(self.primary_direction / 22.5) % 16
         return dirs[ix]
-    
+
     @property
     def dominant_period(self) -> float:
         """Get dominant period from primary components."""

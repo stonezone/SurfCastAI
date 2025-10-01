@@ -72,4 +72,5 @@ forecast:
   templates_dir: src/forecast_engine/templates
   refinement_cycles: 2
   quality_threshold: 0.8
+  use_local_generator: true
   formats: markdown,html,pdf

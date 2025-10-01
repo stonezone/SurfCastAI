@@ -76,6 +76,7 @@ data_sources:
 forecast:
   refinement_cycles: 3
   quality_threshold: 0.8
+  use_local_generator: true
   shores:
     - north
     - south

@@ -102,6 +102,7 @@ See [tests/README.md](tests/README.md) for more information on the testing frame
 
 - Use `setup.sh` to initialize the development environment
 - Follow the module-based architecture for new features
+- Set `forecast.use_local_generator = true` to run the rule-based fallback without OpenAI calls
 - Add unit tests for all new components
 - Update `CLAUDE.md` with status updates
 
