@@ -42,3 +42,8 @@ pytz==2024.1                # Updated from 2023.3.post1
 # - aiohttp 3.12: Better SSL handling, reduced memory usage
 # - NumPy 2.x: Free-threaded Python support, improved performance
 # - Pandas 2.3: Better PyArrow integration, memory optimizations
+# Visualization and Web Interfaces
+matplotlib==3.9.2           # Charts for forecast visualizations
+fastapi==0.115.2            # Lightweight web interface for forecasts
+uvicorn==0.30.6             # ASGI server for local web interface
+
