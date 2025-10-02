@@ -1,35 +1,32 @@
-name: OpenAI Smoke Test
+name: OpenAI Smoke (gpt-5-nano)
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
   schedule:
-    - cron: '0 9 * * *'
+    - cron: "17 7 * * *"
 
 jobs:
   smoke:
-    if: ${{ secrets.OPENAI_API_KEY != '' && (github.event.repository == null || github.event.repository.fork == false) }}
+    if: ${{ github.event.repository.fork == false && secrets.OPENAI_API_KEY != '' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    timeout-minutes: 5
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
-            python -m pip install -r requirements.txt
+            pip install -r requirements.txt
           else
-            python -m pip install openai
+            pip install "openai>=1.51.0"
           fi
 
-      - name: Run smoke test
+      - name: Run smoke
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python scripts/smoke_openai.py
