@@ -98,6 +98,16 @@ uvicorn src.web.app:app --reload
 
 Set `SURFCAST_OUTPUT_DIR` if your forecasts live outside `./output`. Generated charts live under `<forecast>/assets/` and are referenced automatically by the HTML viewer.
 
+## Sample Forecast (GPT-5 Nano)
+
+Run the helper script to produce a demo forecast via OpenAI (set `OPENAI_API_KEY` or keep it in `.env`):
+
+```bash
+python scripts/generate_sample_forecast.py --force-remote --model gpt-5-nano
+```
+
+Outputs land under `output/sample/` by default. Add `--output` to change the path.
+
 ## Testing
 
 ```bash
