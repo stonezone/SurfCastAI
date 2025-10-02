@@ -8,7 +8,12 @@ import os
 import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Union, Set
+from dotenv import load_dotenv
 from .rate_limiter import RateLimitConfig
+
+# Load environment variables from .env file at module import
+# This ensures env vars are available before any config is loaded
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -290,7 +295,18 @@ class Config:
     
     @property
     def openai_api_key(self) -> Optional[str]:
-        """Get OpenAI API key."""
+        """
+        Get OpenAI API key with priority:
+        1. Environment variable (OPENAI_API_KEY)
+        2. Config file (config.yaml)
+        3. None if not found
+        """
+        # First check environment variable
+        env_key = os.getenv('OPENAI_API_KEY')
+        if env_key:
+            return env_key
+
+        # Fall back to config file
         return self.get('openai', 'api_key')
     
     @property
@@ -310,11 +326,16 @@ class Config:
 def load_config(config_path: Optional[Union[str, Path]] = None) -> Config:
     """
     Load configuration from file.
-    
+
+    Environment variables from .env are loaded automatically on module import,
+    ensuring they're available before config.yaml is processed.
+
     Args:
         config_path: Path to configuration file
-        
+
     Returns:
         Config instance
     """
+    # Note: load_dotenv() is already called at module import time
+    # This ensures env vars are loaded before any config instantiation
     return Config(config_path)

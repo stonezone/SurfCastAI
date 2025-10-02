@@ -66,7 +66,78 @@ source venv/bin/activate
 nano config/config.yaml
 ```
 
+## Secure Configuration
+
+### Setting Up API Keys
+
+**IMPORTANT:** Never commit API keys to version control. SurfCastAI uses environment variables for sensitive credentials.
+
+1. **Copy the configuration template:**
+   ```bash
+   cp config/config.example.yaml config/config.yaml
+   ```
+
+2. **Create a `.env` file in the project root:**
+   ```bash
+   echo "OPENAI_API_KEY=your-actual-api-key-here" > .env
+   ```
+
+3. **Remove the API key from config.yaml:**
+   Edit `config/config.yaml` and delete or comment out the `api_key` line under `openai:` section.
+
+### Configuration Priority
+
+The system loads configuration in this order of priority:
+1. **Environment variables** (`.env` file) - Highest priority
+2. **Config file** (`config/config.yaml`) - Falls back if env var not found
+3. **Default values** - Used if neither is available
+
+### Security Best Practices
+
+- ✅ **DO:** Store API keys in `.env` file (already in .gitignore)
+- ✅ **DO:** Use `config.example.yaml` as a template
+- ✅ **DO:** Keep `config.yaml` out of version control
+- ❌ **DON'T:** Commit `.env` or `config.yaml` with secrets
+- ❌ **DON'T:** Share API keys in documentation or issues
+- ❌ **DON'T:** Use the example template values in production
+
+### First-Time Setup Checklist
+
+- [ ] Copy `config.example.yaml` to `config.yaml`
+- [ ] Create `.env` with your OpenAI API key
+- [ ] Remove API key from `config.yaml`
+- [ ] Verify `.env` and `config.yaml` are in `.gitignore`
+- [ ] Test the configuration: `python src/main.py --help`
+
 ## Usage
+
+### Entry Points
+
+SurfCastAI provides two ways to interact with the system:
+
+**1. Command-Line Interface (Recommended)**
+```bash
+python src/main.py [command] [options]
+```
+Use this for:
+- Automated/scripted workflows
+- CI/CD pipelines
+- Production deployments
+- Direct API-style control
+
+**2. Interactive Cyberpunk UI**
+```bash
+python surfcast.py
+```
+Use this for:
+- Interactive exploration
+- Development and testing
+- Visual feedback and progress
+- Learning the system capabilities
+
+Both entry points access the same underlying forecast engine and data pipeline.
+
+### Commands
 
 ```bash
 # Run the full pipeline

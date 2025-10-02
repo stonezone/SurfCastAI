@@ -1,14 +1,23 @@
-# SurfCastAI Configuration
+# SurfCastAI Configuration Template
+#
+# SETUP INSTRUCTIONS:
+# 1. Copy this file to config.yaml: cp config/config.example.yaml config/config.yaml
+# 2. Create .env file with: OPENAI_API_KEY=your-actual-key-here
+# 3. Remove the api_key line from config.yaml (use .env instead)
+# 4. Adjust other settings as needed
+#
+# NOTE: config.yaml should NOT be committed to git (add to .gitignore)
 
 general:
   log_level: INFO
-  data_directory: ./data
-  output_directory: ./output
+  log_file: logs/surfcastai.log
+  output_directory: output
+  data_directory: data
   timezone: Pacific/Honolulu
 
 openai:
-  api_key: YOUR_OPENAI_API_KEY
   model: gpt-4o
+  api_key: your-openai-api-key-here
   temperature: 0.7
   max_tokens: 4000
 
@@ -118,16 +127,8 @@ processing:
     min_combined_confidence: 0.6
 
 forecast:
-  refinement_cycles: 3
+  templates_dir: src/forecast_engine/templates
+  refinement_cycles: 2
   quality_threshold: 0.8
   use_local_generator: true
-  shores:
-    - north
-    - south
-  style: pat_caldwell
-  emphasis: auto
-  length: comprehensive
-  formats:
-    - markdown
-    - html
-    - pdf
+  formats: markdown,html,pdf

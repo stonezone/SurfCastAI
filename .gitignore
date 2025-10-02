@@ -1,10 +1,15 @@
+# Configuration (secrets and local settings)
+# config.yaml contains API keys and credentials - never commit
+config/config.yaml
+
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
+*.pyo
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -20,34 +25,38 @@ var/
 .installed.cfg
 *.egg
 
-# Virtual Environment
-venv/
+# Virtual Environments
+.venv/
+env/
 ENV/
+venv/
 
 # Environment variables
 .env
 
-# Logs
-logs/
-*.log
-
-# IDE files
+# IDEs and OS
 .idea/
 .vscode/
 *.swp
 *.swo
 .DS_Store
+**/.DS_Store
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
+# Testing
+.cache
 .coverage
 .coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*,cover
 .hypothesis/
+.pytest_cache/
+.tox/
+coverage.xml
+htmlcov/
+nosetests.xml
+*,cover
+
+# Logs
+logs/
+*.log
 
 # Jupyter Notebook
 .ipynb_checkpoints

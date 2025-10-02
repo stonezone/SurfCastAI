@@ -16,7 +16,7 @@ import dotenv
 dotenv.load_dotenv()
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.core import Config, load_config
 from src.main import run_pipeline, setup_logging
