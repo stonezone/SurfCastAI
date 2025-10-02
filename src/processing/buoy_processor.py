@@ -61,14 +61,21 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         Process buoy data.
         
         Args:
-            data: Raw buoy data
+            data: Raw buoy data or saved JSON format
             
         Returns:
             ProcessingResult with processed BuoyData
         """
         try:
-            # Create BuoyData from raw data
-            buoy_data = BuoyData.from_ndbc_json(data)
+            # Check if this is already saved JSON format (has 'station_id' and 'observations' keys)
+            # or raw NDBC format
+            import json
+            if 'station_id' in data and 'observations' in data:
+                # Already in saved format, use from_json
+                buoy_data = BuoyData.from_json(json.dumps(data))
+            else:
+                # Raw NDBC format, use from_ndbc_json
+                buoy_data = BuoyData.from_ndbc_json(data)
             
             # Check if we have any observations
             if not buoy_data.observations:

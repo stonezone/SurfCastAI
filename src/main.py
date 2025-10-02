@@ -123,7 +123,7 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     # Process buoy data
     logger.info("Processing buoy data")
     buoy_processor = BuoyProcessor(config)
-    buoy_results = buoy_processor.process_bundle(bundle_id, "buoy_*.json")
+    buoy_results = buoy_processor.process_bundle(bundle_id, "**/buoy_*.json")
     
     # Process weather data
     logger.info("Processing weather data")
