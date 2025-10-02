@@ -7,7 +7,7 @@ on:
 
 jobs:
   smoke:
-    if: ${{ secrets.OPENAI_API_KEY != '' && github.repository_owner == 'zackjordan' }}
+    if: ${{ secrets.OPENAI_API_KEY != '' && (github.event.repository == null || github.event.repository.fork == false) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
