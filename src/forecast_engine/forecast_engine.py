@@ -14,6 +14,7 @@ from pathlib import Path
 
 from .prompt_templates import PromptTemplates
 from .local_generator import LocalForecastGenerator
+from .model_settings import ModelSettings
 from ..processing.models.swell_event import SwellForecast, SwellEvent, ForecastLocation
 from ..core.config import Config
 
@@ -46,9 +47,33 @@ class ForecastEngine:
         
         # Load OpenAI configuration
         self.openai_api_key = self.config.get('openai', 'api_key', os.environ.get('OPENAI_API_KEY'))
-        self.openai_model = self.config.get('openai', 'model', 'gpt-4o')
-        self.temperature = self.config.getfloat('openai', 'temperature', 0.7)
-        self.max_tokens = self.config.getint('openai', 'max_tokens', 4000)
+        primary_config = {
+            "name": self.config.get('openai', 'model', 'gpt-5-nano'),
+            "max_tokens": self.config.getint('openai', 'max_tokens', 32768),
+            "verbosity": self.config.get('openai', 'verbosity', 'high'),
+            "reasoning_effort": self.config.get('openai', 'reasoning_effort', 'medium'),
+        }
+
+        # GPT-5-nano only supports temperature=1 (default), skip for this model
+        model_name = self.config.get('openai', 'model', 'gpt-5-nano')
+        if 'gpt-5' in model_name.lower():
+            self.temperature = None  # Use model default
+        else:
+            self.temperature = self.config.getfloat('openai', 'temperature', 0.7)
+        self.primary_model_settings = ModelSettings.from_config(primary_config)
+        self.openai_model = self.primary_model_settings.name  # Backwards compatibility for legacy callers
+        self.max_tokens = self.primary_model_settings.max_output_tokens
+
+        analysis_models_raw = self.config.get('openai', 'analysis_models', []) or []
+        self.analysis_model_settings = [
+            ModelSettings.from_config(raw, defaults={
+                "max_tokens": self.primary_model_settings.max_output_tokens,
+                "verbosity": self.primary_model_settings.verbosity,
+                "reasoning_effort": self.primary_model_settings.reasoning_effort,
+            })
+            for raw in analysis_models_raw
+            if isinstance(raw, dict)
+        ]
 
         self.use_local_generator = self.config.getboolean(
             'forecast',
@@ -518,16 +543,40 @@ Improve this forecast while maintaining its style and core information. Focus on
             # Initialize client
             client = AsyncOpenAI(api_key=self.openai_api_key)
             
-            # Call API
-            response = await client.chat.completions.create(
-                model=self.openai_model,
-                messages=[
+            # Call API (prefer modern parameter, gracefully fall back for legacy models)
+            request_kwargs = {
+                "model": self.openai_model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
+            }
+            
+            # Only add temperature if specified (GPT-5 models use default)
+            if self.temperature is not None:
+                request_kwargs["temperature"] = self.temperature
+
+            try:
+                response = await client.chat.completions.create(
+                    **request_kwargs,
+                    max_completion_tokens=self.max_tokens
+                )
+            except Exception as call_error:
+                error_text = str(call_error).lower()
+                if (
+                    "max_completion_tokens" in error_text
+                    and any(keyword in error_text for keyword in ("unsupported", "unrecognized", "unknown"))
+                ):
+                    self.logger.debug(
+                        "max_completion_tokens unsupported for model %s; retrying with max_tokens",
+                        self.openai_model,
+                    )
+                    response = await client.chat.completions.create(
+                        **request_kwargs,
+                        max_tokens=self.max_tokens
+                    )
+                else:
+                    raise
             
             # Extract and return content
             if response.choices and response.choices[0].message:
