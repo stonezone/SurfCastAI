@@ -209,22 +209,28 @@ class BuoyData:
             metadata=data.get('metadata', {})
         )
         
-        # Add observations
+        # Add observations - handle both raw NDBC format and normalized format
         for obs in data.get('observations', []):
-            # Create BuoyObservation
-            observation = BuoyObservation(
-                timestamp=obs.get('timestamp', ''),
-                wave_height=obs.get('wave_height'),
-                dominant_period=obs.get('dominant_period'),
-                average_period=obs.get('average_period'),
-                wave_direction=obs.get('wave_direction'),
-                wind_speed=obs.get('wind_speed'),
-                wind_direction=obs.get('wind_direction'),
-                air_temperature=obs.get('air_temperature'),
-                water_temperature=obs.get('water_temperature'),
-                pressure=obs.get('pressure'),
-                raw_data=obs.get('raw_data', {})
-            )
+            # Check if this is raw NDBC format (has 'WVHT', 'DPD', etc.)
+            # or normalized format (has 'wave_height', 'dominant_period', etc.)
+            if 'WVHT' in obs or 'DPD' in obs or 'MWD' in obs:
+                # Raw NDBC format - use from_ndbc to parse it
+                observation = BuoyObservation.from_ndbc(obs)
+            else:
+                # Normalized format - create directly
+                observation = BuoyObservation(
+                    timestamp=obs.get('timestamp', ''),
+                    wave_height=obs.get('wave_height'),
+                    dominant_period=obs.get('dominant_period'),
+                    average_period=obs.get('average_period'),
+                    wave_direction=obs.get('wave_direction'),
+                    wind_speed=obs.get('wind_speed'),
+                    wind_direction=obs.get('wind_direction'),
+                    air_temperature=obs.get('air_temperature'),
+                    water_temperature=obs.get('water_temperature'),
+                    pressure=obs.get('pressure'),
+                    raw_data=obs.get('raw_data', {})
+                )
             buoy_data.observations.append(observation)
         
         return buoy_data

@@ -160,8 +160,10 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                 buoy_data_list.append(buoy_item)
             elif isinstance(buoy_item, dict):
                 # Try to create BuoyData from dictionary
+                # Use from_json which handles both raw NDBC and normalized formats
                 try:
-                    buoy = BuoyData.from_ndbc_json(buoy_item)
+                    import json
+                    buoy = BuoyData.from_json(json.dumps(buoy_item))
                     buoy_data_list.append(buoy)
                 except Exception as e:
                     self.logger.warning(f"Failed to convert buoy data: {e}")
