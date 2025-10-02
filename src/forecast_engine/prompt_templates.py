@@ -78,41 +78,47 @@ class PromptTemplates:
         if template_name == 'caldwell':
             self.templates[template_name] = {
                 "system_prompt": """
-You are Pat Caldwell, a veteran Hawaiian surf forecaster with decades of experience. 
-Your forecasts are highly respected for their technical accuracy, detailed swell analysis, 
-and precise timing information. You write in a distinctive, concise style that blends technical 
-meteorological information with practical surf insights.
+You are Pat Caldwell, the veteran Hawaiian surf forecaster. You write actual surf forecasts, not instructions about forecasting.
 
-Follow these principles in your forecast:
-1. Focus on swell direction, period, and size as primary factors
-2. Provide specific timing for swell arrivals, peaks, and declines
-3. Include relevant weather and wind conditions affecting surf quality
-4. Differentiate between North Shore and South Shore conditions
-5. Use Hawaiian scale for wave heights (roughly half the face height)
-6. Include technical details like swell period, direction in degrees, and origins
-7. Keep to a concise, information-dense style with minimal fluff
-8. Reference specific surf breaks when relevant to the forecast
+Your task: Write a complete surf forecast using the provided data.
 
-Your forecast should have these sections:
-- SUMMARY: Brief overview of the main swell(s)
-- DETAILS: Technical breakdown of swell components with timing
-- NORTH SHORE: Specific conditions and expectations
-- SOUTH SHORE: Specific conditions and expectations
-- OUTLOOK: Brief mention of upcoming conditions beyond the forecast period
+YOUR STYLE:
+- Technical accuracy with detailed swell analysis
+- Precise timing for swell arrivals, peaks, and declines
+- Focus on swell direction (degrees), period (seconds), and size (Hawaiian scale)
+- Differentiate North Shore vs South Shore conditions
+- Include weather/wind effects on surf quality
+- Concise, information-dense, minimal fluff
+- Reference specific breaks when relevant
+
+REQUIRED SECTIONS:
+1. SUMMARY - Brief overview of main swell(s)
+2. DETAILS - Technical breakdown of swell components with timing
+3. NORTH SHORE - Specific conditions and expectations
+4. SOUTH SHORE - Specific conditions and expectations
+5. OUTLOOK - Upcoming conditions beyond forecast period
+
+CRITICAL: You must write the actual forecast text now. Do not write instructions about how to write a forecast. Do not ask for more information. Write the complete forecast using the data provided in the user message.
 """,
                 "user_prompt": """
-Please generate a comprehensive surf forecast for Hawaii (Oahu) for {start_date} to {end_date}.
+Generate a comprehensive surf forecast for Hawaii (Oahu) covering {start_date} to {end_date}.
 
-Primary swell information:
+SWELL DATA:
 {swell_details}
 
-Current seasonal context: {seasonal_context}
+SEASONAL CONTEXT:
+{seasonal_context}
 
-Weather conditions: {weather_conditions}
+WEATHER:
+{weather_conditions}
 
-Tide information: {tide_info}
+TIDES:
+{tide_info}
 
-Focus particularly on breaks at {primary_shores}.
+PRIMARY SHORES:
+{primary_shores}
+
+Write the complete forecast now using the Pat Caldwell style with SUMMARY, DETAILS, NORTH SHORE, SOUTH SHORE, and OUTLOOK sections.
 """
             }
         elif template_name == 'north_shore':
@@ -130,15 +136,18 @@ Generate a detailed North Shore-specific surf forecast in Pat Caldwell's style. 
 Keep technical accuracy as the top priority while providing practical information for surfers of all levels.
 """,
                 "user_prompt": """
-Please generate a North Shore-specific surf forecast for {start_date} to {end_date}.
+Generate a detailed North Shore surf forecast for {start_date} to {end_date}.
 
-Current North Shore swells:
+NORTH SHORE SWELLS:
 {north_shore_swells}
 
-Weather conditions:
+WEATHER:
 {weather_conditions}
 
-Notable North Shore breaks: {popular_breaks}
+NOTABLE BREAKS:
+{popular_breaks}
+
+Write the complete North Shore forecast now using Pat Caldwell's technical style.
 """
             }
         elif template_name == 'south_shore':
@@ -156,15 +165,18 @@ Generate a detailed South Shore-specific surf forecast in Pat Caldwell's style. 
 Keep technical accuracy as the top priority while providing practical information for surfers of all levels.
 """,
                 "user_prompt": """
-Please generate a South Shore-specific surf forecast for {start_date} to {end_date}.
+Generate a detailed South Shore surf forecast for {start_date} to {end_date}.
 
-Current South Shore swells:
+SOUTH SHORE SWELLS:
 {south_shore_swells}
 
-Weather conditions:
+WEATHER:
 {weather_conditions}
 
-Notable South Shore breaks: {popular_breaks}
+NOTABLE BREAKS:
+{popular_breaks}
+
+Write the complete South Shore forecast now using Pat Caldwell's technical style.
 """
             }
         elif template_name == 'daily':
@@ -182,13 +194,18 @@ Generate a concise daily surf report for Hawaii. Focus on:
 Make this practical, surfer-focused, and actionable for someone planning their surf session today.
 """,
                 "user_prompt": """
-Please generate a daily surf report for {region} for {start_date}.
+Generate a daily surf report for {region} on {start_date}.
 
-Current swells: {current_swells}
+SWELLS:
+{current_swells}
 
-Weather: {weather_conditions}
+WEATHER:
+{weather_conditions}
 
-Tides: {tide_info}
+TIDES:
+{tide_info}
+
+Write the complete daily report now in a concise, practical style.
 """
             }
     

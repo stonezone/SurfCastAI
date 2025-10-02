@@ -214,6 +214,8 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
         Returns:
             List of ProcessingResult objects
         """
+        self.logger.info(f"process_bundle called: bundle_id={bundle_id}, file_pattern={file_pattern}")
+        
         # Get bundle manager
         bundle_manager = BundleManager(self.config.data_directory)
         
@@ -228,7 +230,9 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
         
         # Get files from bundle
         if file_pattern:
+            self.logger.info(f"About to glob: bundle_path={bundle_path}, pattern={file_pattern}")
             files = list(bundle_path.glob(file_pattern))
+            self.logger.info(f"Found {len(files)} files matching pattern '{file_pattern}' in {bundle_path}")
         else:
             # Use file_list method from bundle_manager
             file_list = bundle_manager.get_bundle_file_list(bundle_id)

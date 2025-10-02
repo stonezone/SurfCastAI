@@ -1,0 +1,18 @@
+{
+  "station": "PHJR",
+  "metar": "PHJR 021012Z AUTO 04004KT 10SM FEW002 24/19 A3006 RMK AO2 T02390189 TSNO",
+  "issued": "2025-10-02T10:12:00Z",
+  "wind_direction_deg": 40,
+  "wind_speed_kt": 4,
+  "wind_speed_ms": 2.06,
+  "visibility_sm": 10.0,
+  "temperature_c": 24.0,
+  "dewpoint_c": 19.0,
+  "pressure_inhg": 30.06,
+  "pressure_hpa": 1017.9,
+  "raw_lines": [
+    "2025/10/02 10:12",
+    "PHJR 021012Z AUTO 04004KT 10SM FEW002 24/19 A3006 RMK AO2 T02390189 TSNO"
+  ],
+  "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHJR.TXT"
+}

@@ -6,7 +6,7 @@ This module defines the data models for swell events, components,
 and forecast data used throughout the system.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
@@ -98,6 +98,11 @@ class SwellForecast:
     swell_events: List[SwellEvent] = field(default_factory=list)
     locations: List[ForecastLocation] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary representation."""
+        return asdict(self)
     
     
 def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:

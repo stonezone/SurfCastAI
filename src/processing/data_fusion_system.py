@@ -133,7 +133,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             )
             
         except Exception as e:
-            self.logger.error(f"Error in data fusion: {e}")
+            self.logger.error(f"Error in data fusion: {e}", exc_info=True)
             return ProcessingResult(
                 success=False,
                 error=f"Data fusion error: {str(e)}"

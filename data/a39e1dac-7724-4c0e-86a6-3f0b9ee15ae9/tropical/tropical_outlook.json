@@ -1,0 +1,12 @@
+{
+  "headline": "Central Pacific Tropical Weather Outlook",
+  "entries": [
+    {
+      "title": "Central Pacific Tropical Weather Outlook",
+      "summary": "\n        000<br />ACPN50 PHFO 020537<br />TWOCP <br /><br />Tropical Weather Outlook<br />NWS Central Pacific Hurricane Center Honolulu HI<br />Issued by NWS National Hurricane Center Miami FL<br />800 PM HST Wed Oct 01 2025<br /><br />For the central North Pacific...between 140W and 180W:<br /><br />Active Systems:<br />The National Hurricane Center is issuing advisories on Tropical<br />Storm Octave, located well south-southwest of the southern tip of<br />the Baja California Peninsula.<br /><br />Tropical cyclone formation is not expected during the next 7 days.<br /><br />$$<br />Forecaster Jelsema<br />NNNN\n      ",
+      "link": "https://www.nhc.noaa.gov/text/HFOTWOCP.shtml"
+    }
+  ],
+  "source_url": "https://www.nhc.noaa.gov/xml/TWOCP.xml",
+  "fetched_at": "2025-10-02T10:21:32.246815+00:00"
+}

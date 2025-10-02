@@ -1,0 +1,22 @@
+[
+  {
+    "name": "weather_HNL_12,52",
+    "description": "Failed to fetch weather data for HNL_12,52",
+    "type": "json",
+    "source": "WeatherAgent",
+    "status": "failed",
+    "timestamp": "2025-10-02T10:41:47.395683+00:00",
+    "source_url": "https://api.weather.gov/gridpoints/HNL/12,52/forecast",
+    "error": "HTTP 404: Not Found"
+  },
+  {
+    "name": "weather_HNL_8,65",
+    "description": "Failed to fetch weather data for HNL_8,65",
+    "type": "json",
+    "source": "WeatherAgent",
+    "status": "failed",
+    "timestamp": "2025-10-02T10:41:47.400345+00:00",
+    "source_url": "https://api.weather.gov/gridpoints/HNL/8,65/forecast",
+    "error": "HTTP 404: Not Found"
+  }
+]

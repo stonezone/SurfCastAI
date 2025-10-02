@@ -115,7 +115,12 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
             for file_path in agent_path.glob(pattern):
                 try:
                     with open(file_path, 'r') as fh:
-                        payloads.append(json.load(fh))
+                        data = json.load(fh)
+                        # If the JSON is a list, extend; otherwise append
+                        if isinstance(data, list):
+                            payloads.extend(data)
+                        else:
+                            payloads.append(data)
                 except Exception as exc:
                     logger.warning(f"Failed to load {file_path}: {exc}")
         return payloads
@@ -123,7 +128,10 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     # Process buoy data
     logger.info("Processing buoy data")
     buoy_processor = BuoyProcessor(config)
+    logger.info(f"BuoyProcessor created: {type(buoy_processor)}, has process_bundle: {hasattr(buoy_processor, 'process_bundle')}")
+    logger.info(f"Calling process_bundle with bundle_id={bundle_id}, pattern='**/buoy_*.json'")
     buoy_results = buoy_processor.process_bundle(bundle_id, "**/buoy_*.json")
+    logger.info(f"process_bundle returned: {type(buoy_results)}, length={len(buoy_results)}")
     
     # Process weather data
     logger.info("Processing weather data")
@@ -143,6 +151,7 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     
     # Fuse the data
     logger.info("Fusing data from multiple sources")
+    logger.info(f"Buoy results: {len(buoy_results)} total, {sum(1 for r in buoy_results if r.success)} successful")
     fusion_system = DataFusionSystem(config)
     
     # Prepare data for fusion
