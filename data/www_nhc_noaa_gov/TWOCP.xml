@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:dc="https://purl.org/dc/elements/1.1/">
   <channel>
-    <pubDate>Mon, 06 Oct 2025 20:18:11 +0000</pubDate>
-    <lastBuildDate>Mon, 06 Oct 2025 20:18:11 +0000</lastBuildDate>
+    <pubDate>Tue, 07 Oct 2025 11:41:10 +0000</pubDate>
+    <lastBuildDate>Tue, 07 Oct 2025 11:41:10 +0000</lastBuildDate>
     <title>Central Pacific Tropical Weather Outlook</title>
     <description>Central Pacific Hurricane Center - Central Pacific Tropical Weather Outlook</description>
     <link>https://www.nhc.noaa.gov/</link>
@@ -21,11 +21,11 @@
     <item>
       <title>Central Pacific Tropical Weather Outlook</title>
       <description>
-        <![CDATA[118 <br />ACPN50 PHFO 061719<br />TWOCP <br /><br />Tropical Weather Outlook<br />NWS Central Pacific Hurricane Center Honolulu HI<br />Issued by NWS National Hurricane Center Miami FL<br />800 AM HST Mon Oct 06 2025<br /><br />For the central North Pacific...between 140W and 180W:<br /><br />Active Systems:<br />The National Hurricane Center is issuing advisories on Tropical<br />Storm Octave, located in the eastern Pacific well to the<br />west-southwest of the southern tip of the Baja California Peninsula,<br />and on Hurricane Priscilla, located a couple hundred miles offshore<br />of southwestern Mexico.<br /><br />Tropical cyclone formation is not expected during the next 7 days.<br /><br />$$<br />Forecaster Hagen<br />NNNN]]>
+        <![CDATA[264 <br />ACPN50 PHFO 071128<br />TWOCP <br /><br />Tropical Weather Outlook<br />NWS Central Pacific Hurricane Center Honolulu HI<br />Issued by NWS National Hurricane Center Miami FL<br />200 AM HST Tue Oct 07 2025<br /><br />For the central North Pacific...between 140W and 180W:<br /><br />Active Systems:<br />The National Hurricane Center is issuing advisories on Tropical<br />Storm Octave, located well to the southwest of the southern tip of<br />the Baja California Peninsula, and on Hurricane Priscilla, located a<br />couple hundred miles offshore of west-central Mexico.<br /><br />Tropical cyclone formation is not expected during the next 7 days.<br /><br />$$<br />Forecaster Hagen<br />NNNN]]>
       </description>
-      <pubDate>Mon, 06 Oct 2025 17:19:42 +0000</pubDate>
+      <pubDate>Tue, 07 Oct 2025 11:28:59 +0000</pubDate>
       <link>https://www.nhc.noaa.gov/text/HFOTWOCP.shtml</link>
-      <guid>202510061719</guid>
+      <guid>202510071128</guid>
       <author>nhcwebmaster@noaa.gov (nhcwebmaster)</author>
     </item>
   </channel>

@@ -1,0 +1,12 @@
+{
+  "headline": "Central Pacific Tropical Weather Outlook",
+  "entries": [
+    {
+      "title": "Central Pacific Tropical Weather Outlook",
+      "summary": "\n        264 <br />ACPN50 PHFO 071128<br />TWOCP <br /><br />Tropical Weather Outlook<br />NWS Central Pacific Hurricane Center Honolulu HI<br />Issued by NWS National Hurricane Center Miami FL<br />200 AM HST Tue Oct 07 2025<br /><br />For the central North Pacific...between 140W and 180W:<br /><br />Active Systems:<br />The National Hurricane Center is issuing advisories on Tropical<br />Storm Octave, located well to the southwest of the southern tip of<br />the Baja California Peninsula, and on Hurricane Priscilla, located a<br />couple hundred miles offshore of west-central Mexico.<br /><br />Tropical cyclone formation is not expected during the next 7 days.<br /><br />$$<br />Forecaster Hagen<br />NNNN\n      ",
+      "link": "https://www.nhc.noaa.gov/text/HFOTWOCP.shtml"
+    }
+  ],
+  "source_url": "https://www.nhc.noaa.gov/xml/TWOCP.xml",
+  "fetched_at": "2025-10-07T11:47:51.633721+00:00"
+}
