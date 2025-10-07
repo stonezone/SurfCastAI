@@ -1,0 +1,169 @@
+================================================================================
+                        TEST COVERAGE ANALYSIS SUMMARY
+                         Target: 80% | Current: 47%
+================================================================================
+
+OVERALL STATUS
+--------------
+Total Tests:           322
+Passing Tests:         297 (92% pass rate)
+Failing Tests:         25 (config, HTTP, security assertion mismatches)
+Total Coverage:        47% (3,095 of 6,517 lines covered)
+
+COVERAGE BY PRIORITY
+--------------------
+
+PRIORITY 1: VALIDATION (TARGET MET ✓)
+  forecast_validator.py        93% ████████████████████░  ✓ Excellent
+  forecast_parser.py           87% █████████████████░░░  ✓ Good
+  buoy_fetcher.py              87% █████████████████░░░  ✓ Good
+  surf_observation.py          86% █████████████████░░░  ✓ Good
+  database.py                  78% ███████████████░░░░░  ⚠ Near Target
+  ────────────────────────────────────────────────────────────────
+  Average: 86% ✓ EXCEEDS TARGET
+
+PRIORITY 2: PROCESSING (CLOSE TO TARGET ⚠)
+  source_scorer.py             92% ████████████████████░  ✓ Excellent
+  wave_model_processor.py      90% ████████████████████░  ✓ Excellent
+  confidence_scorer.py         89% ██████████████████░░  ✓ Excellent
+  weather_data.py              88% ██████████████████░░  ✓ Good
+  wave_model.py                85% █████████████████░░░  ✓ Good
+  buoy_processor.py            79% ███████████████░░░░░  ⚠ Near Target
+  buoy_data.py                 70% ██████████████░░░░░░  ✗ Below
+  weather_processor.py         65% █████████████░░░░░░░  ✗ Below
+  swell_event.py               62% ████████████░░░░░░░░  ✗ Below
+  data_fusion_system.py        60% ████████████░░░░░░░░  ✗ Below
+  hawaii_context.py            47% █████████░░░░░░░░░░░  ✗ Below
+  data_processor.py            28% █████░░░░░░░░░░░░░░░  ✗ Critical Gap
+  ────────────────────────────────────────────────────────────────
+  Average: 73% ⚠ CLOSE TO TARGET
+
+PRIORITY 3: FORECAST ENGINE (CRITICAL GAPS ✗)
+  historical.py                93% ████████████████████░  ✓ Excellent
+  visualization.py             54% ███████████░░░░░░░░░  ✗ Below
+  model_settings.py            46% █████████░░░░░░░░░░░  ✗ Below
+  local_generator.py           15% ███░░░░░░░░░░░░░░░░░  ✗ Critical Gap
+  prompt_templates.py          13% ██░░░░░░░░░░░░░░░░░░  ✗ Critical Gap
+  forecast_formatter.py         7% █░░░░░░░░░░░░░░░░░░░  ✗ Critical Gap
+  forecast_engine.py            5% █░░░░░░░░░░░░░░░░░░░  ✗ Critical Gap
+  ────────────────────────────────────────────────────────────────
+  Average: 33% ✗ MAJOR DEFICIT (474 lines untested in core engine)
+
+PRIORITY 4: CORE INFRASTRUCTURE (MIXED RESULTS ⚠)
+  rate_limiter.py              99% ████████████████████░  ✓ Excellent
+  config.py                    88% ██████████████████░░  ✓ Good
+  http_client.py               77% ███████████████░░░░░  ⚠ Near Target
+  data_collector.py            19% ███░░░░░░░░░░░░░░░░░  ✗ Critical Gap
+  metadata_tracker.py          14% ██░░░░░░░░░░░░░░░░░░  ✗ Critical Gap
+  bundle_manager.py            11% ██░░░░░░░░░░░░░░░░░░  ✗ Critical Gap
+  ────────────────────────────────────────────────────────────────
+  Average: 51% ⚠ GAPS IN COLLECTION
+
+PRIORITY 5: AGENTS (MINIMAL COVERAGE ✗)
+  base_agent.py                99% ████████████████████░  ✓ Excellent
+  All other agents          12-32% ██░░░░░░░░░░░░░░░░░░  ✗ Largely Untested
+  ────────────────────────────────────────────────────────────────
+  Average: 28% ✗ MINIMAL (but integration tests exist)
+
+UTILITIES & WEB
+  security.py                  94% ████████████████████░  ✓ Excellent
+  exceptions.py                88% ██████████████████░░  ✓ Good
+  web/app.py                    0% ░░░░░░░░░░░░░░░░░░░░  - Not Tested (CLI)
+  main.py                       0% ░░░░░░░░░░░░░░░░░░░░  - Not Tested (CLI)
+
+================================================================================
+                              KEY FINDINGS
+================================================================================
+
+✓ STRENGTHS
+  • Validation system well-tested (86% average)
+  • Source scoring and confidence logic strong (89-92%)
+  • Wave model processing comprehensive (90%)
+  • Core utilities well-covered (88-94%)
+  • Base infrastructure solid (rate limiter 99%, config 88%)
+
+✗ CRITICAL GAPS
+  • Forecast engine core: 5% (474 untested lines) ← HIGHEST IMPACT
+  • Forecast formatter: 7% (265 untested lines) ← HIGH IMPACT
+  • Data fusion system: 60% (170 untested lines) ← HIGH IMPACT
+  • Hawaii context: 47% (76 untested lines) ← MEDIUM IMPACT
+  • Data collectors: 11-19% ← MEDIUM IMPACT
+
+⚠ TEST FAILURES
+  • 25 tests failing (8% of total)
+  • Mostly assertion mismatches, not logic errors
+  • Config tests: path format issues
+  • Security tests: error message text mismatches
+  • HTTP client tests: mocking issues
+
+================================================================================
+                        RECOMMENDED ACTION PLAN
+================================================================================
+
+PHASE 1: FIX FAILURES (2-3 hours)
+  → Fix 25 failing tests (config, security, HTTP mocking)
+  → Expected: 47% → 49% coverage, 100% pass rate
+
+PHASE 2: FORECAST ENGINE TESTS (4-6 hours) ← HIGHEST IMPACT
+  → Test forecast_engine.py core logic (5% → 60%)
+  → Test forecast_formatter.py output (7% → 70%)
+  → Test prompt_templates.py rendering (13% → 80%)
+  → Expected: 49% → 58% coverage (+9%)
+
+PHASE 3: PROCESSING TESTS (2-3 hours)
+  → Complete data_fusion_system.py (60% → 80%)
+  → Test data_processor.py base class (28% → 80%)
+  → Complete hawaii_context.py (47% → 75%)
+  → Complete weather_processor.py (65% → 80%)
+  → Expected: 58% → 67% coverage (+9%)
+
+PHASE 4 (OPTIONAL): CORE INFRASTRUCTURE (2-3 hours)
+  → Test data_collector.py (19% → 70%)
+  → Test bundle_manager.py (11% → 70%)
+  → Expected: 67% → 71% coverage (+4%)
+
+================================================================================
+                           REALISTIC TARGETS
+================================================================================
+
+RECOMMENDED (Phases 1-3): 8-12 hours
+  Coverage:    47% → 67% (20% improvement)
+  Tests:       322 → ~380 tests
+  Pass Rate:   92% → 100%
+  Impact:      All critical forecast/processing logic tested
+
+STRETCH (All Phases): 16-20 hours
+  Coverage:    47% → 71% (24% improvement)
+  Tests:       322 → ~420 tests
+  Impact:      Core infrastructure fully tested
+
+TO REACH 80%: 30+ hours (NOT RECOMMENDED)
+  Reason:      Requires 300+ agent unit tests
+  Note:        Agents already have integration test coverage
+  Value:       Low ROI - diminishing returns
+
+================================================================================
+                              CONCLUSION
+================================================================================
+
+Current Status:  47% coverage with critical gaps in forecast engine
+Achievable Goal: 67% coverage with 100% pass rate in 8-12 hours
+Recommendation:  Execute Phases 1-3 to test all critical logic
+
+Key Insight: The 80% target is unrealistic without extensive agent unit tests
+             that duplicate existing integration test coverage. A 67% target
+             with comprehensive forecast engine and processing tests provides
+             much better value and confidence.
+
+Priority: Fix forecast_engine.py (5% coverage, 474 untested lines)
+          This is the most critical gap for forecast quality assurance.
+
+================================================================================
+                          DETAILED REPORTS AVAILABLE
+================================================================================
+
+Full Analysis:     /Users/zackjordan/code/surfCastAI/COVERAGE_ANALYSIS.md
+Detailed Gaps:     /Users/zackjordan/code/surfCastAI/COVERAGE_GAPS_DETAILED.md
+HTML Report:       /Users/zackjordan/code/surfCastAI/htmlcov/index.html
+
+================================================================================
