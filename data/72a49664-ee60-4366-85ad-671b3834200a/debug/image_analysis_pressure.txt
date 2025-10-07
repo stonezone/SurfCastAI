@@ -1,35 +1,107 @@
 SUMMARY
-Primary threat: two northwest/Gulf-of-Alaska swell sources — a developing storm ~38N/160W and a larger GA low farther north — will send long-period N to NNW energy to the North Shore. Expect building N-NNW swell mid‑week (arrival Oct 9–11), peaking in the 10–15 ft Hawaiian scale range with 14–18 s periods at peak. Trades are reinforced by a strong subtropical high (1038 mb) centered near 30N/165W producing steady NE trades 15–25 kt — wind-affected conditions for exposed east- and south-facing breaks.
+Two primary swell producers in the North/Central Pacific: a developing gale in the central North Pacific (~996 mb) and a deeper Gulf-of‑Alaska low (~982 mb). Both are oriented to send energy toward Hawaii — expect increasing NNW/NW energy late this week with peak energy late Thu–Sat (3–5 day arrival window). A strong subtropical/high center (1038 mb) sits southeast of the islands and will keep steady trades over Hawaii and partially shadow more southerly/long‑range energy (Typhoon Halong and southern TS Octave) — south shore remains mostly quiet.
 
 DETAILS
-- Developing storm (labelled “DVLPG STORM”): center ~38N, 160W, pressure ~996 mb. Fetch oriented NW→SE aimed toward Hawaii (roughly 320–330° true to the islands). Peak winds in the gale quadrant ~35–45 kt over a 300–600 nm fetch. Swell potential: moderate→high for Hawaii. Expected swell: 14–16 s dominant periods, arrival ~72–96 hrs after peak forcing (best energy Oct 9–10). Hawaiian scale faces 8–12 ft building to 10–14 ft at exposed north-facing reefs at peak.
-
-- Gulf of Alaska low system (northern low/“982–993” area): center ~45–50N, ~150W, pressure ~990–994 mb with gale-force winds and a frontal band extending southeast. Fetch orientation NW (310–335°) into the NE Pacific. Producing longer-period energy: 16–18 s periods. Travel time to Hawaii ~4–6 days; expect arrival windows Oct 10–13. Peak size at solid North Shore exposures: 12–16 ft Hawaiian scale faces with heavy lines and strong currents.
-
-- Coastal CA/nearshore low: ~36–38N, ~122W, ~1008 mb — limited local NW fetch; short travel distance gives shorter period, more wind‑chop; negligible contribution to long-period energy for big North Shore peaks.
-
-- Tropical systems: T.S. Octave (~60 kt) located southeast of Hawaii (near 130–140W) and Typhoon Halong far west. Octave is producing SSW–S swell energy (approx. 160–180°) but fetch is compact and partially blocked by the subtropical high/flow pattern. Expect small, short‑to‑medium period tropical swell (8–12 s) arriving later in the week (Oct 10–14) — background S–SSW 2–4 ft Hawaiian scale at best, more detectable at exposed southern points.
-
-- Subtropical high / trades: 1038 mb high centered near 30N/165W. This is a strong, broad high producing a persistent NE trade flow across the islands. It will:
-  - Enhance trade wind speeds (most daytimes 15–25 kt, lighter mornings).
-  - Create a wind shadow to the southwest of the high (limits some SE/SSW swell energy into Hawaii).
-  - Tend to refract/attenuate southern/tropical swell energy trying to wrap into the islands; southern swell from Octave/Halong is therefore reduced.
+- Central Pacific developing storm (estimated 38N 170W, 996 mb): moving ENE ~20–25 kt. Fetch on its southern quadrant is oriented toward Hawaii (roughly 300–330° true) with sustained winds likely 30–40 kt in the main fetch. Generates a short/medium-period NNW swell ~12–14 s arriving Hawaii in ~3–4 days. Swell potential: medium‑high for exposed north and NNW‑facing breaks.
+- Gulf of Alaska low (estimated 45N 155W, 982 mb): moving E‑NE ~25–30 kt. Broad NW fetch on its southern flank aimed at Hawaii (approx 295–310°). Longer period energy (14–16 s) will arrive slightly after the central Pacific pulse, packing more punch at peak. Swell potential: high for big, longer‑period NW energy with good long‑distance propagation.
+- Typhoon Halong (976 mb, far west Pacific): strong but far (west of 140E). Long distance and the large subtropical high (1038 mb) between Halong and Hawaii mean limited direct swell energy to reach the islands — swell potential: low-moderate and heavily attenuated if any.
+- Tropical Storm Octave / low near 130W (995–1008 mb): located well southeast/south of Hawaii. Fetch and orientation are not ideal for strong south swell to Hawaiian south shores in the next few days; any southern energy will be small and delayed (5–7+ days).
+- Frontal activity: cold fronts and occlusions are present across the NW Pacific and wrapping into the developing/deeper lows noted above. These fronts are the primary generators of the NW/NNW gales producing the forecast swell pulses.
+- Pressure gradients: tight gradient between the 1038 mb high (centered roughly 30–32N, 160–165W) and the 996/982 mb lows across 155–175W. Expect strong W‑NW winds 25–40 kt in the fetch corridors — very favorable for swell generation. The large, high‑center also reinforces trades over the Hawaiian Islands (E/ENE 15–20 kt), degrading exposed breaks at times.
 
 NORTH SHORE
-- Arrival: first measurable N–NNW mixed swell energy late Wed–Thu (Oct 9–10), building through Fri (Oct 10–11).
-- Size/period: main swell 14–18 s, faces 10–15 ft Hawaiian scale at exposed points (Pipeline, Ehukai, Haleiwa). Backdoor/NNE components may fill Sunset/Mokuleia with heavier long-period sets.
-- Wind: NE trades 10–15 kt mornings, rising to 15–25 kt afternoons. Best windows are early AM when trades lighten; expect increasing texture and onshore cross‑chop through the day.
-- Hazards: heavy, powerful waves at exposed reef passes; strong currents and shorebreak at shallow points. Biggest sets at Pipeline and off the Pua‘ena stretch.
+- Arrival/timing: First measurable rise late Thursday with the central Pacific 12–14 s NNW pulse; the Gulf‑of‑Alaska 14–16 s NW component peaks late Thu–Sat. Combined peak window Fri (late) into Sat morning for the most exposed north/NW faces.
+- Size: Expect exposed North Shore lineups to move into the 8–12 ft Hawaiian scale range at peak (some peak intervals 10–14 ft Hawaiian on the largest sets at Sunset, Ehukai and Pupukea). Pipeline and Sunset will see significant size and power — hold for big-swell protocols.
+- Direction/period: Primary directions 300–330° true; energy arriving primarily 12–16 s periods (mix of shorter central Pacific swell and longer Gulf‑of‑Alaska swell).
+- Winds/quality: Persistent E–ENE trades 10–20 kt (stronger midday) from the subtropical high produce cross‑onshore conditions for much of the North Shore — best windows early mornings when winds tend lighter. Expect choppy/warbled conditions on exposed points during onshore gusts; some protected spots and deep reefs will clean up briefly on light offshore shifts.
 
 SOUTH SHORE
-- Background: overall quiet for raw southern hemi energy due to the subtropical high blocking long fetch. Expect only modest tropical/south swell from Octave — short to mid period (8–12 s).
-- Size: 2–4 ft Hawaiian scale at most southerly exposures (Ala Moana, Diamond Head, Makapuu still small due to trade winds from NE).
-- Wind: NE trades produce east‑to‑onshore flow for many south‑facing breaks, choppy conditions and reduced surf quality through afternoons; better small-wrinkle conditions in morning.
-- Best spots: protected south‑facing, wind‑protected coves and reef points will see the most usable small surf (longboard rides).
+- Current outlook: Minimal direct southern swell energy in the next 3–5 days. TS Octave and tropical energy are too distant and partially blocked by the large high; any south hemi energy will be small and delayed.
+- Size/period: Background south/east waist‑to‑knee surf (1–3 ft Hawaiian scale) at the more protected south beaches (Ala Moana, Waikiki). No significant long‑period south pulse expected in the immediate 3–5 day window.
+- Winds/quality: Trades (E–ENE 10–20 kt) will produce bump on east‑facing breaks and light chop on south exposures; best small‑surf windows early mornings when trades back or are lighter.
 
 OUTLOOK
-- Fri–Sun (Oct 11–13): NW energy likely peaks then slowly trends down as Gulf-of-Alaska fetch moves east and weakens. North Shore surf remains sizeable but begins to ease late weekend.
-- Beyond 7 days: another frontal band is shown developing northwest of the Aleutians on the chart analysis — moderate confidence for additional NW swell late next week (arrival ~Oct 14–17) depending on amplification. Tropical sources (Octave/Halong) remain possible generators of small episodic SSW energy but will be curtailed by the subtropical high unless track/strength change.
-- Trades are expected to persist (NE 10–25 kt) for the forecast period, so expect cleaner early mornings and windier, choppier afternoons statewide.
+- Fri–Sat: Peak of the combined NNW/NW pulse; largest north‑facing exposures should see the most consistent sets. Conditions probably rough mid‑day on the North Shore from trades; early AM the cleanest.
+- Sun–Mon: Gradual decay as fetch weakens and lows move east; swell energy drops through the weekend into early next week. Residual long‑period NW energy may hang around into early next week at smaller size.
+- Beyond 7 days: Watch for redevelopment in the NW Pacific/Gulf of Alaska; repeated frontal passages could produce another NW pulse late next week. Tropical systems (Halong/Octave) are present but unlikely to deliver significant clean energy to Hawaii while the subtropical high remains strong and trades persist.
 
-If you want estimated arrival/peak dates converted to calendar days for specific spots (Pipeline / Sunset /Waikiki /Ala Moana) I can list them with direction (deg), period (s), and Hawaiian-scale size by break.
+STRUCTURED ANALYSIS (JSON)
+{
+  "low_pressure_systems": [
+    {
+      "location": "38N 170W (central Pacific developing storm)",
+      "pressure_mb": 996,
+      "movement": "ENE ~20–25 kt",
+      "fetch_orientation_relative_to_Hawaii": "southern quadrant aimed toward Hawaii (approx 300–330° true)",
+      "swell_potential": "medium-high (12–14 s energy arriving ~3–4 days)"
+    },
+    {
+      "location": "45N 155W (Gulf of Alaska low)",
+      "pressure_mb": 982,
+      "movement": "E–NE ~25–30 kt",
+      "fetch_orientation_relative_to_Hawaii": "southern/southwestern flank aimed toward Hawaii (approx 295–310° true)",
+      "swell_potential": "high (14–16 s long-period energy arriving ~4–5 days)"
+    },
+    {
+      "location": "Far W Pacific (Typhoon Halong ~976 mb)",
+      "pressure_mb": 976,
+      "movement": "general west/northwest (far west Pacific)",
+      "fetch_orientation_relative_to_Hawaii": "far-field; largely blocked/attenuated by subtropical high",
+      "swell_potential": "low-moderate (distance and blocking reduce impact)"
+    },
+    {
+      "location": "S of Baja / 130W region (TS Octave / low ~995–1008 mb)",
+      "pressure_mb": 995,
+      "movement": "variable; generally W/NW",
+      "fetch_orientation_relative_to_Hawaii": "southeast of Hawaii; not ideally oriented for strong direct south swell",
+      "swell_potential": "low (small, delayed south components possible in 5–7+ days)"
+    }
+  ],
+  "high_pressure_systems": [
+    {
+      "location": "Approx 30–32N 160–165W (subtropical high)",
+      "pressure_mb": 1038,
+      "role": "large blocking/trade wind high",
+      "effects_on_swell": "partially shadows long‑range southern/tropical swell (attenuates energy from west Pacific and south). Enhances ENE trades over Hawaii (10–20+ kt), degrading exposed lineups."
+    },
+    {
+      "location": "Off Pacific NW/NE Pacific (1026–1027 mb ridges)",
+      "pressure_mb": 1026,
+      "role": "supporting high pressure",
+      "effects_on_swell": "reinforces general pressure gradient with nearby lows, contributing to strong fetch in NW Pacific."
+    }
+  ],
+  "frontal_activity": [
+    {
+      "description": "Cold fronts and occlusions across the NW Pacific wrapping into the 982–996 mb lows",
+      "swell_generation_implication": "Primary generators of NW/NWN gale force fetch — likely source of the 14–16 s and 12–14 s energy aimed at Hawaii."
+    }
+  ],
+  "swell_generation_zones": [
+    {
+      "zone": "Central/North Pacific (around 35–45N, 165–150W)",
+      "confidence": "high",
+      "arrival_days": "3–5",
+      "expected_swell": "NNW/NW swell 12–16 s; primary swell for Hawaii's North Shore late week"
+    },
+    {
+      "zone": "Far NW Pacific / Gulf of Alaska",
+      "confidence": "medium-high",
+      "arrival_days": "4–6",
+      "expected_swell": "Long‑period NW swell (14–16 s) reinforcing peak energy"
+    },
+    {
+      "zone": "Western Pacific / Typhoon regions",
+      "confidence": "low",
+      "arrival_days": "5–8+ (if any)",
+      "expected_swell": "Possible long‑period W/SW energy but largely attenuated/blocked by subtropical high"
+    },
+    {
+      "zone": "Eastern Pacific (tropical low near 130W / TS Octave)",
+      "confidence": "low",
+      "arrival_days": "5–8+",
+      "expected_swell": "Small, delayed southerly/ESE energy only — minimal impact in next 3–5 days"
+    }
+  ],
+  "notes": "Tight gradient between the 1038 mb high and the 982–996 mb lows will produce strong W–NW winds in the fetch corridors (25–40 kt), favorable for solid NW/NNW swell generation. Persistent ENE trades over the islands (driven by the subtropical high) will limit clean conditions on exposed north and east facing breaks — look for best windows early mornings and in sheltered locations."
+}

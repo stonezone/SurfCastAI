@@ -95,11 +95,42 @@ class ForecastEngine:
             self.refinement_cycles = self.config.getint('forecast', 'refinement_cycles', 2)
         self.quality_threshold = self.config.getfloat('forecast', 'quality_threshold', 0.8)
         
+        # Load image configuration
+        self.max_images = self.config.getint('forecast', 'max_images', 10)
+        
+        # Load image detail levels with defaults
+        image_detail_config = self.config.get('forecast', 'image_detail_levels', {})
+        if not isinstance(image_detail_config, dict):
+            image_detail_config = {}
+        
+        self.image_detail_pressure = image_detail_config.get('pressure_charts', 'high')
+        self.image_detail_wave = image_detail_config.get('wave_models', 'auto')
+        self.image_detail_satellite = image_detail_config.get('satellite', 'auto')
+        self.image_detail_sst = image_detail_config.get('sst_charts', 'low')
+        
+        # Log image configuration
+        self.logger.info(f'Image configuration: max_images={self.max_images}')
+        self.logger.info(f'Image detail levels: pressure={self.image_detail_pressure}, '
+                        f'wave={self.image_detail_wave}, satellite={self.image_detail_satellite}, '
+                        f'sst={self.image_detail_sst}')
+        
         # Initialize cost tracking
         self.total_cost = 0.0
         self.api_call_count = 0
         self.total_input_tokens = 0
         self.total_output_tokens = 0
+
+        # Initialize token budget enforcement
+        self.token_budget = self.config.getint('forecast', 'token_budget', 150000)
+        self.warn_threshold = self.config.getint('forecast', 'warn_threshold', 200000)
+        self.enable_budget_enforcement = self.config.getboolean(
+            'forecast', 'enable_budget_enforcement', True
+        )
+        self.estimated_tokens = 0
+
+        # Log budget configuration
+        self.logger.info(f"Token budget enforcement: {'enabled' if self.enable_budget_enforcement else 'disabled'}")
+        self.logger.info(f"Token budget: {self.token_budget}, Warning threshold: {self.warn_threshold}")
     
     async def generate_forecast(self, swell_forecast: SwellForecast) -> Dict[str, Any]:
         """
@@ -342,7 +373,7 @@ class ForecastEngine:
         self.logger.info(f"Collected images: {total_images} total (pressure: {len(images['pressure_charts'])}, sst: {len(images['sst_charts'])}, satellite: {len(images['satellite'])}, wave_models: {len(images['wave_models'])})")
         return images
 
-    def _select_critical_images(self, images: Dict[str, List[str]], max_images: int = 6) -> List[Dict[str, Any]]:
+    def _select_critical_images(self, images: Dict[str, List[str]], max_images: Optional[int] = None) -> List[Dict[str, Any]]:
         """
         Select most valuable images within token budget.
 
@@ -351,72 +382,76 @@ class ForecastEngine:
         humans can't achieve - simultaneous analysis of complete temporal evolution.
 
         Priority:
-        1. Pressure chart evolution (high detail) - 4 images (0hr, 24hr, 48hr, 96hr)
+        1. Pressure chart evolution (configurable detail) - 4 images (0hr, 24hr, 48hr, 96hr)
            Track lows, highs, fronts over time to identify system movement patterns
-        2. Wave forecast evolution (auto detail) - 4 images (0hr, 24hr, 48hr, 96hr)
+        2. Wave forecast evolution (configurable detail) - 4 images (0hr, 24hr, 48hr, 96hr)
            Validate fetch predictions and swell propagation over time
-        3. Satellite imagery (auto detail) - 1 image
+        3. Satellite imagery (configurable detail) - 1 image
            Latest cloud patterns for system validation
-        4. SST anomaly (low detail) - 1 image
+        4. SST anomaly (configurable detail) - 1 image
            Storm intensity context (low detail sufficient for anomaly patterns)
 
         Args:
             images: Dict with keys 'pressure_charts', 'satellite', 'wave_models', 'sst_charts'
-            max_images: Maximum number of images to select (default: 6, hard cap: 10)
+            max_images: Maximum number of images to select (default: from config, hard cap: 10)
 
         Returns:
             List of dicts: [{"url": "...", "detail": "high/auto/low", "type": "pressure_chart/satellite/wave_model/sst"}, ...]
         """
+        # Use configured max_images if not provided
+        if max_images is None:
+            max_images = self.max_images
+        
         # Enforce hard cap (GPT-5 limit)
         max_images = min(max_images, 10)
         selected = []
 
-        # Priority 1: Pressure chart evolution - 4 images at high detail
+        # Priority 1: Pressure chart evolution - 4 images at configured detail
         # 0hr, 24hr, 48hr, 96hr surface forecasts showing system movement
         pressure_charts = images.get('pressure_charts', [])
         for i, chart in enumerate(pressure_charts[:4]):
             selected.append({
                 'url': chart,
-                'detail': 'high',
+                'detail': self.image_detail_pressure,
                 'type': 'pressure_chart',
                 'description': f'Pressure forecast T+{i*24}hr'
             })
             if len(selected) >= max_images:
                 return selected
 
-        # Priority 2: Wave forecast evolution - 4 images at auto detail
+        # Priority 2: Wave forecast evolution - 4 images at configured detail
         # 0hr, 24hr, 48hr, 96hr wave heights/directions validating pressure systems
         wave_models = images.get('wave_models', [])
         for i, wave in enumerate(wave_models[:4]):
             selected.append({
                 'url': wave,
-                'detail': 'auto',
+                'detail': self.image_detail_wave,
                 'type': 'wave_model',
                 'description': f'Wave model T+{i*24}hr'
             })
             if len(selected) >= max_images:
                 return selected
 
-        # Priority 3: Satellite imagery - 1 image at auto detail
+        # Priority 3: Satellite imagery - 1 image at configured detail
         # Latest cloud patterns for validation
         satellite_imgs = images.get('satellite', [])
         if satellite_imgs:
             selected.append({
                 'url': satellite_imgs[0],
-                'detail': 'auto',
+                'detail': self.image_detail_satellite,
                 'type': 'satellite',
                 'description': 'Latest satellite imagery'
             })
             if len(selected) >= max_images:
                 return selected
 
-        # Priority 4: SST anomaly - 1 image at low detail
+        # Priority 4: SST anomaly - 1 image at configured detail
         # Affects storm intensity - low detail sufficient for anomaly patterns
         sst_charts = images.get('sst_charts', [])
         if sst_charts:
             selected.append({
                 'url': sst_charts[0],
-                'detail': 'low',
+                'detail': self.image_detail_sst,
                 'type': 'sst_chart',
                 'description': 'Sea surface temperature anomaly'
             })
@@ -516,7 +551,132 @@ class ForecastEngine:
             'month': month,
             'seasonal_patterns': seasonal_info[season]
         }
-    
+
+    def _estimate_tokens(self, forecast_data: Dict[str, Any]) -> int:
+        """
+        Estimate total token usage for forecast generation.
+
+        This estimates tokens from:
+        - Text data (swell events, shore data, prompts)
+        - Images (based on detail level)
+        - Expected output
+
+        Args:
+            forecast_data: Prepared forecast data
+
+        Returns:
+            Estimated token count
+        """
+        # Text data estimation (rough: ~4 chars per token)
+        text_tokens = 0
+
+        # Forecast data structures
+        swell_events_str = str(forecast_data.get('swell_events', []))
+        shore_data_str = str(forecast_data.get('shore_data', {}))
+        text_tokens += len(swell_events_str) // 4
+        text_tokens += len(shore_data_str) // 4
+
+        # System prompts and templates (estimated)
+        text_tokens += 5000  # Base prompt overhead including system prompts
+
+        # Image token estimation (based on actual image detail levels configured)
+        image_tokens = 0
+        images = forecast_data.get('images', {})
+
+        # Pressure charts (4 images)
+        pressure_count = min(len(images.get('pressure_charts', [])), 4)
+        if self.image_detail_pressure == 'high':
+            image_tokens += pressure_count * 3000
+        elif self.image_detail_pressure == 'auto':
+            image_tokens += pressure_count * 1500
+        else:  # low
+            image_tokens += pressure_count * 500
+
+        # Wave models (4 images)
+        wave_count = min(len(images.get('wave_models', [])), 4)
+        if self.image_detail_wave == 'high':
+            image_tokens += wave_count * 3000
+        elif self.image_detail_wave == 'auto':
+            image_tokens += wave_count * 1500
+        else:  # low
+            image_tokens += wave_count * 500
+
+        # Satellite (1 image)
+        if images.get('satellite'):
+            if self.image_detail_satellite == 'high':
+                image_tokens += 3000
+            elif self.image_detail_satellite == 'auto':
+                image_tokens += 1500
+            else:  # low
+                image_tokens += 500
+
+        # SST charts (1 image)
+        if images.get('sst_charts'):
+            if self.image_detail_sst == 'high':
+                image_tokens += 3000
+            elif self.image_detail_sst == 'auto':
+                image_tokens += 1500
+            else:  # low
+                image_tokens += 500
+
+        # Output tokens (conservative estimate for forecast generation)
+        output_tokens = 10000  # Long-form forecast text
+
+        # Total estimate
+        total_tokens = text_tokens + image_tokens + output_tokens
+
+        self.logger.info(
+            f"Token estimate: {text_tokens} text + {image_tokens} images + "
+            f"{output_tokens} output = {total_tokens} total"
+        )
+
+        return total_tokens
+
+    def _check_token_budget(self, estimated: int) -> Tuple[bool, str]:
+        """
+        Check if estimated token usage fits within budget.
+
+        Provides graceful degradation strategy:
+        - If over warn_threshold: Fail (use local generator)
+        - If over token_budget but under warn_threshold: Warn but proceed
+        - If under token_budget: Proceed normally
+
+        Args:
+            estimated: Estimated token count
+
+        Returns:
+            Tuple of (within_budget: bool, message: str)
+        """
+        if not self.enable_budget_enforcement:
+            return (True, "Budget enforcement disabled")
+
+        # Hard limit check
+        if estimated > self.warn_threshold:
+            return (
+                False,
+                f"Estimated {estimated} tokens exceeds hard limit {self.warn_threshold}"
+            )
+
+        # Budget warning check (but still allow)
+        if estimated > self.token_budget:
+            warning = (
+                f"Estimated {estimated} tokens exceeds budget {self.token_budget} "
+                f"but under hard limit {self.warn_threshold}"
+            )
+            self.logger.warning(warning)
+            return (True, warning)
+
+        # Within budget
+        pct_used = (estimated / self.token_budget) * 100
+
+        # Log warnings at thresholds
+        if pct_used >= 90:
+            self.logger.warning(f"Token usage at {pct_used:.1f}% of budget ({estimated}/{self.token_budget})")
+        elif pct_used >= 80:
+            self.logger.info(f"Token usage at {pct_used:.1f}% of budget ({estimated}/{self.token_budget})")
+
+        return (True, f"Within budget: {estimated}/{self.token_budget} ({pct_used:.1f}%)")
+
     async def _generate_main_forecast(self, forecast_data: Dict[str, Any]) -> str:
         """
         Generate the main comprehensive forecast.
@@ -531,10 +691,21 @@ class ForecastEngine:
             generator = LocalForecastGenerator(forecast_data)
             return generator.build_main_forecast()
 
-        # Get images and select critical ones
-        # Using 10 images to maximize GPT-5 vision insight extraction
+        # Estimate token usage and check budget
+        self.estimated_tokens = self._estimate_tokens(forecast_data)
+        within_budget, budget_message = self._check_token_budget(self.estimated_tokens)
+
+        self.logger.info(f"Token budget check: {budget_message}")
+
+        if not within_budget:
+            self.logger.error(f"Token budget exceeded: {budget_message}")
+            self.logger.error("Falling back to local generator due to token limit")
+            generator = LocalForecastGenerator(forecast_data)
+            return generator.build_main_forecast()
+
+        # Get images and select critical ones (using configured max_images)
         images = forecast_data.get('images', {})
-        selected_images = self._select_critical_images(images, max_images=10)
+        selected_images = self._select_critical_images(images)
 
         # Log token estimation
         estimated_tokens = 0

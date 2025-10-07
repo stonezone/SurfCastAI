@@ -132,3 +132,12 @@ forecast:
   quality_threshold: 0.8
   use_local_generator: true
   formats: markdown,html,pdf
+  max_images: 10              # GPT-5 limit (can reduce to 6-8 for cost)
+  token_budget: 150000        # Conservative for gpt-5-mini
+  warn_threshold: 200000      # GPT-5 context limit
+  enable_budget_enforcement: true
+  image_detail_levels:
+    pressure_charts: high     # 3000 tokens each (critical)
+    wave_models: auto         # 1500 tokens each (important)
+    satellite: auto           # 1500 tokens each (validation)
+    sst_charts: low           # 500 tokens (context only)

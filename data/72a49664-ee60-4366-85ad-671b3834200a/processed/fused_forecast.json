@@ -1,6 +1,6 @@
 {
-  "forecast_id": "forecast_20251006_144336",
-  "generated_time": "2025-10-06T14:43:36.730485",
+  "forecast_id": "forecast_20251006_235714",
+  "generated_time": "2025-10-06T23:57:14.032599",
   "swell_events": [
     {
       "event_id": "buoy_51202_20251006",
@@ -969,12 +969,12 @@
       }
     ],
     "confidence": {
-      "overall_score": 0.6488134854238039,
+      "overall_score": 0.5911445530424382,
       "data_source_scores": {
         "buoy": 0.9
       },
       "factors": {
-        "data_freshness": 0.89604495141268,
+        "data_freshness": 0.7038151768081276,
         "source_diversity": 0.3333333333333333,
         "source_agreement": 0.7
       }
