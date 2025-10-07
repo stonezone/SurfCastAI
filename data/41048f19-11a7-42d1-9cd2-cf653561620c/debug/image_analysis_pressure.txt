@@ -1,0 +1,51 @@
+SUMMARY
+A pair of mid-latitude systems north of the Islands will be the primary swell sources this run. Expect a developing gale just north of the dateline (near 35–40N, ~170W) to send an NNW–NW energy windowed for Hawai‘i with arrival later in the week. A larger, more northerly low / occluded gale around 45–50N near the dateline will produce longer-period NW energy that follows. Meanwhile two tropical systems well to the south (Typhoon Halong and TS Octave) will be sources of short-to-moderate period southerly energy for the South Shore. A strong subtropical high (1038 mb) centered east–northeast of the Islands will modulate trades and local wind windows.
+
+DETAILS
+1) Developing mid-latitude gale (primary near-term)
+- Approx location now: 34–38N, 170–175W (marked “DVLPG STORM”; analysis label ~996 mb).
+- Movement: drifting E/NE and expected to deepen/propagate eastward along the dateline track.
+- Fetch orientation: northwest quadrant of the low has a southeastward-directed fetch toward Hawaii, producing energy in the NNW–NW window (roughly 320°–305°).
+- Expected swell: periods centered 11–14s (energy skewed toward upper 10s into low 10s), arrival to Hawaii in ~3–4 days from the chart valid time (first pulse late in the 3rd day), peaking in the 4th day. Hawaiian-scale face heights: pulsing 6–10 ft on exposed North Shore spots at peak, larger at the most exposed reefs.
+
+2) Northern occluded/gale complex (background longer-period source)
+- Approx location now: 45–52N, 170–155W (multiple lows/occlusions with labels 992–982 mb and “GALE” tags).
+- Movement: eastward/NE, some centers being absorbed into larger circulation; frontal bands extend southeast toward Hawaii’s swell window.
+- Fetch orientation: broad west-to-southwest fetch across the NW Pacific feeding a NW swell into the Islands (direction ~300°–320° depending on specific low).
+- Expected swell: longer periods 14–18s, arrival in ~4–6 days, peak energy on day 5–6. Hawaiian-scale faces: 8–12+ ft at the most exposed North Shore locations (Sunset/Off-the-Wall larger at peak), with raw powerful surf and strong currents near passes.
+
+3) Tropical systems to the south
+- Typhoon Halong: roughly 12–18N, ~155–165W per boxed label (Max winds ~70 kt gusts to 85 kt).
+  - Fetch orientation: southwest–southerly quadrants producing S–SSE energy (azimuth ~160°–185° into Hawaii).
+  - Expected swell: short-to-moderate period 9–12s, arrival window 2–4 days for southern exposures, local pulse potential for east-facing South Shore spots. Hawaiian-scale faces locally 2–5 ft depending on directivity and peak strength.
+- Tropical Storm Octave: roughly 10–12N, ~130W (label “T.S. OCTAVE” with 60 kt).
+  - Fetch orientation: easterly-southeasterly component; energy aimed more east of the Islands but can send E–SE to SE energy if it tracks westward.
+  - Expected swell: 8–11s, lower amplitude at Hawaiian latitudes due to distance and less favorable heading; possible energy 2–3 ft Hawaiian-scale on southern facing breaks later in forecast window.
+
+4) High pressure and local winds
+- Strong subtropical high centered ~30N, 170W (1038 mb).
+  - Effect: large clockwise circulation producing light-to-moderate NE trades over the Islands’ latitude band. The high’s southern flank will support east–northeast trades that can produce onshore to cross-shore conditions for some South Shore and East-side spots while aiding clean northerly offshore angles at certain North Shore exposures in the morning.
+  - Blocking/shadowing: the 1038 mb high is large enough to compress isobars between it and the northern lows; this will skew the swell generation region and can limit fetch reach for some NW energy (partial shadowing of more northerly storm outputs), but the dateline lows still have direct fetch into the Hawaiian swell window.
+
+PRESSURE GRADIENTS / WIND POTENTIAL
+- Tight isobar packing between the northern gale cluster and the subtropical high signals a strong pressure gradient across the central Pacific. Expect gale to strong-gale force winds over the fetch regions (labels “GALE,” “RPDLY INTESFYG” on chart) — this is favorable for swell generation.
+- Locally around Hawai‘i, pressure gradient is moderate: typical NE trades on the high’s southern flank, with morning lightening in some sheltered north-facing coves but afternoon trade reinforcement (onshore/windy at exposed south and east shores).
+
+NORTH SHORE
+- Primary energy: NW–NNW swell arriving mid-late week from the dateline gale/occlusion. Expect swell periods in the 12–18s band (early pulse 11–14s from the developing storm, longer-period follow-up 14–18s from the northerly gale).
+- Timing: first noticeable rise ~day 3 (from chart date), building to peak day 4–6.
+- Size (Hawaiian scale): expect widespread 6–10 ft faces on exposed reefs at first pulse, with larger 10–14+ ft faces at the peak on the most exposed venues (E’ Waimea side, Sunset/Off-the-Wall, Pipeline-sized charges at max envelope). Strong current and heavy closeouts at the peak; selectivity at protected reefs.
+- Winds: morning light NE–ESE offshore at some north-facing breaks under the high’s center, but trades trend up in the afternoon producing cross-offshore to cross-onshore depending on spot orientation. Watch for gusty northerlies along the north shore as the frontal remnants pass.
+
+SOUTH SHORE
+- Primary energy: southerly pulses from Typhoon Halong (strongest southern source) and background from Octave; periods generally 8–12s.
+- Timing: Halong’s energy can begin arriving in ~2–4 days as shorter-period S swell; Octave contributions later and weaker.
+- Size (Hawaiian scale): small to moderate — 2–5 ft faces on open south-facing beaches, best at exposed southern reef points (Ala Moana small-boat channel, Diamond Head side for longboarders). Most of the south swell will be wind-affected given prevailing trades.
+- Winds: NE trades promoted by the high will tend to be cross-onshore for many south-facing exposures; expect textured, choppy surface in afternoons. Early mornings will be the cleanest windows.
+
+OUTLOOK
+- Mid-late week: main NW swell energy peaks and then slowly fades over a 24–48 hour decay window. Surf remains large and raw on North Shore for several days after peak due to long-period energy.
+- Beyond day 6–8: watch for follow-up gale activity along the dateline — the chart shows multiple low centers and occlusions that can regenerate NW fetch; confidence moderate for continued northwest swell activity through the next week.
+- Tropicals: monitor Halong track closely; if it tracks west-northwest and remains strong its southern energy and swell consistency increase. Octave currently a lesser southern threat to Hawaiian surf, keep an eye on westward movement.
+
+If you want swell arrival day/time conversions into local Hawaiian time (HST) and spot-specific face estimates (ft faces for Pipeline, Sunset, Hale‘iwa, Ala Moana), say which spots and I’ll convert the arrival windows and predicted face ranges to those specific breaks.

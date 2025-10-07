@@ -1,0 +1,12 @@
+{
+  "bundle_id": "cefed08c-64e9-4df1-87d7-13659124b82b",
+  "timestamp": "2025-10-04T21:08:52.676699+00:00",
+  "region": "Hawaii",
+  "agent_results": {},
+  "stats": {
+    "total_files": 0,
+    "successful_files": 0,
+    "failed_files": 0,
+    "total_size_mb": 0.0
+  }
+}

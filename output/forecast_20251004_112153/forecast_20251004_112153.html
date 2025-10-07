@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawaii Surf Forecast</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: #f5f7fa;
+        }
+        h1, h2, h3 {
+            color: #0066cc;
+        }
+        h1 {
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .generated-date {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .forecast-section {
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .forecast-section h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #e5eaf1;
+            padding-bottom: 12px;
+        }
+        .shore-specific {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .shore-forecast {
+            flex: 1;
+            min-width: 300px;
+        }
+        .confidence-meter {
+            background-color: #e8ecf5;
+            height: 18px;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .confidence-level {
+            height: 100%;
+            background-color: #0066cc;
+        }
+        .confidence-factors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .factor {
+            flex: 1;
+            min-width: 160px;
+            background-color: #f0f4ff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .chart-card {
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .chart-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .history-card ul {
+            padding-left: 18px;
+        }
+        .history-card ul li {
+            margin-bottom: 6px;
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+            }
+            .shore-specific {
+                flex-direction: column;
+            }
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #d7dce5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hawaii Surf Forecast</h1>
+    <div class="generated-date">Generated on October 04, 2025 at 11:21 </div>
+    <div class="forecast-section">
+        <h2>Main Forecast</h2>
+        <h3>Summary:</h3>
+<p>Primary NNW swell building Sat 10:20 HST and peaking Sat 10:20 HST keeps the North Shore in the <strong>29-43 ft</strong> zone. Secondary NNW lines hold <strong>29-43 ft</strong> faces building Sat 10:40 HST and peaking Sat 10:40 HST. Secondary E lines hold <strong>24-35 ft</strong> faces building Sat 10:20 HST and peaking Sat 10:20 HST. Trade winds from the 60 at 15 kt keep mornings cleaner than afternoons. Forecast confidence sits at 0.7/1.0 with good data coverage.</p>
+<h3>Details:</h3>
+<ul>
+<li>NNW swell (14s) delivers <strong>29-43 ft</strong> faces building Sat 10:20 HST and peaking Sat 10:20 HST with strongest impact on North Shore.</li>
+<li>NNW swell (14s) delivers <strong>29-43 ft</strong> faces building Sat 10:40 HST and peaking Sat 10:40 HST with strongest impact on North Shore.</li>
+<li>SSE swell (15s) delivers <strong>12-18 ft</strong> faces building Sat 10:30 HST and peaking Sat 10:30 HST with strongest impact on South Shore.</li>
+<li>E swell (7s) delivers <strong>24-35 ft</strong> faces building Sat 10:20 HST and peaking Sat 10:20 HST with strongest impact on South Shore.</li>
+<li>SSW swell (15s) delivers <strong>10-16 ft</strong> faces building Sat 10:30 HST and peaking Sat 10:30 HST with strongest impact on South Shore.</li>
+<li>ENE swell (7s) delivers <strong>21-31 ft</strong> faces building Sat 10:26 HST and peaking Sat 10:26 HST with strongest impact on South Shore.</li>
+<li>NNW swell (10s) delivers <strong>13-20 ft</strong> faces building Sat 10:26 HST and peaking Sat 10:26 HST with strongest impact on North Shore.</li>
+<li>E swell (6s) delivers <strong>21-31 ft</strong> faces building Sat 10:20 HST and peaking Sat 10:20 HST with strongest impact on South Shore.</li>
+<li>ENE swell (7s) delivers <strong>16-24 ft</strong> faces building Sat 10:26 HST and peaking Sat 10:26 HST with strongest impact on South Shore.</li>
+</ul>
+<h3>North Shore Snapshot:</h3>
+<p>NNW energy keeps <strong>29-43 ft</strong> faces Sat 10:20 HST-Sat 10:20 HST with moderate confidence. Watch for NNW background lines around Sat 10:40 HST-Sat 10:40 HST holding <strong>29-43 ft</strong> faces. Watch for E background lines around Sat 10:20 HST-Sat 10:20 HST holding <strong>24-35 ft</strong> faces. Watch for E background lines around Sat 10:20 HST-Sat 10:20 HST holding <strong>21-31 ft</strong> faces. Watch for ENE background lines around Sat 10:26 HST-Sat 10:26 HST holding <strong>21-31 ft</strong> faces. Watch for ENE background lines around Sat 10:26 HST-Sat 10:26 HST holding <strong>16-24 ft</strong> faces. Watch for NNW background lines around Sat 10:26 HST-Sat 10:26 HST holding <strong>13-20 ft</strong> faces.</p>
+<h3>South Shore Snapshot:</h3>
+<p>SSE energy keeps <strong>12-18 ft</strong> faces Sat 10:30 HST-Sat 10:30 HST with moderate confidence. Watch for SSW background lines around Sat 10:30 HST-Sat 10:30 HST holding <strong>10-16 ft</strong> faces.</p>
+<h3>Outlook:</h3>
+<p>Expect Fall pattern with early season nw swells begin to arrive. transition period with improving conditions as winter approaches. up north and end of south swell season with decreasing activity and size. in town patterns to hold. North Shore stays active through the next couple of days while South Shore trends toward seasonal background. Monitor new NDBC runs for updates.</p>
+    </div>
+    <div class="shore-specific">
+        <div class="forecast-section shore-forecast">
+            <h2>North Shore Forecast</h2>
+            <p>North Shore leans on a NNW swell delivering <strong>29-43 ft</strong> faces and 14.<strong>4ft</strong> Hawaiian Hawaiian scale surf through Sat 10:20 HST.
+North Shore sees 60 trades around 15 kt; aim for morning windows before onshores roughen the faces.
+Secondary energy from NNW holds <strong>29-43 ft</strong> faces (14.<strong>4ft</strong> Hawaiian Hawaiian) with the best window Sat 10:40 HST-Sat 10:40 HST Secondary energy from E holds <strong>24-35 ft</strong> faces (11.<strong>8ft</strong> Hawaiian Hawaiian) with the best window Sat 10:20 HST-Sat 10:20 HST Secondary energy from E holds <strong>21-31 ft</strong> faces (10.<strong>5ft</strong> Hawaiian Hawaiian) with the best window Sat 10:20 HST-Sat 10:20 HST Secondary energy from ENE holds <strong>21-31 ft</strong> faces (10.<strong>5ft</strong> Hawaiian Hawaiian) with the best window Sat 10:26 HST-Sat 10:26 HST Secondary energy from ENE holds <strong>16-24 ft</strong> faces (7.<strong>9ft</strong> Hawaiian Hawaiian) with the best window Sat 10:26 HST-Sat 10:26 HST Secondary energy from NNW holds <strong>13-20 ft</strong> faces (6.<strong>6ft</strong> Hawaiian Hawaiian) with the best window Sat 10:26 HST-Sat 10:26 HST
+Mix of reefs and sandbars respond similarly today.
+North Shore sees 60 trades around 15 kt; aim for morning windows before onshores roughen the faces.
+Overall confidence checks in at 0.7/1.0; expect typical seasonal variability.</p>
+        </div>
+        <div class="forecast-section shore-forecast">
+            <h2>South Shore Forecast</h2>
+            <p>South Shore leans on a SSE swell delivering <strong>12-18 ft</strong> faces and 5.<strong>9ft</strong> Hawaiian Hawaiian scale surf through Sat 10:30 HST.
+South Shore sees 60 trades around 15 kt; aim for morning windows before onshores roughen the faces.
+Secondary energy from SSW holds <strong>10-16 ft</strong> faces (5.<strong>2ft</strong> Hawaiian Hawaiian) with the best window Sat 10:30 HST-Sat 10:30 HST
+Mix of reefs and sandbars respond similarly today.
+South Shore sees 60 trades around 15 kt; aim for morning windows before onshores roughen the faces.
+Overall confidence checks in at 0.7/1.0; expect typical seasonal variability.</p>
+        </div>
+    </div>
+    <div class="forecast-section">
+        <h2>Daily Forecast</h2>
+        <p>Today (2025-10-04): Fall pattern with early season nw swells begin to arrive. transition period with improving conditions as winter approaches. up north and end of south swell season with decreasing activity and size. in town
+North Shore: <strong>29-43 ft</strong> faces from the NNW swell, peak window Sat 10:20 HST-Sat 10:20 HST.
+South Shore: <strong>12-18 ft</strong> faces with SSE energy, best mid-morning Sat 10:30 HST-Sat 10:30 HST.
+Trade winds from the 60 at 15 kt keep mornings cleaner than afternoons.
+High tide at 2025-10-03T23:20:00Z (2.<strong>1 ft</strong>) and at 2025-10-03T23:21:00Z (2.<strong>1 ft</strong>) and at 2025-10-03T23:22:00Z (2.<strong>1 ft</strong>), low tide at 2025-10-04T06:07:00Z (0.<strong>2 ft</strong>) and at 2025-10-04T06:08:00Z (0.<strong>2 ft</strong>) and at 2025-10-04T06:09:00Z (0.<strong>2 ft</strong>).
+Target dawn patrol for clean faces before trades rise after lunch; town reefs handle winds best.</p>
+    </div>
+    <div class="forecast-section history-card">
+        <h2>Historical Comparison</h2>
+        <p>Compared with <strong>forecast_20251004_111905</strong> generated on 2025-10-04T11:19:05.932119:</p>
+        <ul>
+            <li>Confidence up 0.00 since the previous run.</li>
+        </ul>
+    </div>
+<div class="forecast-section">
+    <h2>Forecast Confidence</h2>
+    <p>Overall confidence: 0.7/1.0</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 67%"></div>
+    </div>
+        <h3>Confidence Factors</h3>
+        <div class="confidence-factors">
+<div class="factor">
+    <p>Data Freshness: 1.0</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 98%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Source Diversity: 0.3</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 33%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Source Agreement: 0.7</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 70%"></div>
+    </div>
+</div>
+        </div>
+    </div>
+    <div class="footer">
+        Generated by SurfCastAI - AI-Powered Surf Forecasting
+    </div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "station": "PHNL",
+  "metar": "PHNL 030153Z 15012KT 10SM FEW023 SCT034 SCT050 SCT250 29/22 A2995 RMK AO2 SLP141 T02940217 $",
+  "issued": "2025-10-03T01:53:00Z",
+  "wind_direction_deg": 150,
+  "wind_speed_kt": 12,
+  "wind_speed_ms": 6.17,
+  "visibility_sm": 10.0,
+  "temperature_c": 29.0,
+  "dewpoint_c": 22.0,
+  "pressure_inhg": 29.95,
+  "pressure_hpa": 1014.2,
+  "raw_lines": [
+    "2025/10/03 01:53",
+    "PHNL 030153Z 15012KT 10SM FEW023 SCT034 SCT050 SCT250 29/22 A2995 RMK AO2 SLP141 T02940217 $"
+  ],
+  "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHNL.TXT"
+}

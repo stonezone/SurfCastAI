@@ -1,0 +1,37 @@
+SUMMARY
+Warm SST anomalies are concentrated north of Hawaii (roughly 28–33°N between 180°–170°W) at +1.5 to +3.5°C, with weaker +0.5–+1.5°C anomalies over the immediate Hawaiian latitude band. Small cool patches (≈ -0.5 to -1.0°C) sit just downstream (SE) of the Big Island. On this map there is no clear equatorial Niño signal visible — the chart domain is north of the equator so ENSO can’t be judged here. Net impact: a warm mid-latitude pool north of the islands favors stronger extratropical development and enhanced NW/N swell potential; localized cool near Hawaii could blunt any very nearshore convective enhancement.
+
+DETAILS
+- Warm pockets: strongest anomalies are centered ~30–33°N between 180° and 170°W (+2.0 to +3.5°C). These sit in the preferred baroclinic storm track for late-season North Pacific lows.
+- Immediate Hawaiian region (18–23°N): generally +0.5 to +1.5°C — modestly above normal, enough to marginally increase lower-latitude storm energy but not a dramatic tropical-favoring signal.
+- Cool pocket: small -0.5 to -1.0°C anomaly just southeast of the Big Island and into the subtropical convergence zone — this will lower local ocean heat content there and can slightly reduce any very close-range storm intensification or tropical convective support.
+- ENSO/equator: chart does not show the equatorial belt. From this map alone there is no firm El Niño/La Niña diagnosis; the mid-latitude warming is not a substitute for a Niño3.4 signal.
+
+STORM INTENSITY IMPLICATIONS
+- Where SST anomaly ≥ +2°C (mid-latitude warm pool) lies under a developing low, expect stronger surface fluxes into the atmosphere, supporting deeper cyclogenesis and higher peak winds versus climatology — i.e., a storm that might otherwise be a 40–50 kt low could deepen faster and reach higher peak winds if it tracks over the +2°C pocket.
+- The warm pool is positioned squarely under the canonical extratropical fetch for Hawaii-bound NW energy — this increases the probability of longer-period (12–18s+) NW/N swell generation with stronger peak energy if a surface low develops there in the next 3–7 days.
+- Conversely, the small cool anomaly southeast of Hawaii slightly reduces local OHC and would act to weaken any very close coastal intensification (tropical cyclones or shallow lows) that attempt to spin up immediately adjacent to the islands.
+
+SWELL GENERATION CONTEXT
+- Best potential: storms forming or deepening over 30–34°N between 180°–170°W will have access to the warmest anomalies on this map. If a deepening low tracks through that corridor expect enhanced fetch, stronger winds and increased probability of long-period NW/N swell aimed at the North Shore and west exposures of the islands.
+- Expected swell character if storms tap the warm pool: dominant energy from ~300°–335° (NW–N-NW), periods likely in the 12–18s band depending on storm size/latency. Warmer SSTs can translate to a 10–30% uptick in wind strength and resultant swell energy compared with identical systems over neutral SSTs.
+- South Pacific: not shown on this chart. No assessment here for primary S/SE swell generation — check full Southern Hemisphere SST maps for austral-season sourcing.
+
+NORTH SHORE
+- Implication: elevated risk of stronger NW/N swell windows over coming 3–10 days if synoptic lows develop over the warm pool region (30–33°N, 180–170°W). Expect swells from 300°–335° with periods 12–18s if storms deepen over the anomaly; quality will hinge on wind direction at arrival (offshore early, onshores later).
+- Local quality: warmer nearshore waters across the Hawaiian latitude band (+0.5–+1.5°C) slightly favor stronger swell transfer into the surf zone and marginally fuller faces. Watch for rapid size rises if a strong low forms upstream.
+- Hazards: stronger currents and larger sets at exposed outer reefs if storm fetch materializes — keep an eye on buoy/model updates.
+
+SOUTH SHORE
+- Generally quiet for south-swell generation from this map — the domain is Northern Hemisphere and shows no Southern Hemisphere source. The small cool anomalies SE of the islands suggest nearshore SE energy and local SSE trades will be muted where that cool patch sits.
+- For longboard-friendly, low-period south-to-southwest lines, expect nothing significant from the SST pattern shown here; any south swell will depend on distant Southern Hemisphere systems not visible on this chart.
+
+OUTLOOK
+- Near term (3–7 days): elevated potential for stronger-than-normal NW/N swell if an extratropical low develops over the warm pool north of 30°N between 180°–170°W. Monitor model lows in that corridor — SSTs are supportive of deeper cyclogenesis.
+- 7–14 days: if the warm anomaly persists/widens, expect a tendency for storm tracks to produce more energetic, higher-latitude NW fetches — this favors repeated NW swell pulses to Hawaiian north and west exposures. If the warm pool erodes, timing and intensity will fall back to climatology.
+- ENSO note: this map alone does not confirm El Niño/La Niña. For seasonal outlook and potential persistent changes to storm tracks, check Niño3.4 and operational models. Persistent equatorial warming would further enhance storm odds; absence of that signal points to more episodic enhancements tied to mid-latitude SST anomalies rather than basin-wide ENSO modulation.
+
+Actionable short checklist
+- Watch model low development in the 30–34°N, 180–170°W corridor — warm SSTs there materially increase odds of strong NW fetch.
+- Expect swells from ~300°–335° with 12–18s periods if a storm taps the warm pool; plan for rapid size increases and stronger currents on North Shore exposures.
+- Check Southern Hemisphere maps separately for any S-swell prospects; this chart does not cover that basin.

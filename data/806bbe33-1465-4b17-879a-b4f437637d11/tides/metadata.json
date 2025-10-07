@@ -1,0 +1,28 @@
+[
+  {
+    "name": "tide_1612340_predictions.json",
+    "description": "NOAA tides product predictions for station 1612340",
+    "type": "json",
+    "source": "TideAgent",
+    "status": "success",
+    "timestamp": "2025-10-04T04:28:13.981154+00:00",
+    "source_url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=1612340&product=predictions&datum=MLLW&units=metric&time_zone=GMT&interval=1&range=48&format=csv",
+    "file_path": "data/806bbe33-1465-4b17-879a-b4f437637d11/tides/tide_1612340_predictions.json",
+    "size_bytes": 230522,
+    "station": "1612340",
+    "product": "predictions"
+  },
+  {
+    "name": "tide_1612340_water_level.json",
+    "description": "NOAA tides product water_level for station 1612340",
+    "type": "json",
+    "source": "TideAgent",
+    "status": "success",
+    "timestamp": "2025-10-04T04:28:14.001647+00:00",
+    "source_url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=1612340&product=water_level&datum=MLLW&units=metric&time_zone=GMT&date=today&format=csv",
+    "file_path": "data/806bbe33-1465-4b17-879a-b4f437637d11/tides/tide_1612340_water_level.json",
+    "size_bytes": 9620,
+    "station": "1612340",
+    "product": "water_level"
+  }
+]

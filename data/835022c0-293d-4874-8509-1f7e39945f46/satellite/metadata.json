@@ -1,0 +1,16 @@
+[
+  {
+    "name": "satellite_goes_hawaii",
+    "description": "goes satellite image for hawaii",
+    "type": "image",
+    "source": "SatelliteAgent",
+    "status": "success",
+    "timestamp": "20251005",
+    "source_url": "https://cdn.star.nesdis.noaa.gov/GOES18/ABI/FD/GEOCOLOR/latest.jpg",
+    "file_path": "data/835022c0-293d-4874-8509-1f7e39945f46/satellite/satellite/satellite_goes_hawaii_20251005_latest.jpg",
+    "satellite_type": "goes",
+    "region": "hawaii",
+    "content_type": "image/jpeg",
+    "size_bytes": 9538747
+  }
+]

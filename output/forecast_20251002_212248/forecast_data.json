@@ -1,0 +1,37 @@
+{
+  "forecast_id": "forecast_20251002_212248",
+  "generated_time": "2025-10-02T21:22:48.663174",
+  "main_forecast": "",
+  "north_shore": "",
+  "south_shore": "",
+  "daily": "",
+  "metadata": {
+    "source_data": {
+      "swell_events": 9,
+      "locations": 4
+    },
+    "confidence": {
+      "overall_score": 0.6439201660798611,
+      "data_source_scores": {
+        "buoy": 0.9
+      },
+      "factors": {
+        "data_freshness": 0.8797338869328706,
+        "source_diversity": 0.3333333333333333,
+        "source_agreement": 0.7
+      }
+    },
+    "visualizations": {},
+    "historical_summary": {
+      "previous_id": "forecast_20251002_155119",
+      "previous_generated": "2025-10-02T15:51:19.673438",
+      "confidence_change": -0.04,
+      "hawaiian_avg_change": null,
+      "dominant_shift": null,
+      "summary_lines": [
+        "Confidence down 0.04 since the previous run."
+      ],
+      "source_path": "output/forecast_20251002_155119/forecast_data.json"
+    }
+  }
+}

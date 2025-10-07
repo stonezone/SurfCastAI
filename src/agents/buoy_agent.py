@@ -202,7 +202,11 @@ class BuoyAgent(BaseAgent):
             return None
         try:
             year = int(row['YY'])
-            year += 2000 if year < 70 else 1900
+            # Handle both 2-digit and 4-digit years
+            if year < 100:
+                # 2-digit year: 00-69 = 2000-2069, 70-99 = 1970-1999
+                year += 2000 if year < 70 else 1900
+            # else: already 4-digit year, use as-is
             month = int(row['MM'])
             day = int(row['DD'])
             hour = int(row['hh'])

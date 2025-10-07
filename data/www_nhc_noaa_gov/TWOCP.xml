@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:dc="https://purl.org/dc/elements/1.1/">
   <channel>
-    <pubDate>Thu, 02 Oct 2025 10:40:17 +0000</pubDate>
-    <lastBuildDate>Thu, 02 Oct 2025 10:40:17 +0000</lastBuildDate>
+    <pubDate>Mon, 06 Oct 2025 20:18:11 +0000</pubDate>
+    <lastBuildDate>Mon, 06 Oct 2025 20:18:11 +0000</lastBuildDate>
     <title>Central Pacific Tropical Weather Outlook</title>
     <description>Central Pacific Hurricane Center - Central Pacific Tropical Weather Outlook</description>
     <link>https://www.nhc.noaa.gov/</link>
@@ -21,11 +21,11 @@
     <item>
       <title>Central Pacific Tropical Weather Outlook</title>
       <description>
-        <![CDATA[000<br />ACPN50 PHFO 020537<br />TWOCP <br /><br />Tropical Weather Outlook<br />NWS Central Pacific Hurricane Center Honolulu HI<br />Issued by NWS National Hurricane Center Miami FL<br />800 PM HST Wed Oct 01 2025<br /><br />For the central North Pacific...between 140W and 180W:<br /><br />Active Systems:<br />The National Hurricane Center is issuing advisories on Tropical<br />Storm Octave, located well south-southwest of the southern tip of<br />the Baja California Peninsula.<br /><br />Tropical cyclone formation is not expected during the next 7 days.<br /><br />$$<br />Forecaster Jelsema<br />NNNN]]>
+        <![CDATA[118 <br />ACPN50 PHFO 061719<br />TWOCP <br /><br />Tropical Weather Outlook<br />NWS Central Pacific Hurricane Center Honolulu HI<br />Issued by NWS National Hurricane Center Miami FL<br />800 AM HST Mon Oct 06 2025<br /><br />For the central North Pacific...between 140W and 180W:<br /><br />Active Systems:<br />The National Hurricane Center is issuing advisories on Tropical<br />Storm Octave, located in the eastern Pacific well to the<br />west-southwest of the southern tip of the Baja California Peninsula,<br />and on Hurricane Priscilla, located a couple hundred miles offshore<br />of southwestern Mexico.<br /><br />Tropical cyclone formation is not expected during the next 7 days.<br /><br />$$<br />Forecaster Hagen<br />NNNN]]>
       </description>
-      <pubDate>Thu, 02 Oct 2025 05:37:57 +0000</pubDate>
+      <pubDate>Mon, 06 Oct 2025 17:19:42 +0000</pubDate>
       <link>https://www.nhc.noaa.gov/text/HFOTWOCP.shtml</link>
-      <guid>202510020537</guid>
+      <guid>202510061719</guid>
       <author>nhcwebmaster@noaa.gov (nhcwebmaster)</author>
     </item>
   </channel>

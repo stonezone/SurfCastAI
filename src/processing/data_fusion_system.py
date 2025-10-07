@@ -330,15 +330,21 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                     "station_id": buoy_data.station_id,
                     "buoy_name": buoy_data.name,
                     "confidence": 0.9,  # High confidence as this is observed data
-                    "type": "observed"
+                    "type": "observed",
+                    "source_details": {
+                        "buoy_id": buoy_data.station_id,
+                        "observation_time": latest.timestamp,
+                        "data_quality": "excellent" if latest.wave_height and latest.dominant_period else "good",
+                        "source_type": "NDBC realtime"
+                    }
                 }
             )
             
             # Add primary component
             event.primary_components.append(SwellComponent(
-                height=latest.wave_height,
-                period=latest.dominant_period,
-                direction=latest.wave_direction,
+                height=latest.wave_height or 0.0,
+                period=latest.dominant_period or 0.0,
+                direction=latest.wave_direction or 0.0,
                 confidence=0.9,
                 source="buoy"
             ))
@@ -940,10 +946,14 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
     
     def _convert_to_hawaii_scale(self, meters: Optional[float]) -> Optional[float]:
         """
-        Convert wave height from meters to Hawaiian scale (face height in feet).
+        Convert wave height from meters to Hawaiian scale.
+        
+        Hawaiian scale measures wave height from the back of the wave,
+        approximately equal to the significant wave height (not face height).
+        Face height is typically 1.5-2x the Hawaiian scale.
         
         Args:
-            meters: Wave height in meters
+            meters: Significant wave height in meters
             
         Returns:
             Wave height in Hawaiian scale (feet) or None if input is None
@@ -951,8 +961,9 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         if meters is None:
             return None
         
-        # Hawaiian scale is approximately 2x the significant height in feet
-        return meters * 2 * 3.28084  # 1m = 3.28084ft
+        # Hawaiian scale ≈ Hs in feet (back height)
+        # DO NOT multiply by 2 - that would give face height
+        return meters * 3.28084  # 1m = 3.28084ft  # 1m = 3.28084ft
     
     def _haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """

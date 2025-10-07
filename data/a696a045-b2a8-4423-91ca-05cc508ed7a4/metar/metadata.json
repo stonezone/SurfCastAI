@@ -1,0 +1,28 @@
+[
+  {
+    "name": "metar_PHNL.json",
+    "description": "Normalized METAR observation for PHNL",
+    "type": "json",
+    "source": "MetarAgent",
+    "status": "success",
+    "timestamp": "2025-10-03T19:26:01.338966+00:00",
+    "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHNL.TXT",
+    "file_path": "data/a696a045-b2a8-4423-91ca-05cc508ed7a4/metar/metar_PHNL.json",
+    "size_bytes": 569,
+    "station": "PHNL",
+    "issued": "2025-10-03T18:53:00Z"
+  },
+  {
+    "name": "metar_PHJR.json",
+    "description": "Normalized METAR observation for PHJR",
+    "type": "json",
+    "source": "MetarAgent",
+    "status": "success",
+    "timestamp": "2025-10-03T19:26:01.424837+00:00",
+    "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHJR.TXT",
+    "file_path": "data/a696a045-b2a8-4423-91ca-05cc508ed7a4/metar/metar_PHJR.json",
+    "size_bytes": 477,
+    "station": "PHJR",
+    "issued": "2025-10-03T19:20:00Z"
+  }
+]

@@ -40,9 +40,8 @@ class WeatherAgent(BaseAgent):
         Returns:
             List of metadata dictionaries
         """
-        # Create weather data directory
-        weather_dir = data_dir / "weather"
-        weather_dir.mkdir(exist_ok=True)
+        # Use the provided data_dir directly (already agent-specific)
+        weather_dir = data_dir
         
         # Get weather URLs from config
         weather_urls = self.config.get_data_source_urls('weather').get('weather', [])

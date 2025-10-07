@@ -1,0 +1,102 @@
+[
+  {
+    "name": "model_unknown_unknown",
+    "description": "Failed to download unknown wave model page for unknown",
+    "type": "html",
+    "source": "ModelAgent",
+    "status": "failed",
+    "timestamp": "2025-10-03T19:14:51.734141+00:00",
+    "source_url": "https://nomads.ncep.noaa.gov:9090/dods/gfs_0p25",
+    "error": "Request timeout after 30s"
+  },
+  {
+    "name": "model_unknown_unknown",
+    "description": "Failed to download unknown wave model page for unknown",
+    "type": "html",
+    "source": "ModelAgent",
+    "status": "failed",
+    "timestamp": "2025-10-03T19:14:51.733975+00:00",
+    "source_url": "https://nomads.ncep.noaa.gov:9090/dods/wave_multi_1.glo_0.16",
+    "error": "Request timeout after 30s"
+  },
+  {
+    "name": "model_swan_oahu",
+    "description": "Failed to download swan wave model page for oahu",
+    "type": "html",
+    "source": "ModelAgent",
+    "status": "failed",
+    "timestamp": "2025-10-03T19:12:41.617696+00:00",
+    "source_url": "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/",
+    "error": "HTTP 404: Not Found"
+  },
+  {
+    "name": "model_unknown_unknown",
+    "description": "unknown wave model image for unknown",
+    "type": "image",
+    "source": "ModelAgent",
+    "status": "success",
+    "timestamp": "2025-10-03T19:12:42.132825+00:00",
+    "source_url": "https://ocean.weather.gov/shtml/P_00hrww.gif",
+    "file_path": "data/c27fbaeb-08a7-4ab8-90c6-5787c58557e9/models/models/model_unknown_unknown_P_00hrww.gif",
+    "model_type": "unknown",
+    "location": "unknown",
+    "content_type": "image/gif",
+    "size_bytes": 236986
+  },
+  {
+    "name": "model_unknown_unknown",
+    "description": "unknown wave model image for unknown",
+    "type": "image",
+    "source": "ModelAgent",
+    "status": "success",
+    "timestamp": "2025-10-03T19:12:42.307934+00:00",
+    "source_url": "https://ocean.weather.gov/shtml/P_24hrww.gif",
+    "file_path": "data/c27fbaeb-08a7-4ab8-90c6-5787c58557e9/models/models/model_unknown_unknown_P_24hrww.gif",
+    "model_type": "unknown",
+    "location": "unknown",
+    "content_type": "image/gif",
+    "size_bytes": 258073
+  },
+  {
+    "name": "model_unknown_unknown",
+    "description": "unknown wave model image for unknown",
+    "type": "image",
+    "source": "ModelAgent",
+    "status": "success",
+    "timestamp": "2025-10-03T19:12:43.451875+00:00",
+    "source_url": "https://ocean.weather.gov/shtml/P_48hrww.gif",
+    "file_path": "data/c27fbaeb-08a7-4ab8-90c6-5787c58557e9/models/models/model_unknown_unknown_P_48hrww.gif",
+    "model_type": "unknown",
+    "location": "unknown",
+    "content_type": "image/gif",
+    "size_bytes": 261909
+  },
+  {
+    "name": "model_unknown_unknown",
+    "description": "unknown wave model image for unknown",
+    "type": "image",
+    "source": "ModelAgent",
+    "status": "success",
+    "timestamp": "2025-10-03T19:12:45.270277+00:00",
+    "source_url": "https://ocean.weather.gov/shtml/P_72hrww.gif",
+    "file_path": "data/c27fbaeb-08a7-4ab8-90c6-5787c58557e9/models/models/model_unknown_unknown_P_72hrww.gif",
+    "model_type": "unknown",
+    "location": "unknown",
+    "content_type": "image/gif",
+    "size_bytes": 262130
+  },
+  {
+    "name": "model_unknown_unknown",
+    "description": "unknown wave model image for unknown",
+    "type": "image",
+    "source": "ModelAgent",
+    "status": "success",
+    "timestamp": "2025-10-03T19:12:47.379074+00:00",
+    "source_url": "https://ocean.weather.gov/shtml/P_96hrww.gif",
+    "file_path": "data/c27fbaeb-08a7-4ab8-90c6-5787c58557e9/models/models/model_unknown_unknown_P_96hrww.gif",
+    "model_type": "unknown",
+    "location": "unknown",
+    "content_type": "image/gif",
+    "size_bytes": 281123
+  }
+]

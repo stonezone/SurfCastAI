@@ -1,0 +1,24 @@
+[
+  {
+    "name": "satellite_goes_hawaii",
+    "description": "goes satellite data for hawaii",
+    "type": "html",
+    "source": "SatelliteAgent",
+    "status": "success",
+    "timestamp": "2025-10-04T21:25:54.955782+00:00",
+    "source_url": "https://www.star.nesdis.noaa.gov/goes/sector.php?sat=G17&sector=hin&length=24&img=geocolor",
+    "file_path": "data/aa57cdbf-38ea-4636-a787-476ade103a74/satellite/satellite/satellite_goes_hawaii_page.html",
+    "satellite_type": "goes",
+    "region": "hawaii",
+    "image_count": 1,
+    "images": [
+      {
+        "url": "https://www.star.nesdis.noaa.gov/goes/sector.php?sat=G17&sector=hin&length=24&img=geocolor/images/banner/GOESAllBanner_600x60px.jpg",
+        "file_path": "data/aa57cdbf-38ea-4636-a787-476ade103a74/satellite/satellite/satellite_goes_hawaii_20251004_GOESAllBanner_600x60px.jpg",
+        "content_type": "text/html; charset=UTF-8",
+        "size_bytes": 488993,
+        "timestamp": "20251004"
+      }
+    ]
+  }
+]

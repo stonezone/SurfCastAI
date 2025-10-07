@@ -1,0 +1,12 @@
+{
+  "station": "PHJR",
+  "metar": "PHJR 031953Z A3005 RMK AO2 SLP184 $",
+  "issued": "2025-10-03T19:53:00Z",
+  "pressure_inhg": 30.05,
+  "pressure_hpa": 1017.6,
+  "raw_lines": [
+    "2025/10/03 19:53",
+    "PHJR 031953Z A3005 RMK AO2 SLP184 $"
+  ],
+  "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHJR.TXT"
+}

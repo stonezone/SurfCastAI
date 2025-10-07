@@ -1,0 +1,23 @@
+[
+  {
+    "name": "model_pacioos_oahu",
+    "description": "pacioos wave model data for oahu",
+    "type": "html",
+    "source": "ModelAgent",
+    "status": "success",
+    "timestamp": "2025-10-05T11:14:03.916975+00:00",
+    "source_url": "https://www.pacioos.hawaii.edu/waves/model-oahu/",
+    "file_path": "data/dc0479da-904f-4482-a89a-604236b3dfd2/models/models/model_pacioos_oahu_page.html",
+    "model_type": "pacioos",
+    "location": "oahu",
+    "image_count": 1,
+    "images": [
+      {
+        "url": "https://www.pacioos.hawaii.edu/wp-content/uploads/2016/02/header-waveforecast-oahu.jpg",
+        "file_path": "data/dc0479da-904f-4482-a89a-604236b3dfd2/models/models/model_pacioos_oahu_header-waveforecast-oahu.jpg",
+        "content_type": "image/jpeg",
+        "size_bytes": 268675
+      }
+    ]
+  }
+]

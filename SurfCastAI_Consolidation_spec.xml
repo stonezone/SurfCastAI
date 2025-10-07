@@ -1,0 +1,1840 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project_specification>
+  <metadata>
+    <project_name>SurfCastAI Consolidation</project_name>
+    <objective>Retire SwellGuy, consolidate best features into SurfCastAI production system</objective>
+    <timeline>4 weeks</timeline>
+    <priority>HIGH</priority>
+    <created>2025-10-06</created>
+  </metadata>
+
+  <context>
+    <current_state>
+      <surfcastai>
+        <status>Production ready (95%)</status>
+        <proven>Live test Oct 3, 2025: $0.005/forecast, 5min generation, ⭐⭐⭐⭐⭐ quality</proven>
+        <architecture>Clean, modern, GPT-5 optimized</architecture>
+        <issues>
+          <issue priority="LOW">Empty pressure analysis file (0 bytes)</issue>
+          <issue priority="MEDIUM">No validation system</issue>
+          <issue priority="LOW">Limited preprocessing by design</issue>
+        </issues>
+      </surfcastai>
+      
+      <swellguy>
+        <status>Not production ready (needs fixes)</status>
+        <architecture>Over-engineered for GPT-4 era, 22 preprocessing modules</architecture>
+        <critical_issues>
+          <issue>Token tracking broken (NULL in database)</issue>
+          <issue>Pattern recognition broken (non-existent methods)</issue>
+          <issue>Accuracy never measured</issue>
+          <issue>Cost unknown</issue>
+        </critical_issues>
+        <valuable_modules>
+          <module>validation system (forecast_tracker, accuracy_metrics)</module>
+          <module>source_scorer.py (source reliability)</module>
+          <module>confidence_scorer.py (confidence metrics)</module>
+          <module>buoy_analyzer.py (trend analysis)</module>
+        </valuable_modules>
+      </swellguy>
+    </current_state>
+
+    <decision>
+      <action>Consolidate around SurfCastAI</action>
+      <rationale>
+        <reason>SurfCastAI proven working, clean architecture, GPT-5 optimized</reason>
+        <reason>SwellGuy over-engineered for old GPT-4 constraints</reason>
+        <reason>Selective porting cheaper than fixing SwellGuy</reason>
+      </rationale>
+    </decision>
+  </context>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 1: FIX SURFCASTAI ISSUES (Week 1, Days 1-3)           -->
+  <!-- ============================================================ -->
+  <phase id="1" name="Fix SurfCastAI Issues" duration="3 days">
+    <goal>Resolve all identified SurfCastAI issues before adding new features</goal>
+    
+    <task id="1.1" priority="MEDIUM">
+      <name>Fix Empty Pressure Analysis File</name>
+      <description>Investigate and fix 0-byte image_analysis_pressure.txt file</description>
+      
+      <current_behavior>
+        <symptom>image_analysis_pressure.txt created but empty (0 bytes)</symptom>
+        <api_status>Returns HTTP 200 OK</api_status>
+        <logs>Show "completed" but file empty</logs>
+      </current_behavior>
+      
+      <investigation_steps>
+        <step>Add diagnostic logging in forecast_engine.py around line 555</step>
+        <step>Log response length and content preview</step>
+        <step>Check if API returns empty string vs None</step>
+        <step>Verify prompt is not causing empty response</step>
+        <step>Test with single pressure chart vs multiple</step>
+      </investigation_steps>
+      
+      <diagnostic_code>
+        <file>src/forecast_engine/forecast_engine.py</file>
+        <location>Line ~555, _generate_main_forecast method</location>
+        <code><![CDATA[
+# Add after pressure chart analysis call
+self.logger.info(f"Pressure response type: {type(analysis)}")
+self.logger.info(f"Pressure response length: {len(analysis)}")
+self.logger.info(f"Pressure response preview: {analysis[:500] if analysis else 'EMPTY'}")
+
+# Modify file write logic
+if debug_dir:
+    pressure_file = debug_dir / 'image_analysis_pressure.txt'
+    if analysis and len(analysis.strip()) > 0:
+        with open(pressure_file, 'w') as f:
+            f.write(analysis)
+        self.logger.info(f"Wrote {len(analysis)} chars to {pressure_file}")
+    else:
+        self.logger.warning("Pressure analysis returned empty, not writing file")
+        # Write placeholder
+        with open(pressure_file, 'w') as f:
+            f.write("[EMPTY RESPONSE FROM API]\n")
+]]></code>
+      </diagnostic_code>
+      
+      <potential_fixes>
+        <fix priority="HIGH">
+          <hypothesis>GPT-5-mini returns empty for complex multi-image pressure requests</hypothesis>
+          <solution>Try single chart first, then expand</solution>
+          <test>Run with 1 chart, then 2, then 4 to find threshold</test>
+        </fix>
+        <fix priority="MEDIUM">
+          <hypothesis>Prompt template issue for pressure charts</hypothesis>
+          <solution>Review PRESSURE_CHART_ANALYSIS_PROMPT in prompt_templates.py</solution>
+          <test>Test prompt with GPT-5-mini in playground</test>
+        </fix>
+        <fix priority="LOW">
+          <hypothesis>Timeout during processing but no error logged</hypothesis>
+          <solution>Add explicit timeout handling with logging</solution>
+          <test>Set timeout to 30s and verify behavior</test>
+        </fix>
+      </potential_fixes>
+      
+      <acceptance_criteria>
+        <criterion>image_analysis_pressure.txt contains >0 bytes</criterion>
+        <criterion>File contains valid text analysis (>100 characters)</criterion>
+        <criterion>Logs show diagnostic information</criterion>
+        <criterion>If truly empty from API, log warning and document</criterion>
+      </acceptance_criteria>
+      
+      <rollback_if>
+        <condition>Cannot fix in 4 hours</condition>
+        <action>Document as known issue, continue (low priority)</action>
+        <note>Satellite and SST analyses work perfectly, pressure is bonus</note>
+      </rollback_if>
+    </task>
+
+    <task id="1.2" priority="HIGH">
+      <name>Make Image Limit Configurable</name>
+      <description>Move hardcoded 10-image limit to config.yaml</description>
+      
+      <current_state>
+        <file>src/forecast_engine/forecast_engine.py</file>
+        <line>~425</line>
+        <code>selected_images = self._select_critical_images(images, max_images=10)</code>
+      </current_state>
+      
+      <implementation>
+        <step>1. Add to config.yaml</step>
+        <config_addition>
+          <![CDATA[
+forecast:
+  max_images: 10              # GPT-5 limit (can reduce to 6-8 for cost)
+  image_detail_levels:
+    pressure_charts: high     # 3000 tokens each (critical)
+    wave_models: auto         # 1500 tokens each (important)
+    satellite: auto           # 1500 tokens each (validation)
+    sst_charts: low           # 500 tokens (context only)
+]]>
+        </config_addition>
+        
+        <step>2. Update forecast_engine.py __init__</step>
+        <code_addition>
+          <![CDATA[
+self.max_images = self.config.getint('forecast', 'max_images', 10)
+self.image_detail_pressure = self.config.get('forecast.image_detail_levels', 'pressure_charts', 'high')
+self.image_detail_wave = self.config.get('forecast.image_detail_levels', 'wave_models', 'auto')
+self.image_detail_satellite = self.config.get('forecast.image_detail_levels', 'satellite', 'auto')
+self.image_detail_sst = self.config.get('forecast.image_detail_levels', 'sst_charts', 'low')
+]]>
+          </code_addition>
+        
+        <step>3. Update _select_critical_images method signature</step>
+        <code_change>
+          <![CDATA[
+# From:
+def _select_critical_images(self, images: Dict[str, List[str]], max_images: int = 6) -> List[Dict[str, Any]]:
+
+# To:
+def _select_critical_images(self, images: Dict[str, List[str]], max_images: Optional[int] = None) -> List[Dict[str, Any]]:
+    if max_images is None:
+        max_images = self.max_images
+]]>
+          </code_change>
+        
+        <step>4. Use configured detail levels</step>
+        <code_change>
+          <![CDATA[
+# In _select_critical_images, replace hardcoded 'high', 'auto', 'low' with:
+selected.append({
+    'url': chart,
+    'detail': self.image_detail_pressure,  # Instead of 'high'
+    'type': 'pressure_chart',
+    'description': f'Pressure forecast T+{i*24}hr'
+})
+]]>
+          </code_change>
+      </implementation>
+      
+      <testing>
+        <test>Set max_images: 6 in config.yaml, verify only 6 images used</test>
+        <test>Set pressure_charts: auto, verify API call uses 'auto' detail</test>
+        <test>Set invalid value, verify graceful fallback to default</test>
+        <test>Verify token estimation logs reflect configured limits</test>
+      </testing>
+      
+      <acceptance_criteria>
+        <criterion>max_images read from config.yaml</criterion>
+        <criterion>image_detail_levels read from config.yaml</criterion>
+        <criterion>Defaults (10, high/auto/auto/low) used if not in config</criterion>
+        <criterion>Configuration changes work without code changes</criterion>
+        <criterion>Logs show configured values at startup</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <task id="1.3" priority="HIGH">
+      <name>Add Token Budget Enforcement</name>
+      <description>Add token budget checking before API calls</description>
+      
+      <rationale>
+        <reason>Prevent unexpected cost spikes</reason>
+        <reason>Graceful degradation when approaching limits</reason>
+        <reason>Match SwellGuy's token budget management</reason>
+      </rationale>
+      
+      <implementation>
+        <step>1. Add to config.yaml</step>
+        <config_addition>
+          <![CDATA[
+forecast:
+  token_budget: 150000        # Conservative for gpt-5-mini
+  warn_threshold: 200000      # GPT-5 context limit
+  enable_budget_enforcement: true
+]]>
+          </config_addition>
+        
+        <step>2. Add budget tracking to forecast_engine.py</step>
+        <code_addition>
+          <![CDATA[
+class ForecastEngine:
+    def __init__(self, config: Config):
+        # ... existing code ...
+        self.token_budget = self.config.getint('forecast', 'token_budget', 150000)
+        self.warn_threshold = self.config.getint('forecast', 'warn_threshold', 200000)
+        self.enable_budget_enforcement = self.config.getboolean(
+            'forecast', 'enable_budget_enforcement', True
+        )
+        self.estimated_tokens = 0
+    
+    def _estimate_token_usage(self, forecast_data: Dict[str, Any]) -> int:
+        """Estimate total tokens for forecast generation."""
+        # Text data estimation (rough)
+        text_tokens = 0
+        text_tokens += len(str(forecast_data.get('swell_events', []))) // 4  # ~4 chars/token
+        text_tokens += len(str(forecast_data.get('shore_data', {}))) // 4
+        text_tokens += 5000  # Base prompt overhead
+        
+        # Image token estimation
+        image_tokens = 0
+        for img in forecast_data.get('images', {}).get('pressure_charts', [])[:4]:
+            image_tokens += 3000 if self.image_detail_pressure == 'high' else 1500
+        for img in forecast_data.get('images', {}).get('wave_models', [])[:4]:
+            image_tokens += 1500 if self.image_detail_wave == 'auto' else 500
+        image_tokens += 1500  # Satellite (auto)
+        image_tokens += 500   # SST (low)
+        
+        # Output tokens
+        output_tokens = 10000  # Conservative estimate for long forecast
+        
+        total = text_tokens + image_tokens + output_tokens
+        self.logger.info(
+            f"Token estimate: {text_tokens} text + {image_tokens} images + "
+            f"{output_tokens} output = {total} total"
+        )
+        return total
+    
+    def _check_token_budget(self, estimated: int) -> Tuple[bool, str]:
+        """Check if estimated usage fits within budget."""
+        if not self.enable_budget_enforcement:
+            return (True, "Budget enforcement disabled")
+        
+        if estimated > self.warn_threshold:
+            return (False, f"Estimated {estimated} exceeds limit {self.warn_threshold}")
+        
+        if estimated > self.token_budget:
+            warning = (
+                f"Estimated {estimated} exceeds budget {self.token_budget} "
+                f"but under limit {self.warn_threshold}"
+            )
+            self.logger.warning(warning)
+            return (True, warning)
+        
+        return (True, f"Within budget: {estimated}/{self.token_budget}")
+]]>
+          </code_addition>
+        
+        <step>3. Add budget check to _generate_main_forecast</step>
+        <code_addition>
+          <![CDATA[
+async def _generate_main_forecast(self, forecast_data: Dict[str, Any]) -> str:
+    # Estimate token usage
+    self.estimated_tokens = self._estimate_token_usage(forecast_data)
+    within_budget, message = self._check_token_budget(self.estimated_tokens)
+    
+    if not within_budget:
+        self.logger.error(f"Token budget exceeded: {message}")
+        # Fallback: reduce images or use local generator
+        if self.estimated_tokens > self.warn_threshold:
+            self.logger.error("Using local generator due to token limit")
+            generator = LocalForecastGenerator(forecast_data)
+            return generator.build_main_forecast()
+    
+    # Continue with normal generation...
+]]>
+          </code_addition>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>Token estimation logs before API calls</criterion>
+        <criterion>Warning logged when exceeding budget but under limit</criterion>
+        <criterion>Error logged and fallback triggered when exceeding limit</criterion>
+        <criterion>Can disable enforcement via config</criterion>
+        <criterion>Estimation accuracy within 20% of actual usage</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <task id="1.4" priority="LOW">
+      <name>Run 5-Forecast Stability Test</name>
+      <description>Verify system stability with consecutive runs</description>
+      
+      <test_procedure>
+        <step>1. Clear output directory</step>
+        <step>2. Run: for i in {1..5}; do python src/main.py run --mode full; sleep 60; done</step>
+        <step>3. Monitor logs for errors, warnings, timeouts</step>
+        <step>4. Check for memory leaks (memory usage should be stable)</step>
+        <step>5. Verify all 5 forecasts complete successfully</step>
+        <step>6. Check file handles (should not accumulate)</step>
+      </test_procedure>
+      
+      <monitoring>
+        <metric>Completion rate (target: 5/5 = 100%)</metric>
+        <metric>Average generation time (target: ~5 minutes)</metric>
+        <metric>Memory usage (target: stable, not growing)</metric>
+        <metric>File handles (target: no accumulation)</metric>
+        <metric>API errors (target: 0)</metric>
+      </monitoring>
+      
+      <acceptance_criteria>
+        <criterion>All 5 forecasts complete successfully</criterion>
+        <criterion>No memory leaks observed</criterion>
+        <criterion>No file handle leaks observed</criterion>
+        <criterion>Generation time consistent (within 20% variance)</criterion>
+        <criterion>No accumulated warnings or errors</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <deliverables>
+      <deliverable>Empty pressure analysis investigated and documented</deliverable>
+      <deliverable>Image limits configurable via config.yaml</deliverable>
+      <deliverable>Token budget enforcement implemented</deliverable>
+      <deliverable>5-forecast stability test passed</deliverable>
+      <deliverable>Updated documentation reflecting changes</deliverable>
+    </deliverables>
+
+    <stop_conditions>
+      <condition>All HIGH priority tasks complete</condition>
+      <condition>Stability test passes</condition>
+      <condition>System ready for production enhancements</condition>
+    </stop_conditions>
+  </phase>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 2: PORT VALIDATION SYSTEM (Week 1-2, Days 4-10)       -->
+  <!-- ============================================================ -->
+  <phase id="2" name="Port Validation System" duration="7 days">
+    <goal>Add forecast accuracy tracking and validation from SwellGuy</goal>
+    
+    <modules_to_port>
+      <module priority="CRITICAL">
+        <name>validation/forecast_tracker.py</name>
+        <source>/Users/zackjordan/code/swellguy/validation/forecast_tracker.py</source>
+        <destination>src/validation/forecast_tracker.py</destination>
+        <dependencies>
+          <dep>SQLite3 (already in Python)</dep>
+          <dep>datetime</dep>
+        </dependencies>
+        <modifications>
+          <mod>Update to use SurfCastAI's Config class</mod>
+          <mod>Integrate with SurfCastAI's forecast output structure</mod>
+          <mod>Use async/await patterns from SurfCastAI</mod>
+        </modifications>
+      </module>
+      
+      <module priority="CRITICAL">
+        <name>validation/accuracy_metrics.py</name>
+        <source>/Users/zackjordan/code/swellguy/validation/accuracy_metrics.py</source>
+        <destination>src/validation/accuracy_metrics.py</destination>
+        <purpose>MAE, RMSE, categorical accuracy calculations</purpose>
+      </module>
+      
+      <module priority="HIGH">
+        <name>validation/buoy_validator.py</name>
+        <source>/Users/zackjordan/code/swellguy/validation/buoy_validator.py</source>
+        <destination>src/validation/buoy_validator.py</destination>
+        <purpose>Fetch actual buoy data for validation</purpose>
+      </module>
+    </modules_to_port>
+
+    <task id="2.1" priority="CRITICAL">
+      <name>Create Validation Database Schema</name>
+      
+      <database_schema>
+        <file>src/validation/schema.sql</file>
+        <tables>
+          <table name="forecasts">
+            <columns>
+              <column name="id" type="INTEGER PRIMARY KEY AUTOINCREMENT"/>
+              <column name="forecast_id" type="TEXT UNIQUE NOT NULL"/>
+              <column name="created_at" type="TIMESTAMP NOT NULL"/>
+              <column name="bundle_id" type="TEXT"/>
+              <column name="model_version" type="TEXT NOT NULL"/>
+              <column name="total_tokens" type="INTEGER"/>
+              <column name="input_tokens" type="INTEGER"/>
+              <column name="output_tokens" type="INTEGER"/>
+              <column name="model_cost_usd" type="REAL"/>
+              <column name="generation_time_sec" type="REAL"/>
+              <column name="status" type="TEXT"/>
+            </columns>
+            <indexes>
+              <index>CREATE INDEX idx_forecasts_created ON forecasts(created_at)</index>
+              <index>CREATE INDEX idx_forecasts_bundle ON forecasts(bundle_id)</index>
+            </indexes>
+          </table>
+          
+          <table name="predictions">
+            <columns>
+              <column name="id" type="INTEGER PRIMARY KEY AUTOINCREMENT"/>
+              <column name="forecast_id" type="TEXT NOT NULL"/>
+              <column name="shore" type="TEXT NOT NULL"/>
+              <column name="forecast_time" type="TIMESTAMP NOT NULL"/>
+              <column name="valid_time" type="TIMESTAMP NOT NULL"/>
+              <column name="predicted_height" type="REAL"/>
+              <column name="predicted_period" type="REAL"/>
+              <column name="predicted_direction" type="TEXT"/>
+              <column name="predicted_category" type="TEXT"/>
+              <column name="confidence" type="REAL"/>
+            </columns>
+            <indexes>
+              <index>CREATE INDEX idx_predictions_forecast ON predictions(forecast_id)</index>
+              <index>CREATE INDEX idx_predictions_valid_time ON predictions(valid_time)</index>
+            </indexes>
+            <foreign_keys>
+              <fk>FOREIGN KEY (forecast_id) REFERENCES forecasts(forecast_id)</fk>
+            </foreign_keys>
+          </table>
+          
+          <table name="actuals">
+            <columns>
+              <column name="id" type="INTEGER PRIMARY KEY AUTOINCREMENT"/>
+              <column name="buoy_id" type="TEXT NOT NULL"/>
+              <column name="observation_time" type="TIMESTAMP NOT NULL"/>
+              <column name="wave_height" type="REAL"/>
+              <column name="dominant_period" type="REAL"/>
+              <column name="direction" type="REAL"/>
+              <column name="source" type="TEXT"/>
+            </columns>
+            <indexes>
+              <index>CREATE INDEX idx_actuals_buoy_time ON actuals(buoy_id, observation_time)</index>
+            </indexes>
+          </table>
+          
+          <table name="validations">
+            <columns>
+              <column name="id" type="INTEGER PRIMARY KEY AUTOINCREMENT"/>
+              <column name="forecast_id" type="TEXT NOT NULL"/>
+              <column name="prediction_id" type="INTEGER NOT NULL"/>
+              <column name="actual_id" type="INTEGER NOT NULL"/>
+              <column name="validated_at" type="TIMESTAMP NOT NULL"/>
+              <column name="height_error" type="REAL"/>
+              <column name="period_error" type="REAL"/>
+              <column name="direction_error" type="REAL"/>
+              <column name="category_match" type="BOOLEAN"/>
+              <column name="mae" type="REAL"/>
+              <column name="rmse" type="REAL"/>
+            </columns>
+            <indexes>
+              <index>CREATE INDEX idx_validations_forecast ON validations(forecast_id)</index>
+            </indexes>
+            <foreign_keys>
+              <fk>FOREIGN KEY (forecast_id) REFERENCES forecasts(forecast_id)</fk>
+              <fk>FOREIGN KEY (prediction_id) REFERENCES predictions(id)</fk>
+              <fk>FOREIGN KEY (actual_id) REFERENCES actuals(id)</fk>
+            </foreign_keys>
+          </table>
+        </tables>
+      </database_schema>
+      
+      <implementation>
+        <code_file>src/validation/database.py</code_file>
+        <code>
+          <![CDATA[
+"""Validation database management."""
+import sqlite3
+import logging
+from pathlib import Path
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+class ValidationDatabase:
+    """Manages SQLite database for forecast validation."""
+    
+    def __init__(self, db_path: str = "data/validation.db"):
+        self.db_path = Path(db_path)
+        self.db_path.parent.mkdir(exist_ok=True, parents=True)
+        self._init_database()
+    
+    def _init_database(self):
+        """Initialize database with schema."""
+        schema_path = Path(__file__).parent / "schema.sql"
+        
+        with sqlite3.connect(self.db_path) as conn:
+            # Read and execute schema
+            if schema_path.exists():
+                with open(schema_path) as f:
+                    conn.executescript(f.read())
+                logger.info(f"Initialized validation database: {self.db_path}")
+            else:
+                logger.warning(f"Schema file not found: {schema_path}")
+    
+    def save_forecast(self, forecast_data: Dict[str, Any]) -> str:
+        """Save forecast metadata to database."""
+        metadata = forecast_data.get('metadata', {})
+        api_usage = metadata.get('api_usage', {})
+        
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO forecasts (
+                    forecast_id, created_at, bundle_id, model_version,
+                    total_tokens, input_tokens, output_tokens, model_cost_usd,
+                    generation_time_sec, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                forecast_data.get('forecast_id'),
+                forecast_data.get('generated_time'),
+                metadata.get('source_data', {}).get('bundle_id'),
+                api_usage.get('model', 'gpt-5-mini'),
+                api_usage.get('input_tokens', 0) + api_usage.get('output_tokens', 0),
+                api_usage.get('input_tokens', 0),
+                api_usage.get('output_tokens', 0),
+                api_usage.get('total_cost', 0.0),
+                metadata.get('generation_time', 0.0),
+                'completed'
+            ))
+            conn.commit()
+            
+        logger.info(f"Saved forecast {forecast_data.get('forecast_id')} to database")
+        return forecast_data.get('forecast_id')
+    
+    def save_predictions(self, forecast_id: str, predictions: List[Dict[str, Any]]):
+        """Save forecast predictions to database."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            for pred in predictions:
+                cursor.execute("""
+                    INSERT INTO predictions (
+                        forecast_id, shore, forecast_time, valid_time,
+                        predicted_height, predicted_period, predicted_direction,
+                        predicted_category, confidence
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    forecast_id,
+                    pred.get('shore'),
+                    pred.get('forecast_time'),
+                    pred.get('valid_time'),
+                    pred.get('height'),
+                    pred.get('period'),
+                    pred.get('direction'),
+                    pred.get('category'),
+                    pred.get('confidence', 0.7)
+                ))
+            conn.commit()
+        
+        logger.info(f"Saved {len(predictions)} predictions for forecast {forecast_id}")
+    
+    def get_forecasts_needing_validation(
+        self, 
+        hours_after: int = 24
+    ) -> List[Dict[str, Any]]:
+        """Get forecasts that need validation (24+ hours old)."""
+        cutoff = datetime.now().timestamp() - (hours_after * 3600)
+        
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT f.forecast_id, f.created_at, f.bundle_id
+                FROM forecasts f
+                LEFT JOIN validations v ON f.forecast_id = v.forecast_id
+                WHERE f.created_at < ?
+                AND v.id IS NULL
+                ORDER BY f.created_at DESC
+            """, (cutoff,))
+            
+            results = []
+            for row in cursor.fetchall():
+                results.append({
+                    'forecast_id': row[0],
+                    'created_at': row[1],
+                    'bundle_id': row[2]
+                })
+            
+        return results
+]]>
+        </code>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>Database created with all tables</criterion>
+        <criterion>Forecasts saved with all metadata</criterion>
+        <criterion>Predictions extracted and saved</criterion>
+        <criterion>Schema auto-upgrades on version changes</criterion>
+        <criterion>Queries execute without errors</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <task id="2.2" priority="CRITICAL">
+      <name>Port Forecast Parser</name>
+      <description>Parse forecast markdown to extract predictions</description>
+      
+      <implementation>
+        <code_file>src/validation/forecast_parser.py</code_file>
+        <purpose>Extract structured predictions from natural language forecast</purpose>
+        
+        <parsing_rules>
+          <rule>
+            <pattern>North Shore: (\d+)-(\d+) feet</pattern>
+            <extraction>height_min, height_max</extraction>
+          </rule>
+          <rule>
+            <pattern>Period: (\d+)-(\d+) seconds</pattern>
+            <extraction>period_min, period_max</extraction>
+          </rule>
+          <rule>
+            <pattern>Direction: ([A-Z]+)</pattern>
+            <extraction>direction (NW, N, NE, etc.)</extraction>
+          </rule>
+          <rule>
+            <pattern>(small|moderate|large|extra large)</pattern>
+            <extraction>category</extraction>
+          </rule>
+        </parsing_rules>
+        
+        <example_input>
+          <![CDATA[
+## North Shore Forecast
+**Day 1 (Oct 7):** 6-8 feet Hawaiian scale, 14-16 second periods, NW swell
+**Day 2 (Oct 8):** 8-10 feet Hawaiian scale, 15-18 second periods, NW swell
+**Day 3 (Oct 9):** 5-7 feet Hawaiian scale, 13-15 second periods, WNW swell
+]]>
+        </example_input>
+        
+        <expected_output>
+          <![CDATA[
+[
+  {
+    "shore": "north_shore",
+    "forecast_time": "2025-10-06T12:00:00",
+    "valid_time": "2025-10-07T12:00:00",
+    "height": 7.0,  # Average of range
+    "height_min": 6.0,
+    "height_max": 8.0,
+    "period": 15.0,
+    "direction": "NW",
+    "category": "moderate"
+  },
+  // ... more predictions
+]
+]]>
+        </expected_output>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>Parses 90%+ of forecast sections</criterion>
+        <criterion>Extracts height, period, direction correctly</criterion>
+        <criterion>Handles date/time extraction</criterion>
+        <criterion>Gracefully handles malformed text</criterion>
+        <criterion>Logs parsing failures for review</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <task id="2.3" priority="HIGH">
+      <name>Port Buoy Data Fetcher</name>
+      <description>Fetch actual buoy observations for validation</description>
+      
+      <implementation>
+        <code_file>src/validation/buoy_fetcher.py</code_file>
+        
+        <buoy_mapping>
+          <shore name="north_shore">
+            <buoy id="51001" name="NW Hawaii" priority="1"/>
+            <buoy id="51101" name="NW Molokai" priority="2"/>
+          </shore>
+          <shore name="south_shore">
+            <buoy id="51003" name="SE Hawaii" priority="1"/>
+            <buoy id="51004" name="SE Hawaii" priority="2"/>
+          </shore>
+        </buoy_mapping>
+        
+        <data_source>
+          <url>https://www.ndbc.noaa.gov/data/realtime2/{buoy_id}.txt</url>
+          <format>Space-delimited text with header</format>
+          <rate_limit>0.5 requests/second</rate_limit>
+        </data_source>
+        
+        <code_template>
+          <![CDATA[
+import aiohttp
+import asyncio
+from datetime import datetime, timedelta
+from typing import List, Dict, Any
+
+class BuoyDataFetcher:
+    """Fetch actual buoy observations from NDBC."""
+    
+    BUOY_MAPPING = {
+        'north_shore': ['51001', '51101'],
+        'south_shore': ['51003', '51004']
+    }
+    
+    async def fetch_observations(
+        self, 
+        shore: str, 
+        start_time: datetime,
+        end_time: datetime
+    ) -> List[Dict[str, Any]]:
+        """Fetch buoy observations for validation."""
+        buoys = self.BUOY_MAPPING.get(shore, [])
+        observations = []
+        
+        for buoy_id in buoys:
+            try:
+                obs = await self._fetch_buoy_data(buoy_id, start_time, end_time)
+                observations.extend(obs)
+            except Exception as e:
+                logger.error(f"Failed to fetch {buoy_id}: {e}")
+        
+        return observations
+    
+    async def _fetch_buoy_data(
+        self, 
+        buoy_id: str,
+        start_time: datetime,
+        end_time: datetime
+    ) -> List[Dict[str, Any]]:
+        """Fetch and parse data for single buoy."""
+        url = f"https://www.ndbc.noaa.gov/data/realtime2/{buoy_id}.txt"
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                text = await response.text()
+                return self._parse_buoy_data(buoy_id, text, start_time, end_time)
+    
+    def _parse_buoy_data(
+        self, 
+        buoy_id: str, 
+        text: str,
+        start_time: datetime,
+        end_time: datetime
+    ) -> List[Dict[str, Any]]:
+        """Parse NDBC text format."""
+        observations = []
+        lines = text.strip().split('\n')
+        
+        # Skip header lines
+        for line in lines[2:]:
+            parts = line.split()
+            if len(parts) < 9:
+                continue
+            
+            # Parse observation
+            try:
+                obs_time = datetime(
+                    int(parts[0]), int(parts[1]), int(parts[2]),
+                    int(parts[3]), int(parts[4])
+                )
+                
+                # Check if within validation window
+                if start_time <= obs_time <= end_time:
+                    observations.append({
+                        'buoy_id': buoy_id,
+                        'observation_time': obs_time,
+                        'wave_height': float(parts[8]) if parts[8] != 'MM' else None,
+                        'dominant_period': float(parts[9]) if parts[9] != 'MM' else None,
+                        'direction': float(parts[11]) if len(parts) > 11 and parts[11] != 'MM' else None,
+                        'source': 'NDBC'
+                    })
+            except (ValueError, IndexError) as e:
+                logger.debug(f"Failed to parse line: {e}")
+        
+        return observations
+]]>
+        </code_template>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>Fetches buoy data from NDBC</criterion>
+        <criterion>Parses data correctly (90%+ accuracy)</criterion>
+        <criterion>Handles missing data gracefully</criterion>
+        <criterion>Respects rate limits</criterion>
+        <criterion>Returns observations in validation window</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <task id="2.4" priority="HIGH">
+      <name>Implement Validation Logic</name>
+      <description>Calculate accuracy metrics (MAE, RMSE, categorical)</description>
+      
+      <metrics>
+        <metric name="MAE (Mean Absolute Error)">
+          <formula>MAE = Σ|predicted - actual| / n</formula>
+          <target>MAE &lt; 2 feet Hawaiian scale</target>
+          <unit>feet</unit>
+        </metric>
+        
+        <metric name="RMSE (Root Mean Square Error)">
+          <formula>RMSE = sqrt(Σ(predicted - actual)² / n)</formula>
+          <target>RMSE &lt; 2.5 feet</target>
+          <unit>feet</unit>
+        </metric>
+        
+        <metric name="Categorical Accuracy">
+          <categories>
+            <category>small: 0-3 feet</category>
+            <category>moderate: 3-6 feet</category>
+            <category>large: 6-10 feet</category>
+            <category>extra_large: 10+ feet</category>
+          </categories>
+          <target>75% correct category</target>
+        </metric>
+        
+        <metric name="Direction Accuracy">
+          <tolerance>22.5 degrees (one compass point)</tolerance>
+          <target>80% within tolerance</target>
+        </metric>
+      </metrics>
+      
+      <implementation>
+        <code_file>src/validation/validator.py</code_file>
+        <code>
+          <![CDATA[
+class ForecastValidator:
+    """Validate forecasts against actual observations."""
+    
+    def __init__(self, database: ValidationDatabase):
+        self.db = database
+        self.parser = ForecastParser()
+        self.fetcher = BuoyDataFetcher()
+    
+    async def validate_forecast(
+        self, 
+        forecast_id: str,
+        hours_after: int = 24
+    ) -> Dict[str, Any]:
+        """Validate a forecast against actual observations."""
+        
+        # 1. Get forecast data
+        forecast = self.db.get_forecast(forecast_id)
+        predictions = self.db.get_predictions(forecast_id)
+        
+        # 2. Fetch actual observations
+        validation_window_start = forecast['created_at'] + timedelta(hours=hours_after)
+        validation_window_end = validation_window_start + timedelta(hours=24)
+        
+        actuals = []
+        for pred in predictions:
+            shore_actuals = await self.fetcher.fetch_observations(
+                pred['shore'],
+                validation_window_start,
+                validation_window_end
+            )
+            actuals.extend(shore_actuals)
+        
+        # 3. Match predictions to actuals
+        matches = self._match_predictions_to_actuals(predictions, actuals)
+        
+        # 4. Calculate metrics
+        metrics = self._calculate_metrics(matches)
+        
+        # 5. Save validation results
+        self.db.save_validation(forecast_id, matches, metrics)
+        
+        return metrics
+    
+    def _calculate_metrics(self, matches: List[Dict]) -> Dict[str, float]:
+        """Calculate MAE, RMSE, categorical accuracy."""
+        height_errors = []
+        period_errors = []
+        direction_errors = []
+        category_matches = []
+        
+        for match in matches:
+            if match['predicted_height'] and match['actual_height']:
+                error = abs(match['predicted_height'] - match['actual_height'])
+                height_errors.append(error)
+            
+            if match['predicted_period'] and match['actual_period']:
+                error = abs(match['predicted_period'] - match['actual_period'])
+                period_errors.append(error)
+            
+            if match['predicted_category'] and match['actual_category']:
+                category_matches.append(
+                    match['predicted_category'] == match['actual_category']
+                )
+        
+        mae = sum(height_errors) / len(height_errors) if height_errors else None
+        rmse = (sum(e**2 for e in height_errors) / len(height_errors))**0.5 if height_errors else None
+        categorical_accuracy = sum(category_matches) / len(category_matches) if category_matches else None
+        
+        return {
+            'mae': mae,
+            'rmse': rmse,
+            'categorical_accuracy': categorical_accuracy,
+            'n_validated': len(matches),
+            'n_height_errors': len(height_errors),
+            'n_category_matches': len(category_matches)
+        }
+]]>
+        </code>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>Validates forecasts 24+ hours old</criterion>
+        <criterion>Calculates MAE, RMSE, categorical accuracy</criterion>
+        <criterion>Saves validation results to database</criterion>
+        <criterion>Handles missing data gracefully</criterion>
+        <criterion>Generates validation report</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <task id="2.5" priority="MEDIUM">
+      <name>Create Validation CLI</name>
+      <description>Command-line interface for validation operations</description>
+      
+      <commands>
+        <command name="validate">
+          <usage>python src/main.py validate --forecast FORECAST_ID</usage>
+          <description>Validate a specific forecast</description>
+        </command>
+        
+        <command name="validate-all">
+          <usage>python src/main.py validate-all --hours-after 24</usage>
+          <description>Validate all forecasts 24+ hours old</description>
+        </command>
+        
+        <command name="accuracy-report">
+          <usage>python src/main.py accuracy-report --days 30</usage>
+          <description>Generate accuracy report for last 30 days</description>
+        </command>
+      </commands>
+      
+      <implementation>
+        <code_file>src/main.py (add subcommands)</code_file>
+        <code_addition>
+          <![CDATA[
+# Add to main.py argparse
+validate_parser = subparsers.add_parser('validate', help='Validate forecasts')
+validate_parser.add_argument('--forecast', help='Specific forecast ID')
+validate_parser.add_argument('--hours-after', type=int, default=24, help='Hours after forecast')
+
+validate_all_parser = subparsers.add_parser('validate-all', help='Validate all pending forecasts')
+validate_all_parser.add_argument('--hours-after', type=int, default=24)
+
+accuracy_parser = subparsers.add_parser('accuracy-report', help='Generate accuracy report')
+accuracy_parser.add_argument('--days', type=int, default=30, help='Days of history')
+]]>
+        </code_addition>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>CLI commands work as specified</criterion>
+        <criterion>Help text is clear and accurate</criterion>
+        <criterion>Error messages are informative</criterion>
+        <criterion>Progress is displayed for long operations</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <deliverables>
+      <deliverable>Validation database with schema</deliverable>
+      <deliverable>Forecast parser extracting predictions</deliverable>
+      <deliverable>Buoy data fetcher working</deliverable>
+      <deliverable>Validation logic calculating metrics</deliverable>
+      <deliverable>CLI for validation operations</deliverable>
+      <deliverable>Documentation for validation system</deliverable>
+    </deliverables>
+
+    <stop_conditions>
+      <condition>Database schema created and tested</condition>
+      <condition>Can validate at least one forecast successfully</condition>
+      <condition>Metrics calculate correctly</condition>
+      <condition>CLI commands functional</condition>
+    </stop_conditions>
+  </phase>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 3: PORT PROCESSING ENHANCEMENTS (Week 2-3, Days 11-17) -->
+  <!-- ============================================================ -->
+  <phase id="3" name="Port Processing Enhancements" duration="7 days">
+    <goal>Add source scoring and confidence metrics from SwellGuy</goal>
+    
+    <task id="3.1" priority="HIGH">
+      <name>Port Source Scorer</name>
+      <description>Add source reliability scoring to data collection</description>
+      
+      <source_reliability_tiers>
+        <tier level="1" score="1.0">
+          <name>Official NOAA/Government</name>
+          <sources>
+            <source>NDBC buoys (real-time observations)</source>
+            <source>TGFTP weather fax (official forecasts)</source>
+            <source>OPC forecasts (Ocean Prediction Center)</source>
+            <source>NWS forecasts (National Weather Service)</source>
+          </sources>
+        </tier>
+        
+        <tier level="2" score="0.9">
+          <name>Research/Academic</name>
+          <sources>
+            <source>PacIOOS SWAN/WW3 models (University of Hawaii)</source>
+            <source>CDIP buoys (Scripps Institution)</source>
+          </sources>
+        </tier>
+        
+        <tier level="3" score="0.7">
+          <name>International Government</name>
+          <sources>
+            <source>ECMWF models (European Centre)</source>
+            <source>BOM models (Australian Bureau)</source>
+          </sources>
+        </tier>
+        
+        <tier level="4" score="0.5">
+          <name>Commercial APIs</name>
+          <sources>
+            <source>Stormglass API</source>
+            <source>Windy API</source>
+            <source>Open-Meteo API</source>
+          </sources>
+        </tier>
+        
+        <tier level="5" score="0.3">
+          <name>Surf Forecasting Sites</name>
+          <sources>
+            <source>Surfline</source>
+            <source>MagicSeaweed</source>
+          </sources>
+        </tier>
+      </source_reliability_tiers>
+      
+      <scoring_factors>
+        <factor weight="0.5">
+          <name>Source Tier</name>
+          <description>Base reliability from tier system</description>
+        </factor>
+        <factor weight="0.2">
+          <name>Data Freshness</name>
+          <formula>1.0 - (age_hours / 24)</formula>
+          <description>Newer data scores higher</description>
+        </factor>
+        <factor weight="0.2">
+          <name>Completeness</name>
+          <formula>fields_present / fields_expected</formula>
+          <description>More complete data scores higher</description>
+        </factor>
+        <factor weight="0.1">
+          <name>Historical Accuracy</name>
+          <description>Based on validation results (if available)</description>
+        </factor>
+      </scoring_factors>
+      
+      <implementation>
+        <code_file>src/processing/source_scorer.py</code_file>
+        <modifications>
+          <mod>Adapt from SwellGuy's version</mod>
+          <mod>Integrate with SurfCastAI's agent system</mod>
+          <mod>Add to data fusion pipeline</mod>
+        </modifications>
+        
+        <integration_point>
+          <file>src/processing/data_fusion_system.py</file>
+          <location>In process() method, before fusion</location>
+          <code>
+            <![CDATA[
+# Score all sources
+scorer = SourceScorer()
+scores = scorer.score_sources(fusion_data)
+
+# Weight data by reliability
+for source_type, data_list in fusion_data.items():
+    for data in data_list:
+        source_name = data.get('source', 'unknown')
+        score = scores.get(source_name, 0.5)
+        data['reliability_score'] = score
+        data['weight'] = score  # Use for weighted averaging
+]]>
+          </code>
+        </integration_point>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>All sources assigned reliability scores</criterion>
+        <criterion>Scores range from 0.0 to 1.0</criterion>
+        <criterion>Higher tier sources score higher</criterion>
+        <criterion>Scores logged for transparency</criterion>
+        <criterion>Integration with fusion system works</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <task id="3.2" priority="HIGH">
+      <name>Port Confidence Scorer</name>
+      <description>Add confidence scoring to forecast output</description>
+      
+      <confidence_factors>
+        <factor weight="0.3">
+          <name>Model Consensus</name>
+          <description>Agreement between different models</description>
+          <calculation>
+            <![CDATA[
+# Calculate variance in predictions
+height_predictions = [model['height'] for model in models]
+variance = np.var(height_predictions)
+consensus_score = 1.0 / (1.0 + variance)
+]]>
+          </calculation>
+        </factor>
+        
+        <factor weight="0.25">
+          <name>Source Reliability</name>
+          <description>Weighted average of source scores</description>
+          <calculation>
+            <![CDATA[
+total_weight = sum(source['reliability_score'] for source in sources)
+avg_reliability = total_weight / len(sources)
+]]>
+          </calculation>
+        </factor>
+        
+        <factor weight="0.20">
+          <name>Data Completeness</name>
+          <description>Percentage of expected data received</description>
+          <calculation>
+            <![CDATA[
+expected_sources = ['buoys', 'models', 'charts', 'satellite']
+received_sources = [s for s in expected_sources if s in data]
+completeness = len(received_sources) / len(expected_sources)
+]]>
+          </calculation>
+        </factor>
+        
+        <factor weight="0.15">
+          <name>Forecast Horizon</name>
+          <description>Confidence decreases with time</description>
+          <calculation>
+            <![CDATA[
+# Day 1: 1.0, Day 2: 0.9, Day 3: 0.8, etc.
+horizon_score = max(0.5, 1.0 - (days_ahead * 0.1))
+]]>
+          </calculation>
+        </factor>
+        
+        <factor weight="0.10">
+          <name>Historical Accuracy</name>
+          <description>Recent validation performance</description>
+          <calculation>
+            <![CDATA[
+# From validation database
+recent_mae = get_recent_mae(days=30)
+accuracy_score = max(0.0, 1.0 - (recent_mae / 5.0))  # 5ft = 0% confidence
+]]>
+          </calculation>
+        </factor>
+      </confidence_factors>
+      
+      <confidence_categories>
+        <category min="0.8" max="1.0" label="High" color="green">
+          <description>Strong consensus, reliable sources, complete data</description>
+        </category>
+        <category min="0.6" max="0.8" label="Moderate" color="yellow">
+          <description>Good data but some uncertainty</description>
+        </category>
+        <category min="0.4" max="0.6" label="Low" color="orange">
+          <description>Limited data or disagreement between sources</description>
+        </category>
+        <category min="0.0" max="0.4" label="Very Low" color="red">
+          <description>Poor data quality or high uncertainty</description>
+        </category>
+      </confidence_categories>
+      
+      <implementation>
+        <code_file>src/processing/confidence_scorer.py</code_file>
+        
+        <integration>
+          <location>src/forecast_engine/forecast_engine.py</location>
+          <point>After data fusion, before forecast generation</point>
+          <code>
+            <![CDATA[
+# Calculate confidence scores
+from src.processing.confidence_scorer import ConfidenceScorer
+
+scorer = ConfidenceScorer(config, validation_db)
+confidence = scorer.calculate_confidence(fusion_data, forecast_horizon_days=3)
+
+# Add to forecast metadata
+forecast_data['confidence'] = {
+    'overall_score': confidence['overall'],
+    'model_consensus': confidence['model_consensus'],
+    'source_reliability': confidence['source_reliability'],
+    'data_completeness': confidence['data_completeness'],
+    'forecast_horizon': confidence['forecast_horizon'],
+    'historical_accuracy': confidence['historical_accuracy'],
+    'category': confidence['category'],  # High/Moderate/Low/Very Low
+    'factors': confidence['factor_breakdown']
+}
+]]>
+          </code>
+        </integration>
+        
+        <output_integration>
+          <location>Forecast markdown/HTML output</location>
+          <display>
+            <![CDATA[
+## Forecast Confidence: [High/Moderate/Low]
+
+**Overall Score:** 8.5/10
+
+**Confidence Factors:**
+- Model Consensus: 9.0/10 (models in close agreement)
+- Source Reliability: 9.5/10 (high-quality NOAA sources)
+- Data Completeness: 8.0/10 (most sources available)
+- Forecast Horizon: 8.5/10 (3-day forecast)
+- Historical Accuracy: 7.5/10 (recent MAE: 1.8 feet)
+]]>
+          </display>
+        </output_integration>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>Confidence calculated for all forecasts</criterion>
+        <criterion>Score range 0.0-1.0 with clear categories</criterion>
+        <criterion>Factor breakdown available</criterion>
+        <criterion>Displayed in forecast output</criterion>
+        <criterion>Logged for monitoring</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <task id="3.3" priority="MEDIUM">
+      <name>Enhanced Buoy Processor</name>
+      <description>Add trend analysis from SwellGuy's buoy_analyzer</description>
+      
+      <enhancements>
+        <enhancement name="Trend Detection">
+          <description>Detect increasing/decreasing/stable trends in wave height</description>
+          <method>Linear regression over last 24 hours</method>
+          <threshold>Slope > 0.5 feet/hour = increasing</threshold>
+        </enhancement>
+        
+        <enhancement name="Anomaly Detection">
+          <description>Flag unusual readings vs historical patterns</description>
+          <method>Z-score > 2.0 standard deviations</method>
+          <action>Log warning, reduce weight in fusion</action>
+        </enhancement>
+        
+        <enhancement name="Quality Scoring">
+          <description>Score data quality based on completeness and consistency</description>
+          <factors>
+            <factor>Data freshness (age < 1 hour = 1.0)</factor>
+            <factor>Completeness (all fields present = 1.0)</factor>
+            <factor>Consistency (no sudden jumps = 1.0)</factor>
+          </factors>
+        </enhancement>
+        
+        <enhancement name="Swell Separation">
+          <description>Separate mixed sea state into individual swells</description>
+          <method>Spectral analysis of wave periods</method>
+          <note>Port from SwellGuy's swell_decomposition.py</note>
+        </enhancement>
+      </enhancements>
+      
+      <implementation>
+        <code_file>src/processing/buoy_processor.py</code_file>
+        <modifications>
+          <mod>Add trend detection to existing processor</mod>
+          <mod>Add quality scoring</mod>
+          <mod>Optional: Add swell separation (complex, may skip)</mod>
+        </modifications>
+      </implementation>
+      
+      <acceptance_criteria>
+        <criterion>Trends detected and logged</criterion>
+        <criterion>Anomalies flagged appropriately</criterion>
+        <criterion>Quality scores assigned</criterion>
+        <criterion>Integration with fusion system works</criterion>
+        <criterion>Performance impact minimal (< 1 second)</criterion>
+      </acceptance_criteria>
+    </task>
+
+    <deliverables>
+      <deliverable>Source scorer integrated</deliverable>
+      <deliverable>Confidence scorer working</deliverable>
+      <deliverable>Enhanced buoy processor</deliverable>
+      <deliverable>Confidence displayed in forecasts</deliverable>
+      <deliverable>Documentation updated</deliverable>
+    </deliverables>
+
+    <stop_conditions>
+      <condition>Source scoring working</condition>
+      <condition>Confidence calculated and displayed</condition>
+      <condition>Buoy enhancements tested</condition>
+    </stop_conditions>
+  </phase>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 4: TESTING & DOCUMENTATION (Week 4, Days 18-21)       -->
+  <!-- ============================================================ -->
+  <phase id="4" name="Testing & Documentation" duration="4 days">
+    <goal>Achieve 80%+ test coverage and comprehensive documentation</goal>
+    
+    <testing_requirements>
+      <unit_tests target="80%">
+        <test_suite>tests/unit/validation/</test_suite>
+        <test_suite>tests/unit/processing/</test_suite>
+        <test_suite>tests/unit/forecast_engine/</test_suite>
+        
+        <priority_modules>
+          <module>validation/forecast_tracker.py</module>
+          <module>validation/validator.py</module>
+          <module>processing/source_scorer.py</module>
+          <module>processing/confidence_scorer.py</module>
+          <module>forecast_engine/forecast_engine.py</module>
+        </priority_modules>
+      </unit_tests>
+      
+      <integration_tests>
+        <test name="test_full_pipeline">
+          <description>Test complete data collection → forecast → validation</description>
+          <steps>
+            <step>Collect data (use mock/cached)</step>
+            <step>Process data</step>
+            <step>Generate forecast</step>
+            <step>Save to database</step>
+            <step>Validate (use mock actuals)</step>
+            <step>Verify all steps complete</step>
+          </steps>
+        </test>
+        
+        <test name="test_validation_system">
+          <description>Test validation with known forecast/actual pairs</description>
+          <data>Use historical forecast with known actuals</data>
+          <expected>Specific MAE, RMSE values</expected>
+        </test>
+        
+        <test name="test_confidence_scoring">
+          <description>Test confidence calculation with various data scenarios</description>
+          <scenarios>
+            <scenario>Complete data, high consensus → High confidence</scenario>
+            <scenario>Missing data → Lower confidence</scenario>
+            <scenario>Disagreement between models → Lower confidence</scenario>
+          </scenarios>
+        </test>
+      </integration_tests>
+      
+      <performance_tests>
+        <test name="test_forecast_generation_time">
+          <target>< 5 minutes</target>
+          <method>Time 10 runs, take average</method>
+        </test>
+        
+        <test name="test_validation_batch_processing">
+          <target>100 forecasts in < 10 minutes</target>
+          <method>Validate 100 historical forecasts</method>
+        </test>
+      </performance_tests>
+    </testing_requirements>
+    
+    <documentation_requirements>
+      <document name="README.md">
+        <sections>
+          <section>Project overview and features</section>
+          <section>Installation instructions</section>
+          <section>Configuration guide</section>
+          <section>Usage examples</section>
+          <section>Validation system guide</section>
+          <section>Troubleshooting</section>
+        </sections>
+      </document>
+      
+      <document name="VALIDATION_GUIDE.md">
+        <sections>
+          <section>Overview of validation system</section>
+          <section>Running validations</section>
+          <section>Understanding metrics (MAE, RMSE, categorical)</section>
+          <section>Accuracy targets and baselines</section>
+          <section>Interpreting results</section>
+        </sections>
+      </document>
+      
+      <document name="CONFIGURATION.md">
+        <sections>
+          <section>All configuration options explained</section>
+          <section>GPT-5 model selection (nano/mini/main)</section>
+          <section>Image settings and token budgets</section>
+          <section>Data source configuration</section>
+          <section>Validation settings</section>
+        </sections>
+      </document>
+      
+      <document name="DEPLOYMENT.md">
+        <sections>
+          <section>Production deployment guide</section>
+          <section>Cron job setup</section>
+          <section>Monitoring and alerting</section>
+          <section>Backup and recovery</section>
+        </sections>
+      </document>
+      
+      <document name="API.md">
+        <sections>
+          <section>API documentation for all modules</section>
+          <section>Data structures and types</section>
+          <section>Error handling</section>
+          <section>Extension points</section>
+        </sections>
+      </document>
+    </documentation_requirements>
+    
+    <deliverables>
+      <deliverable>80%+ unit test coverage</deliverable>
+      <deliverable>Integration tests passing</deliverable>
+      <deliverable>Performance tests meeting targets</deliverable>
+      <deliverable>All documentation complete</deliverable>
+      <deliverable>Code review checklist completed</deliverable>
+    </deliverables>
+  </phase>
+
+  <!-- ============================================================ -->
+  <!-- ACCEPTANCE CRITERIA (Project-Wide)                          -->
+  <!-- ============================================================ -->
+  <acceptance_criteria>
+    <critical_requirements>
+      <requirement id="CR-1">
+        <description>All SurfCastAI issues fixed (pressure analysis, configurable limits, token budget)</description>
+        <verification>Manual testing + automated tests</verification>
+        <status_check>All Phase 1 tasks complete</status_check>
+      </requirement>
+      
+      <requirement id="CR-2">
+        <description>Validation system working and integrated</description>
+        <verification>
+          <step>Generate forecast</step>
+          <step>Wait 24 hours (or use historical data)</step>
+          <step>Run validation</step>
+          <step>Verify metrics calculated</step>
+          <step>Check database populated</step>
+        </verification>
+        <status_check>Can validate at least 3 forecasts successfully</status_check>
+      </requirement>
+      
+      <requirement id="CR-3">
+        <description>Source scoring and confidence metrics working</description>
+        <verification>
+          <step>Generate forecast</step>
+          <step>Check logs for source scores</step>
+          <step>Verify confidence calculated</step>
+          <step>Check displayed in output</step>
+        </verification>
+        <status_check>All forecasts have confidence scores</status_check>
+      </requirement>
+      
+      <requirement id="CR-4">
+        <description>Testing coverage ≥ 80%</description>
+        <verification>Run pytest --cov</verification>
+        <command>pytest --cov=src --cov-report=html tests/</command>
+        <status_check>Coverage report shows ≥ 80%</status_check>
+      </requirement>
+      
+      <requirement id="CR-5">
+        <description>Documentation complete and accurate</description>
+        <verification>Manual review of all docs</verification>
+        <checklist>
+          <item>README.md complete</item>
+          <item>VALIDATION_GUIDE.md complete</item>
+          <item>CONFIGURATION.md complete</item>
+          <item>DEPLOYMENT.md complete</item>
+          <item>API.md complete</item>
+        </checklist>
+      </requirement>
+    </critical_requirements>
+    
+    <quality_metrics>
+      <metric name="forecast_generation_time">
+        <target>< 5 minutes</target>
+        <measurement>Average of 10 runs</measurement>
+      </metric>
+      
+      <metric name="forecast_accuracy_mae">
+        <target>< 2.0 feet Hawaiian scale</target>
+        <measurement>30-day average after deployment</measurement>
+      </metric>
+      
+      <metric name="categorical_accuracy">
+        <target>> 75%</target>
+        <measurement>30-day average after deployment</measurement>
+      </metric>
+      
+      <metric name="cost_per_forecast">
+        <target>< $0.15</target>
+        <measurement>Track actual API costs</measurement>
+        <expected>~$0.005-0.015 with gpt-5-mini</expected>
+      </metric>
+      
+      <metric name="completion_rate">
+        <target>> 95%</target>
+        <measurement>Forecasts completed / forecasts attempted</measurement>
+      </metric>
+    </quality_metrics>
+  </acceptance_criteria>
+
+  <!-- ============================================================ -->
+  <!-- MIGRATION CHECKLIST (SwellGuy Retirement)                   -->
+  <!-- ============================================================ -->
+  <migration_checklist>
+    <pre_migration>
+      <item>Backup SwellGuy codebase</item>
+      <item>Export SwellGuy validation database (if any data exists)</item>
+      <item>Document SwellGuy configuration</item>
+      <item>Identify any custom modifications worth preserving</item>
+      <item>Test SurfCastAI thoroughly before migration</item>
+    </pre_migration>
+    
+    <migration>
+      <item>Stop SwellGuy cron jobs (if any)</item>
+      <item>Archive SwellGuy directory: mv swellguy swellguy.archived.$(date +%Y%m%d)</item>
+      <item>Deploy SurfCastAI to production location</item>
+      <item>Set up SurfCastAI cron job: 0 6 * * * (daily at 6am)</item>
+      <item>Monitor first 5 production runs</item>
+      <item>Compare output quality to SwellGuy (if historical data available)</item>
+    </migration>
+    
+    <post_migration>
+      <item>Run validation on 30 days of SurfCastAI forecasts</item>
+      <item>Establish baseline metrics</item>
+      <item>Set up monitoring/alerting</item>
+      <item>Document lessons learned</item>
+      <item>Archive SwellGuy permanently after 90 days of successful SurfCastAI operation</item>
+    </post_migration>
+    
+    <rollback_plan>
+      <trigger>SurfCastAI completion rate < 90% after 7 days</trigger>
+      <trigger>Critical bug discovered</trigger>
+      <trigger>Cost > 3x expected</trigger>
+      <action>
+        <step>Stop SurfCastAI cron job</step>
+        <step>Restore SwellGuy from archive</step>
+        <step>Resume SwellGuy cron job</step>
+        <step>Document issue and fix</step>
+        <step>Test fix thoroughly before re-migration</step>
+      </action>
+    </rollback_plan>
+  </migration_checklist>
+
+  <!-- ============================================================ -->
+  <!-- MONITORING & MAINTENANCE                                     -->
+  <!-- ============================================================ -->
+  <monitoring>
+    <daily_checks>
+      <check>Forecast generated successfully</check>
+      <check>No errors in logs</check>
+      <check>API cost within budget</check>
+      <check>Generation time < 5 minutes</check>
+    </daily_checks>
+    
+    <weekly_checks>
+      <check>Run validation on completed forecasts</check>
+      <check>Review accuracy metrics (MAE, RMSE)</check>
+      <check>Check data source success rates</check>
+      <check>Review any warnings in logs</check>
+    </weekly_checks>
+    
+    <monthly_checks>
+      <check>Generate accuracy report (30-day)</check>
+      <check>Review cost trends</check>
+      <check>Update dependencies</check>
+      <check>Archive old forecasts</check>
+      <check>Database maintenance (vacuum, reindex)</check>
+    </monthly_checks>
+    
+    <alerts>
+      <alert priority="HIGH">
+        <trigger>Forecast fails to complete</trigger>
+        <action>Email notification + manual investigation</action>
+      </alert>
+      
+      <alert priority="MEDIUM">
+        <trigger>MAE > 3.0 feet for 3 consecutive days</trigger>
+        <action>Review forecasting logic</action>
+      </alert>
+      
+      <alert priority="LOW">
+        <trigger>Data source success rate < 80%</trigger>
+        <action>Check source availability</action>
+      </alert>
+    </alerts>
+  </monitoring>
+
+  <!-- ============================================================ -->
+  <!-- SUCCESS CRITERIA SUMMARY                                     -->
+  <!-- ============================================================ -->
+  <success_criteria_summary>
+    <immediate_success when="Week 1">
+      <criterion>SurfCastAI issues fixed</criterion>
+      <criterion>Stability test passed (5/5 forecasts)</criterion>
+      <criterion>System ready for enhancements</criterion>
+    </immediate_success>
+    
+    <short_term_success when="Week 2">
+      <criterion>Validation system working</criterion>
+      <criterion>Can validate historical forecasts</criterion>
+      <criterion>Database populating correctly</criterion>
+    </short_term_success>
+    
+    <medium_term_success when="Week 3">
+      <criterion>Source scoring integrated</criterion>
+      <criterion>Confidence metrics calculated</criterion>
+      <criterion>Enhanced buoy processing working</criterion>
+    </medium_term_success>
+    
+    <project_success when="Week 4">
+      <criterion>80%+ test coverage</criterion>
+      <criterion>Documentation complete</criterion>
+      <criterion>All acceptance criteria met</criterion>
+      <criterion>SwellGuy retired</criterion>
+      <criterion>Production deployment successful</criterion>
+    </project_success>
+    
+    <long_term_success when="90 days post-deployment">
+      <criterion>MAE < 2.0 feet (30-day average)</criterion>
+      <criterion>Categorical accuracy > 75%</criterion>
+      <criterion>Cost < $0.15/forecast</criterion>
+      <criterion>Completion rate > 95%</criterion>
+      <criterion>System running reliably</criterion>
+    </long_term_success>
+  </success_criteria_summary>
+
+  <!-- ============================================================ -->
+  <!-- APPENDIX: MODULE PORTING REFERENCE                          -->
+  <!-- ============================================================ -->
+  <appendix id="module_porting">
+    <modules_to_port>
+      <module name="validation/forecast_tracker.py">
+        <priority>CRITICAL</priority>
+        <effort>2 days</effort>
+        <dependencies>SQLite3, datetime</dependencies>
+        <modifications>Adapt to SurfCastAI structure</modifications>
+        <testing>Unit tests + integration test</testing>
+      </module>
+      
+      <module name="validation/accuracy_metrics.py">
+        <priority>CRITICAL</priority>
+        <effort>1 day</effort>
+        <dependencies>numpy, scipy</dependencies>
+        <modifications>Minimal</modifications>
+        <testing>Unit tests with known inputs</testing>
+      </module>
+      
+      <module name="validation/buoy_validator.py">
+        <priority>HIGH</priority>
+        <effort>1 day</effort>
+        <dependencies>aiohttp, requests</dependencies>
+        <modifications>Use SurfCastAI's HTTP client</modifications>
+        <testing>Integration test with real NDBC data</testing>
+      </module>
+      
+      <module name="processing/source_scorer.py">
+        <priority>HIGH</priority>
+        <effort>1.5 days</effort>
+        <dependencies>None (pure Python)</dependencies>
+        <modifications>Integrate with data fusion system</modifications>
+        <testing>Unit tests + integration with fusion</testing>
+      </module>
+      
+      <module name="processing/confidence_scorer.py">
+        <priority>HIGH</priority>
+        <effort>2 days</effort>
+        <dependencies>numpy, validation database</dependencies>
+        <modifications>Adapt to SurfCastAI structure</modifications>
+        <testing>Unit tests with mock data</testing>
+      </module>
+      
+      <module name="processing/buoy_analyzer.py">
+        <priority>MEDIUM</priority>
+        <effort>2 days</effort>
+        <dependencies>numpy, scipy</dependencies>
+        <modifications>Integrate with BuoyProcessor</modifications>
+        <testing>Unit tests + integration</testing>
+      </module>
+    </modules_to_port>
+    
+    <modules_not_to_port>
+      <module name="pattern_integrator.py">
+        <reason>Broken (calls non-existent methods)</reason>
+        <alternative>Use GPT-5 vision for pattern recognition</alternative>
+      </module>
+      
+      <module name="swellguy_launcher.py">
+        <reason>TUI not essential</reason>
+        <alternative>Use SurfCastAI's CLI</alternative>
+      </module>
+      
+      <module name="22 preprocessing modules">
+        <reason>Over-engineered for GPT-5</reason>
+        <alternative>Let GPT-5 handle with large context</alternative>
+      </module>
+      
+      <module name="pipeline.py orchestrator">
+        <reason>Complex orchestration not needed</reason>
+        <alternative>SurfCastAI's simpler pipeline</alternative>
+      </module>
+    </modules_not_to_port>
+  </appendix>
+
+  <!-- ============================================================ -->
+  <!-- APPENDIX: CONFIGURATION TEMPLATES                           -->
+  <!-- ============================================================ -->
+  <appendix id="configuration_templates">
+    <config name="config.yaml (Production)">
+      <![CDATA[
+general:
+  log_level: INFO
+  log_file: logs/surfcastai.log
+  output_directory: output
+  data_directory: data
+  timezone: Pacific/Honolulu
+
+openai:
+  model: gpt-5-mini              # Production choice: best quality/cost balance
+  max_output_tokens: 32768       # Allow long forecasts
+  verbosity: high                # Detailed analysis
+  reasoning_effort: medium       # Balance speed/quality
+
+forecast:
+  max_images: 10                 # GPT-5 limit
+  image_detail_levels:
+    pressure_charts: high        # 3000 tokens each (critical)
+    wave_models: auto            # 1500 tokens each (important)
+    satellite: auto              # 1500 tokens each (validation)
+    sst_charts: low              # 500 tokens (context only)
+  
+  token_budget: 150000           # Conservative for gpt-5-mini
+  warn_threshold: 200000         # GPT-5 context limit
+  enable_budget_enforcement: true
+  
+  refinement_cycles: 0           # Disabled for GPT-5
+  use_local_generator: false     # Always use OpenAI
+
+validation:
+  enable_accuracy_tracking: true
+  validate_after_hours: 24
+  target_mae: 2.0                # 2 feet Hawaiian scale
+  target_categorical_accuracy: 0.75  # 75% correct category
+  database_path: data/validation.db
+
+processing:
+  enable_source_scoring: true
+  enable_confidence_scoring: true
+  buoy:
+    min_confidence: 0.7
+    enable_trend_detection: true
+    enable_anomaly_detection: true
+]]>
+    </config>
+    
+    <config name="config.yaml (Development/Testing)">
+      <![CDATA[
+general:
+  log_level: DEBUG
+  
+openai:
+  model: gpt-5-nano              # Cheaper for testing
+  
+forecast:
+  max_images: 6                  # Reduce for faster testing
+  token_budget: 100000           # Lower budget
+  enable_budget_enforcement: true
+  use_local_generator: false     # Test with API
+]]>
+    </config>
+  </appendix>
+
+  <!-- ============================================================ -->
+  <!-- EXECUTION NOTES FOR CLAUDE CODE                             -->
+  <!-- ============================================================ -->
+  <execution_notes>
+    <note priority="CRITICAL">
+      Read this entire specification before starting. Understand the phased approach.
+    </note>
+    
+    <note priority="HIGH">
+      Complete Phase 1 before starting Phase 2. Each phase builds on previous.
+    </note>
+    
+    <note priority="HIGH">
+      Test thoroughly at each phase. Don't move forward with broken functionality.
+    </note>
+    
+    <note priority="MEDIUM">
+      Maintain SurfCastAI's clean architecture. Don't port complexity unnecessarily.
+    </note>
+    
+    <note priority="MEDIUM">
+      When in doubt about SwellGuy modules, ask before porting. Some may be obsolete.
+    </note>
+    
+    <note priority="LOW">
+      Document as you go. Update README.md with new features.
+    </note>
+    
+    <working_strategy>
+      <step>1. Read entire specification</step>
+      <step>2. Start with Phase 1, Task 1.1</step>
+      <step>3. Complete each task fully before moving to next</step>
+      <step>4. Run acceptance criteria tests after each task</step>
+      <step>5. Commit working code after each task</step>
+      <step>6. Move to next phase only when current phase complete</step>
+      <step>7. Update this spec with actual results and learnings</step>
+    </working_strategy>
+    
+    <when_stuck>
+      <action>Document the blocker</action>
+      <action>Try simpler approach first</action>
+      <action>Ask for clarification if spec unclear</action>
+      <action>Skip optional (MEDIUM/LOW priority) items if time-constrained</action>
+      <action>Focus on CRITICAL and HIGH priority first</action>
+    </when_stuck>
+  </execution_notes>
+</project_specification>

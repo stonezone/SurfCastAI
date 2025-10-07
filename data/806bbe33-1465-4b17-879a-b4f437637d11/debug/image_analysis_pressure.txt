@@ -1,0 +1,34 @@
+SUMMARY
+A strong North Pacific/Alaskan storm regime will be the dominant swell source for Hawaii over the next 3–6 days with long-period NNW-NW energy building across the islands. A secondary, shorter-period pulse associated with Tropical Storm Octave (well southeast/east of the islands) will produce limited E/SE energy for exposed south/east facing breaks. Trades remain active under a broad subtropical high, producing local east wind swell and onshore/easterly texture for many spots.
+
+DETAILS
+- Primary NNW/NW swell (source): Deep low centered in the western Gulf of Alaska / Aleutian region (pressure ~969–980 mb on the charts) with a strong cold front and gale/ storm-force winds wrapping around the system. Fetch orientation is southeasterly toward Hawaii (aiming across the mid-latitude North Pacific). Expected swell direction into Hawaii: roughly 300°–320° true. Period: predominantly 14–18+ seconds (long-period groundswell). Arrival: energy begins to reach the islands in ~3 days, building to peak energy 4–6 days out (highest energy window centered ~72–120 hrs after chart time). Hawaiian scale size: building to locally significant — exposed North Shore reef/pipeline faces in the 8–12 ft Hawaiian scale range at peak (solid overhead to occasionally much bigger on the biggest sets at the most exposed spots); most North Shore reef breaks 6–10 ft Hawaiian scale during the peak window. Confidence: medium-high (strong, well-defined Aleutian low plus tight gradients).
+
+- Secondary tropical swell (Octave): Tropical cyclone noted on the charts centered roughly east-southeast of Hawaii (near ~12–16N, ~120–130W on the surface charts) with max winds 45–65 kt. Fetch is east-southeast toward the islands; swell vector into Hawaii ~130°–160° (ESE to SE). Period: shorter than the Aleutian swell, mainly 10–14 seconds with some longer bands if the storm intensifies. Arrival: earliest energy in ~2–4 days for the south/east facing shores, peak timing dependent on storm evolution (monitor NHC/NWS). Hawaiian scale size: small-to-moderate — many south/east-exposed breaks 2–5 ft Hawaiian scale at peak, with the largest response on very exposed south-facing reefs. Confidence: medium (track/intensity of tropical system will control final size).
+
+- Local trades / wind swell: Strong subtropical ridge/blocked high centered northeast of the islands (charts show 1026–1039 mb highs across the central Pacific) maintaining moderate to strong east to ENE trades along and south of the high’s southern periphery. Expect continued short-period wind/bumps on east-facing shores (6–10 second energy). Typical east shore wind swell 2–4 ft Hawaiian scale with higher raw chop at exposed points. Confidence: high.
+
+NORTH SHORE
+- Expect the long-period NNW/NW groundswell from the Aleutian/Gulf of Alaska storm to build mid- to late-week. Direction ~300°–320° will favor the classic North Shore exposures (Ehukai/Pipeline, Sunset, Haleiwa).
+- Timing: swell onset ~72 hrs after the chart time, peaking in the 72–120 hr window. Peak periods 14–18s. Peak heights: exposed reef heads (Pipeline/Sunset) could see 8–12 ft Hawaiian scale faces at the top of the pulse; more protected points 6–8 ft Hawaiian scale. Expect powerful, hollow waves at the most exposed reef passes.
+- Winds: trades and a large subtropical high keep easterly component predominating; best windows will be early mornings when trades ease. Local NW winds possible ahead of the front passage at some points — watch for onshore/variable winds that can degrade clean lines.
+- Hazards: significant current, strong shorebreak at exposed beaches, and very large sets at the most direct-angled breaks. Surfcraft and local knowledge required.
+
+SOUTH SHORE
+- Tropical Storm Octave is the principal south/east energy source. Expect limited, shorter-period ESE/SE pulses arriving within 2–4 days depending on storm evolution. Direction ~130°–160°. Periods shorter (10–14s) than the Aleutian swell, so the surf will be punchy, not the long, drawn-out north sets.
+- Heights: most south-facing, exposed reefs and points could see 2–5 ft Hawaiian scale at peak; sheltered beaches may only see background south-swell 1–2 ft.
+- Winds: steady trades and the subtropical high will give east to ESE winds — expect onshore texture at many south/east facing spots, with cleaner conditions at protected coves and early morning lulls.
+- Note: if Octave strengthens or shifts westward, the south-swell could increase and period lengthen; monitor tropical advisories.
+
+OUTLOOK
+- Through day 7 the dominant trend is NW energy from the Aleutian/Gulf of Alaska storm regime gradually declining after its peak; expect a decrease in period and size 5–8 days after the peak as the fetch weakens and moves east.
+- The subtropical high(s) shown on the charts (1026–1039 mb) will persist and maintain/enhance trade winds along the islands’ southern and eastern flanks — this will keep east wind swell present and likely produce onshore/easterly wind texture at many breaks during the afternoon and into the evening.
+- A follow-up mid-latitude gale is indicated in the upstream charts and forecast loop near the Aleutians; this has the potential to generate another NW pulse later in the 7–10 day range if it deepens and maintains fetch aimed toward Hawaii. Confidence on that follow-up pulse is medium (dependent on storm evolution).
+- Tropical threat: Octave is being monitored; if it intensifies and shifts west, expect larger SE/ESE energy and longer periods reaching the islands. Continue to follow official NHC/NWS advisories for track/intensity updates.
+
+Key synoptic points to watch (chart-derived)
+- Deep Aleutian low (≈969–980 mb) with strong cold frontal/gale fetch oriented toward Hawaii — main source for long-period NW groundswell (arrival ~3–6 days).
+- Tropical Storm Octave east-southeast of Hawaii (45–65 kt) — source for ESE/SE shorter-period swell in 2–4 days (track/intensity-sensitive).
+- Strong subtropical high ridge (1026–1039 mb) centered east-northeast of the islands — sustains trades, producing wind swell and possible swell-shadowing/deflection effects depending on storm track and the high’s placement.
+
+If you want timings converted to specific local dates/times for particular breaks (Pipeline, Sunset, Haleiwa, Makaha, South Shore points), tell me which island/break and I’ll give precise arrival/peak windows and expected faces in Hawaiian scale.

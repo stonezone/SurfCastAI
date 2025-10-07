@@ -1,0 +1,20 @@
+{
+  "station": "PHNL",
+  "metar": "PHNL 042153Z 06014G21KT 10SM FEW026 FEW060 31/18 A3003 RMK AO2 SLP170 T03110183 $",
+  "issued": "2025-10-04T21:53:00Z",
+  "wind_direction_deg": 60,
+  "wind_speed_kt": 14,
+  "wind_speed_ms": 7.2,
+  "wind_gust_kt": 21,
+  "wind_gust_ms": 10.8,
+  "visibility_sm": 10.0,
+  "temperature_c": 31.0,
+  "dewpoint_c": 18.0,
+  "pressure_inhg": 30.03,
+  "pressure_hpa": 1016.9,
+  "raw_lines": [
+    "2025/10/04 21:53",
+    "PHNL 042153Z 06014G21KT 10SM FEW026 FEW060 31/18 A3003 RMK AO2 SLP170 T03110183 $"
+  ],
+  "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHNL.TXT"
+}

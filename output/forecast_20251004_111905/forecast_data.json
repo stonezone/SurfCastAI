@@ -1,0 +1,44 @@
+{
+  "forecast_id": "forecast_20251004_111905",
+  "generated_time": "2025-10-04T11:19:05.932119",
+  "main_forecast": "SUMMARY:\nPrimary NNW swell building Sat 10:20 HST and peaking Sat 10:20 HST keeps the North Shore in the 29-43 ft zone. Secondary NNW lines hold 29-43 ft faces building Sat 10:40 HST and peaking Sat 10:40 HST. Secondary E lines hold 24-35 ft faces building Sat 10:20 HST and peaking Sat 10:20 HST. Trade winds from the 60 at 15 kt keep mornings cleaner than afternoons. Forecast confidence sits at 0.7/1.0 with good data coverage.\n\nDETAILS:\n- NNW swell (14s) delivers 29-43 ft faces building Sat 10:20 HST and peaking Sat 10:20 HST with strongest impact on North Shore.\n- NNW swell (14s) delivers 29-43 ft faces building Sat 10:40 HST and peaking Sat 10:40 HST with strongest impact on North Shore.\n- SSE swell (15s) delivers 12-18 ft faces building Sat 10:30 HST and peaking Sat 10:30 HST with strongest impact on South Shore.\n- E swell (7s) delivers 24-35 ft faces building Sat 10:20 HST and peaking Sat 10:20 HST with strongest impact on South Shore.\n- SSW swell (15s) delivers 10-16 ft faces building Sat 10:30 HST and peaking Sat 10:30 HST with strongest impact on South Shore.\n- ENE swell (7s) delivers 21-31 ft faces building Sat 10:26 HST and peaking Sat 10:26 HST with strongest impact on South Shore.\n- NNW swell (10s) delivers 13-20 ft faces building Sat 10:26 HST and peaking Sat 10:26 HST with strongest impact on North Shore.\n- E swell (6s) delivers 21-31 ft faces building Sat 10:20 HST and peaking Sat 10:20 HST with strongest impact on South Shore.\n- ENE swell (7s) delivers 16-24 ft faces building Sat 10:26 HST and peaking Sat 10:26 HST with strongest impact on South Shore.\n\nNORTH SHORE SNAPSHOT:\nNNW energy keeps 29-43 ft faces Sat 10:20 HST-Sat 10:20 HST with moderate confidence. Watch for NNW background lines around Sat 10:40 HST-Sat 10:40 HST holding 29-43 ft faces. Watch for E background lines around Sat 10:20 HST-Sat 10:20 HST holding 24-35 ft faces. Watch for E background lines around Sat 10:20 HST-Sat 10:20 HST holding 21-31 ft faces. Watch for ENE background lines around Sat 10:26 HST-Sat 10:26 HST holding 21-31 ft faces. Watch for ENE background lines around Sat 10:26 HST-Sat 10:26 HST holding 16-24 ft faces. Watch for NNW background lines around Sat 10:26 HST-Sat 10:26 HST holding 13-20 ft faces.\n\nSOUTH SHORE SNAPSHOT:\nSSE energy keeps 12-18 ft faces Sat 10:30 HST-Sat 10:30 HST with moderate confidence. Watch for SSW background lines around Sat 10:30 HST-Sat 10:30 HST holding 10-16 ft faces.\n\nOUTLOOK:\nExpect Fall pattern with early season nw swells begin to arrive. transition period with improving conditions as winter approaches. up north and end of south swell season with decreasing activity and size. in town patterns to hold. North Shore stays active through the next couple of days while South Shore trends toward seasonal background. Monitor new NDBC runs for updates.",
+  "north_shore": "North Shore leans on a NNW swell delivering 29-43 ft faces and 14.4ft Hawaiian Hawaiian scale surf through Sat 10:20 HST.\nNorth Shore sees 60 trades around 15 kt; aim for morning windows before onshores roughen the faces.\nSecondary energy from NNW holds 29-43 ft faces (14.4ft Hawaiian Hawaiian) with the best window Sat 10:40 HST-Sat 10:40 HST Secondary energy from E holds 24-35 ft faces (11.8ft Hawaiian Hawaiian) with the best window Sat 10:20 HST-Sat 10:20 HST Secondary energy from E holds 21-31 ft faces (10.5ft Hawaiian Hawaiian) with the best window Sat 10:20 HST-Sat 10:20 HST Secondary energy from ENE holds 21-31 ft faces (10.5ft Hawaiian Hawaiian) with the best window Sat 10:26 HST-Sat 10:26 HST Secondary energy from ENE holds 16-24 ft faces (7.9ft Hawaiian Hawaiian) with the best window Sat 10:26 HST-Sat 10:26 HST Secondary energy from NNW holds 13-20 ft faces (6.6ft Hawaiian Hawaiian) with the best window Sat 10:26 HST-Sat 10:26 HST\nMix of reefs and sandbars respond similarly today.\nNorth Shore sees 60 trades around 15 kt; aim for morning windows before onshores roughen the faces.\nOverall confidence checks in at 0.7/1.0; expect typical seasonal variability.",
+  "south_shore": "South Shore leans on a SSE swell delivering 12-18 ft faces and 5.9ft Hawaiian Hawaiian scale surf through Sat 10:30 HST.\nSouth Shore sees 60 trades around 15 kt; aim for morning windows before onshores roughen the faces.\nSecondary energy from SSW holds 10-16 ft faces (5.2ft Hawaiian Hawaiian) with the best window Sat 10:30 HST-Sat 10:30 HST\nMix of reefs and sandbars respond similarly today.\nSouth Shore sees 60 trades around 15 kt; aim for morning windows before onshores roughen the faces.\nOverall confidence checks in at 0.7/1.0; expect typical seasonal variability.",
+  "daily": "Today (2025-10-04): Fall pattern with early season nw swells begin to arrive. transition period with improving conditions as winter approaches. up north and end of south swell season with decreasing activity and size. in town\nNorth Shore: 29-43 ft faces from the NNW swell, peak window Sat 10:20 HST-Sat 10:20 HST.\nSouth Shore: 12-18 ft faces with SSE energy, best mid-morning Sat 10:30 HST-Sat 10:30 HST.\nTrade winds from the 60 at 15 kt keep mornings cleaner than afternoons.\nHigh tide at 2025-10-03T23:20:00Z (2.1 ft) and at 2025-10-03T23:21:00Z (2.1 ft) and at 2025-10-03T23:22:00Z (2.1 ft), low tide at 2025-10-04T06:07:00Z (0.2 ft) and at 2025-10-04T06:08:00Z (0.2 ft) and at 2025-10-04T06:09:00Z (0.2 ft).\nTarget dawn patrol for clean faces before trades rise after lunch; town reefs handle winds best.",
+  "metadata": {
+    "source_data": {
+      "swell_events": 9,
+      "locations": 4
+    },
+    "confidence": {
+      "overall_score": 0.674515188605517,
+      "data_source_scores": {
+        "buoy": 0.9
+      },
+      "factors": {
+        "data_freshness": 0.9817172953517233,
+        "source_diversity": 0.3333333333333333,
+        "source_agreement": 0.7
+      }
+    },
+    "api_usage": {
+      "total_cost": 0.0,
+      "api_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "model": "gpt-5-mini"
+    },
+    "visualizations": {},
+    "historical_summary": {
+      "previous_id": "forecast_20251004_110852",
+      "previous_generated": "2025-10-04T11:08:52.679330",
+      "confidence_change": 0.24,
+      "hawaiian_avg_change": null,
+      "dominant_shift": null,
+      "summary_lines": [
+        "Confidence up 0.24 since the previous run."
+      ],
+      "source_path": "output/forecast_20251004_110852/forecast_data.json"
+    }
+  }
+}

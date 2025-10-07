@@ -1,0 +1,18 @@
+{
+  "station": "PHNL",
+  "metar": "PHNL 031853Z 05007KT 10SM FEW026 SCT040 28/21 A3003 RMK AO2 SLP168 T02830211 $",
+  "issued": "2025-10-03T18:53:00Z",
+  "wind_direction_deg": 50,
+  "wind_speed_kt": 7,
+  "wind_speed_ms": 3.6,
+  "visibility_sm": 10.0,
+  "temperature_c": 28.0,
+  "dewpoint_c": 21.0,
+  "pressure_inhg": 30.03,
+  "pressure_hpa": 1016.9,
+  "raw_lines": [
+    "2025/10/03 18:53",
+    "PHNL 031853Z 05007KT 10SM FEW026 SCT040 28/21 A3003 RMK AO2 SLP168 T02830211 $"
+  ],
+  "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHNL.TXT"
+}

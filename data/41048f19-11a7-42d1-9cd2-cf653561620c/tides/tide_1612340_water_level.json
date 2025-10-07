@@ -1,0 +1,2000 @@
+{
+  "station": "1612340",
+  "product": "water_level",
+  "fetched_at": "2025-10-06T19:58:29.627362+00:00",
+  "units": "metric",
+  "time_zone": "GMT",
+  "records": [
+    {
+      "Date Time": "2025-10-06 00:00",
+      "Water Level": "0.728",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:06",
+      "Water Level": "0.73",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:12",
+      "Water Level": "0.729",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:18",
+      "Water Level": "0.735",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:24",
+      "Water Level": "0.735",
+      "Sigma": "0.016",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:30",
+      "Water Level": "0.74",
+      "Sigma": "0.015",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:36",
+      "Water Level": "0.749",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:42",
+      "Water Level": "0.744",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:48",
+      "Water Level": "0.749",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 00:54",
+      "Water Level": "0.751",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:00",
+      "Water Level": "0.746",
+      "Sigma": "0.019",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:06",
+      "Water Level": "0.751",
+      "Sigma": "0.015",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:12",
+      "Water Level": "0.746",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:18",
+      "Water Level": "0.743",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:24",
+      "Water Level": "0.741",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:30",
+      "Water Level": "0.734",
+      "Sigma": "0.016",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:36",
+      "Water Level": "0.731",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:42",
+      "Water Level": "0.713",
+      "Sigma": "0.022",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:48",
+      "Water Level": "0.696",
+      "Sigma": "0.022",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 01:54",
+      "Water Level": "0.703",
+      "Sigma": "0.02",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:00",
+      "Water Level": "0.687",
+      "Sigma": "0.019",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:06",
+      "Water Level": "0.671",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:12",
+      "Water Level": "0.667",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:18",
+      "Water Level": "0.662",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:24",
+      "Water Level": "0.633",
+      "Sigma": "0.016",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:30",
+      "Water Level": "0.622",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:36",
+      "Water Level": "0.623",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:42",
+      "Water Level": "0.607",
+      "Sigma": "0.018",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:48",
+      "Water Level": "0.588",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 02:54",
+      "Water Level": "0.581",
+      "Sigma": "0.016",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:00",
+      "Water Level": "0.561",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:06",
+      "Water Level": "0.54",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:12",
+      "Water Level": "0.531",
+      "Sigma": "0.015",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:18",
+      "Water Level": "0.507",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:24",
+      "Water Level": "0.502",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:30",
+      "Water Level": "0.485",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:36",
+      "Water Level": "0.479",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:42",
+      "Water Level": "0.465",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:48",
+      "Water Level": "0.45",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 03:54",
+      "Water Level": "0.424",
+      "Sigma": "0.015",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:00",
+      "Water Level": "0.409",
+      "Sigma": "0.015",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:06",
+      "Water Level": "0.399",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:12",
+      "Water Level": "0.378",
+      "Sigma": "0.016",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:18",
+      "Water Level": "0.355",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:24",
+      "Water Level": "0.345",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:30",
+      "Water Level": "0.338",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:36",
+      "Water Level": "0.318",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:42",
+      "Water Level": "0.297",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:48",
+      "Water Level": "0.282",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 04:54",
+      "Water Level": "0.267",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:00",
+      "Water Level": "0.249",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:06",
+      "Water Level": "0.24",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:12",
+      "Water Level": "0.23",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:18",
+      "Water Level": "0.217",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:24",
+      "Water Level": "0.201",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:30",
+      "Water Level": "0.186",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:36",
+      "Water Level": "0.18",
+      "Sigma": "0.01",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:42",
+      "Water Level": "0.167",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:48",
+      "Water Level": "0.158",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 05:54",
+      "Water Level": "0.151",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:00",
+      "Water Level": "0.14",
+      "Sigma": "0.018",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:06",
+      "Water Level": "0.131",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:12",
+      "Water Level": "0.129",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:18",
+      "Water Level": "0.114",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:24",
+      "Water Level": "0.108",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:30",
+      "Water Level": "0.113",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:36",
+      "Water Level": "0.12",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:42",
+      "Water Level": "0.099",
+      "Sigma": "0.015",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:48",
+      "Water Level": "0.097",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 06:54",
+      "Water Level": "0.107",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:00",
+      "Water Level": "0.089",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:06",
+      "Water Level": "0.08",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:12",
+      "Water Level": "0.088",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:18",
+      "Water Level": "0.099",
+      "Sigma": "0.01",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:24",
+      "Water Level": "0.1",
+      "Sigma": "0.01",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:30",
+      "Water Level": "0.098",
+      "Sigma": "0.01",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:36",
+      "Water Level": "0.103",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:42",
+      "Water Level": "0.106",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:48",
+      "Water Level": "0.106",
+      "Sigma": "0.01",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 07:54",
+      "Water Level": "0.111",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:00",
+      "Water Level": "0.125",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:06",
+      "Water Level": "0.138",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:12",
+      "Water Level": "0.148",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:18",
+      "Water Level": "0.151",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:24",
+      "Water Level": "0.17",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:30",
+      "Water Level": "0.174",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:36",
+      "Water Level": "0.19",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:42",
+      "Water Level": "0.196",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:48",
+      "Water Level": "0.21",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 08:54",
+      "Water Level": "0.228",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:00",
+      "Water Level": "0.241",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:06",
+      "Water Level": "0.251",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:12",
+      "Water Level": "0.263",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:18",
+      "Water Level": "0.285",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:24",
+      "Water Level": "0.287",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:30",
+      "Water Level": "0.303",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:36",
+      "Water Level": "0.324",
+      "Sigma": "0.016",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:42",
+      "Water Level": "0.346",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:48",
+      "Water Level": "0.367",
+      "Sigma": "0.016",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 09:54",
+      "Water Level": "0.385",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:00",
+      "Water Level": "0.404",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:06",
+      "Water Level": "0.415",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:12",
+      "Water Level": "0.436",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:18",
+      "Water Level": "0.454",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:24",
+      "Water Level": "0.474",
+      "Sigma": "0.016",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:30",
+      "Water Level": "0.492",
+      "Sigma": "0.016",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:36",
+      "Water Level": "0.512",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:42",
+      "Water Level": "0.524",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:48",
+      "Water Level": "0.539",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 10:54",
+      "Water Level": "0.556",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:00",
+      "Water Level": "0.567",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:06",
+      "Water Level": "0.587",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:12",
+      "Water Level": "0.603",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:18",
+      "Water Level": "0.622",
+      "Sigma": "0.015",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:24",
+      "Water Level": "0.634",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:30",
+      "Water Level": "0.645",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:36",
+      "Water Level": "0.66",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:42",
+      "Water Level": "0.666",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:48",
+      "Water Level": "0.683",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 11:54",
+      "Water Level": "0.694",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:00",
+      "Water Level": "0.716",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:06",
+      "Water Level": "0.721",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:12",
+      "Water Level": "0.728",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:18",
+      "Water Level": "0.74",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:24",
+      "Water Level": "0.744",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:30",
+      "Water Level": "0.746",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:36",
+      "Water Level": "0.76",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:42",
+      "Water Level": "0.762",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:48",
+      "Water Level": "0.766",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 12:54",
+      "Water Level": "0.773",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:00",
+      "Water Level": "0.771",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:06",
+      "Water Level": "0.772",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:12",
+      "Water Level": "0.759",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:18",
+      "Water Level": "0.763",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:24",
+      "Water Level": "0.77",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:30",
+      "Water Level": "0.765",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:36",
+      "Water Level": "0.769",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:42",
+      "Water Level": "0.768",
+      "Sigma": "0.016",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:48",
+      "Water Level": "0.767",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 13:54",
+      "Water Level": "0.763",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:00",
+      "Water Level": "0.761",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:06",
+      "Water Level": "0.753",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:12",
+      "Water Level": "0.751",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:18",
+      "Water Level": "0.75",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:24",
+      "Water Level": "0.74",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:30",
+      "Water Level": "0.729",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:36",
+      "Water Level": "0.729",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:42",
+      "Water Level": "0.715",
+      "Sigma": "0.016",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:48",
+      "Water Level": "0.709",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 14:54",
+      "Water Level": "0.7",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:00",
+      "Water Level": "0.686",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:06",
+      "Water Level": "0.669",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:12",
+      "Water Level": "0.661",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:18",
+      "Water Level": "0.646",
+      "Sigma": "0.017",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:24",
+      "Water Level": "0.633",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:30",
+      "Water Level": "0.617",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:36",
+      "Water Level": "0.617",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:42",
+      "Water Level": "0.597",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:48",
+      "Water Level": "0.571",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 15:54",
+      "Water Level": "0.559",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:00",
+      "Water Level": "0.542",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:06",
+      "Water Level": "0.524",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:12",
+      "Water Level": "0.516",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:18",
+      "Water Level": "0.506",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:24",
+      "Water Level": "0.489",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:30",
+      "Water Level": "0.475",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:36",
+      "Water Level": "0.467",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:42",
+      "Water Level": "0.455",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:48",
+      "Water Level": "0.443",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 16:54",
+      "Water Level": "0.428",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:00",
+      "Water Level": "0.421",
+      "Sigma": "0.013",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:06",
+      "Water Level": "0.405",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:12",
+      "Water Level": "0.398",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:18",
+      "Water Level": "0.378",
+      "Sigma": "0.014",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:24",
+      "Water Level": "0.361",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:30",
+      "Water Level": "0.349",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:36",
+      "Water Level": "0.338",
+      "Sigma": "0.014",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:42",
+      "Water Level": "0.328",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:48",
+      "Water Level": "0.318",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 17:54",
+      "Water Level": "0.306",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:00",
+      "Water Level": "0.297",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:06",
+      "Water Level": "0.287",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:12",
+      "Water Level": "0.264",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:18",
+      "Water Level": "0.267",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:24",
+      "Water Level": "0.265",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:30",
+      "Water Level": "0.258",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:36",
+      "Water Level": "0.248",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:42",
+      "Water Level": "0.241",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:48",
+      "Water Level": "0.243",
+      "Sigma": "0.012",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 18:54",
+      "Water Level": "0.232",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:00",
+      "Water Level": "0.221",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:06",
+      "Water Level": "0.225",
+      "Sigma": "0.011",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:12",
+      "Water Level": "0.224",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:18",
+      "Water Level": "0.214",
+      "Sigma": "0.015",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:24",
+      "Water Level": "0.219",
+      "Sigma": "0.013",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:30",
+      "Water Level": "0.218",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:36",
+      "Water Level": "0.214",
+      "Sigma": "0.012",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:42",
+      "Water Level": "0.206",
+      "Sigma": "0.011",
+      "O or I (for verified)": "0",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    },
+    {
+      "Date Time": "2025-10-06 19:48",
+      "Water Level": "0.216",
+      "Sigma": "0.01",
+      "O or I (for verified)": "1",
+      "F": "0",
+      "R": "0",
+      "L": "0",
+      "Quality": "p"
+    }
+  ],
+  "source_url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?station=1612340&product=water_level&datum=MLLW&units=metric&time_zone=GMT&date=today&format=csv"
+}

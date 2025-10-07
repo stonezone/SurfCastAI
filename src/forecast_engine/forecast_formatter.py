@@ -70,28 +70,58 @@ class ForecastFormatter:
             # Create forecast directory
             forecast_dir = self.output_dir / forecast_id
             forecast_dir.mkdir(exist_ok=True)
-            
-            visualizations = self.visualizer.generate_all(forecast_data, forecast_dir)
-            forecast_data.setdefault('metadata', {})['visualizations'] = visualizations
 
-            history_summary = self.history.build_summary(forecast_id, forecast_dir, forecast_data)
-            if history_summary:
-                forecast_data['metadata']['historical_summary'] = history_summary
+            # Generate visualizations with error handling
+            try:
+                self.logger.info("Generating visualizations...")
+                visualizations = self.visualizer.generate_all(forecast_data, forecast_dir)
+                self.logger.info(f"Generated {len(visualizations)} visualizations")
+                forecast_data.setdefault('metadata', {})['visualizations'] = visualizations
+            except Exception as e:
+                self.logger.error(f"Visualization generation failed: {e}")
+                forecast_data.setdefault('metadata', {})['visualizations'] = {}
+
+            # Build historical summary with error handling
+            try:
+                self.logger.info("Building historical summary...")
+                history_summary = self.history.build_summary(forecast_id, forecast_dir, forecast_data)
+                if history_summary:
+                    self.logger.info("Historical summary completed")
+                    forecast_data['metadata']['historical_summary'] = history_summary
+                else:
+                    self.logger.info("No historical summary available")
+            except Exception as e:
+                self.logger.error(f"Historical summary generation failed: {e}")
 
             # Format outputs
             output_paths = {}
-            
+
             if 'markdown' in self.formats:
-                markdown_path = self._format_markdown(forecast_data, forecast_dir)
-                output_paths['markdown'] = str(markdown_path)
-            
+                try:
+                    self.logger.info("Generating markdown format...")
+                    markdown_path = self._format_markdown(forecast_data, forecast_dir)
+                    output_paths['markdown'] = str(markdown_path)
+                    self.logger.info(f"Markdown format saved to: {markdown_path}")
+                except Exception as e:
+                    self.logger.error(f"Failed to generate markdown: {e}")
+
             if 'html' in self.formats:
-                html_path = self._format_html(forecast_data, forecast_dir)
-                output_paths['html'] = str(html_path)
-            
+                try:
+                    self.logger.info("Generating HTML format...")
+                    html_path = self._format_html(forecast_data, forecast_dir)
+                    output_paths['html'] = str(html_path)
+                    self.logger.info(f"HTML format saved to: {html_path}")
+                except Exception as e:
+                    self.logger.error(f"Failed to generate html: {e}")
+
             if 'pdf' in self.formats:
-                pdf_path = self._format_pdf(forecast_data, forecast_dir)
-                output_paths['pdf'] = str(pdf_path)
+                try:
+                    self.logger.info("Generating PDF format...")
+                    pdf_path = self._format_pdf(forecast_data, forecast_dir)
+                    output_paths['pdf'] = str(pdf_path)
+                    self.logger.info(f"PDF format saved to: {pdf_path}")
+                except Exception as e:
+                    self.logger.error(f"Failed to generate pdf: {e}")
             
             # Save original forecast data for reference
             with open(forecast_dir / 'forecast_data.json', 'w') as f:

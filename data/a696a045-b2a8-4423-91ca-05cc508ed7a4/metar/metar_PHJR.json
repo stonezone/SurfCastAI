@@ -1,0 +1,15 @@
+{
+  "station": "PHJR",
+  "metar": "PHJR 031920Z VRB06KT 10SM BKN029 BKN035 29/21 A3004 RMK AO2 T02890211",
+  "issued": "2025-10-03T19:20:00Z",
+  "visibility_sm": 10.0,
+  "temperature_c": 29.0,
+  "dewpoint_c": 21.0,
+  "pressure_inhg": 30.04,
+  "pressure_hpa": 1017.3,
+  "raw_lines": [
+    "2025/10/03 19:20",
+    "PHJR 031920Z VRB06KT 10SM BKN029 BKN035 29/21 A3004 RMK AO2 T02890211"
+  ],
+  "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHJR.TXT"
+}

@@ -146,9 +146,13 @@ class SatelliteAgent(BaseAgent):
     
     async def _process_satellite_page(self, url: str, satellite_dir: Path, satellite_info: Dict[str, str]) -> Dict[str, Any]:
         """Process a satellite web page URL to extract images."""
+        # Special handling for NOAA GOES sector pages
+        if 'star.nesdis.noaa.gov/goes/sector.php' in url:
+            return await self._process_goes_sector_page(url, satellite_dir, satellite_info)
+
         # Download the page content
         result = await self.http_client.download(url)
-        
+
         if not result.success:
             return self.create_metadata(
                 name=f"satellite_{satellite_info['type']}_{satellite_info['region']}",
@@ -157,29 +161,22 @@ class SatelliteAgent(BaseAgent):
                 source_url=url,
                 error=result.error
             )
-        
-        # Save the original page
-        page_filename = f"satellite_{satellite_info['type']}_{satellite_info['region']}_page.html"
-        page_path = satellite_dir / page_filename
-        
-        with open(page_path, 'wb') as f:
-            f.write(result.content)
-        
+
         # Extract image URLs from the page
         content = result.content.decode('utf-8', errors='ignore')
         image_urls = self._extract_image_urls(content, url)
-        
+
         # Download images
         image_metadata = []
         for img_url in image_urls:
             try:
                 # Generate a metadata entry for this specific image
                 image_result = await self._process_satellite_image(
-                    img_url, 
-                    satellite_dir, 
+                    img_url,
+                    satellite_dir,
                     satellite_info
                 )
-                
+
                 if image_result.get('status') == 'success':
                     image_metadata.append({
                         "url": img_url,
@@ -190,19 +187,97 @@ class SatelliteAgent(BaseAgent):
                     })
             except Exception as e:
                 self.logger.warning(f"Failed to download image {img_url}: {e}")
-        
+
         return self.create_metadata(
             name=f"satellite_{satellite_info['type']}_{satellite_info['region']}",
             description=f"{satellite_info['type']} satellite data for {satellite_info['region']}",
             data_type="html",
             source_url=url,
-            file_path=str(page_path),
-            satellite_type=satellite_info['type'],
-            region=satellite_info['region'],
             image_count=len(image_metadata),
             images=image_metadata
         )
-    
+
+    async def _process_goes_sector_page(self, url: str, satellite_dir: Path, satellite_info: Dict[str, str]) -> Dict[str, Any]:
+        """
+        Process NOAA GOES sector page by constructing direct CDN image URL.
+
+        Example URL: https://www.star.nesdis.noaa.gov/goes/sector.php?sat=G17&sector=hin&length=24&img=geocolor
+        CDN pattern: https://cdn.star.nesdis.noaa.gov/GOES{sat}/ABI/SECTOR/{sector}/{img}/latest.jpg
+
+        Note: Hawaii sector codes vary by satellite. Try multiple fallbacks.
+        """
+        from urllib.parse import urlparse, parse_qs
+
+        try:
+            # Parse URL parameters
+            parsed = urlparse(url)
+            params = parse_qs(parsed.query)
+
+            # Extract parameters
+            sat = params.get('sat', ['18'])[0]  # Default to GOES-18 (current operational West satellite)
+            sector = params.get('sector', ['hin'])[0]
+            img_type = params.get('img', ['geocolor'])[0]
+
+            # Clean satellite number (G17 -> 17, GOES-18 -> 18)
+            sat_num = ''.join(filter(str.isdigit, sat))
+            if not sat_num:
+                sat_num = '18'  # Default
+
+            # Map old satellites to current operational ones
+            # GOES-17 (decommissioned) -> GOES-18 (West)
+            # GOES-16 (East) still operational
+            if sat_num == '17':
+                sat_num = '18'  # GOES-17 replaced by GOES-18
+
+            # Construct CDN URLs to try (in order of preference)
+            img_type_upper = img_type.upper()
+            sector_lower = sector.lower()
+
+            # Try sector image first, then full disk as fallback for Hawaii
+            cdn_urls = [
+                f"https://cdn.star.nesdis.noaa.gov/GOES{sat_num}/ABI/SECTOR/{sector_lower}/{img_type_upper}/latest.jpg",
+                f"https://cdn.star.nesdis.noaa.gov/GOES{sat_num}/ABI/FD/{img_type_upper}/latest.jpg",  # Full disk fallback
+                f"https://cdn.star.nesdis.noaa.gov/GOES{sat_num}/ABI/SECTOR/pnw/{img_type_upper}/latest.jpg",  # Pacific Northwest (wider view)
+            ]
+
+            # Try each URL until one succeeds
+            last_error = None
+            for cdn_url in cdn_urls:
+                try:
+                    self.logger.info(f"Trying GOES CDN URL: {cdn_url}")
+                    result = await self._process_satellite_image(cdn_url, satellite_dir, satellite_info)
+
+                    # Check if successful
+                    if result.get('status') == 'success' or not result.get('error'):
+                        self.logger.info(f"Successfully downloaded from: {cdn_url}")
+                        return result
+                    else:
+                        last_error = result.get('error')
+                        self.logger.warning(f"Failed {cdn_url}: {last_error}")
+                except Exception as e:
+                    last_error = str(e)
+                    self.logger.warning(f"Failed {cdn_url}: {e}")
+                    continue
+
+            # All URLs failed
+            return self.create_metadata(
+                name=f"satellite_{satellite_info['type']}_{satellite_info['region']}",
+                description=f"Failed to download GOES satellite image (tried {len(cdn_urls)} URLs)",
+                data_type="image",
+                source_url=url,
+                error=f"All URLs failed. Last error: {last_error}"
+            )
+
+        except Exception as e:
+            self.logger.error(f"Failed to process GOES sector page {url}: {e}")
+            return self.create_metadata(
+                name=f"satellite_{satellite_info['type']}_{satellite_info['region']}",
+                description=f"Failed to process GOES sector page",
+                data_type="image",
+                source_url=url,
+                error=str(e)
+            )
+
     def _determine_satellite_info(self, url: str) -> Dict[str, str]:
         """Determine the type of satellite and region from the URL."""
         url_lower = url.lower()

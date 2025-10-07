@@ -13,7 +13,10 @@ from .rate_limiter import RateLimitConfig
 
 # Load environment variables from .env file at module import
 # This ensures env vars are available before any config is loaded
-load_dotenv()
+# Get project root (2 levels up from this file: src/core/config.py)
+_project_root = Path(__file__).parent.parent.parent
+_env_path = _project_root / '.env'
+load_dotenv(dotenv_path=_env_path, override=True)  # override=True allows .env to override shell variables
 
 logger = logging.getLogger(__name__)
 

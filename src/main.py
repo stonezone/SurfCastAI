@@ -136,12 +136,12 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     # Process weather data
     logger.info("Processing weather data")
     weather_processor = WeatherProcessor(config)
-    weather_results = weather_processor.process_bundle(bundle_id, "weather_*.json")
+    weather_results = weather_processor.process_bundle(bundle_id, "weather/weather_*.json")
     
     # Process model data
     logger.info("Processing wave model data")
     wave_model_processor = WaveModelProcessor(config)
-    model_results = wave_model_processor.process_bundle(bundle_id, "model_*.json")
+    model_results = wave_model_processor.process_bundle(bundle_id, "models/model_*.*")
     
     # Load supplemental agent outputs
     metar_data = _load_agent_json('metar', 'metar_*.json')
@@ -391,7 +391,6 @@ def bundle_info(config: Config, bundle_id: Optional[str] = None) -> None:
     # Print file list
     print("\nFile list available with --files option")
 
-
 def bundle_files(config: Config, bundle_id: Optional[str] = None) -> None:
     """Display file list for a specific bundle."""
     bundle_manager = BundleManager(config.data_directory)
@@ -428,7 +427,6 @@ def bundle_files(config: Config, bundle_id: Optional[str] = None) -> None:
             break
         
         print()
-
 
 def main():
     """Main entry point."""

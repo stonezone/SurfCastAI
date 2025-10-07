@@ -1,0 +1,14 @@
+[
+  {
+    "name": "tropical_outlook.json",
+    "description": "Central Pacific tropical outlook summary",
+    "type": "json",
+    "source": "TropicalAgent",
+    "status": "success",
+    "timestamp": "2025-10-04T21:16:55.669387+00:00",
+    "source_url": "https://www.nhc.noaa.gov/xml/TWOCP.xml",
+    "file_path": "data/4e2bb761-3a6b-4441-85f1-cc3f15f6ddaf/tropical/tropical_outlook.json",
+    "size_bytes": 1012,
+    "headline": "Central Pacific Tropical Weather Outlook"
+  }
+]

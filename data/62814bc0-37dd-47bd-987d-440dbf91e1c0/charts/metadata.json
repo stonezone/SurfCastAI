@@ -1,0 +1,61 @@
+[
+  {
+    "name": "P_sfc_full_ocean_color.png",
+    "description": "Marine analysis chart P_sfc_full_ocean_color.png",
+    "type": "image",
+    "source": "ChartAgent",
+    "status": "success",
+    "timestamp": "2025-10-04T21:22:19.504639+00:00",
+    "source_url": "https://ocean.weather.gov/P_sfc_full_ocean_color.png",
+    "file_path": "data/62814bc0-37dd-47bd-987d-440dbf91e1c0/charts/P_sfc_full_ocean_color.png",
+    "size_bytes": 157965,
+    "content_type": "image/png",
+    "download_time": 1.6600959300994873,
+    "chart_type": "P_sfc_full_ocean_color.png",
+    "manifest_path": "data/62814bc0-37dd-47bd-987d-440dbf91e1c0/charts/P_sfc_full_ocean_color.png.json"
+  },
+  {
+    "name": "P_sfc_24hr_ocean_color.png",
+    "description": "Marine analysis chart P_sfc_24hr_ocean_color.png",
+    "type": "html",
+    "source": "ChartAgent",
+    "status": "failed",
+    "timestamp": "2025-10-04T21:22:19.652557+00:00",
+    "source_url": "https://ocean.weather.gov/P_sfc_24hr_ocean_color.png",
+    "error": "HTTP 404: Not Found",
+    "status_code": 404
+  },
+  {
+    "name": "P_sfc_48hr_ocean_color.png",
+    "description": "Marine analysis chart P_sfc_48hr_ocean_color.png",
+    "type": "html",
+    "source": "ChartAgent",
+    "status": "failed",
+    "timestamp": "2025-10-04T21:22:19.795103+00:00",
+    "source_url": "https://ocean.weather.gov/P_sfc_48hr_ocean_color.png",
+    "error": "HTTP 404: Not Found",
+    "status_code": 404
+  },
+  {
+    "name": "P_sfc_96hr_ocean_color.png",
+    "description": "Marine analysis chart P_sfc_96hr_ocean_color.png",
+    "type": "html",
+    "source": "ChartAgent",
+    "status": "failed",
+    "timestamp": "2025-10-04T21:22:20.027658+00:00",
+    "source_url": "https://ocean.weather.gov/P_sfc_96hr_ocean_color.png",
+    "error": "HTTP 404: Not Found",
+    "status_code": 404
+  },
+  {
+    "name": "P_sfc_120hr_ocean_color.png",
+    "description": "Marine analysis chart P_sfc_120hr_ocean_color.png",
+    "type": "html",
+    "source": "ChartAgent",
+    "status": "failed",
+    "timestamp": "2025-10-04T21:22:22.073658+00:00",
+    "source_url": "https://ocean.weather.gov/P_sfc_120hr_ocean_color.png",
+    "error": "HTTP 404: Not Found",
+    "status_code": 404
+  }
+]

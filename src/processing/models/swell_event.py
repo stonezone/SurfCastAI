@@ -183,6 +183,29 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
                 source=event_data.get('source', ''),
                 metadata=event_data.get('metadata', {})
             )
+            
+            # Add primary components (same as main swell events)
+            for comp_data in event_data.get('primary_components', []):
+                component = SwellComponent(
+                    height=comp_data.get('height', 0.0),
+                    period=comp_data.get('period', 0.0),
+                    direction=comp_data.get('direction', 0.0),
+                    confidence=comp_data.get('confidence', 0.7),
+                    source=comp_data.get('source', 'model')
+                )
+                event.primary_components.append(component)
+            
+            # Add secondary components
+            for comp_data in event_data.get('secondary_components', []):
+                component = SwellComponent(
+                    height=comp_data.get('height', 0.0),
+                    period=comp_data.get('period', 0.0),
+                    direction=comp_data.get('direction', 0.0),
+                    confidence=comp_data.get('confidence', 0.7),
+                    source=comp_data.get('source', 'model')
+                )
+                event.secondary_components.append(component)
+            
             location.swell_events.append(event)
         
         forecast.locations.append(location)

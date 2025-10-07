@@ -1,0 +1,30 @@
+SUMMARY
+A long-period NNW/NW swell from a deep North Pacific storm is on track to reach the North Shore mid-late this week with solid size and long period (16–20s). A secondary NW/gale pulse follows behind. Trades/pressure pattern east of the Hawaiian chain build later this weekend producing wind-affected east and southeast exposures. Tropical Storm Octave well southeast of the islands is producing SSW energy; a small, longer-period SSW pulse is possible late in the 5–8 day window.
+
+DETAILS
+- Primary NNW swell: source = deep low/rapidly intensifying storm centered ~40–50N, 170–180W (pressure ~969–984 mb in the 24–48 hr charts). Fetch is broad, northwest-to-southeast oriented with sustained gale/strong-gale winds wrapping around the low. Fetch vector aimed toward Hawaii produces swell directions ~320°–330° true. Periods 16–20 s expected; arrival to the North Shore late in the 48–72 hr window (roughly Oct 5–6 UTC on these charts), peak energy 72–96 hrs after chart valid time (peak ~Oct 6–7), then gradual decline through day 5–7 as energy disperses.
+  - Hawaiian-scale size estimate at peak: North Shore primary breaks 8–12 ft faces (Hawaiian scale) with occasional larger sets possible at the most exposed points (Pipeline, Haleiwa/Central North Shore) depending on exact track/intensity of the parent low.
+
+- Secondary NW/gale pulse: a separate developing gale farther west (near 45N/160W region in the 24–48 hr forecasts) will add energy behind the primary pulse. Swell direction ~305°–320°, shorter period 12–16 s for the secondary pulse, timing ~96–120+ hrs (arriving late in the primary's decay, Oct 7–9), adding raw, windier surf to exposed NW faces.
+
+- Tropical/Southern component (TS Octave): Tropical Storm Octave located roughly 12–15N / 130–140W (max winds 40–55 kt noted on charts) moving WNW. Fetch oriented westward with strongest winds on the north side of the circulation; energy is SSW to SW directed (~200°–210°). Expect a relatively short-period (12–14 s) SSW pulse if the storm maintains strength and westward track. Arrival timeframe for S-facing breaks: late in the 5–8 day window (around Oct 8–11), size modest — 2–4 ft Hawaiian scale — unless Octave intensifies or tracks closer.
+
+- Wind/pressure gradient effects: a building strong subtropical/central Pacific high (1030–1039 mb in the 72–96 hr fields centered east of Hawaii) tightens the gradient between that high and the storm complex to the north. This produces strong north-northeast to east trades across the islands late in the forecast period (15–25 kt in many forecasts), increasing sea-state/wind chop on east and southeast facing breaks and reducing surf quality there. The same gradient helps generate and sustain the long fetch for the NW swell but will produce windier onshore conditions as the swell arrives unless a temporary offshore window opens (early mornings).
+
+NORTH SHORE
+- Expect the long-period NNW/NW swell to arrive mid-late period: first energy late in the 48–72 hr window, building to the peak 72–96 hrs after the valid chart (peak ~Oct 6–7). Direction ~320°–330°, period 16–20 s — heavy, powerful surf on the North Shore.
+- Size (Hawaiian scale): peak 8–12 ft faces at the most exposed spots (Pipeline, Haleiwa). Sunset/South facing sections will see smaller wrap-around energy but expect big, powerful sets at the exposed points.
+- Winds: Offshore to light variable early windows possible overnight/early AM ahead of the trade surge. As the central Pacific high strengthens, E/NE trades increase to 15–25 kt and will trend more onshore/crossshore for many north-facing spots, bumping and closing out faces — best surf will be early mornings or during any transient lull in the trades.
+- Hazards: strong currents, large sets, shorebreak at reef entries; local wind chop once trades build.
+
+SOUTH SHORE
+- Background: overall light for classic south-season surf this period. Primary energy is from the tropical system (Octave) — only a modest, short-period SSW pulse expected if Octave maintains intensity and westward motion.
+- Timing/size: SSW pulse arrival likely late in the 5–8 day window (Oct 8–11), direction ~200°–210°, period 12–14 s, size modest — 2–4 ft Hawaiian scale at exposed S/SW points (Kaʻanapali, Makaha for wrap, some longboard-friendly energy at Ala Moana/Diamond Head on smaller days).
+- Trades and local wind: building E/NE trades (15–25 kt) will produce wind swell/rind on east and southeast exposures, making conditioned south-facing spots less favorable during trade peaks. Protected south coves will see cleaner windows if trades back off overnight.
+
+OUTLOOK
+- Short term (next 3–5 days): Primary NNW/NW swell arrives and peaks mid‑period with solid long‑period energy. Expect a secondary NW pulse to follow; both will be accompanied by building trades that spoil east-facing exposures.
+- 5–8+ day: Watch Tropical Storm Octave — potential for a small SSW swell if it continues westward and holds intensity. The central Pacific high (1030–1039 mb) is forecast to strengthen and slide or hold east of the islands, maintaining trades and likely producing windier conditions for east-facing breaks through the extended period.
+- Confidence: high that the North Pacific storm(s) will produce significant NNW/NW long-period swell to the North Shore (arrival 48–72 hrs, peak 72–96 hrs). Moderate confidence in a modest SSW contribution from Octave (depends on track/intensity). Expect trade wind deterioration for east exposures as the 1030+ mb high builds.
+
+If you want precise arrival windows and modeled face-height estimates for particular spots (Pipeline, Haleiwa, Sunset, Makaha, Ala Moana), I can convert the storm geometry and estimated energy into specific surf-height and period arrival charts.

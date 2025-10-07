@@ -1,0 +1,58 @@
+[
+  {
+    "name": "satellite_goes_hawaii",
+    "description": "goes satellite image for hawaii",
+    "type": "image",
+    "source": "SatelliteAgent",
+    "status": "success",
+    "timestamp": "20251003",
+    "source_url": "https://cdn.star.nesdis.noaa.gov/GOES18/ABI/SECTOR/hi/GEOCOLOR/1200x1200.jpg",
+    "file_path": "data/32052178-ed86-403d-b062-0a6bdc5f85bc/satellite/satellite/satellite_goes_hawaii_20251003_1200x1200.jpg",
+    "satellite_type": "goes",
+    "region": "hawaii",
+    "content_type": "image/jpeg",
+    "size_bytes": 1192576
+  },
+  {
+    "name": "satellite_goes_hawaii",
+    "description": "goes satellite image for hawaii",
+    "type": "image",
+    "source": "SatelliteAgent",
+    "status": "success",
+    "timestamp": "20251003",
+    "source_url": "https://cdn.star.nesdis.noaa.gov/GOES18/ABI/SECTOR/hi/GEOCOLOR/2400x2400.jpg",
+    "file_path": "data/32052178-ed86-403d-b062-0a6bdc5f85bc/satellite/satellite/satellite_goes_hawaii_20251003_2400x2400.jpg",
+    "satellite_type": "goes",
+    "region": "hawaii",
+    "content_type": "image/jpeg",
+    "size_bytes": 3632707
+  },
+  {
+    "name": "satellite_unknown_unknown",
+    "description": "unknown satellite image for unknown",
+    "type": "image",
+    "source": "SatelliteAgent",
+    "status": "success",
+    "timestamp": "20251003",
+    "source_url": "https://www.weather.gov/images/hfo/satellite/State_VIS.gif",
+    "file_path": "data/32052178-ed86-403d-b062-0a6bdc5f85bc/satellite/satellite/satellite_unknown_unknown_20251003_State_VIS.gif",
+    "satellite_type": "unknown",
+    "region": "unknown",
+    "content_type": "image/gif",
+    "size_bytes": 108943
+  },
+  {
+    "name": "satellite_unknown_hawaii",
+    "description": "unknown satellite image for hawaii",
+    "type": "image",
+    "source": "SatelliteAgent",
+    "status": "success",
+    "timestamp": "20251003",
+    "source_url": "https://www.weather.gov/images/hfo/satellite/Hawaii_IR.gif",
+    "file_path": "data/32052178-ed86-403d-b062-0a6bdc5f85bc/satellite/satellite/satellite_unknown_hawaii_20251003_Hawaii_IR.gif",
+    "satellite_type": "unknown",
+    "region": "hawaii",
+    "content_type": "image/gif",
+    "size_bytes": 90108
+  }
+]

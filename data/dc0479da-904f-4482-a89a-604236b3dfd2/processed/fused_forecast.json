@@ -1,0 +1,1171 @@
+{
+  "forecast_id": "forecast_20251005_011722",
+  "generated_time": "2025-10-05T01:17:22.867855",
+  "swell_events": [
+    {
+      "event_id": "buoy_51101_20251005",
+      "start_time": "2025-10-05T10:20:00Z",
+      "peak_time": "2025-10-05T10:20:00Z",
+      "primary_direction": 341.0,
+      "significance": 0.7020000000000001,
+      "hawaii_scale": 8.858268,
+      "end_time": "2025-10-05T10:20:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 2.7,
+          "period": 13.0,
+          "direction": 341.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51101",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51101",
+          "observation_time": "2025-10-05T10:20:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_north_shore": 0.5
+      }
+    },
+    {
+      "event_id": "buoy_51001_20251005",
+      "start_time": "2025-10-05T10:20:00Z",
+      "peak_time": "2025-10-05T10:20:00Z",
+      "primary_direction": 331.0,
+      "significance": 0.6,
+      "hawaii_scale": 8.2021,
+      "end_time": "2025-10-05T10:20:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 2.5,
+          "period": 12.0,
+          "direction": 331.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51001",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51001",
+          "observation_time": "2025-10-05T10:20:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_north_shore": 0.9028571428571428
+      }
+    },
+    {
+      "event_id": "buoy_51002_20251005",
+      "start_time": "2025-10-05T10:20:00Z",
+      "peak_time": "2025-10-05T10:20:00Z",
+      "primary_direction": 90.0,
+      "significance": 0.252,
+      "hawaii_scale": 5.905512,
+      "end_time": "2025-10-05T10:20:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 1.8,
+          "period": 7.0,
+          "direction": 90.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51002",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51002",
+          "observation_time": "2025-10-05T10:20:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_north_shore": 0.5,
+        "exposure_south_shore": 0.5,
+        "exposure_east_shore": 0.8
+      }
+    },
+    {
+      "event_id": "buoy_51004_20251005",
+      "start_time": "2025-10-05T10:20:00Z",
+      "peak_time": "2025-10-05T10:20:00Z",
+      "primary_direction": 65.0,
+      "significance": 0.252,
+      "hawaii_scale": 5.905512,
+      "end_time": "2025-10-05T10:20:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 1.8,
+          "period": 7.0,
+          "direction": 65.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51004",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51004",
+          "observation_time": "2025-10-05T10:20:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_north_shore": 0.5,
+        "exposure_east_shore": 0.8666666666666667
+      }
+    },
+    {
+      "event_id": "buoy_51201_20251005",
+      "start_time": "2025-10-05T10:26:00Z",
+      "peak_time": "2025-10-05T10:26:00Z",
+      "primary_direction": 321.0,
+      "significance": 0.546,
+      "hawaii_scale": 6.889764,
+      "end_time": "2025-10-05T10:26:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 2.1,
+          "period": 13.0,
+          "direction": 321.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51201",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51201",
+          "observation_time": "2025-10-05T10:26:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_north_shore": 0.9828571428571429,
+        "exposure_west_shore": 0.5
+      }
+    },
+    {
+      "event_id": "buoy_51202_20251005",
+      "start_time": "2025-10-05T10:26:00Z",
+      "peak_time": "2025-10-05T10:26:00Z",
+      "primary_direction": 348.0,
+      "significance": 0.41600000000000004,
+      "hawaii_scale": 5.249344000000001,
+      "end_time": "2025-10-05T10:26:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 1.6,
+          "period": 13.0,
+          "direction": 348.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51202",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51202",
+          "observation_time": "2025-10-05T10:26:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_north_shore": 0.5
+      }
+    },
+    {
+      "event_id": "buoy_51212_20251005",
+      "start_time": "2025-10-05T10:30:00Z",
+      "peak_time": "2025-10-05T10:30:00Z",
+      "primary_direction": 313.0,
+      "significance": 0.338,
+      "hawaii_scale": 4.265092,
+      "end_time": "2025-10-05T10:30:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 1.3,
+          "period": 13.0,
+          "direction": 313.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51212",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51212",
+          "observation_time": "2025-10-05T10:30:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_north_shore": 0.8914285714285715,
+        "exposure_west_shore": 0.5
+      }
+    },
+    {
+      "event_id": "buoy_51211_20251005",
+      "start_time": "2025-10-05T10:30:00Z",
+      "peak_time": "2025-10-05T10:30:00Z",
+      "primary_direction": 131.0,
+      "significance": 0.09,
+      "hawaii_scale": 2.952756,
+      "end_time": "2025-10-05T10:30:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 0.9,
+          "period": 5.0,
+          "direction": 131.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51211",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51211",
+          "observation_time": "2025-10-05T10:30:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_south_shore": 0.5,
+        "exposure_east_shore": 0.5
+      }
+    },
+    {
+      "event_id": "buoy_51207_20251005",
+      "start_time": "2025-10-05T10:56:00Z",
+      "peak_time": "2025-10-05T10:56:00Z",
+      "primary_direction": 349.0,
+      "significance": 0.44199999999999995,
+      "hawaii_scale": 5.577427999999999,
+      "end_time": "2025-10-05T10:56:00Z",
+      "source": "buoy",
+      "primary_components": [
+        {
+          "height": 1.7,
+          "period": 13.0,
+          "direction": 349.0,
+          "confidence": 0.9,
+          "source": "buoy",
+          "metadata": {}
+        }
+      ],
+      "secondary_components": [],
+      "metadata": {
+        "station_id": "51207",
+        "buoy_name": null,
+        "confidence": 0.9,
+        "type": "observed",
+        "source_details": {
+          "buoy_id": "51207",
+          "observation_time": "2025-10-05T10:56:00Z",
+          "data_quality": "excellent",
+          "source_type": "NDBC realtime"
+        },
+        "exposure_north_shore": 0.5
+      }
+    }
+  ],
+  "locations": [
+    {
+      "name": "Oahu North Shore",
+      "shore": "North Shore",
+      "latitude": 21.6639,
+      "longitude": -158.0529,
+      "facing_direction": 0,
+      "swell_events": [
+        {
+          "event_id": "buoy_51101_20251005",
+          "start_time": "2025-10-05T10:20:00Z",
+          "peak_time": "2025-10-05T10:20:00Z",
+          "primary_direction": 341.0,
+          "significance": 0.7020000000000001,
+          "hawaii_scale": 8.858268,
+          "end_time": "2025-10-05T10:20:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 2.7,
+              "period": 13.0,
+              "direction": 341.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51101",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51101",
+              "observation_time": "2025-10-05T10:20:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.5
+          }
+        },
+        {
+          "event_id": "buoy_51001_20251005",
+          "start_time": "2025-10-05T10:20:00Z",
+          "peak_time": "2025-10-05T10:20:00Z",
+          "primary_direction": 331.0,
+          "significance": 0.6,
+          "hawaii_scale": 8.2021,
+          "end_time": "2025-10-05T10:20:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 2.5,
+              "period": 12.0,
+              "direction": 331.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51001",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51001",
+              "observation_time": "2025-10-05T10:20:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.9028571428571428
+          }
+        },
+        {
+          "event_id": "buoy_51002_20251005",
+          "start_time": "2025-10-05T10:20:00Z",
+          "peak_time": "2025-10-05T10:20:00Z",
+          "primary_direction": 90.0,
+          "significance": 0.252,
+          "hawaii_scale": 5.905512,
+          "end_time": "2025-10-05T10:20:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.8,
+              "period": 7.0,
+              "direction": 90.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51002",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51002",
+              "observation_time": "2025-10-05T10:20:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.5,
+            "exposure_south_shore": 0.5,
+            "exposure_east_shore": 0.8
+          }
+        },
+        {
+          "event_id": "buoy_51004_20251005",
+          "start_time": "2025-10-05T10:20:00Z",
+          "peak_time": "2025-10-05T10:20:00Z",
+          "primary_direction": 65.0,
+          "significance": 0.252,
+          "hawaii_scale": 5.905512,
+          "end_time": "2025-10-05T10:20:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.8,
+              "period": 7.0,
+              "direction": 65.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51004",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51004",
+              "observation_time": "2025-10-05T10:20:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.5,
+            "exposure_east_shore": 0.8666666666666667
+          }
+        },
+        {
+          "event_id": "buoy_51201_20251005",
+          "start_time": "2025-10-05T10:26:00Z",
+          "peak_time": "2025-10-05T10:26:00Z",
+          "primary_direction": 321.0,
+          "significance": 0.546,
+          "hawaii_scale": 6.889764,
+          "end_time": "2025-10-05T10:26:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 2.1,
+              "period": 13.0,
+              "direction": 321.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51201",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51201",
+              "observation_time": "2025-10-05T10:26:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.9828571428571429,
+            "exposure_west_shore": 0.5
+          }
+        },
+        {
+          "event_id": "buoy_51202_20251005",
+          "start_time": "2025-10-05T10:26:00Z",
+          "peak_time": "2025-10-05T10:26:00Z",
+          "primary_direction": 348.0,
+          "significance": 0.41600000000000004,
+          "hawaii_scale": 5.249344000000001,
+          "end_time": "2025-10-05T10:26:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.6,
+              "period": 13.0,
+              "direction": 348.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51202",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51202",
+              "observation_time": "2025-10-05T10:26:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.5
+          }
+        },
+        {
+          "event_id": "buoy_51212_20251005",
+          "start_time": "2025-10-05T10:30:00Z",
+          "peak_time": "2025-10-05T10:30:00Z",
+          "primary_direction": 313.0,
+          "significance": 0.338,
+          "hawaii_scale": 4.265092,
+          "end_time": "2025-10-05T10:30:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.3,
+              "period": 13.0,
+              "direction": 313.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51212",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51212",
+              "observation_time": "2025-10-05T10:30:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.8914285714285715,
+            "exposure_west_shore": 0.5
+          }
+        },
+        {
+          "event_id": "buoy_51207_20251005",
+          "start_time": "2025-10-05T10:56:00Z",
+          "peak_time": "2025-10-05T10:56:00Z",
+          "primary_direction": 349.0,
+          "significance": 0.44199999999999995,
+          "hawaii_scale": 5.577427999999999,
+          "end_time": "2025-10-05T10:56:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.7,
+              "period": 13.0,
+              "direction": 349.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51207",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51207",
+              "observation_time": "2025-10-05T10:56:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.5
+          }
+        }
+      ],
+      "metadata": {
+        "swell_exposure": [
+          [
+            270,
+            360
+          ],
+          [
+            0,
+            90
+          ]
+        ],
+        "quality_directions": [
+          [
+            305,
+            340
+          ]
+        ],
+        "seasonal_rating": {
+          "1": 0.9,
+          "2": 0.8,
+          "3": 0.7,
+          "4": 0.5,
+          "5": 0.3,
+          "6": 0.2,
+          "7": 0.1,
+          "8": 0.1,
+          "9": 0.2,
+          "10": 0.5,
+          "11": 0.7,
+          "12": 0.9
+        },
+        "seasonal_factor": 0.5,
+        "wind_factor": 0.5,
+        "overall_quality": 0.4553
+      }
+    },
+    {
+      "name": "Oahu South Shore",
+      "shore": "South Shore",
+      "latitude": 21.2749,
+      "longitude": -157.8238,
+      "facing_direction": 180,
+      "swell_events": [
+        {
+          "event_id": "buoy_51002_20251005",
+          "start_time": "2025-10-05T10:20:00Z",
+          "peak_time": "2025-10-05T10:20:00Z",
+          "primary_direction": 90.0,
+          "significance": 0.252,
+          "hawaii_scale": 5.905512,
+          "end_time": "2025-10-05T10:20:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.8,
+              "period": 7.0,
+              "direction": 90.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51002",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51002",
+              "observation_time": "2025-10-05T10:20:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.5,
+            "exposure_south_shore": 0.5,
+            "exposure_east_shore": 0.8
+          }
+        },
+        {
+          "event_id": "buoy_51211_20251005",
+          "start_time": "2025-10-05T10:30:00Z",
+          "peak_time": "2025-10-05T10:30:00Z",
+          "primary_direction": 131.0,
+          "significance": 0.09,
+          "hawaii_scale": 2.952756,
+          "end_time": "2025-10-05T10:30:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 0.9,
+              "period": 5.0,
+              "direction": 131.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51211",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51211",
+              "observation_time": "2025-10-05T10:30:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_south_shore": 0.5,
+            "exposure_east_shore": 0.5
+          }
+        }
+      ],
+      "metadata": {
+        "swell_exposure": [
+          [
+            90,
+            270
+          ]
+        ],
+        "quality_directions": [
+          [
+            170,
+            200
+          ]
+        ],
+        "seasonal_rating": {
+          "1": 0.2,
+          "2": 0.3,
+          "3": 0.4,
+          "4": 0.6,
+          "5": 0.8,
+          "6": 0.9,
+          "7": 0.9,
+          "8": 0.9,
+          "9": 0.7,
+          "10": 0.5,
+          "11": 0.3,
+          "12": 0.2
+        },
+        "seasonal_factor": 0.5,
+        "wind_factor": 0.5,
+        "overall_quality": 0.3878
+      }
+    },
+    {
+      "name": "Oahu West Shore",
+      "shore": "West Shore",
+      "latitude": 21.4152,
+      "longitude": -158.1928,
+      "facing_direction": 270,
+      "swell_events": [
+        {
+          "event_id": "buoy_51201_20251005",
+          "start_time": "2025-10-05T10:26:00Z",
+          "peak_time": "2025-10-05T10:26:00Z",
+          "primary_direction": 321.0,
+          "significance": 0.546,
+          "hawaii_scale": 6.889764,
+          "end_time": "2025-10-05T10:26:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 2.1,
+              "period": 13.0,
+              "direction": 321.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51201",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51201",
+              "observation_time": "2025-10-05T10:26:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.9828571428571429,
+            "exposure_west_shore": 0.5
+          }
+        },
+        {
+          "event_id": "buoy_51212_20251005",
+          "start_time": "2025-10-05T10:30:00Z",
+          "peak_time": "2025-10-05T10:30:00Z",
+          "primary_direction": 313.0,
+          "significance": 0.338,
+          "hawaii_scale": 4.265092,
+          "end_time": "2025-10-05T10:30:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.3,
+              "period": 13.0,
+              "direction": 313.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51212",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51212",
+              "observation_time": "2025-10-05T10:30:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.8914285714285715,
+            "exposure_west_shore": 0.5
+          }
+        }
+      ],
+      "metadata": {
+        "swell_exposure": [
+          [
+            210,
+            330
+          ]
+        ],
+        "quality_directions": [
+          [
+            270,
+            310
+          ]
+        ],
+        "seasonal_rating": {
+          "1": 0.8,
+          "2": 0.7,
+          "3": 0.6,
+          "4": 0.5,
+          "5": 0.4,
+          "6": 0.3,
+          "7": 0.2,
+          "8": 0.3,
+          "9": 0.4,
+          "10": 0.5,
+          "11": 0.6,
+          "12": 0.7
+        },
+        "seasonal_factor": 0.5,
+        "wind_factor": 0.5,
+        "overall_quality": 0.43189999999999995
+      }
+    },
+    {
+      "name": "Oahu East Shore",
+      "shore": "East Shore",
+      "latitude": 21.4813,
+      "longitude": -157.704,
+      "facing_direction": 90,
+      "swell_events": [
+        {
+          "event_id": "buoy_51002_20251005",
+          "start_time": "2025-10-05T10:20:00Z",
+          "peak_time": "2025-10-05T10:20:00Z",
+          "primary_direction": 90.0,
+          "significance": 0.252,
+          "hawaii_scale": 5.905512,
+          "end_time": "2025-10-05T10:20:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.8,
+              "period": 7.0,
+              "direction": 90.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51002",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51002",
+              "observation_time": "2025-10-05T10:20:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.5,
+            "exposure_south_shore": 0.5,
+            "exposure_east_shore": 0.8
+          }
+        },
+        {
+          "event_id": "buoy_51004_20251005",
+          "start_time": "2025-10-05T10:20:00Z",
+          "peak_time": "2025-10-05T10:20:00Z",
+          "primary_direction": 65.0,
+          "significance": 0.252,
+          "hawaii_scale": 5.905512,
+          "end_time": "2025-10-05T10:20:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 1.8,
+              "period": 7.0,
+              "direction": 65.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51004",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51004",
+              "observation_time": "2025-10-05T10:20:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_north_shore": 0.5,
+            "exposure_east_shore": 0.8666666666666667
+          }
+        },
+        {
+          "event_id": "buoy_51211_20251005",
+          "start_time": "2025-10-05T10:30:00Z",
+          "peak_time": "2025-10-05T10:30:00Z",
+          "primary_direction": 131.0,
+          "significance": 0.09,
+          "hawaii_scale": 2.952756,
+          "end_time": "2025-10-05T10:30:00Z",
+          "source": "buoy",
+          "primary_components": [
+            {
+              "height": 0.9,
+              "period": 5.0,
+              "direction": 131.0,
+              "confidence": 0.9,
+              "source": "buoy",
+              "metadata": {}
+            }
+          ],
+          "secondary_components": [],
+          "metadata": {
+            "station_id": "51211",
+            "buoy_name": null,
+            "confidence": 0.9,
+            "type": "observed",
+            "source_details": {
+              "buoy_id": "51211",
+              "observation_time": "2025-10-05T10:30:00Z",
+              "data_quality": "excellent",
+              "source_type": "NDBC realtime"
+            },
+            "exposure_south_shore": 0.5,
+            "exposure_east_shore": 0.5
+          }
+        }
+      ],
+      "metadata": {
+        "swell_exposure": [
+          [
+            30,
+            150
+          ]
+        ],
+        "quality_directions": [
+          [
+            60,
+            90
+          ]
+        ],
+        "seasonal_rating": {
+          "1": 0.7,
+          "2": 0.8,
+          "3": 0.8,
+          "4": 0.7,
+          "5": 0.6,
+          "6": 0.5,
+          "7": 0.5,
+          "8": 0.5,
+          "9": 0.6,
+          "10": 0.6,
+          "11": 0.7,
+          "12": 0.7
+        },
+        "seasonal_factor": 0.6,
+        "wind_factor": 0.5,
+        "overall_quality": 0.44048
+      }
+    }
+  ],
+  "metadata": {
+    "bundle_id": "dc0479da-904f-4482-a89a-604236b3dfd2",
+    "timestamp": "2025-10-05T11:13:39.302929+00:00",
+    "region": "Hawaii",
+    "agent_results": {
+      "buoys": {
+        "total": 13,
+        "successful": 12,
+        "failed": 1,
+        "success_rate": 92.3,
+        "total_size_bytes": 15815721
+      },
+      "weather": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 0
+      },
+      "models": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 0
+      },
+      "satellite": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 9535378
+      },
+      "metar": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 1138
+      },
+      "tides": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 254467
+      },
+      "charts": {
+        "total": 5,
+        "successful": 1,
+        "failed": 4,
+        "success_rate": 20.0,
+        "total_size_bytes": 156526
+      },
+      "tropical": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 1364
+      }
+    },
+    "stats": {
+      "total_files": 27,
+      "successful_files": 22,
+      "failed_files": 5,
+      "total_size_mb": 24.57
+    },
+    "weather": {
+      "metar_station": "PHNL",
+      "metar_issued": "2025-10-05T10:53:00Z",
+      "wind_direction": 80,
+      "wind_speed_ms": 4.63,
+      "temperature": 26.0,
+      "pressure_hpa": 1017.3,
+      "metar": {
+        "station": "PHNL",
+        "metar": "PHNL 051053Z 08009KT 10SM FEW025 FEW045 26/19 A3004 RMK AO2 SLP171 T02610189 $",
+        "issued": "2025-10-05T10:53:00Z",
+        "wind_direction_deg": 80,
+        "wind_speed_kt": 9,
+        "wind_speed_ms": 4.63,
+        "visibility_sm": 10.0,
+        "temperature_c": 26.0,
+        "dewpoint_c": 19.0,
+        "pressure_inhg": 30.04,
+        "pressure_hpa": 1017.3,
+        "raw_lines": [
+          "2025/10/05 10:53",
+          "PHNL 051053Z 08009KT 10SM FEW025 FEW045 26/19 A3004 RMK AO2 SLP171 T02610189 $"
+        ],
+        "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHNL.TXT"
+      }
+    },
+    "tides": {
+      "high_tide": [
+        [
+          "2025-10-03T23:20:00Z",
+          2.07
+        ],
+        [
+          "2025-10-03T23:21:00Z",
+          2.07
+        ],
+        [
+          "2025-10-03T23:22:00Z",
+          2.07
+        ]
+      ],
+      "low_tide": [
+        [
+          "2025-10-05T06:39:00Z",
+          0.09
+        ],
+        [
+          "2025-10-05T06:40:00Z",
+          0.09
+        ],
+        [
+          "2025-10-05T06:41:00Z",
+          0.09
+        ]
+      ],
+      "station": "1612340",
+      "latest_water_level": {
+        "time": "2025-10-05T11:06:00Z",
+        "height_ft": 1.89
+      }
+    },
+    "tropical": {
+      "headline": "Central Pacific Tropical Weather Outlook",
+      "entries": [
+        {
+          "title": "Central Pacific Tropical Weather Outlook",
+          "summary": "\n        000<br />ACPN50 PHFO 050511<br />TWOCP <br /><br />Tropical Weather Outlook<br />NWS Central Pacific Hurricane Center Honolulu HI<br />Issued by NWS National Hurricane Center Miami FL<br />800 PM HST Sat Oct 04 2025<br /><br />For the central North Pacific...between 140W and 180W:<br /><br />Active Systems:<br />The National Hurricane Center is issuing advisories on Tropical<br />Storm Octave, located in the eastern Pacific well to the<br />west-southwest of the southern tip of the Baja California Peninsula,<br />and on Tropical Storm Priscilla, located offshore of southwestern<br />Mexico.<br /><br />Tropical cyclone formation is not expected during the next 7 days.<br /><br />&&<br /><br />Public Advisories on Tropical Storm Priscilla are issued under<br />WMO header WTPZ31 KNHC and under AWIPS header MIATCPEP1.<br />Forecast/Advisories on Tropical Storm Priscilla are issued under<br />WMO header WTPZ21 KNHC and under AWIPS header MIATCMEP1.<br /><br />$$<br />Forecaster Gibbs<br />NNNN\n      ",
+          "link": "https://www.nhc.noaa.gov/text/HFOTWOCP.shtml"
+        }
+      ]
+    },
+    "charts": [
+      {
+        "type": "P_sfc_full_ocean_color.png",
+        "file_path": "data/dc0479da-904f-4482-a89a-604236b3dfd2/charts/P_sfc_full_ocean_color.png",
+        "source_url": "https://ocean.weather.gov/P_sfc_full_ocean_color.png"
+      },
+      {
+        "type": "P_sfc_full_ocean_color.png",
+        "file_path": "data/dc0479da-904f-4482-a89a-604236b3dfd2/charts/P_sfc_full_ocean_color.png",
+        "source_url": "https://ocean.weather.gov/P_sfc_full_ocean_color.png"
+      }
+    ],
+    "confidence": {
+      "overall_score": 0.6748098057253086,
+      "data_source_scores": {
+        "buoy": 0.9
+      },
+      "factors": {
+        "data_freshness": 0.9826993524176955,
+        "source_diversity": 0.3333333333333333,
+        "source_agreement": 0.7
+      }
+    }
+  }
+}

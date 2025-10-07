@@ -12,6 +12,16 @@ except ImportError:  # pragma: no cover - handled gracefully at runtime
     plt = None
 
 
+def degrees_to_cardinal(degrees):
+    """Convert degrees to cardinal direction."""
+    if degrees is None:
+        return "?"
+    dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+            "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    ix = round(degrees / 22.5) % 16
+    return dirs[ix]
+
+
 class ForecastVisualizer:
     """Generate simple charts that highlight the swell mix for a forecast."""
 
@@ -42,84 +52,123 @@ class ForecastVisualizer:
 
     def _build_swell_mix_chart(self, forecast_data: Dict[str, Any], assets_dir: Path) -> Optional[str]:
         """Plot Hawaiian scale heights for each detected swell event."""
-        events = forecast_data.get("swell_events", [])
-        if not events:
+        try:
+            events = forecast_data.get("swell_events", [])
+            if not events:
+                return None
+
+            labels = []
+            heights = []
+            periods = []
+            for event in events:
+                height = event.get("hawaii_scale")
+                if height is None:
+                    continue
+
+                # Extract direction from primary_direction (numeric degrees)
+                direction_deg = event.get("primary_direction")
+                direction = degrees_to_cardinal(direction_deg)
+
+                # Extract period from primary_components
+                period = None
+                primary_components = event.get("primary_components", [])
+                if primary_components and len(primary_components) > 0:
+                    period = primary_components[0].get("period")
+
+                # Build label with null check for period
+                if period is not None:
+                    labels.append(f"{direction}\n{period:.0f}s")
+                else:
+                    labels.append(f"{direction}\n?s")
+
+                heights.append(height)
+                periods.append(period)
+
+            if not heights:
+                return None
+
+            fig, ax = plt.subplots(figsize=(8, 4.5))
+            bars = ax.bar(range(len(heights)), heights, color="#0077b6")
+            ax.set_title("Primary Swell Mix (Hawaiian Scale)")
+            ax.set_ylabel("Height (ft)")
+            ax.set_xticks(range(len(labels)))
+            ax.set_xticklabels(labels, rotation=45, ha="right")
+            ymax = max(heights) * 1.2
+            ax.set_ylim(0, ymax or 1)
+            ax.grid(axis="y", linestyle="--", alpha=0.4)
+
+            for bar, period in zip(bars, periods):
+                if period is not None:
+                    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.2, f"{period:.0f}s", ha="center", va="bottom", fontsize=8)
+
+            fig.tight_layout()
+            output_path = assets_dir / "swell_mix.png"
+            fig.savefig(output_path, dpi=150, bbox_inches="tight")
+            plt.close(fig)
+            return str(output_path)
+        except Exception as e:
+            self.logger.error(f"Failed to generate swell mix chart: {e}")
             return None
-
-        labels = []
-        heights = []
-        periods = []
-        for event in events:
-            height = event.get("hawaii_scale")
-            direction = event.get("primary_direction_cardinal", "?")
-            period = event.get("dominant_period")
-            if height is None:
-                continue
-            labels.append(f"{direction}\n{period:.0f}s")
-            heights.append(height)
-            periods.append(period)
-
-        if not heights:
-            return None
-
-        fig, ax = plt.subplots(figsize=(8, 4.5))
-        bars = ax.bar(range(len(heights)), heights, color="#0077b6")
-        ax.set_title("Primary Swell Mix (Hawaiian Scale)")
-        ax.set_ylabel("Height (ft)")
-        ax.set_xticks(range(len(labels)))
-        ax.set_xticklabels(labels, rotation=45, ha="right")
-        ymax = max(heights) * 1.2
-        ax.set_ylim(0, ymax or 1)
-        ax.grid(axis="y", linestyle="--", alpha=0.4)
-
-        for bar, period in zip(bars, periods):
-            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.2, f"{period:.0f}s", ha="center", va="bottom", fontsize=8)
-
-        fig.tight_layout()
-        output_path = assets_dir / "swell_mix.png"
-        fig.savefig(output_path, dpi=150, bbox_inches="tight")
-        plt.close(fig)
-        return str(output_path)
 
     def _build_shore_focus_chart(self, forecast_data: Dict[str, Any], assets_dir: Path) -> Optional[str]:
         """Summarise expected face heights per shore based on event exposure."""
-        shore_data = forecast_data.get("shore_data", {})
-        if not shore_data:
+        try:
+            locations = forecast_data.get("locations", [])
+            if not locations:
+                return None
+
+            shore_labels = []
+            face_ranges = []
+            for location in locations:
+                if not isinstance(location, dict):
+                    continue
+
+                display = location.get("name", "Unknown Shore")
+                events = location.get("swell_events", [])
+                if not events:
+                    continue
+
+                # Calculate average height from swell events
+                total_height = 0.0
+                valid_events = 0
+                for event in events:
+                    height = event.get("hawaii_scale")
+                    if height is not None:
+                        total_height += height
+                        valid_events += 1
+
+                if valid_events == 0:
+                    continue
+
+                avg_height = total_height / valid_events
+                # Convert Hawaiian scale to approximate face height range
+                face_low = max(1, round(avg_height * 2))
+                face_high = max(face_low + 1, round(avg_height * 3))
+                shore_labels.append(display)
+                face_ranges.append((face_low, face_high))
+
+            if not shore_labels:
+                return None
+
+            lows = [low for low, _ in face_ranges]
+            highs = [high for _, high in face_ranges]
+
+            fig, ax = plt.subplots(figsize=(8, 4.5))
+            ax.bar(shore_labels, highs, color="#00b4d8", alpha=0.7, label="Upper range")
+            ax.bar(shore_labels, lows, color="#03045e", alpha=0.9, label="Lower range")
+            ax.set_ylabel("Face Height (ft)")
+            ax.set_title("Projected Face Heights by Shore")
+            ax.legend()
+            ax.grid(axis="y", linestyle="--", alpha=0.3)
+            fig.tight_layout()
+
+            output_path = assets_dir / "shore_faces.png"
+            fig.savefig(output_path, dpi=150, bbox_inches="tight")
+            plt.close(fig)
+            return str(output_path)
+        except Exception as e:
+            self.logger.error(f"Failed to generate shore focus chart: {e}")
             return None
-
-        shore_labels = []
-        face_ranges = []
-        for shore_key, info in shore_data.items():
-            display = info.get("name", shore_key.replace("_", " ").title())
-            events = info.get("swell_events", [])
-            if not events:
-                continue
-            avg_height = sum(event.get("hawaii_scale", 0.0) for event in events) / max(len(events), 1)
-            # Convert Hawaiian scale to approximate face height range
-            face_low = max(1, round(avg_height * 2))
-            face_high = max(face_low + 1, round(avg_height * 3))
-            shore_labels.append(display)
-            face_ranges.append((face_low, face_high))
-
-        if not shore_labels:
-            return None
-
-        lows = [low for low, _ in face_ranges]
-        highs = [high for _, high in face_ranges]
-
-        fig, ax = plt.subplots(figsize=(8, 4.5))
-        ax.bar(shore_labels, highs, color="#00b4d8", alpha=0.7, label="Upper range")
-        ax.bar(shore_labels, lows, color="#03045e", alpha=0.9, label="Lower range")
-        ax.set_ylabel("Face Height (ft)")
-        ax.set_title("Projected Face Heights by Shore")
-        ax.legend()
-        ax.grid(axis="y", linestyle="--", alpha=0.3)
-        fig.tight_layout()
-
-        output_path = assets_dir / "shore_faces.png"
-        fig.savefig(output_path, dpi=150, bbox_inches="tight")
-        plt.close(fig)
-        return str(output_path)
 
 
 __all__ = ["ForecastVisualizer"]

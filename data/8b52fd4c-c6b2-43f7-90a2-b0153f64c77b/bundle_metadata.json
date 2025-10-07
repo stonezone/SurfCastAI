@@ -1,0 +1,69 @@
+{
+  "bundle_id": "8b52fd4c-c6b2-43f7-90a2-b0153f64c77b",
+  "timestamp": "2025-10-03T19:59:58.428904+00:00",
+  "region": "Hawaii",
+  "agent_results": {
+    "buoys": {
+      "total": 13,
+      "successful": 12,
+      "failed": 1,
+      "success_rate": 92.3,
+      "total_size_bytes": 15942457
+    },
+    "weather": {
+      "total": 2,
+      "successful": 0,
+      "failed": 2,
+      "success_rate": 0.0,
+      "total_size_bytes": 0
+    },
+    "models": {
+      "total": 8,
+      "successful": 5,
+      "failed": 3,
+      "success_rate": 62.5,
+      "total_size_bytes": 1300221
+    },
+    "satellite": {
+      "total": 4,
+      "successful": 4,
+      "failed": 0,
+      "success_rate": 100.0,
+      "total_size_bytes": 4810061
+    },
+    "metar": {
+      "total": 2,
+      "successful": 2,
+      "failed": 0,
+      "success_rate": 100.0,
+      "total_size_bytes": 922
+    },
+    "tides": {
+      "total": 2,
+      "successful": 2,
+      "failed": 0,
+      "success_rate": 100.0,
+      "total_size_bytes": 273015
+    },
+    "charts": {
+      "total": 13,
+      "successful": 13,
+      "failed": 0,
+      "success_rate": 100.0,
+      "total_size_bytes": 2634245
+    },
+    "tropical": {
+      "total": 1,
+      "successful": 1,
+      "failed": 0,
+      "success_rate": 100.0,
+      "total_size_bytes": 990
+    }
+  },
+  "stats": {
+    "total_files": 45,
+    "successful_files": 39,
+    "failed_files": 6,
+    "total_size_mb": 23.81
+  }
+}

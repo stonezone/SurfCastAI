@@ -1,0 +1,40 @@
+[
+  {
+    "name": "weather_HFO_154,145",
+    "description": "Weather forecast data for HFO_154,145",
+    "type": "json",
+    "source": "WeatherAgent",
+    "status": "success",
+    "timestamp": "2025-10-05T11:13:40.050695+00:00",
+    "source_url": "https://api.weather.gov/gridpoints/HFO/154,145/forecast",
+    "file_path": "data/dc0479da-904f-4482-a89a-604236b3dfd2/weather/weather/weather_HFO_154,145.json",
+    "location": "HFO_154,145",
+    "forecast_info": {
+      "update_time": "2025-10-05T04:01:53+00:00",
+      "provider": "National Weather Service",
+      "forecast_period": "2025-10-05T01:00:00-10:00 to 2025-10-11T18:00:00-10:00",
+      "periods": 14,
+      "contains_wind": true,
+      "contains_marine": false
+    }
+  },
+  {
+    "name": "weather_HFO_148,158",
+    "description": "Weather forecast data for HFO_148,158",
+    "type": "json",
+    "source": "WeatherAgent",
+    "status": "success",
+    "timestamp": "2025-10-05T11:13:39.770950+00:00",
+    "source_url": "https://api.weather.gov/gridpoints/HFO/148,158/forecast",
+    "file_path": "data/dc0479da-904f-4482-a89a-604236b3dfd2/weather/weather/weather_HFO_148,158.json",
+    "location": "HFO_148,158",
+    "forecast_info": {
+      "update_time": "2025-10-05T04:01:53+00:00",
+      "provider": "National Weather Service",
+      "forecast_period": "2025-10-05T01:00:00-10:00 to 2025-10-11T18:00:00-10:00",
+      "periods": 14,
+      "contains_wind": true,
+      "contains_marine": false
+    }
+  }
+]

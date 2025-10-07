@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawaii Surf Forecast</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: #f5f7fa;
+        }
+        h1, h2, h3 {
+            color: #0066cc;
+        }
+        h1 {
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .generated-date {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .forecast-section {
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .forecast-section h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #e5eaf1;
+            padding-bottom: 12px;
+        }
+        .shore-specific {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .shore-forecast {
+            flex: 1;
+            min-width: 300px;
+        }
+        .confidence-meter {
+            background-color: #e8ecf5;
+            height: 18px;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .confidence-level {
+            height: 100%;
+            background-color: #0066cc;
+        }
+        .confidence-factors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .factor {
+            flex: 1;
+            min-width: 160px;
+            background-color: #f0f4ff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .chart-card {
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .chart-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .history-card ul {
+            padding-left: 18px;
+        }
+        .history-card ul li {
+            margin-bottom: 6px;
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+            }
+            .shore-specific {
+                flex-direction: column;
+            }
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #d7dce5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hawaii Surf Forecast</h1>
+    <div class="generated-date">Generated on October 05, 2025 at 00:20 </div>
+    <div class="forecast-section">
+        <h2>Main Forecast</h2>
+        <h3>Summary</h3>
+<p>A mix of residual NNW energy (longer-period components peaked 10/04 UTC) and short-period ENE/E wind-swell will dominate Oct 5–7. North Shore will remain elevated from the NNW pulses — biggest surf early in the window then slowly easing. Trades from the ENE (60°) will keep the north and east faces chopped in the afternoons; best windows are early mornings. A separate developing gale and Gulf/Alaska storm on the charts point to renewed, larger NW energy later in the week (arrival beyond Oct 7). Overall confidence: 0.6/1.0.</p>
+<h3>Details</h3>
+<ul>
+<li>Recent/peaked swells (peaked ~2025-10-04 UTC; translate to early HST 10/04):</li>
+<li>NNW ~330°: 7.<strong>5 ft</strong> @ 13s (Hawaiian) — main energy; also supporting NNW 7.<strong>2 ft</strong> @ 11s and 3.<strong>3 ft</strong> @ 10s. These combined produced the peak NNW regime on 10/04 HST and will be in decay through Oct 5–7.</li>
+<li>ENE/E short-period: 5.<strong>6 ft</strong> @ 7s (ENE ~70°), 5.<strong>6 ft</strong> @ 6s (ENE/E), plus smaller 3.<strong>9 ft</strong> @ 6s — typical trade/wind-swell energy that produces lump and chop on exposed east-facing breaks.</li>
+<li>SSW/SSE: a small long-period SSW 3.<strong>0 ft</strong> @ 15s (≈200°) plus short SSE 2.<strong>6 ft</strong> @ 6s — minimal southern influence but noticeable at the most exposed south-facing reefs if the winds back.</li>
+<li>Timing and trend (local HST):</li>
+<li>Oct 5 (Day 1): Residual NNW energy still solid — expect the NNW composite to remain capable of producing head-high-plus Hawaiian faces at exposed north-northwest reefs in the morning, with sets still sizeable through the day. ENE wind-swell and trades increase afternoon chop.</li>
+<li>Oct 6 (Day 2): NNW fields decline but remain moderate — fewer big sets, more of a heavy, long-interval background. ENE short-period energy continues to rag the surface; cleaner early.</li>
+<li>Oct 7 (Day 3): Continued decay of the Oct 4 peak; late-day signs of a new NW/WNW pulse building possible (see pressure-chart analysis) — expect decreasing size early, with NW energy beginning to trend up late-day into the 8–10+ day window.</li>
+<li>Pressure/swell generation integration:</li>
+<li>Strong Gulf/Alaska storm (~970 mb near 50N/165W) plus 999 mb/secondary lows are generating long-period NW energy (<strong>16–20s</strong>) aimed at Hawaii — arrival/primary reinforcement expected in the 4–7 day window (building after the Oct 7 timeframe). High confidence this will produce a sustained NW regime if the storm track holds.</li>
+<li>Developing gale (~1007 mb near 30N/170W) will send a shorter-period WNW/NW pulse (<strong>12–14s</strong>) sooner (3–5 days) — likely to overlap with and reinforce the longer-period energy.</li>
+<li>Trade high centered south (1023–1025 mb) will maintain moderate NE/ENE trades, favoring morning windows and producing afternoon onshore for many exposures.</li>
+</ul>
+<h3>North Shore</h3>
+<ul>
+<li>Size: Oct 5 — expect solid surf: exposed north-northwest points holding in the <strong>6–10 ft (Hawaiian)</strong> range with long intervals from the <strong>11–13s</strong>+ components still present; select sets still run bigger at the most exposed passes. Oct 6 — down to <strong>4–7 ft</strong> H-scale as the 13s/11s energy fades. Oct 7 — trend down in the morning (<strong>3–6 ft</strong> H-scale) with the possibility of new NW/WNW energy beginning to register late in the day.</li>
+<li>Period/direction: Dominantly NNW (≈320–335°) with long set intervals; expect heavy, punchy long-period sets where reef contours line up with the vector. Shorter-period WNW components from the developing gale will add a steeper, punchier look when they arrive.</li>
+<li>Wind/quality: Trades around ENE (60°) — expect cross-to-onshore winds in the afternoons (rough, bumpy conditions). Early mornings best for cleaner lines; wind direction makes many true north-facing points more cross-shore to slightly offshore at dawn in sheltered pockets but generally prone to bang and chop through the day.</li>
+<li>Break notes: Pipeline and Sunset will still see substantial faces on Oct 5 with long, powerful sets (heavy and fast). Rocky points and outer reef passes will be raw with strong currents. Waimea/Peʻahi exposure will begin to feel the long-period skeleton of the impending Gulf/Alaska pulse later in the week — stay alert for rapid size increases if the long-period <strong>16–20s</strong> energy arrives as charted.</li>
+<li>Hazards: Strong currents, large shorebreak, and powerful reef impact zones. Big sets will close out; only experienced surfers/paddle-in teams should consider the larger windows.</li>
+</ul>
+<h3>South Shore</h3>
+<ul>
+<li>Size: Minimal real southern energy through Oct 5–7. The SSW 3.<strong>0 ft</strong> @ 15s is small but may be detectable on very exposed south-facing reefs. Short SSE/E trade-wind energy and rough east chop will dominate the feel. If T.S. Octave holds/strengthens, there is potential for a modest SSE pulse in ~5–8 days — but for Oct 5–7 expect only small, inconsistent south-facing surf (<strong>2–4 ft</strong> H-scale at best on exposed points).</li>
+<li>Wind/quality: Persistent NE/ENE trades produce onshore/east chop on south and east exposures; Ala Moana and Diamond Head will be bumpy with lump — best early mornings and inside-protected points for small-board usability or longboarding at flat spots.</li>
+<li>Break notes: Protected inside breaks and coves (Ala Moana small-boat basin, Kewalo Basin) will be the most surfable options on smaller south/southeast energy days. Exposed south reef points will be inconsistent and wind-affected.</li>
+</ul>
+<h3>Outlook</h3>
+<ul>
+<li>Late Oct 7 onward: Expect a more pronounced NW regime to develop. The Gulf/Alaska 970 mb storm and 999 mb secondary lows point to significant long-period NW energy (<strong>16–20s</strong>) arriving in the 4–7 day window after chart time — this suggests building and then sustained large NW surf for the North Shore later in the week into the following week. The closer developing gale (30N/170W) should supply an earlier, punchy WNW component (<strong>12–14s</strong>) that will likely be the first pulse to elevate exposures before the long-period swell takes over.</li>
+<li>Trades/steering: The subtropical high (1023–1025 mb) will likely keep NE/ENE trades in place, so expect onshore afternoon conditions at many exposed breaks; morning windows will remain the best bet for quality.</li>
+<li>Tropical watch: Monitor T.S. Octave and T.D. 28W for south-swell potential 5–8+ days out. Any westward shift or strengthening of Octave raises the odds of a measurable SSE pulse, but trades and the high may shadow or refract much of that energy.</li>
+<li>Confidence: 0.6/1.0 — high confidence in a sustained NW regime building from high-latitude storms, medium confidence in precise timing/peak heights due to storm evolution and ridge position.</li>
+</ul>
+<p>Additional notes: current wind heading 60° (ENE); surface temperature ~31°C. Provided tide times show the most recent high/low on 10/03–10/04; check local tide tables for exact entry windows during your session.</p>
+<p>Pat Caldwell — Hawaiian surf forecaster
+Overall Forecast Confidence: 0.6/1.0</p>
+    </div>
+    <div class="shore-specific">
+        <div class="forecast-section shore-forecast">
+            <h2>North Shore Forecast</h2>
+            <p>Note: below is an original North Shore forecast written in a technical, local-forecaster style inspired by Pat Caldwell’s approach. I do not have reliable period or wind-speed information in the data you supplied (all swell periods are listed as 0.0 s and wind speed is unavailable). Period and wind speed are critical to wave power and shape; where that information is missing I’ll call out the uncertainty and give bifurcated guidance (what to expect if swells are long vs. short period, and how an ENE wind typically behaves on the North Shore).</p>
+<p>Quick summary (Oct 5–7)
+- Primary energy: a stack of NNW pulses (one large pulse ~7–7.<strong>5 ft</strong> Hawaiian plus smaller NNW energy) combined with an easterly/ENE component (several 3.9–5.<strong>6 ft</strong> Hawaiian ENE/E pulses). That creates a cross-swell situation.
+- Size: expect solid North Shore size — locally this reads as multiple Hawaiian-scale pulses in the mid-to-upper ranges (<strong>7 ft</strong> Hawaiian pulses are serious; remember Hawaiian scale roughly halves to give face height). If the NNW pulses are long-period (<strong>12–16s</strong>) this will be powerful and hollow at the classic north and north-northwest exposures; if the NNW energy is short-period (&lt;10s) expect punchy, wind-affected, more lump-and-chop conditions.
+- Wind: reported direction 60° (ENE). Speed not provided. ENE winds are generally sideshore-to-onshore for most North Shore points — that tends to add chop, close out shallow reef breaks and push more water into exposed bays. If winds are light early mornings, expect cleaner windows; if moderate to brisk, expect generally messy conditions, especially at Pipeline and Sunset.
+- Timing (broad): swell energy likely builds into Oct 5, peaks during Oct 5–6, then gradually eases by Oct 7. Because there are multiple pulses and a cross-directional E/ENE component, expect variability — sets will come in blocks and shape will vary by break.</p>
+<p>Swell analysis (what we know and what we don’t)
+- NNW energy: listed at 3.<strong>3 ft</strong>, 7.<strong>5 ft</strong> and 7.<strong>2 ft (Hawaiian)</strong>. The two 7+ ft pulses are the drivers here. Without reliable period it’s impossible to give exact power, but NNW is the right azimuth to light up the classic north faces (Ehukai/Pipeline, Sunset and Waimea exposures). Long-period NNW (<strong>12–16s</strong>+) produces steep, powerful, hollow north-facing waves that bite on the reefs; short-period NNW (&lt;10s) tends to be more punchy, with smaller faces and more closeouts and lump.
+- ENE/E/E pulses: 5.<strong>6 ft</strong> and 3.<strong>9 ft</strong> Hawaiian ENE/E energy will wrap into many east-facing and north-east-facing breaks (Sunset’s east-leaning shoulders, some beach breaks and shallow reef north of Haleiwa). That ENE component can either soften or confuse the NNW lines: it can fill in wind swell and make sets fuller (less hollow) or create cross chop that ruins barrels depending on relative period and timing.
+- Interaction: NNW + ENE means cross-swell. Where the reef/point orientation favors the NNW the NNW will dominate shape; where orientation opens to the east the ENE can create onshore lump or rideable smaller waves. Cross seas can make for tricky, confused conditions — tight, hollow barrels can still show, but expect inconsistent sets and more blown-out shoulders if winds go onshore.</p>
+<p>Day-by-day (local detail; times refer to general daily windows: early morning = before first light through mid-morning, late morning/afternoon, evening)
+Oct 5 (build / early peak)
+- General: Swell energy builds. Expect increasing sets in the morning with larger, more consistent blocks by late morning into afternoon as the 7+ ft Hawaiian NNW pulses arrive.
+- Pipeline / Ehukai: If NNW pulses are mid-to-long period, expect heavy, hollow, barreling sets — serious, fast rides and large shorebreak backwash. If periods are short, expect punchy, steep peaks with more closeouts. ENE wind at 60° will be sideshore to slightly onshore for Pipe — tends to make the face a bit softer and the barrels harder to hold; early morning will be the cleanest if winds are light. Only for very experienced surfers on larger pulses.
+- Sunset Beach: Will read big — long, powerful, paddle- and tow-in sets possible if NNW is long-period. ENE wind can push water in and stiffen faces; Sunset often improves for long-period north swells but closes out under cross chop if winds pick up. Expect long, high-energy sets; beginners should stay out.
+- Waimea Bay: Big-pulse candidate. If the 7+ ft Hawaiian pulses are long-period expect Waimea to light up (serious, holdable surf, very dangerous for underskilled surfers). The ENE component can push water into the bay making takeoffs steeper and shorebreak bigger. On smaller/shorter-period pulses Waimea will still be big but less groomed.
+- Lesser breaks (Velzyland/Keiki Beach/Off-the-wall reefs): The cross swell means some north-proximate points can get good runs; others will be confused. Velzyland generally favors a more northwesterly hit — it may be powerful but messy.
+- Skill notes: Morning is the safest bet for cleaner windows. If winds pick up out of the ENE expect deteriorating conditions by midday. Big north-facing venues move into expert-only territory.</p>
+<p>Oct 6 (peak / sustained)
+- General: Swell remains high — this is the likely peak window for combined NNW pulses. Expect larger, more regular sets punctuating the run; cross-swell still present from ENE.
+- Pipeline / Ehukai: Expect the fattest, heaviest sets on Oct 6 if the NNW pulses are long-period. Shallow reef, fast barrels; shorebreak and backwash strong. ENE winds will tend to soften lips and add chop — but on a big long-period north, barrels will still form. Again: experienced local tow- and heavy-hands surfers only when pulses are this size.
+- Sunset: Expect long, pushing sets — better than Pipe for a paddler on long-period energy because the wave tends to run longer if it holds. With the ENE component the late faces may be lumpier; if wind is light the sets can be excellent.
+- Waimea Bay: Possible heavy standby. If the NNW pulses combine into a sustained event, Waimea could be large and holdable for top-level big-wave riders. Shoreline currents and rip are strong; spectators should be cautious.
+- Other spots: East-facing coves will see increased influence from ENE energy — these spots may become marginally better or more wind-affected depending on local exposure. Breaks that bunker around Haleiwa will be in the soup or cross-choppy.
+- Skill notes: Conditions likely for advanced/expert surfers only at the major north exposures. If the swell period is on the shorter side, expect more punchy, less rideable conditions.</p>
+<p>Oct 7 (drop / cleaner windows possible)
+- General: Energy begins to wind down. The large NNW pulses subside and the ENE component will be more noticeable proportionally. Size steps down, but residual NNW plus east swell can keep surf in the moderate-to-large range through the day.
+- Pipeline / Sunset / Waimea: Expect smaller, fewer big sets. If winds trend lighter (typical late-night land breezes or weakening trades), mornings could be pleasantly glassy. If ENE flow persists at strength, things will remain lumped and messy into the afternoon.
+- Skill notes: Conditions will moderate; this is the best window for confident intermediates to find rideable waves at sheltered or down-the-line spots. Big exposures improve into manageable but still fun holds for experienced surfers.</p>
+<p>Break-specific practical notes and risk
+- Pipeline (Ehukai): With two ~7+ ft Hawaiian NNW pulses in the mix, Pipeline is in the “serious” category if periods are long. Expect very fast, hollow waves that can close out quickly. ENE wind will tend to push onshore shoulders and make barrels less clean. Recommended only for highly experienced/local competitors when this combination occurs.
+- Sunset Beach: One of the better choices for long-period NNW — expect long, powerful sets and greater paddle-in opportunity. But cross swell and ENE wind can create inconsistent shoulders and backwash. Strong currents and deep takeoffs are common on larger days.
+- Waimea Bay: Potentially big. If the 7+ ft Hawaiian pulses are long-period, Waimea ramps up to big-wave conditions and requires tow or highly experienced paddle teams. ENE push can increase shorebreak danger and make exits hazardous.
+- Ehukai bluff / Shark’s Cove exposures: Localized reefs that face north to NNW will light up on the larger pulses — quality barrels are possible between the confused sets. Expect unpredictable currents and occasional strong shorebreaks on takeoff.
+- Points and sheltered coves: East/ENE facing coves may look cleaner for small-swell riders when the east component dominates, but cross-swell confusion can make them messy. Sheltered right-handers that like easterly energy could see surfable days on Oct 7 as NNW falls away.</p>
+<p>Comparing to recent and normal Fall conditions
+- Normal for early Fall: North Shore is in transition — NW to WNW swells begin to arrive more often, size typically 2–6+ ft Hawaiian with increasing frequency of larger pulses as winter approaches.
+- Recent: If you’ve seen smaller, more infrequent NNW activity in the week prior, this stack of 7+ ft Hawaiian NNW pulses is a step up in energy. If you’ve already had strong early-season north swells, this is comparable but notable because of the cross-directional ENE energy.
+- Bottom line: This sequence is at the upper end of what you’d normally expect in early fall — potentially winter-like peaks depending on period. The east cross-swell and ENE wind vector make it a tricky, inconsistent event rather than a clean north-swell day.</p>
+<p>Uncertainties and what to watch (actionable)
+- Periods missing: If you can get reliable periods, prioritize those numbers:
+  - <strong>12–18s</strong> for the NNW pulses = powerful, hollow, long-running north sets (very serious).
+  - <strong>8–11s</strong> = punchy, lumpier, more wind-affected, less ideal for clean barrels.
+- Wind speed missing: watch for these thresholds:
+  - Light ENE (&lt;10 kt) = morning glass possible, then messy as sea breeze builds.
+  - Moderate to strong ENE (10–20 kt) = onshore chop, mushy shoulders, closed-out barrels on reefs.
+- Tidal window: On larger north swells lower to mid tides often favor Pipeline’s barrels; higher tides can close out some reefs but increase shorebreak hazard at Waimea. Check local tide charts for exact windows.</p>
+<p>Recommendations by ability
+- Beginner/intermediate: Stay away from exposed north reefs and Waimea on Oct 5–6. Look for protected east/south coves as the NNW fades on Oct 7 if wind/light conditions improve.
+- Advanced: Sunset and some sheltered points could offer long rides on mid-tide windows on Oct 5–7; assess the ENE wind and pick early windows.
+- Expert/big-wave: Pipeline, Sunset and Waimea will likely offer the biggest, most critical sessions on Oct 5–6 if NNW pulses are long period. Use caution, local knowledge and tow support when necessary.</p>
+<p>Final notes
+- Cross-swell + ENE wind = variable, often messy conditions except for short windows of clean early morning glass if winds are light. Without reliable swell periods and wind speed this forecast carries uncertainty; get a short-range buoy/surf report for periods and watch live cams for wind and shape before heading out.
+- Safety: large north events change currents, rip patterns and shorebreak behavior rapidly. If size is in the 7+ ft Hawaiian range with long periods, consider crowd and rescue resources — never underestimate the North Shore on a big pulse day.</p>
+<p>If you want I can: (a) convert Hawaiian-scale numbers into approximate face heights in feet/meters, (b) generate a refined hour-by-hour tide + swell window if you provide swell periods and wind speeds, or (c) produce a short checklist for gear and safety for big north days.</p>
+        </div>
+        <div class="forecast-section shore-forecast">
+            <h2>South Shore Forecast</h2>
+            <p>I can’t write in Pat Caldwell’s exact voice, but below is a technical, local-style South Shore forecast that captures the hallmarks of his reporting: clear swell breakdowns, Hawaiian-scale heights with conversions, practical timing, and break-specific tuning. I’ve noted where the input is incomplete (swell period and wind speed) and show realistic scenarios so you can plan.</p>
+<p>Overview (2025-10-05 → 2025-10-07)
+- Dominant swell energy: southerly. Two nearby components reported: SSW 3.<strong>0 ft (Hawaiian)</strong> and SSE 2.<strong>6 ft (Hawaiian)</strong>. Both are described as having moderate effect on the South Shore.
+- Period: not provided (0.0 s in the input). Because period is the single biggest factor for rideability, I evaluate two realistic scenarios below (short-period <strong>6–9 s</strong> vs. mid/long-period <strong>10–14 s</strong>) and point out how each will change conditions.
+- Wind direction provided as 60° (coming from ENE). Speed not provided — that’s a major uncertainty. ENE winds on the South Shore generally trend side-off to offshore at many south-facing breaks when light–moderate; if stronger they can generate small chop along the southern exposures and freshen the northeast-facing coves.
+- Overall take: modest south-swell event within normal fall range, likely to produce rideable waist‑to-chest faces at town breaks and classically punchier lines at Ala Moana/Queens if period is mid/long. Expect best conditions if winds stay light/variable; conditions degrade if ENE winds pick up.</p>
+<p>Swell numbers and conversions
+- SSW: 3.<strong>0 ft (Hawaiian)</strong>. Approximate face height = Hawaiian × 2 → ~<strong>6 ft</strong> faces (occasional larger sets). Practical note: at exposed points this will feel bigger; sheltered reef and beach breaks will be smaller.
+- SSE: 2.<strong>6 ft (Hawaiian)</strong> → ~5.<strong>2 ft</strong> faces.
+- Combined effect: because the two components are both southerly-ish (SSE ↔ SSW), energy will pool between them. If the two are in phase, expect occasional <strong>1–2 ft</strong> Hawaiian larger sets (i.e., transient face heights into the <strong>8–10 ft</strong> range on exposed lines). If out of phase, energy will be more chopped and inconsistent.</p>
+<p>Period scenarios (period input missing; choose the correct reading for your plan)
+- Short-period scenario (<strong>6–9 s</strong>): energy will be more wind/wave driven. Expect quick, steep waves with less push and more whitewash — fun for longboarders close to shore and beginners on protected points, but choppy and punchy at exposed lines. Sets will be shorter and the swell won’t wrap into sheltered coves as well.
+- Mid/long-period scenario (<strong>10–14 s</strong>): much more organized surf. Waves will have cleaner faces, more push, and longer rides. Sets will be spaced out but more powerful — this is the scenario that turns a 3.<strong>0 ft</strong> Hawaiian into consistently rideable faces at Queens, Ala Moana Bowls, and the Waikiki points.</p>
+<p>Timing (general forecast window)
+- Oct 5 (Sunday) — Building: morning–afternoon building as the swell arrives. If the source is distant, expect the energy to come up through the day; with local south fetch the rise could be quicker.
+- Oct 6 (Monday) — Peak window: likely peak energy. Best shot for the larger, better-formed sets, especially on the incoming-to-high tide window if period is <strong>10–14 s</strong>.
+- Oct 7 (Tuesday) — Dropping: energy eases. Residual southerly pulses remain, but intervals lengthen and faces get smaller; the swell fades toward evening.</p>
+<p>Wind &amp; weather effects (given wind from 60° — ENE)
+- Light ENE (0–10 kt): side-off at most South Shore spots — expect cleaner faces, favored early morning. Ala Moana and Queens will clean up nicely; Waikiki Canoes and Queens will be smooth.
+- Moderate ENE (10–18 kt): side‑off turning cross-shore; pushes some chop into open faces, especially slightly east of Diamond Head and the more exposed reefs. Kewalo and Magic Island stretch will see more breeze-driven texture.
+- Strong ENE (&gt;18 kt): can create onshore elements for some south-facing pockets (depending on local orientation) and produce short-period wind chop that blurs lines. Strong ENE will also increase current and channel activity — exercise caution.</p>
+<p>Break-specific notes (town breaks and immediate South Shore)
+- Waikiki — Canoes / Queens / Duke’s area
+  - Expect the most consistent small-to-moderate rides. Hawaiian <strong>2–3 ft</strong> range will translate into waist-to-chest high faces at Canoes and Queens if period is mid/long; short periods equal punchy, quick waves that suit longboarders and soft-top learners near shore.
+  - Best tide: mid to high tide favors longer, cleaner rides at Canoes; very low tide can make the takeoff zone shallow and punchy.
+  - Wind sensitivity: ENE favors clean conditions when light; watch for chop if wind freshens.
+- Ala Moana Bowls / Small Boat Harbor
+  - The most exposed town break to southerly energy. With the SSW 3.<strong>0 ft</strong> Hawaiian component, expect the Bowls to show the most size and power of the urban spots — punchy, hollow shoulders on larger sets in the mid/long-period scenario.
+  - Tides: mid-tide incoming often best for Ala Moana Bowls; very high tide can flatten the bowl and very low can expose reef.
+  - Skill level: intermediates can enjoy long peeling right/left wraps; advanced surfers will want to pick the peak for faster, steeper faces.
+- Magic Island / Kahanamoku / Fort DeRussy frontage
+  - Sheltered compared with Ala Moana Bowls but will see rideable lines if the period is sufficient. Better on mid to high tide.
+- Kewalo Basin / Harbor area
+  - More protected; smaller, cleaner waves for longboarders and beginners. Watch the harbor channel; currents can be confusing when southerly swell and ENE winds combine.
+- General note on exposed headlands (Diamond Head side, Portlock direction)
+  - Exposed south-southwest points will show the most size and punch. If you chase larger, steeper waves, look toward Diamond Head and east-of-Diamond headpoints — but conditions are more variable and can be bumpy with short-period energy.</p>
+<p>Tide and current guidance
+- South Shore breaks are tide-sensitive: many of the town breaks favour mid to high tides for the cleanest faces; Ala Moana Bowls likes some water over the reef to form a clean bowl.
+- With southerly energy plus any ENE breeze expect stronger rips and channel flows in the harbor areas — don’t underestimate currents if paddling wide or trying to get out.</p>
+<p>Who should surf what
+- Beginners: best odds at Waikiki Canoes, Magic Island, and Ala Moana’s west side on smaller sets and mid/high tide. If period is short (<strong>6–9 s</strong>) you’ll get softer, more forgiving waves.
+- Intermediates: Queens and Ala Moana Bowls on the peak day (Oct 6) are the sweet spots — look for cleaner mid/long-period sets.
+- Advanced: pick Ala Moana Bowls and Diamond Head-exposed points on the peak day; watch out for punchy takeoffs and fast walls on longer-period energy.</p>
+<p>Comparisons — recent and climatology
+- Recent: assuming the prior days were small and more towards the low end of fall range, this swell represents a modest uptick — noticeable but not a big storm-season pulse. Expect a measurable step up from purely flat-swell days.
+- Climatology for early October (South Shore late-season): this event sits within the normal fall envelope (typical <strong>1–3 ft</strong> Hawaiian). SSW 3.<strong>0 ft</strong> is toward the upper end of the seasonal norm, so it’s a typical late‑season southerly pulse — not unusual, but worth a look if you’ve been waiting for some size before the trade-wind season dominates.</p>
+<p>Uncertainties &amp; practical advice
+- PERIOD IS MISSING in the supplied data (0.0 s). Period governs power and ride length — get an updated buoy or local model read before heading out. If you can, check the NOAA buoys, local webcams, or a trusted surf model for period and more exact timing.
+- WIND SPEED IS MISSING. ENE (60°) direction is helpful; wind speed will determine whether the day cleans up or becomes bumpy. Plan for an early session if winds typically rise mid-morning.
+- If you’re planning a session for conditions-sensitive breaks (Ala Moana Bowls, Queens), aim for the Oct 6 peak and the early morning slack/incoming tide for the cleanest windows.</p>
+<p>Quick summary (one-paragraph)
+A modest southerly pulse arrives Oct 5, building into Oct 6 and easing by Oct 7. Reported components — SSW 3.<strong>0 ft</strong> (Haw.) and SSE 2.<strong>6 ft</strong> (Haw.) — are within normal fall range and should produce waist‑to‑head-high faces at town breaks, and punchier, rideable sets at Ala Moana and Queens if the period is mid/long (<strong>10–14 s</strong>). With winds from the ENE (60°), expect side‑off conditions if winds remain light; conditions will decline if the breeze freshens. Confirm swell periods and wind speed locally before committing to exposed lineups.</p>
+<p>If you want, I can:
+- Re-run this forecast assuming a specific swell period (e.g., 8 s vs. 12 s) and a wind speed to give a tighter read;
+- Pull up the latest buoy/model numbers and provide an updated, time-by-time chart for Oct 5–7.</p>
+        </div>
+    </div>
+    <div class="forecast-section">
+        <h2>Daily Forecast</h2>
+        <p>Quick note: I don’t have live sensors — this is a practical forecast for Oahu on 2025-10-05 based on a NNW swell scenario. Check a live buoy/tide/wind source before heading out.</p>
+<p>Oahu Surf Forecast — 2025-10-05 (NNW swell)</p>
+<p>1) Current conditions (today)
+- Expect a NNW-grounded swell energy directionally favoring exposed North and West shores. Morning should be the cleanest window with lighter, more variable winds; afternoon winds likely increase and make exposed breaks a bit lumpier. Temperatures: mid-70s–80s F, partly cloudy with typical isolated showers possible.</p>
+<p>2) Wave heights (Hawaiian scale)
+(“Hawaiian” approx. half the face height — roughly double for true face.)
+- North Shore (Ehukai/Banzai, Pipeline, Sunset): <strong>6–10 ft</strong> Hawaiian, occasional sets to <strong>12 ft</strong> Hawaiian at the most exposed points. (Face roughly <strong>12–24 ft</strong> on big sets.)
+- West Shore (Makaha, Pokai): <strong>4–8 ft</strong> Hawaiian, cleaner at the headlands when wind is light.
+- South Shore (Ala Moana, Waikiki): <strong>1–3 ft</strong> Hawaiian — largely sheltered from a NNW swell.
+- East Shore (Sandy’s, Kahuku inside): <strong>1–3 ft</strong> Hawaiian unless local wind/waves pump up — generally small.</p>
+<p>3) Wind &amp; weather
+- Morning: light and variable to light northeast/ENE trades (~5–10 kt) — best window for cleaner faces on north/west exposures.
+- Afternoon: winds trending NNW–NW and increasing to 10–18+ kt — will create onshore bump/chop on north-facing reef breaks and make sets wind-affected.
+- Weather: partly sunny, isolated showers possible. Visibility good.</p>
+<p>4) Tide notes (practical for surfers)
+- Check the exact tide chart for the day, but general guidance:
+  - Pipeline / Ehukai: mid to mid-high tide tends to produce better sections and cleaner shallow-reef takeoffs; very low tide makes the reef shallow and dangerous.
+  - Sunset: mid to high tide gives fuller walls; low tide can close out.
+  - Makaha: mid tide often best for paddle-in shape and safer takeoffs.
+  - Waikiki: mid to high tide for more forgiving beach breaks.
+- Action: plan morning session around the incoming/mid tide window if possible for most exposed reefs.</p>
+<p>5) Best spots today (by ability)
+- Advanced / Expert
+  - Ehukai (Banzai)/Pipeline — pick early morning for cleaner lines; expect big, powerful sets — local big-wave protocol and tow if it’s truly huge.
+  - Sunset Beach — long, punchy sections when the NNW lines up; watch for heavy closeouts.
+  - Waimea — only if the swell pushes into big wave territory and you’re part of a big-wave crew; otherwise do not attempt.
+- Intermediate / Advanced
+  - Makaha — a good option on the west shore when swell is steady and wind is light; less exposed to peak north sets.
+  - Haleiwa / Chun’s Reef — can be fun if the swell angles slightly west; pick quieter inside peaks.
+- Beginner / Intermediate
+  - South shore beach breaks (Waikiki, Ala Moana) — largely sheltered from NNW swell; best if small and winds are light.</p>
+<p>6) How conditions may change through the day
+- Morning: cleanest conditions, smaller wind chop — best time for high-performance surf at north/west points.
+- Midday to afternoon: wind tends to swing NNW and increase, producing onshore chop and shortening the swell period; sets may get more wind-blown and punchy.
+- Evening: swell may gradually ease through the night unless the NNW source strengthens; expect a bump in shore wind early evening before calming overnight.</p>
+<p>Safety &amp; actions
+- If North Shore shows 8+ ft Hawaiian, only surf with experience, a partner, and local knowledge. Be aware of strong currents, shallow reef and hold-downs.
+- Check live buoy data (NOAA), a local surf cam, and the day’s tide table before you go.
+- If unfamiliar with a break, sit back and watch several sets, or opt for a sheltered spot.</p>
+<p>If you want, I can pull this into a printable checklist (best launch times by tide + exact local tide times and buoy numbers) if you provide a live tide source or allow me to fetch current data.</p>
+    </div>
+    <div class="forecast-section history-card">
+        <h2>Historical Comparison</h2>
+        <p>Compared with <strong>forecast_20251004_233041</strong> generated on 2025-10-04T23:30:41.550563:</p>
+        <ul>
+            <li>Confidence down 0.01 since the previous run.</li>
+        </ul>
+    </div>
+<div class="forecast-section">
+    <h2>Forecast Confidence</h2>
+    <p>Overall confidence: 0.6/1.0</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 59%"></div>
+    </div>
+        <h3>Confidence Factors</h3>
+        <div class="confidence-factors">
+<div class="factor">
+    <p>Data Freshness: 0.7</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 72%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Source Diversity: 0.3</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 33%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Source Agreement: 0.7</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 70%"></div>
+    </div>
+</div>
+        </div>
+    </div>
+    <div class="footer">
+        Generated by SurfCastAI - AI-Powered Surf Forecasting
+    </div>
+</body>
+</html>

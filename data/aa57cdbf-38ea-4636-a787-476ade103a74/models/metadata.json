@@ -1,0 +1,32 @@
+[
+  {
+    "name": "model_unknown_unknown",
+    "description": "Failed to download unknown wave model page for unknown",
+    "type": "html",
+    "source": "ModelAgent",
+    "status": "failed",
+    "timestamp": "2025-10-04T21:27:51.270237+00:00",
+    "source_url": "https://nomads.ncep.noaa.gov:9090/dods/gfs_0p25",
+    "error": "Request timeout after 30s"
+  },
+  {
+    "name": "model_unknown_unknown",
+    "description": "Failed to download unknown wave model page for unknown",
+    "type": "html",
+    "source": "ModelAgent",
+    "status": "failed",
+    "timestamp": "2025-10-04T21:27:51.269884+00:00",
+    "source_url": "https://nomads.ncep.noaa.gov:9090/dods/wave_multi_1.glo_0.16",
+    "error": "Request timeout after 30s"
+  },
+  {
+    "name": "model_swan_oahu",
+    "description": "Failed to download swan wave model page for oahu",
+    "type": "html",
+    "source": "ModelAgent",
+    "status": "failed",
+    "timestamp": "2025-10-04T21:25:41.629542+00:00",
+    "source_url": "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/",
+    "error": "HTTP 404: Not Found"
+  }
+]

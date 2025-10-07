@@ -248,13 +248,18 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
     
     def get_hawaii_scale(self, meters: float) -> float:
         """
-        Convert wave height from meters to Hawaiian scale (face height in feet).
+        Convert wave height from meters to Hawaiian scale.
+        
+        Hawaiian scale measures wave height from the back of the wave,
+        approximately equal to the significant wave height (not face height).
+        Face height is typically 1.5-2x the Hawaiian scale.
         
         Args:
-            meters: Wave height in meters
+            meters: Significant wave height in meters
             
         Returns:
             Wave height in Hawaiian scale (feet)
         """
-        # Hawaiian scale is approximately 2x the significant height in feet
-        return meters * 2 * 3.28084  # 1m = 3.28084ft
+        # Hawaiian scale ≈ Hs in feet (back height)
+        # DO NOT multiply by 2 - that would give face height
+        return meters * 3.28084  # 1m = 3.28084ft  # 1m = 3.28084ft

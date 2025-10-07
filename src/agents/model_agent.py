@@ -41,9 +41,8 @@ class ModelAgent(BaseAgent):
         Returns:
             List of metadata dictionaries
         """
-        # Create model data directory
-        model_dir = data_dir / "models"
-        model_dir.mkdir(exist_ok=True)
+        # Use the provided data_dir directly (already agent-specific)
+        model_dir = data_dir
         
         # Get model URLs from config
         model_urls = self.config.get_data_source_urls('models').get('models', [])

@@ -1,0 +1,29 @@
+SUMMARY
+Strong northern hemisphere storm energy across the North Pacific with two main NW/NNW swell sources (a deep Aleutian storm ~970 mb and a secondary central-N Pacific gale ~999–1007 mb) — both within ~1000–3000 nm of Hawai‘i and expected to send long-period NW energy to the North Shore mid-week into the weekend. Secondary but notable: a tropical cyclone/TD complex well south of the Aleutians and a tropical cyclone (T.S. Octave) southeast of Hawai‘i that can produce southerly/SE energy for the South Shore later in the period. A robust subtropical/extratropical high field and trade wind fetch will maintain local NE windswell and moderate trades, reducing quality on exposed east-facing and some north-facing reefs.
+
+DETAILS
+- Aleutian storm (primary): center ~52N 172W, pressure ~970 mb, moving ESE ~20–25 kt. Fetch is broad and wraps from WNW to SE around the low with sustained gales on its southern quadrant oriented toward Hawai‘i (energy window ~315–330° true to Hawai‘i). Expected swell: dominant periods 16–20 s, arrival window to North Shore 4–6 days (peak ~day 5). Hawaiian scale: 10–14 ft faces at exposed north-northwest points at peak (larger on extreme outer reefs). High confidence for long-period NW energy.
+- Central-N Pacific gale (secondary): center ~38–42N 170–175W, pressure ~999–1007 mb, moving SE ~15–20 kt. Fetch oriented NW→SE with the main energy aimed at Hawai‘i between ~300–320°. Expected swell: 12–16 s periods, arrival 3–5 days, Hawaiian scale 6–10 ft faces on exposed North Shore at peak; support/overlap with Aleutian swell possible, increasing holdover/longer duration.
+- Frontal activity/NW short-period fetch: a cold front with trailing low ~1003–1007 mb across the western Aleutians/near 50N–45N is producing transient NW gales and tighter gradients — generates shorter-period (~11–14 s) NW-N fetch that may produce energetic but shorter-lived swell arriving earlier in the 3–4 day window.
+- Tropical systems near/between 10–15N:
+  - T.S./T.D. near 12N 140–150W (T.D. 28W / adjacent convective low): pressure ~1002–1007 mb, max winds 30–40 kt (gales noted), moving WNW ~8–12 kt. Fetch oriented westward/southwestward relative to itself, but relative to Hawai‘i the energy will be from the SSE–S (150–170°). Expected swell: 9–12 s, arrival 3–5 days for South Shore; Hawaiian scale 2–4 ft on protected south spots, higher at exposed southeast points.
+  - T.S. Octave: located ~12N 125–135W, max winds ~50 kt (gusts to 60 kt) — moving WNW ~10 kt. Stronger, more focused SE fetch (energy window ~140–160°) capable of producing a more significant southerly swell 10–14 s. Arrival to the South Shore ~4–6 days; Hawaiian scale 3–6 ft on protected south beaches, larger at exposed SE-facing reefs. Confidence medium — depends on Octave’s exact track/intensity.
+- Pressure gradients / trades: high pressure ridge centered NE of Hawai‘i and another ridge south of the Aleutians produce a persistent pressure gradient across the central Pacific. Trades 15–20 kt are indicated over the islands (daytime reinforcement), with offshore/light winds limited to early mornings in protected gulches. Tighter gradients exist in the NW Pacific around the Aleutian storm, driving strong gale-force fetch there (high confidence).
+
+NORTH SHORE
+- Primary energy: NW/NNW groundswells arriving mid-late week (combined Aleutian + central-N Pacific sources). Direction ~310–330° true, dominant periods 14–20 s. Expect raw, powerful long-period surf on exposed north and northwest points.
+- Timing: earliest arrival of shorter-period NW swell in ~3 days, main long-period pulse 4–6 days out, peaking around day 5 with gradual decline over 2–3 days.
+- Size (Hawaiian scale): exposed north reefs (Pipeline/Sunset/Chuns) — faces 8–14 ft at peak with sets larger on outer reef/swell windows (Pipeline/Offshore Waimea may see larger). Strong currents and heavy shorebreak likely.
+- Wind/surf quality: steady trades 10–20 kt will keep conditions chunky on many north-facing reefs, with the best windows early mornings when winds ease. Protected north bays and lee breaks will be cleaner but smaller. Watch for cross/sideshore trade winds that will buffet exposed reefs and increase lump.
+
+SOUTH SHORE
+- Current: minimal background south energy now. Short-period trade windswell (ENE/ E ) 6–8 s will dominate east-facing beaches through the period.
+- Tropical contribution: T.S. Octave / TD 28W capable of producing a focused S–SE swell (140–170°) with 9–14 s periods arriving later (4–6 days). Expect 2–6 ft Hawaiian-scale surf at the most exposed south and SE reefs (Diamond Head, Ala Moana, Makapuu-facing points) at peak, lower in protected coves.
+- Wind/surf quality: trades will keep east and SE exposures bumpy; best south-swell windows will be early mornings if trades drop.
+
+OUTLOOK
+- Next 3–7 days: NW energy will build into the North Shore (main pulse day 4–6) with two contributions — an earlier shorter-period frontal pulse and a longer-period Aleutian fetch later. South/SE energy from tropical Octave and TD 28W may produce the first credible South Shore swell of the season in ~4–6 days if systems hold intensity.
+- Beyond 7 days: Aleutian storm trend suggests possible follow-up NW pulses (repeat fetch in same storm corridor) — monitor ongoing Aleutian deep low evolution. Trades likely remain moderate; local NE windswell will persist on the east shores.
+- Hazards: strong currents, large sets on exposed north reefs during NW peaks; elevated surf and possible localized flooding on exposed south coves if Octave intensifies/parks on a favorable track.
+
+If you want, I can convert the above into the exact JSON structure you requested with the lat/lon and arrival-day ranges broken out per system.

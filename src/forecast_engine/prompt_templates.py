@@ -13,6 +13,81 @@ import json
 logger = logging.getLogger('forecast.templates')
 
 
+# Image analysis prompts for GPT-5 Vision
+PRESSURE_CHART_ANALYSIS_PROMPT = """
+Analyze the attached surface pressure chart for Hawaii surf forecasting:
+
+1. **Low Pressure Systems**: Identify any lows within 1000-3000nm of Hawaii
+   - Location (lat/lon estimate)
+   - Pressure (mb)
+   - Movement direction/speed
+   - Fetch orientation relative to Hawaii
+
+2. **High Pressure Systems**: Identify blocking highs or trade wind highs
+   - Could they shadow swell from reaching Hawaii?
+   - Are they enhancing/diminishing trade winds?
+
+3. **Frontal Boundaries**: Any cold fronts generating NW swells?
+
+4. **Pressure Gradients**: Tight gradients = strong winds = fetch for swell generation
+
+Provide analysis in structured format:
+{
+  "low_pressure_systems": [
+    {"location": "35N 155W", "pressure_mb": 995, "fetch_direction": "NW", "swell_potential": "high"}
+  ],
+  "high_pressure_systems": [...],
+  "frontal_activity": [...],
+  "swell_generation_zones": [
+    {"zone": "NW Pacific", "confidence": "high", "arrival_days": 3-5}
+  ]
+}
+"""
+
+SATELLITE_IMAGE_ANALYSIS_PROMPT = """
+Analyze the attached satellite imagery for Hawaii region:
+
+1. **Cloud Patterns**:
+   - Large spiral systems (tropical cyclones/lows)
+   - Linear cloud bands (frontal systems)
+   - Trade wind cumulus (normal pattern)
+
+2. **Storm Systems**:
+   - Location relative to Hawaii
+   - Size/intensity indicators (eye, banding)
+   - Direction of movement
+
+3. **Atmospheric Rivers**: Any moisture plumes that could bring weather?
+
+4. **Visible Swell Patterns**: Can you see swell lines in ocean areas? (subtle but visible in some imagery)
+
+Extract actionable surf forecast information.
+"""
+
+SST_CHART_ANALYSIS_PROMPT = """
+Analyze the attached Sea Surface Temperature (SST) anomaly chart for surf forecasting context:
+
+1. **Temperature Anomalies**:
+   - Identify warm/cold water regions near swell generation zones (North Pacific, South Pacific)
+   - Note any El Niño/La Niña patterns (equatorial Pacific anomalies)
+
+2. **Storm Intensity Implications**:
+   - Warm anomalies (+2°C or more) can intensify low pressure systems
+   - Cold anomalies can weaken storm development
+   - Warmer water = stronger winds = better fetch for swell generation
+
+3. **Swell Generation Context**:
+   - Where are the warmest anomalies relative to current pressure systems?
+   - Could warm water enhance storm development in swell generation zones?
+
+4. **Seasonal Patterns**:
+   - Does the SST pattern align with typical El Niño/La Niña/Neutral conditions?
+   - Any unusual patterns that could affect storm tracks?
+
+Provide brief, actionable insights for how SST anomalies may affect swell generation and storm intensity.
+"""
+
+
 class PromptTemplates:
     """
     Manages prompt templates for forecast generation.
@@ -99,6 +174,30 @@ REQUIRED SECTIONS:
 5. OUTLOOK - Upcoming conditions beyond forecast period
 
 CRITICAL: You must write the actual forecast text now. Do not write instructions about how to write a forecast. Do not ask for more information. Write the complete forecast using the data provided in the user message.
+
+ABSOLUTELY CRITICAL:
+- You MUST write the complete forecast text in your response
+- Do NOT say you need more information
+- Do NOT provide a template or instructions
+- Do NOT ask the user to paste anything
+- Do NOT return an empty response
+- WRITE THE ACTUAL FORECAST NOW using ONLY the data provided in the user message
+
+EXAMPLE OUTPUT FORMAT:
+SUMMARY
+North-northwest swell 10-12ft arriving Wednesday morning, peaking Thursday. Light offshore winds Wednesday AM.
+
+DETAILS
+Primary NNW swell (320°) at 10-12ft Hawaiian scale, 12-15 second period. Peaks Thursday 6AM-2PM with clean conditions.
+
+NORTH SHORE
+Best conditions Thursday morning with offshore winds. Pipeline 8-12ft faces, Sunset 10-15ft. Watch for strong currents at exposed breaks.
+
+SOUTH SHORE
+Minimal swell activity, 1-2ft background south swell. Best spots: Ala Moana, Diamond Head for longboarding.
+
+OUTLOOK
+Swell declining Friday, next NW system arriving Sunday with potential for 12-15ft faces.
 """,
                 "user_prompt": """
 Generate a comprehensive surf forecast for Hawaii (Oahu) covering {start_date} to {end_date}.
@@ -225,6 +324,30 @@ Write the complete daily report now in a concise, practical style.
         
         return self.templates[template_name]
     
+    def _get_swell_period(self, swell: Dict[str, Any]) -> float:
+        """
+        Extract dominant period from swell event.
+        
+        Args:
+            swell: Swell event dictionary
+            
+        Returns:
+            Dominant period in seconds
+        """
+        # Try direct field first
+        if 'dominant_period' in swell and swell['dominant_period']:
+            return float(swell['dominant_period'])
+        
+        # Try primary components
+        primary_components = swell.get('primary_components', [])
+        if primary_components:
+            # Filter out None values and convert to float
+            periods = [float(c['period']) for c in primary_components if c.get('period') is not None]
+            if periods:
+                return max(periods)
+        
+        return 0.0
+    
     def get_caldwell_prompt(self, forecast_data: Dict[str, Any]) -> str:
         """
         Generate a prompt for Caldwell-style forecast.
@@ -241,12 +364,25 @@ Write the complete daily report now in a concise, practical style.
         # Format swell details
         swell_details = []
         for swell in forecast_data.get('swell_events', []):
+            period = self._get_swell_period(swell)
+            
+            # Extract source attribution
+            metadata = swell.get('metadata', {})
+            source_details = metadata.get('source_details', {})
+            source_info = ""
+            if source_details:
+                buoy_id = source_details.get('buoy_id', '')
+                obs_time = source_details.get('observation_time', '')
+                source_type = source_details.get('source_type', '')
+                if buoy_id and source_type:
+                    source_info = f" (Source: {source_type} Buoy {buoy_id})"
+            
             swell_details.append(
                 f"- {swell.get('primary_direction_cardinal', 'Unknown')} swell at "
                 f"{swell.get('hawaii_scale', 0):.1f}ft (Hawaiian), "
-                f"period: {swell.get('dominant_period', 0):.1f}s, "
+                f"period: {period:.1f}s, "
                 f"arriving: {swell.get('start_time', '')}, "
-                f"peaking: {swell.get('peak_time', '')}"
+                f"peaking: {swell.get('peak_time', '')}{source_info}"
             )
         
         # Format seasonal context
@@ -262,8 +398,17 @@ Write the complete daily report now in a concise, practical style.
         
         # Format weather conditions
         weather = forecast_data.get('metadata', {}).get('weather', {})
+        wind_dir = weather.get('wind_direction')
+        wind_speed = weather.get('wind_speed')
+        if wind_dir is not None and wind_speed is not None:
+            wind_str = f"Wind: {wind_dir}° at {wind_speed} knots"
+        elif wind_dir is not None:
+            wind_str = f"Wind: {wind_dir}° (speed unavailable)"
+        else:
+            wind_str = "Wind: Variable/Light"
+        
         weather_conditions = (
-            f"Wind: {weather.get('wind_direction', 'Unknown')} at {weather.get('wind_speed', 0)} knots. "
+            f"{wind_str}. "
             f"Conditions: {weather.get('conditions', 'Unknown')}. "
             f"Temperature: {weather.get('temperature', 0)}°C."
         )
@@ -321,18 +466,28 @@ Write the complete daily report now in a concise, practical style.
         for swell in shore_data.get('swell_events', []):
             exposure = swell.get('metadata', {}).get(f'exposure_{shore}', 0.5)
             effect = "strong" if exposure > 0.7 else ("moderate" if exposure > 0.4 else "minimal")
+            period = self._get_swell_period(swell)
             
             shore_swells.append(
                 f"- {swell.get('primary_direction_cardinal', 'Unknown')} swell at "
                 f"{swell.get('hawaii_scale', 0):.1f}ft (Hawaiian), "
-                f"period: {swell.get('dominant_period', 0):.1f}s, "
+                f"period: {period:.1f}s, "
                 f"{effect} effect on {shore.replace('_', ' ').title()}"
             )
         
         # Format weather conditions
         weather = forecast_data.get('metadata', {}).get('weather', {})
+        wind_dir = weather.get('wind_direction')
+        wind_speed = weather.get('wind_speed')
+        if wind_dir is not None and wind_speed is not None:
+            wind_str = f"Wind: {wind_dir}° at {wind_speed} knots"
+        elif wind_dir is not None:
+            wind_str = f"Wind: {wind_dir}° (speed unavailable)"
+        else:
+            wind_str = "Wind: Variable/Light"
+        
         weather_conditions = (
-            f"Wind: {weather.get('wind_direction', 'Unknown')} at {weather.get('wind_speed', 0)} knots. "
+            f"{wind_str}. "
             f"Conditions: {weather.get('conditions', 'Unknown')}."
         )
         
