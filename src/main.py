@@ -428,6 +428,294 @@ def bundle_files(config: Config, bundle_id: Optional[str] = None) -> None:
         
         print()
 
+async def validate_forecast_cmd(config: Config, forecast_id: str) -> None:
+    """
+    Validate a specific forecast against actual observations.
+    
+    Args:
+        config: Application configuration
+        forecast_id: ID of forecast to validate
+    """
+    from src.validation import ValidationDatabase, ForecastValidator
+    
+    print(f"\nValidating forecast: {forecast_id}")
+    print("=" * 60)
+    
+    # Initialize database and validator
+    db_path = config.get('validation', 'database_path', 'data/validation.db')
+    database = ValidationDatabase(db_path)
+    validator = ForecastValidator(database)
+    
+    try:
+        # Run validation
+        results = await validator.validate_forecast(forecast_id, hours_after=24)
+        
+        # Print results
+        print(f"\nForecast ID: {results['forecast_id']}")
+        print(f"Validated at: {results['validated_at']}")
+        print(f"Predictions validated: {results['predictions_validated']}/{results['predictions_total']}")
+        
+        if 'error' in results:
+            print(f"\nError: {results['error']}")
+            return
+        
+        # Print metrics
+        metrics = results.get('metrics', {})
+        print("\nMetrics:")
+        print(f"  MAE (Mean Absolute Error):        {metrics.get('mae', 0):.2f} ft  (target: < 2.0 ft)")
+        print(f"  RMSE (Root Mean Square Error):    {metrics.get('rmse', 0):.2f} ft  (target: < 2.5 ft)")
+        print(f"  Categorical Accuracy:              {metrics.get('categorical_accuracy', 0)*100:.1f}%  (target: > 75%)")
+        print(f"  Direction Accuracy:                {metrics.get('direction_accuracy', 0)*100:.1f}%  (target: > 80%)")
+        print(f"  Sample Size:                       {metrics.get('sample_size', 0)} matches")
+        
+        # Print pass/fail status
+        print("\nValidation Status:")
+        mae_pass = metrics.get('mae', float('inf')) < 2.0
+        rmse_pass = metrics.get('rmse', float('inf')) < 2.5
+        cat_pass = metrics.get('categorical_accuracy', 0) > 0.75
+        dir_pass = metrics.get('direction_accuracy', 0) > 0.80
+        
+        print(f"  MAE < 2.0 ft:          {'✓ PASS' if mae_pass else '✗ FAIL'}")
+        print(f"  RMSE < 2.5 ft:         {'✓ PASS' if rmse_pass else '✗ FAIL'}")
+        print(f"  Categorical > 75%:     {'✓ PASS' if cat_pass else '✗ FAIL'}")
+        print(f"  Direction > 80%:       {'✓ PASS' if dir_pass else '✗ FAIL'}")
+        
+        overall_pass = mae_pass and rmse_pass and cat_pass and dir_pass
+        print(f"\nOverall: {'✓ PASS' if overall_pass else '✗ FAIL'}")
+        
+    except ValueError as e:
+        print(f"\nError: {e}")
+    except Exception as e:
+        print(f"\nUnexpected error: {e}")
+        logging.getLogger('surfcastai').error(f"Validation error: {e}", exc_info=True)
+
+
+async def validate_all_forecasts_cmd(config: Config, hours_after: int = 24) -> None:
+    """
+    Validate all forecasts that are ready for validation.
+    
+    Args:
+        config: Application configuration
+        hours_after: Minimum hours after forecast before validating
+    """
+    from src.validation import ValidationDatabase, ForecastValidator
+    
+    print(f"\nValidating all forecasts ({hours_after}+ hours old)")
+    print("=" * 60)
+    
+    # Initialize database and validator
+    db_path = config.get('validation', 'database_path', 'data/validation.db')
+    database = ValidationDatabase(db_path)
+    validator = ForecastValidator(database)
+    
+    # Get forecasts needing validation
+    forecasts = database.get_forecasts_needing_validation(hours_after=hours_after)
+    
+    if not forecasts:
+        print(f"\nNo forecasts found that need validation (must be {hours_after}+ hours old)")
+        return
+    
+    print(f"\nFound {len(forecasts)} forecast(s) to validate:\n")
+    
+    # Validate each forecast
+    results_summary = []
+    
+    for i, forecast in enumerate(forecasts, 1):
+        forecast_id = forecast['forecast_id']
+        created_at = forecast['created_at']
+        
+        print(f"{i}. Validating {forecast_id} (created {created_at})...")
+        
+        try:
+            results = await validator.validate_forecast(forecast_id, hours_after=hours_after)
+            
+            metrics = results.get('metrics', {})
+            results_summary.append({
+                'forecast_id': forecast_id,
+                'success': 'error' not in results,
+                'mae': metrics.get('mae'),
+                'rmse': metrics.get('rmse'),
+                'categorical_accuracy': metrics.get('categorical_accuracy'),
+                'direction_accuracy': metrics.get('direction_accuracy'),
+                'sample_size': metrics.get('sample_size', 0)
+            })
+            
+            print(f"   ✓ Validated: MAE={metrics.get('mae', 0):.2f}ft, "
+                  f"RMSE={metrics.get('rmse', 0):.2f}ft, "
+                  f"Cat={metrics.get('categorical_accuracy', 0)*100:.0f}%, "
+                  f"n={metrics.get('sample_size', 0)}")
+            
+        except Exception as e:
+            print(f"   ✗ Error: {e}")
+            results_summary.append({
+                'forecast_id': forecast_id,
+                'success': False,
+                'error': str(e)
+            })
+    
+    # Print summary
+    print("\n" + "=" * 60)
+    print("Validation Summary:")
+    print("=" * 60)
+    
+    successful = [r for r in results_summary if r['success']]
+    failed = [r for r in results_summary if not r['success']]
+    
+    print(f"\nTotal forecasts: {len(results_summary)}")
+    print(f"Successfully validated: {len(successful)}")
+    print(f"Failed: {len(failed)}")
+    
+    if successful:
+        # Calculate aggregate metrics
+        mae_values = [r['mae'] for r in successful if r.get('mae') is not None]
+        rmse_values = [r['rmse'] for r in successful if r.get('rmse') is not None]
+        cat_values = [r['categorical_accuracy'] for r in successful if r.get('categorical_accuracy') is not None]
+        dir_values = [r['direction_accuracy'] for r in successful if r.get('direction_accuracy') is not None]
+        
+        if mae_values:
+            print(f"\nAggregate Metrics:")
+            print(f"  Average MAE:  {sum(mae_values)/len(mae_values):.2f} ft")
+            print(f"  Average RMSE: {sum(rmse_values)/len(rmse_values):.2f} ft")
+            if cat_values:
+                print(f"  Average Categorical Accuracy: {sum(cat_values)/len(cat_values)*100:.1f}%")
+            if dir_values:
+                print(f"  Average Direction Accuracy: {sum(dir_values)/len(dir_values)*100:.1f}%")
+
+
+async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
+    """
+    Generate accuracy report for recent forecasts.
+    
+    Args:
+        config: Application configuration
+        days: Number of days to include in report
+    """
+    from src.validation import ValidationDatabase
+    import sqlite3
+    
+    print(f"\nAccuracy Report (Last {days} Days)")
+    print("=" * 60)
+    
+    # Initialize database
+    db_path = config.get('validation', 'database_path', 'data/validation.db')
+    database = ValidationDatabase(db_path)
+    
+    # Calculate cutoff timestamp
+    cutoff = datetime.now().timestamp() - (days * 86400)
+    
+    with sqlite3.connect(database.db_path) as conn:
+        cursor = conn.cursor()
+        
+        # Get validation statistics
+        cursor.execute("""
+            SELECT 
+                COUNT(DISTINCT f.forecast_id) as total_forecasts,
+                COUNT(v.id) as total_validations,
+                AVG(v.mae) as avg_mae,
+                AVG(v.rmse) as avg_rmse,
+                AVG(CASE WHEN v.category_match = 1 THEN 1.0 ELSE 0.0 END) as categorical_accuracy,
+                AVG(CASE WHEN v.direction_error <= 22.5 THEN 1.0 ELSE 0.0 END) as direction_accuracy
+            FROM forecasts f
+            INNER JOIN validations v ON f.forecast_id = v.forecast_id
+            WHERE f.created_at >= ?
+        """, (cutoff,))
+        
+        row = cursor.fetchone()
+        
+        if not row or row[0] == 0:
+            print(f"\nNo validated forecasts found in the last {days} days.")
+            return
+        
+        total_forecasts = row[0]
+        total_validations = row[1]
+        avg_mae = row[2]
+        avg_rmse = row[3]
+        categorical_accuracy = row[4]
+        direction_accuracy = row[5]
+        
+        print(f"\nOverview:")
+        print(f"  Period: Last {days} days")
+        print(f"  Validated Forecasts: {total_forecasts}")
+        print(f"  Total Validations: {total_validations}")
+        print(f"  Average Predictions per Forecast: {total_validations/total_forecasts:.1f}")
+        
+        print(f"\nAccuracy Metrics:")
+        print(f"  MAE (Mean Absolute Error):     {avg_mae:.2f} ft  (target: < 2.0 ft)")
+        print(f"  RMSE (Root Mean Square Error): {avg_rmse:.2f} ft  (target: < 2.5 ft)")
+        print(f"  Categorical Accuracy:          {categorical_accuracy*100:.1f}%  (target: > 75%)")
+        print(f"  Direction Accuracy:            {direction_accuracy*100:.1f}%  (target: > 80%)")
+        
+        # Performance assessment
+        mae_pass = avg_mae < 2.0
+        rmse_pass = avg_rmse < 2.5
+        cat_pass = categorical_accuracy > 0.75
+        dir_pass = direction_accuracy > 0.80
+        
+        print(f"\nPerformance Assessment:")
+        print(f"  MAE Target:         {'✓ PASS' if mae_pass else '✗ FAIL'}")
+        print(f"  RMSE Target:        {'✓ PASS' if rmse_pass else '✗ FAIL'}")
+        print(f"  Categorical Target: {'✓ PASS' if cat_pass else '✗ FAIL'}")
+        print(f"  Direction Target:   {'✓ PASS' if dir_pass else '✗ FAIL'}")
+        
+        # Get per-shore breakdown
+        cursor.execute("""
+            SELECT 
+                p.shore,
+                COUNT(v.id) as validations,
+                AVG(v.mae) as avg_mae,
+                AVG(v.rmse) as avg_rmse,
+                AVG(CASE WHEN v.category_match = 1 THEN 1.0 ELSE 0.0 END) as categorical_accuracy
+            FROM predictions p
+            INNER JOIN validations v ON p.id = v.prediction_id
+            INNER JOIN forecasts f ON p.forecast_id = f.forecast_id
+            WHERE f.created_at >= ?
+            GROUP BY p.shore
+        """, (cutoff,))
+        
+        shore_stats = cursor.fetchall()
+        
+        if shore_stats:
+            print(f"\nPer-Shore Breakdown:")
+            for shore, validations, mae, rmse, cat_acc in shore_stats:
+                print(f"\n  {shore}:")
+                print(f"    Validations: {validations}")
+                print(f"    MAE:  {mae:.2f} ft")
+                print(f"    RMSE: {rmse:.2f} ft")
+                print(f"    Categorical Accuracy: {cat_acc*100:.1f}%")
+        
+        # Get recent forecast details
+        cursor.execute("""
+            SELECT 
+                f.forecast_id,
+                f.created_at,
+                COUNT(v.id) as validations,
+                AVG(v.mae) as avg_mae,
+                AVG(v.rmse) as avg_rmse
+            FROM forecasts f
+            INNER JOIN validations v ON f.forecast_id = v.forecast_id
+            WHERE f.created_at >= ?
+            GROUP BY f.forecast_id
+            ORDER BY f.created_at DESC
+            LIMIT 10
+        """, (cutoff,))
+        
+        recent_forecasts = cursor.fetchall()
+        
+        if recent_forecasts:
+            print(f"\nRecent Forecasts:")
+            print(f"  {'Forecast ID':<40} {'Date':<20} {'n':<4} {'MAE':<6} {'RMSE':<6}")
+            print(f"  {'-'*40} {'-'*20} {'-'*4} {'-'*6} {'-'*6}")
+            for forecast_id, created_at, validations, mae, rmse in recent_forecasts:
+                # Format timestamp
+                if isinstance(created_at, str):
+                    dt = datetime.fromisoformat(created_at)
+                else:
+                    dt = datetime.fromtimestamp(created_at)
+                date_str = dt.strftime('%Y-%m-%d %H:%M')
+                
+                print(f"  {forecast_id:<40} {date_str:<20} {validations:<4} {mae:<6.2f} {rmse:<6.2f}")
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="SurfCastAI: AI-Powered Oahu Surf Forecasting System")
@@ -451,6 +739,18 @@ def main():
     # Bundle files command
     files_parser = subparsers.add_parser('files', help='List files in a bundle')
     files_parser.add_argument('--bundle', '-b', help="Specific bundle ID to use")
+    
+    # Validation commands
+    validate_parser = subparsers.add_parser('validate', help='Validate a specific forecast')
+    validate_parser.add_argument('--forecast', '-f', required=True, help="Forecast ID to validate")
+    
+    validate_all_parser = subparsers.add_parser('validate-all', help='Validate all pending forecasts')
+    validate_all_parser.add_argument('--hours-after', type=int, default=24, 
+                                     help="Minimum hours after forecast before validating (default: 24)")
+    
+    accuracy_report_parser = subparsers.add_parser('accuracy-report', help='Generate accuracy report')
+    accuracy_report_parser.add_argument('--days', type=int, default=30, 
+                                        help="Number of days to include in report (default: 30)")
     
     # Parse arguments
     args = parser.parse_args()
@@ -505,6 +805,21 @@ def main():
         elif args.command == 'files':
             # List files in a bundle
             bundle_files(config, args.bundle)
+            return 0
+            
+        elif args.command == 'validate':
+            # Validate a specific forecast
+            asyncio.run(validate_forecast_cmd(config, args.forecast))
+            return 0
+            
+        elif args.command == 'validate-all':
+            # Validate all pending forecasts
+            asyncio.run(validate_all_forecasts_cmd(config, args.hours_after))
+            return 0
+            
+        elif args.command == 'accuracy-report':
+            # Generate accuracy report
+            asyncio.run(accuracy_report_cmd(config, args.days))
             return 0
             
         else:
