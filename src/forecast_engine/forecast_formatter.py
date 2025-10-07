@@ -198,14 +198,38 @@ class ForecastFormatter:
         confidence = forecast_data.get('metadata', {}).get('confidence', {})
         if confidence:
             overall_score = confidence.get('overall_score', 0)
+            category = confidence.get('category', 'Moderate')
+            breakdown = confidence.get('breakdown', {})
+
             markdown_parts.append('## Forecast Confidence\n\n')
-            markdown_parts.append(f"Overall confidence: {overall_score:.1f}/1.0\n\n")
+            markdown_parts.append(
+                f"**{category}** Confidence ({breakdown.get('overall_score_out_of_10', overall_score * 10):.1f}/10)\n\n"
+            )
+
             factors = confidence.get('factors', {})
-            if factors:
+            if factors and breakdown.get('factor_descriptions'):
                 markdown_parts.append('**Confidence Factors:**\n\n')
-                for factor, value in factors.items():
-                    markdown_parts.append(f"- {factor.replace('_', ' ').title()}: {value:.1f}/1.0\n")
+                descriptions = breakdown.get('factor_descriptions', {})
+                factors_out_of_10 = breakdown.get('factors', {})
+
+                for factor_key in ['model_consensus', 'source_reliability', 'data_completeness',
+                                  'forecast_horizon', 'historical_accuracy']:
+                    if factor_key in factors_out_of_10:
+                        factor_name = factor_key.replace('_', ' ').title()
+                        score_10 = factors_out_of_10[factor_key]
+                        description = descriptions.get(factor_key, '')
+                        markdown_parts.append(f"- **{factor_name}**: {score_10}/10 - {description}\n")
                 markdown_parts.append('\n')
+
+                # Add data source summary
+                if 'total_sources' in breakdown:
+                    source_counts = breakdown.get('source_counts', {})
+                    markdown_parts.append(
+                        f"**Data Sources**: {breakdown['total_sources']} sources "
+                        f"({source_counts.get('buoys', 0)} buoys, "
+                        f"{source_counts.get('models', 0)} models, "
+                        f"{source_counts.get('weather', 0)} weather)\n\n"
+                    )
 
         visuals = forecast_data.get('metadata', {}).get('visualizations', {})
         if visuals:

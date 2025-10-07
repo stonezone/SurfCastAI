@@ -3,10 +3,12 @@ Buoy data processor for SurfCastAI.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional, Union, Tuple
 from pathlib import Path
 import json
 from datetime import datetime, timedelta
+import numpy as np
+from scipy import stats
 
 from .data_processor import DataProcessor, ProcessingResult
 from .models.buoy_data import BuoyData, BuoyObservation
@@ -107,7 +109,272 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
                 success=False,
                 error=f"Processing error: {str(e)}"
             )
-    
+
+    def detect_trend(self, buoy_data: BuoyData, hours: int = 24) -> Dict[str, Any]:
+        """
+        Detect trends in wave height over the specified time period.
+
+        Uses linear regression to calculate slope and determine trend direction.
+        Threshold: slope > 0.2 feet/hour is considered increasing/decreasing.
+
+        Args:
+            buoy_data: Buoy data to analyze
+            hours: Number of hours to look back (default: 24)
+
+        Returns:
+            Dictionary with trend information:
+            - direction: 'increasing', 'decreasing', or 'stable'
+            - slope: Rate of change in feet/hour
+            - confidence: Confidence in trend (0.0-1.0)
+            - r_squared: R-squared value of linear regression
+        """
+        # Extract wave heights and timestamps for the specified period
+        cutoff_time = datetime.now() - timedelta(hours=hours)
+
+        heights = []
+        timestamps = []
+
+        for obs in buoy_data.observations:
+            if obs.wave_height is None:
+                continue
+
+            try:
+                obs_time = datetime.fromisoformat(obs.timestamp.replace('Z', '+00:00'))
+                if obs_time >= cutoff_time.replace(tzinfo=obs_time.tzinfo):
+                    # Convert meters to feet for slope calculation
+                    heights.append(obs.wave_height * 3.28084)
+                    timestamps.append(obs_time.timestamp())
+            except (ValueError, TypeError):
+                continue
+
+        # Need at least 3 points for meaningful regression
+        if len(heights) < 3:
+            return {
+                'direction': 'unknown',
+                'slope': 0.0,
+                'confidence': 0.0,
+                'r_squared': 0.0,
+                'sample_size': len(heights)
+            }
+
+        # Convert timestamps to hours since first observation
+        timestamps = np.array(timestamps)
+        hours_elapsed = (timestamps - timestamps[0]) / 3600.0
+        heights = np.array(heights)
+
+        # Perform linear regression
+        slope, intercept, r_value, p_value, std_err = stats.linregress(hours_elapsed, heights)
+
+        # Determine trend direction
+        # Threshold: slope > 0.2 feet/hour = increasing (about 2.4 feet over 12 hours)
+        # This is reasonable for detecting significant swell changes
+        if slope > 0.2:
+            direction = 'increasing'
+        elif slope < -0.2:
+            direction = 'decreasing'
+        else:
+            direction = 'stable'
+
+        # Calculate confidence based on r_squared and sample size
+        r_squared = r_value ** 2
+        sample_factor = min(1.0, len(heights) / 24.0)  # More samples = higher confidence
+        confidence = r_squared * sample_factor
+
+        return {
+            'direction': direction,
+            'slope': float(slope),
+            'confidence': float(confidence),
+            'r_squared': float(r_squared),
+            'sample_size': len(heights),
+            'p_value': float(p_value),
+            'std_error': float(std_err)
+        }
+
+    def detect_anomalies(self, buoy_data: BuoyData, threshold: float = 2.0) -> Dict[str, Any]:
+        """
+        Detect anomalous readings in buoy data using z-score method.
+
+        Flags readings that are more than threshold standard deviations from the mean.
+
+        Args:
+            buoy_data: Buoy data to analyze
+            threshold: Z-score threshold (default: 2.0)
+
+        Returns:
+            Dictionary with anomaly information:
+            - anomalies: List of anomalous observation indices
+            - anomaly_count: Number of anomalies detected
+            - mean_height: Mean wave height
+            - std_height: Standard deviation of wave height
+            - z_scores: Z-scores for all observations
+        """
+        # Extract wave heights
+        heights = []
+        valid_indices = []
+
+        for i, obs in enumerate(buoy_data.observations):
+            if obs.wave_height is not None:
+                heights.append(obs.wave_height)
+                valid_indices.append(i)
+
+        if len(heights) < 3:
+            return {
+                'anomalies': [],
+                'anomaly_count': 0,
+                'mean_height': 0.0,
+                'std_height': 0.0,
+                'z_scores': [],
+                'sample_size': len(heights)
+            }
+
+        # Calculate z-scores
+        heights_array = np.array(heights)
+        mean_height = np.mean(heights_array)
+        std_height = np.std(heights_array, ddof=1)  # Sample standard deviation
+
+        # Avoid division by zero
+        if std_height == 0:
+            return {
+                'anomalies': [],
+                'anomaly_count': 0,
+                'mean_height': float(mean_height),
+                'std_height': 0.0,
+                'z_scores': [0.0] * len(heights),
+                'sample_size': len(heights)
+            }
+
+        z_scores = (heights_array - mean_height) / std_height
+
+        # Find anomalies (|z-score| > threshold)
+        anomaly_mask = np.abs(z_scores) > threshold
+        anomalies = [valid_indices[i] for i in range(len(valid_indices)) if anomaly_mask[i]]
+
+        # Log warnings for anomalies
+        if anomalies:
+            self.logger.warning(
+                f"Detected {len(anomalies)} anomalous readings in buoy {buoy_data.station_id}"
+            )
+            for idx in anomalies:
+                obs = buoy_data.observations[idx]
+                z_score = z_scores[valid_indices.index(idx)]
+                self.logger.debug(
+                    f"Anomaly at {obs.timestamp}: wave_height={obs.wave_height}m, z-score={z_score:.2f}"
+                )
+
+        return {
+            'anomalies': anomalies,
+            'anomaly_count': len(anomalies),
+            'mean_height': float(mean_height),
+            'std_height': float(std_height),
+            'z_scores': [float(z) for z in z_scores],
+            'sample_size': len(heights),
+            'threshold': threshold
+        }
+
+    def calculate_quality_score(self, buoy_data: BuoyData) -> Dict[str, Any]:
+        """
+        Calculate a quality score for buoy data based on freshness, completeness, and consistency.
+
+        Score components:
+        - Freshness: Based on age of latest observation (< 1 hour = 1.0)
+        - Completeness: Percentage of observations with all fields present
+        - Consistency: Based on lack of sudden jumps in values
+
+        Args:
+            buoy_data: Buoy data to score
+
+        Returns:
+            Dictionary with quality score information:
+            - overall_score: Overall quality score (0.0-1.0)
+            - freshness_score: Freshness score (0.0-1.0)
+            - completeness_score: Completeness score (0.0-1.0)
+            - consistency_score: Consistency score (0.0-1.0)
+        """
+        scores = {
+            'overall_score': 0.0,
+            'freshness_score': 0.0,
+            'completeness_score': 0.0,
+            'consistency_score': 0.0
+        }
+
+        if not buoy_data.observations:
+            return scores
+
+        # 1. Calculate freshness score
+        latest_obs = buoy_data.observations[0]
+        try:
+            obs_time = datetime.fromisoformat(latest_obs.timestamp.replace('Z', '+00:00'))
+            now = datetime.now(obs_time.tzinfo)
+            hours_old = (now - obs_time).total_seconds() / 3600
+
+            # Score decreases linearly from 1.0 at 0 hours to 0.0 at 6 hours
+            if hours_old <= 1.0:
+                scores['freshness_score'] = 1.0
+            elif hours_old >= 6.0:
+                scores['freshness_score'] = 0.0
+            else:
+                scores['freshness_score'] = 1.0 - (hours_old - 1.0) / 5.0
+        except (ValueError, TypeError):
+            scores['freshness_score'] = 0.5  # Unknown freshness
+
+        # 2. Calculate completeness score
+        essential_fields = ['wave_height', 'dominant_period', 'wave_direction']
+        optional_fields = ['wind_speed', 'wind_direction', 'water_temperature']
+        all_fields = essential_fields + optional_fields
+
+        complete_count = 0
+        partial_count = 0
+
+        for obs in buoy_data.observations:
+            # Check essential fields
+            essential_present = sum(1 for field in essential_fields if getattr(obs, field) is not None)
+
+            if essential_present == len(essential_fields):
+                # Check optional fields
+                optional_present = sum(1 for field in optional_fields if getattr(obs, field) is not None)
+                if optional_present == len(optional_fields):
+                    complete_count += 1
+                else:
+                    partial_count += 1
+            else:
+                partial_count += 1
+
+        total_obs = len(buoy_data.observations)
+        scores['completeness_score'] = (complete_count + 0.5 * partial_count) / total_obs
+
+        # 3. Calculate consistency score (check for sudden jumps)
+        if len(buoy_data.observations) < 2:
+            scores['consistency_score'] = 1.0
+        else:
+            jump_count = 0
+            checked_pairs = 0
+
+            for i in range(len(buoy_data.observations) - 1):
+                current = buoy_data.observations[i]
+                next_obs = buoy_data.observations[i + 1]
+
+                # Check wave height consistency
+                if current.wave_height is not None and next_obs.wave_height is not None:
+                    checked_pairs += 1
+                    # Flag as jump if change is more than 2 meters between observations
+                    height_diff = abs(current.wave_height - next_obs.wave_height)
+                    if height_diff > 2.0:
+                        jump_count += 1
+
+            if checked_pairs > 0:
+                scores['consistency_score'] = 1.0 - (jump_count / checked_pairs)
+            else:
+                scores['consistency_score'] = 1.0
+
+        # 4. Calculate overall score (weighted average)
+        scores['overall_score'] = (
+            0.4 * scores['freshness_score'] +
+            0.3 * scores['completeness_score'] +
+            0.3 * scores['consistency_score']
+        )
+
+        return scores
+
     def _clean_observations(self, buoy_data: BuoyData) -> BuoyData:
         """
         Clean and normalize buoy observations.
@@ -152,10 +419,15 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
     def _analyze_buoy_data(self, buoy_data: BuoyData) -> tuple[List[str], Dict[str, Any]]:
         """
         Analyze buoy data for quality and special conditions.
-        
+
+        Enhanced with:
+        - Trend detection (linear regression)
+        - Anomaly detection (z-scores)
+        - Quality scoring (freshness, completeness, consistency)
+
         Args:
             buoy_data: Buoy data to analyze
-            
+
         Returns:
             Tuple of (warnings, metadata)
         """
@@ -165,9 +437,87 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
                 'timestamp': datetime.now().isoformat(),
                 'quality_score': 1.0,
                 'trends': {},
+                'anomalies': {},
+                'quality_details': {},
                 'special_conditions': []
             }
         }
+
+        # Run enhanced analysis methods
+        try:
+            # 1. Detect trends
+            trend_info = self.detect_trend(buoy_data, hours=24)
+            metadata['analysis']['trends'] = trend_info
+
+            # Log trend information
+            if trend_info['confidence'] > 0.5:
+                trend_msg = (
+                    f"Wave height trend: {trend_info['direction']} "
+                    f"(slope: {trend_info['slope']:.3f} ft/hr, "
+                    f"confidence: {trend_info['confidence']:.2f})"
+                )
+                self.logger.info(trend_msg)
+
+                # Add warning for significant trends
+                if trend_info['direction'] == 'increasing' and abs(trend_info['slope']) > 1.0:
+                    warnings.append(f"Rapidly increasing wave heights detected ({trend_info['slope']:.2f} ft/hr)")
+                elif trend_info['direction'] == 'decreasing' and abs(trend_info['slope']) > 1.0:
+                    warnings.append(f"Rapidly decreasing wave heights detected ({trend_info['slope']:.2f} ft/hr)")
+
+        except Exception as e:
+            self.logger.warning(f"Failed to detect trends: {e}")
+
+        try:
+            # 2. Detect anomalies
+            anomaly_info = self.detect_anomalies(buoy_data, threshold=2.0)
+            metadata['analysis']['anomalies'] = anomaly_info
+
+            # Adjust quality score based on anomaly count
+            if anomaly_info['anomaly_count'] > 0:
+                anomaly_ratio = anomaly_info['anomaly_count'] / max(1, anomaly_info['sample_size'])
+                anomaly_penalty = min(0.5, anomaly_ratio * 2.0)  # Max 0.5 penalty
+                metadata['analysis']['quality_score'] -= anomaly_penalty
+
+                warnings.append(
+                    f"Detected {anomaly_info['anomaly_count']} anomalous readings - "
+                    f"data reliability reduced"
+                )
+
+        except Exception as e:
+            self.logger.warning(f"Failed to detect anomalies: {e}")
+
+        try:
+            # 3. Calculate quality score
+            quality_info = self.calculate_quality_score(buoy_data)
+            metadata['analysis']['quality_details'] = quality_info
+
+            # Use the detailed quality score as the overall score
+            metadata['analysis']['quality_score'] = quality_info['overall_score']
+
+            # Add warnings for low quality scores
+            if quality_info['overall_score'] < 0.4:
+                warnings.append(
+                    f"Poor data quality (score: {quality_info['overall_score']:.2f}) - "
+                    f"use with caution"
+                )
+            elif quality_info['overall_score'] < 0.6:
+                warnings.append(
+                    f"Moderate data quality (score: {quality_info['overall_score']:.2f})"
+                )
+
+            # Specific warnings for quality components
+            if quality_info['freshness_score'] < 0.5:
+                warnings.append("Data is not fresh - may not reflect current conditions")
+            if quality_info['completeness_score'] < 0.5:
+                warnings.append("Incomplete data - missing essential fields")
+            if quality_info['consistency_score'] < 0.7:
+                warnings.append("Inconsistent data - sudden jumps detected")
+
+        except Exception as e:
+            self.logger.warning(f"Failed to calculate quality score: {e}")
+
+        # Store weight for data fusion based on quality score
+        metadata['analysis']['weight'] = metadata['analysis']['quality_score']
         
         # Check data freshness
         if buoy_data.observations:

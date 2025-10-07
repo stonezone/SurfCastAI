@@ -20,6 +20,8 @@ from .models.weather_data import WeatherData, WeatherPeriod
 from .models.wave_model import ModelData, ModelForecast, ModelPoint
 from .models.swell_event import SwellEvent, SwellComponent, SwellForecast, ForecastLocation
 from .hawaii_context import HawaiiContext
+from .source_scorer import SourceScorer
+from .confidence_scorer import ConfidenceScorer
 from ..core.config import Config
 
 
@@ -38,13 +40,15 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
     def __init__(self, config: Config):
         """
         Initialize the data fusion system.
-        
+
         Args:
             config: Application configuration
         """
         super().__init__(config)
         self.logger = logging.getLogger('processor.data_fusion')
         self.hawaii_context = HawaiiContext()
+        self.source_scorer = SourceScorer()
+        self.confidence_scorer = ConfidenceScorer()
     
     def validate(self, data: Dict[str, Any]) -> List[str]:
         """
@@ -102,7 +106,31 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             tide_data = data.get('tide_data', [])
             tropical_data = data.get('tropical_data', [])
             chart_data = data.get('chart_data', [])
-            
+
+            # Score all data sources for reliability weighting
+            self.logger.info("Scoring data sources for reliability weighting")
+            source_scores = self.source_scorer.score_sources({
+                'buoy_data': buoy_data,
+                'weather_data': weather_data,
+                'model_data': model_data
+            })
+
+            # Attach reliability scores and weights to data items
+            self._attach_source_scores(buoy_data, weather_data, model_data, source_scores)
+
+            # Store source scores in forecast metadata
+            forecast.metadata['source_scores'] = {
+                source_id: {
+                    'overall_score': score.overall_score,
+                    'tier': score.tier.name,
+                    'tier_score': score.tier_score,
+                    'freshness_score': score.freshness_score,
+                    'completeness_score': score.completeness_score,
+                    'accuracy_score': score.accuracy_score
+                }
+                for source_id, score in source_scores.items()
+            }
+
             # Identify swell events from all sources
             swell_events = self._identify_swell_events(buoy_data, model_data)
             
@@ -119,11 +147,50 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             self._integrate_tropical_data(forecast, tropical_data)
             self._integrate_chart_data(forecast, chart_data)
             
-            # Calculate confidence scores
-            warnings, metadata = self._calculate_confidence_scores(forecast, buoy_data, weather_data, model_data)
-            
-            # Add metadata from analysis
-            forecast.metadata.update(metadata)
+            # Calculate confidence scores using new ConfidenceScorer
+            self.logger.info("Calculating confidence scores")
+            confidence_result = self.confidence_scorer.calculate_confidence(
+                fusion_data={
+                    'swell_events': forecast.swell_events,
+                    'locations': forecast.locations,
+                    'metadata': forecast.metadata,
+                    'buoy_data': buoy_data,
+                    'weather_data': weather_data,
+                    'model_data': model_data
+                },
+                forecast_horizon_days=2  # Default 2-day forecast
+            )
+
+            # Update forecast metadata with confidence information
+            forecast.metadata['confidence'] = {
+                'overall_score': confidence_result.overall_score,
+                'category': confidence_result.category.value,
+                'factors': confidence_result.factors,
+                'breakdown': confidence_result.breakdown
+            }
+
+            # Generate warnings based on confidence
+            warnings = []
+            if confidence_result.overall_score < 0.4:
+                warnings.append(
+                    "Very low forecast confidence due to poor data quality or high uncertainty"
+                )
+            elif confidence_result.overall_score < 0.6:
+                warnings.append(
+                    "Low forecast confidence - limited data or model disagreement present"
+                )
+
+            # Add specific factor warnings
+            if confidence_result.factors['model_consensus'] < 0.5:
+                warnings.append("Significant disagreement between model predictions")
+            if confidence_result.factors['data_completeness'] < 0.5:
+                warnings.append("Limited data sources available - missing expected data types")
+
+            # Prepare metadata for result
+            metadata = {
+                'confidence': forecast.metadata['confidence'],
+                'confidence_calculated_at': confidence_result.metadata['calculated_at']
+            }
             
             return ProcessingResult(
                 success=True,
@@ -788,136 +855,6 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         # Ensure result is between 0 and 1
         return max(0.0, min(1.0, quality))
     
-    def _calculate_confidence_scores(self, forecast: SwellForecast, 
-                                   buoy_data: List[BuoyData],
-                                   weather_data: List[WeatherData],
-                                   model_data: List[ModelData]) -> Tuple[List[str], Dict[str, Any]]:
-        """
-        Calculate confidence scores for the forecast.
-        
-        Args:
-            forecast: Swell forecast
-            buoy_data: List of buoy data
-            weather_data: List of weather data
-            model_data: List of model data
-            
-        Returns:
-            Tuple of (warnings, metadata)
-        """
-        warnings = []
-        metadata = {
-            'confidence': {
-                'overall_score': 0.7,  # Default mid-high confidence
-                'data_source_scores': {},
-                'factors': {}
-            }
-        }
-        
-        # Calculate data freshness factor
-        freshness_scores = []
-        
-        for buoy in buoy_data:
-            if buoy.observations:
-                latest = buoy.observations[0]
-                try:
-                    obs_time = datetime.fromisoformat(latest.timestamp.replace('Z', '+00:00'))
-                    now = datetime.now(obs_time.tzinfo)
-                    hours_old = (now - obs_time).total_seconds() / 3600
-                    
-                    freshness = max(0, min(1, 1 - (hours_old / 48)))  # 0 after 48 hours
-                    freshness_scores.append(freshness)
-                except (ValueError, TypeError):
-                    pass
-        
-        for model in model_data:
-            try:
-                run_time = datetime.fromisoformat(model.run_time.replace('Z', '+00:00'))
-                now = datetime.now(run_time.tzinfo)
-                hours_old = (now - run_time).total_seconds() / 3600
-                
-                freshness = max(0, min(1, 1 - (hours_old / 72)))  # 0 after 72 hours
-                freshness_scores.append(freshness)
-            except (ValueError, TypeError):
-                pass
-        
-        # Calculate average freshness
-        if freshness_scores:
-            freshness_factor = sum(freshness_scores) / len(freshness_scores)
-        else:
-            freshness_factor = 0.5
-            warnings.append("No data freshness information available")
-        
-        metadata['confidence']['factors']['data_freshness'] = freshness_factor
-        
-        # Calculate source diversity factor
-        source_count = 0
-        if buoy_data:
-            source_count += 1
-            metadata['confidence']['data_source_scores']['buoy'] = 0.9  # High confidence
-        
-        if weather_data:
-            source_count += 1
-            metadata['confidence']['data_source_scores']['weather'] = 0.8  # Good confidence
-        
-        if model_data:
-            source_count += 1
-            metadata['confidence']['data_source_scores']['model'] = 0.7  # Medium confidence
-        
-        diversity_factor = min(1.0, source_count / 3)
-        metadata['confidence']['factors']['source_diversity'] = diversity_factor
-        
-        # Calculate source agreement factor (if multiple models)
-        agreement_factor = 0.7  # Default medium-high
-        
-        if len(model_data) > 1:
-            # Compare wave heights across models
-            model_heights = []
-            
-            for model in model_data:
-                if model.forecasts:
-                    # Find maximum height in first few forecasts
-                    max_height = 0
-                    for forecast in model.forecasts[:3]:  # First three forecast periods
-                        for point in forecast.points:
-                            if point.wave_height > max_height:
-                                max_height = point.wave_height
-                    
-                    if max_height > 0:
-                        model_heights.append(max_height)
-            
-            # Calculate agreement based on coefficient of variation
-            if len(model_heights) > 1:
-                mean_height = sum(model_heights) / len(model_heights)
-                if mean_height > 0:
-                    std_dev = stdev(model_heights)
-                    cv = std_dev / mean_height
-                    
-                    # Convert to agreement factor (1 = perfect agreement, 0 = poor agreement)
-                    agreement_factor = max(0, min(1, 1 - cv))
-        
-        metadata['confidence']['factors']['source_agreement'] = agreement_factor
-        
-        # Calculate overall confidence
-        overall_confidence = (
-            freshness_factor * 0.3 +
-            diversity_factor * 0.3 +
-            agreement_factor * 0.4
-        )
-        
-        metadata['confidence']['overall_score'] = overall_confidence
-        
-        # Add warnings for low confidence factors
-        if freshness_factor < 0.5:
-            warnings.append("Data is not fresh - forecast confidence reduced")
-        
-        if diversity_factor < 0.6:
-            warnings.append("Limited data sources available - forecast confidence reduced")
-        
-        if agreement_factor < 0.6:
-            warnings.append("Data sources show significant disagreement - forecast confidence reduced")
-        
-        return warnings, metadata
-    
     def _calculate_significance(self, height: Optional[float], period: Optional[float]) -> float:
         """
         Calculate significance score for a swell.
@@ -965,27 +902,102 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         # DO NOT multiply by 2 - that would give face height
         return meters * 3.28084  # 1m = 3.28084ft  # 1m = 3.28084ft
     
+    def _attach_source_scores(
+        self,
+        buoy_data: List[BuoyData],
+        weather_data: List[WeatherData],
+        model_data: List[ModelData],
+        source_scores: Dict[str, Any]
+    ) -> None:
+        """
+        Attach reliability scores and weights to data items.
+
+        This enables downstream processing to use weighted fusion
+        based on source reliability.
+
+        Args:
+            buoy_data: List of buoy data
+            weather_data: List of weather data
+            model_data: List of model data
+            source_scores: Dictionary of source scores from SourceScorer
+        """
+        # Attach scores to buoy data
+        for buoy in buoy_data:
+            source_id = self._get_source_id_from_data(buoy, 'buoy')
+            if source_id in source_scores:
+                score = source_scores[source_id]
+                buoy.metadata = buoy.metadata or {}
+                buoy.metadata['reliability_score'] = score.overall_score
+                buoy.metadata['source_tier'] = score.tier.name
+                buoy.metadata['weight'] = score.overall_score  # Weight for fusion
+
+        # Attach scores to weather data
+        for weather in weather_data:
+            source_id = self._get_source_id_from_data(weather, 'weather')
+            if source_id in source_scores:
+                score = source_scores[source_id]
+                weather.metadata = weather.metadata or {}
+                weather.metadata['reliability_score'] = score.overall_score
+                weather.metadata['source_tier'] = score.tier.name
+                weather.metadata['weight'] = score.overall_score
+
+        # Attach scores to model data
+        for model in model_data:
+            source_id = self._get_source_id_from_data(model, 'model')
+            if source_id in source_scores:
+                score = source_scores[source_id]
+                model.metadata = model.metadata or {}
+                model.metadata['reliability_score'] = score.overall_score
+                model.metadata['source_tier'] = score.tier.name
+                model.metadata['weight'] = score.overall_score
+
+        self.logger.info(
+            f"Attached reliability scores to {len(buoy_data)} buoy, "
+            f"{len(weather_data)} weather, {len(model_data)} model sources"
+        )
+
+    def _get_source_id_from_data(self, data: Any, data_type: str) -> str:
+        """
+        Extract source identifier from data object.
+
+        Args:
+            data: Data object
+            data_type: Type of data (buoy, weather, model)
+
+        Returns:
+            Source identifier string
+        """
+        # Try common source identifier fields
+        for field in ['source', 'source_name', 'provider', 'station_id',
+                     'model_id', 'buoy_id', 'name']:
+            if hasattr(data, field):
+                value = getattr(data, field)
+                if value:
+                    return str(value)
+
+        return f"{data_type}_unknown"
+
     def _haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """
         Calculate Haversine distance between two points in kilometers.
-        
+
         Args:
             lat1: Latitude of first point
             lon1: Longitude of first point
             lat2: Latitude of second point
             lon2: Longitude of second point
-            
+
         Returns:
             Distance in kilometers
         """
         # Convert decimal degrees to radians
         lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-        
+
         # Haversine formula
         dlon = lon2 - lon1
         dlat = lat2 - lat1
         a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
         c = 2 * math.asin(math.sqrt(a))
         r = 6371  # Radius of Earth in kilometers
-        
+
         return c * r
