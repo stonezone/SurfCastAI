@@ -15,15 +15,21 @@ from datetime import datetime
 class SwellComponent:
     """
     Represents a component of a swell event.
-    
+
     A swell can have multiple components with different
     characteristics (e.g. primary NW swell with secondary W component).
+
+    quality_flag values:
+    - "valid": Data passes all quality checks (use in forecast)
+    - "suspect": Data looks unusual but not clearly wrong (use with caution)
+    - "excluded": Data is anomalous and should NOT be used in forecasts
     """
     height: float
     period: float
     direction: float
     confidence: float = 0.7
     source: str = "model"
+    quality_flag: str = "valid"  # valid, suspect, or excluded
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -31,9 +37,14 @@ class SwellComponent:
 class SwellEvent:
     """
     Represents a distinct swell event.
-    
+
     A swell event has a lifecycle (start, peak, end times),
     directional characteristics, and one or more components.
+
+    quality_flag values:
+    - "valid": Data passes all quality checks (use in forecast)
+    - "suspect": Data looks unusual but not clearly wrong (use with caution)
+    - "excluded": Data is anomalous and should NOT be used in forecasts
     """
     event_id: str
     start_time: str
@@ -43,6 +54,7 @@ class SwellEvent:
     hawaii_scale: float
     end_time: str = ''
     source: str = 'model'
+    quality_flag: str = "valid"  # valid, suspect, or excluded
     primary_components: List[SwellComponent] = field(default_factory=list)
     secondary_components: List[SwellComponent] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -55,7 +67,7 @@ class SwellEvent:
     @property
     def primary_direction_cardinal(self) -> str:
         """Get cardinal direction from degrees."""
-        dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 
+        dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
                 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
         ix = round(self.primary_direction / 22.5) % 16
         return dirs[ix]
@@ -72,7 +84,7 @@ class SwellEvent:
 class ForecastLocation:
     """
     Represents a location for which forecasts are generated.
-    
+
     Different locations (e.g. North Shore vs South Shore) have
     different exposures to swell events.
     """
@@ -89,7 +101,7 @@ class ForecastLocation:
 class SwellForecast:
     """
     Represents a complete swell forecast.
-    
+
     A forecast includes multiple swell events and their impacts
     on different locations.
     """
@@ -99,19 +111,19 @@ class SwellForecast:
     locations: List[ForecastLocation] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return asdict(self)
-    
-    
+
+
 def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
     """
     Convert dictionary to SwellForecast object.
-    
+
     Args:
         data: Dictionary data from JSON
-        
+
     Returns:
         SwellForecast object
     """
@@ -120,7 +132,7 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
         generated_time=data.get('generated_time', ''),
         metadata=data.get('metadata', {})
     )
-    
+
     # Convert swell events
     for event_data in data.get('swell_events', []):
         event = SwellEvent(
@@ -132,9 +144,10 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
             significance=event_data.get('significance', 0.0),
             hawaii_scale=event_data.get('hawaii_scale', 0.0),
             source=event_data.get('source', ''),
+            quality_flag=event_data.get('quality_flag', 'valid'),
             metadata=event_data.get('metadata', {})
         )
-        
+
         # Add primary components
         for comp_data in event_data.get('primary_components', []):
             component = SwellComponent(
@@ -142,10 +155,11 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
                 period=comp_data.get('period', 0.0),
                 direction=comp_data.get('direction', 0.0),
                 confidence=comp_data.get('confidence', 0.7),
-                source=comp_data.get('source', 'model')
+                source=comp_data.get('source', 'model'),
+                quality_flag=comp_data.get('quality_flag', 'valid')
             )
             event.primary_components.append(component)
-        
+
         # Add secondary components
         for comp_data in event_data.get('secondary_components', []):
             component = SwellComponent(
@@ -153,12 +167,13 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
                 period=comp_data.get('period', 0.0),
                 direction=comp_data.get('direction', 0.0),
                 confidence=comp_data.get('confidence', 0.7),
-                source=comp_data.get('source', 'model')
+                source=comp_data.get('source', 'model'),
+                quality_flag=comp_data.get('quality_flag', 'valid')
             )
             event.secondary_components.append(component)
-        
+
         forecast.swell_events.append(event)
-    
+
     # Convert locations
     for loc_data in data.get('locations', []):
         location = ForecastLocation(
@@ -169,7 +184,7 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
             facing_direction=loc_data.get('facing_direction', 0.0),
             metadata=loc_data.get('metadata', {})
         )
-        
+
         # Add location-specific swell events
         for event_data in loc_data.get('swell_events', []):
             event = SwellEvent(
@@ -181,9 +196,10 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
                 significance=event_data.get('significance', 0.0),
                 hawaii_scale=event_data.get('hawaii_scale', 0.0),
                 source=event_data.get('source', ''),
+                quality_flag=event_data.get('quality_flag', 'valid'),
                 metadata=event_data.get('metadata', {})
             )
-            
+
             # Add primary components (same as main swell events)
             for comp_data in event_data.get('primary_components', []):
                 component = SwellComponent(
@@ -191,10 +207,11 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
                     period=comp_data.get('period', 0.0),
                     direction=comp_data.get('direction', 0.0),
                     confidence=comp_data.get('confidence', 0.7),
-                    source=comp_data.get('source', 'model')
+                    source=comp_data.get('source', 'model'),
+                    quality_flag=comp_data.get('quality_flag', 'valid')
                 )
                 event.primary_components.append(component)
-            
+
             # Add secondary components
             for comp_data in event_data.get('secondary_components', []):
                 component = SwellComponent(
@@ -202,12 +219,13 @@ def dict_to_swell_forecast(data: Dict[str, Any]) -> SwellForecast:
                     period=comp_data.get('period', 0.0),
                     direction=comp_data.get('direction', 0.0),
                     confidence=comp_data.get('confidence', 0.7),
-                    source=comp_data.get('source', 'model')
+                    source=comp_data.get('source', 'model'),
+                    quality_flag=comp_data.get('quality_flag', 'valid')
                 )
                 event.secondary_components.append(component)
-            
+
             location.swell_events.append(event)
-        
+
         forecast.locations.append(location)
-    
+
     return forecast

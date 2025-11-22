@@ -1,0 +1,145 @@
+{
+  "metadata": {
+    "forecast_date": "2025-12-08",
+    "valid_period": "48hr"
+  },
+  "seasonal_context": {
+    "season": "winter",
+    "typical_patterns": "Active North Pacific storm track, large NW-W swells common"
+  },
+  "buoy_analysis": {
+    "confidence": 0.87,
+    "narrative": "Major NW swell event underway. Buoy 51001 recording 18-20ft @ 18s from 305° (NW), peaking since 03:00 HST. Buoy 51201 shows 22-25ft faces @ 17s from 310° - largest reading in 3 months. Spectral analysis shows dominant long-period energy with secondary W swell component (12ft @ 14s from 270°). Cross-buoy timing indicates dual swell systems: primary NW groundswell and trailing W swell. High confidence in extreme surf conditions North and West shores.",
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51001",
+          "trend_type": "peaked",
+          "rate": 0.0,
+          "confidence": 0.90
+        },
+        {
+          "buoy_id": "51201",
+          "trend_type": "increasing",
+          "rate": 0.80,
+          "confidence": 0.95
+        }
+      ],
+      "anomalies": [],
+      "cross_validation": {
+        "agreement_level": "strong",
+        "consistent_buoys": ["51001", "51201", "51101", "51002"]
+      }
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.90,
+    "narrative": "Historic North Pacific storm complex. Primary low (952 mb) at 48°N, 170°W on Dec 5-6 generated 1000+ nm NW fetch with sustained 60 kt winds. Secondary low (958 mb) at 45°N, 165°W on Dec 6-7 added overlapping W fetch. Wave period charts show exceptional 18-20s energy arriving Dec 8-9, with secondary 14-16s W component. High pressure ridge south providing strong offshore flow. Pattern resembles historic Eddie Aikau contest swells. Very high confidence in XXL surf event.",
+    "data": {
+      "weather_systems": [
+        {
+          "type": "low_pressure",
+          "location": {"lat": 48.0, "lon": -170.0},
+          "central_pressure": 952,
+          "movement": "E at 25 kt"
+        },
+        {
+          "type": "low_pressure",
+          "location": {"lat": 45.0, "lon": -165.0},
+          "central_pressure": 958,
+          "movement": "NE at 20 kt"
+        }
+      ],
+      "predicted_swells": [
+        {
+          "source_lat": 48.0,
+          "source_lon": -170.0,
+          "target_lat": 21.7,
+          "target_lon": -158.0,
+          "fetch_distance_nm": 1050,
+          "fetch_duration_hrs": 48,
+          "peak_wind_speed_kt": 62,
+          "estimated_period_s": 18.5,
+          "estimated_height_ft": 22.0,
+          "arrival_time": "2025-12-08T06:00:00",
+          "confidence": 0.92
+        },
+        {
+          "source_lat": 45.0,
+          "source_lon": -165.0,
+          "target_lat": 21.7,
+          "target_lon": -158.0,
+          "fetch_distance_nm": 900,
+          "fetch_duration_hrs": 36,
+          "peak_wind_speed_kt": 55,
+          "estimated_period_s": 15.0,
+          "estimated_height_ft": 14.0,
+          "arrival_time": "2025-12-08T18:00:00",
+          "confidence": 0.88
+        }
+      ],
+      "frontal_boundaries": []
+    }
+  },
+  "contradictions": [],
+  "key_findings": [
+    "Historic multi-swell event with XXL North Shore surf",
+    "Primary NW swell 18-22ft @ 18s, secondary W swell 12-14ft @ 15s",
+    "Buoy readings confirm extreme conditions already arrived",
+    "Offshore winds creating excellent but dangerous conditions",
+    "Likely Eddie Aikau contest-caliber swell (30-40ft+ faces North Shore)",
+    "High surf warning conditions - life-threatening surf expected"
+  ],
+  "shore_forecasts": {
+    "north": {
+      "conditions": "Extreme - WARNING",
+      "wave_height_ft": "30-40+ faces (25-35 Hawaiian scale)",
+      "primary_swell": "NW 305° @ 18s + W 270° @ 15s",
+      "wind": "Offshore (E-SE 10-15 kt)",
+      "rating": 10,
+      "warning": "Life-threatening surf. Expert watermen only. Likely beach closures."
+    },
+    "south": {
+      "conditions": "Flat",
+      "wave_height_ft": "1-2",
+      "primary_swell": "Shadow from NW event",
+      "wind": "Light variable",
+      "rating": 2
+    },
+    "east": {
+      "conditions": "Small-moderate",
+      "wave_height_ft": "3-5",
+      "primary_swell": "Trade windswell + wrap",
+      "wind": "Light trades",
+      "rating": 5
+    },
+    "west": {
+      "conditions": "Very large - WARNING",
+      "wave_height_ft": "18-25 faces",
+      "primary_swell": "Direct W 270° @ 15s + NW wrap",
+      "wind": "Offshore (E 10 kt)",
+      "rating": 9,
+      "warning": "Dangerous conditions. Expert surfers only."
+    }
+  },
+  "swell_breakdown": [
+    {
+      "direction": 305,
+      "period": 18.5,
+      "height": 22.0,
+      "source": "Major North Pacific low (48N, 170W, 952mb)",
+      "arrival": "Dec 8 06:00 HST (ARRIVED)",
+      "duration": "48+ hours",
+      "confidence": 0.92
+    },
+    {
+      "direction": 270,
+      "period": 15.0,
+      "height": 14.0,
+      "source": "Secondary North Pacific low (45N, 165W, 958mb)",
+      "arrival": "Dec 8 18:00 HST",
+      "duration": "36 hours",
+      "confidence": 0.88
+    }
+  ]
+}

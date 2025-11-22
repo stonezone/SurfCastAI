@@ -1,0 +1,60 @@
+# Pre-commit hooks configuration for SurfCastAI
+# Run: pre-commit install (one-time setup)
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Black - Code formatter
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        language_version: python3.11
+        args: ['--line-length=100']
+
+  # Ruff - Fast Python linter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.4
+    hooks:
+      - id: ruff
+        args: ['--fix', '--exit-non-zero-on-fix']
+
+  # MyPy - Static type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.9.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests, types-PyYAML, types-aiofiles]
+        args: ['--ignore-missing-imports', '--no-strict-optional']
+        # Only check src/ directory, not tests
+        files: ^src/
+
+  # Pytest - Run fast unit tests
+  - repo: local
+    hooks:
+      - id: pytest-fast
+        name: pytest-fast
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [
+          'tests/unit/',
+          '-v',
+          '--tb=short',
+          '--maxfail=3',  # Stop after 3 failures
+          '-x',           # Stop on first failure
+          '--timeout=10'  # 10 second timeout per test
+        ]
+        stages: [pre-commit]
+
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: debug-statements

@@ -1,0 +1,15 @@
+{
+  "test_case": "case_02_low_confidence",
+  "description": "Low confidence scenario with sparse data and specialist disagreement",
+  "scenario": "Summer flatspell with uncertain Southern Hemisphere swell",
+  "expected_characteristics": [
+    "Weak specialist confidence scores (<0.55)",
+    "Missing or unreliable buoy data",
+    "Contradictions between specialists",
+    "Uncertain timing and sizing",
+    "Conservative hedging language in forecast"
+  ],
+  "created": "2025-10-12",
+  "author": "SurfCastAI Team",
+  "validation_method": "Test that low confidence is appropriately communicated"
+}

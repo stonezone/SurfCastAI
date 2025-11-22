@@ -11,7 +11,7 @@ from dataclasses import dataclass
 class SurfObservation:
     """
     Ground truth surf observation from a specific location.
-    
+
     Attributes:
         location: Surf break name (e.g., "Sunset Beach", "Pipeline")
         time: Observation time (HST)
@@ -34,7 +34,7 @@ class SurfObservation:
     observer: str = "unknown"
     confidence: float = 0.8
     notes: Optional[str] = None
-    
+
     def to_dict(self):
         """Convert to dictionary."""
         return {
@@ -49,7 +49,7 @@ class SurfObservation:
             'confidence': self.confidence,
             'notes': self.notes
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create from dictionary."""

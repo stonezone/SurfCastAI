@@ -210,32 +210,27 @@ tail -50 logs/surfcastai.log
 
 #### Daily Forecast Generation
 
+Use the helper script to manage logging and basic rotation:
+
 ```bash
 # Edit crontab
 crontab -e
 
-# Add daily forecast at 6:00 AM HST
-0 6 * * * cd /opt/surfCastAI && /opt/surfCastAI/venv/bin/python src/main.py run --mode full >> /var/log/surfcastai/cron.log 2>&1
-
-# Add validation at 8:00 PM HST (24+ hours after forecast)
-0 20 * * * cd /opt/surfCastAI && /opt/surfCastAI/venv/bin/python src/main.py validate-all >> /var/log/surfcastai/validation.log 2>&1
-
-# Weekly accuracy report (Sunday evening)
-0 21 * * 0 cd /opt/surfCastAI && /opt/surfCastAI/venv/bin/python src/main.py accuracy-report --days 7 | mail -s "Weekly Forecast Accuracy" admin@example.com
+# Run twice daily (adjust schedule as needed)
+0 6,18 * * * /opt/surfCastAI/deployment/cron_example.sh >> /dev/null 2>&1
 ```
 
-#### Multiple Daily Forecasts
+`deployment/cron_example.sh` writes forecasts to `logs/cron-YYYYMMDD.log`, runs `python src.main.py run --mode full`, and keeps the seven newest cron logs.
 
-```bash
-# Early morning (6 AM)
-0 6 * * * cd /opt/surfCastAI && /opt/surfCastAI/venv/bin/python src/main.py run --mode full
+#### Weekly Accuracy Report
 
-# Midday (12 PM)
-0 12 * * * cd /opt/surfCastAI && /opt/surfCastAI/venv/bin/python src/main.py run --mode full
+Use the provided helper to capture seven-day accuracy snapshots:
 
-# Evening (6 PM)
-0 18 * * * cd /opt/surfCastAI && /opt/surfCastAI/venv/bin/python src/main.py run --mode full
 ```
+0 20 * * 0 /opt/surfCastAI/scripts/weekly_review.sh >> /dev/null 2>&1
+```
+
+The script stores output at `logs/weekly-YYYYMMDD.log` and echoes a short summary to stdout.
 
 #### Cron Best Practices
 

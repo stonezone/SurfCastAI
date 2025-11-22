@@ -1,0 +1,223 @@
+{
+  "buoy_analysis": {
+    "confidence": 0.84,
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51001",
+          "buoy_name": "NW Hawaii (51001)",
+          "height_trend": "increasing_slight",
+          "height_slope": 0.0095,
+          "height_current": 2.8,
+          "period_trend": "steady",
+          "period_slope": 0.0032,
+          "period_current": 13.5,
+          "direction_trend": "steady",
+          "direction_current": 300.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51101",
+          "buoy_name": "South Oahu (51101)",
+          "height_trend": "steady",
+          "height_slope": 0.0018,
+          "height_current": 2.2,
+          "period_trend": "steady",
+          "period_slope": 0.0008,
+          "period_current": 18.5,
+          "direction_trend": "steady",
+          "direction_current": 200.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51207",
+          "buoy_name": "West Molokai (51207)",
+          "height_trend": "steady",
+          "height_slope": 0.0022,
+          "height_current": 1.8,
+          "period_trend": "steady",
+          "period_slope": 0.0005,
+          "period_current": 9.8,
+          "direction_trend": "steady",
+          "direction_current": 265.0,
+          "observations_count": 18
+        }
+      ],
+      "anomalies": [],
+      "quality_flags": {
+        "51001": "valid",
+        "51101": "valid",
+        "51207": "valid"
+      },
+      "cross_validation": {
+        "agreement_score": 0.68,
+        "height_agreement": 0.72,
+        "period_agreement": 0.64,
+        "num_buoys_compared": 3,
+        "interpretation": "moderate_agreement"
+      },
+      "summary_stats": {
+        "avg_wave_height": 2.27,
+        "max_wave_height": 2.8,
+        "min_wave_height": 1.8,
+        "avg_period": 13.93,
+        "max_period": 18.5,
+        "min_period": 9.8
+      }
+    },
+    "narrative": "Multiple swell windows active around the island. NW Hawaii (51001) tracking WNW swell at 2.8m @ 13.5s from 300\u00b0 with slight building trend. South Oahu (51101) showing long-period south swell at 2.2m @ 18.5s from 200\u00b0 (SSW)\u2014ultra-long 18-second periods indicate distant Southern Hemisphere source. West Molokai (51207) detecting west swell at 1.8m @ 9.8s from 265\u00b0 (W), shorter period suggests local or shorter-fetch system. All four shores of Oahu receiving surf energy from different directions. Good data quality across stations.",
+    "metadata": {
+      "buoys_analyzed": [
+        "51001",
+        "51101",
+        "51207"
+      ],
+      "analysis_timestamp": "2025-03-15T12:00:00Z",
+      "data_quality": "good"
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.76,
+    "data": {
+      "systems": [
+        {
+          "type": "low_pressure",
+          "location": "40N 155W",
+          "location_lat": 40.0,
+          "location_lon": -155.0,
+          "pressure_mb": 990,
+          "wind_speed_kt": 38,
+          "movement": "E at 16kt",
+          "intensification": "steady",
+          "generation_time": "2025-03-13T18:00:00Z",
+          "fetch": {
+            "direction": "WNW",
+            "distance_nm": 1200.0,
+            "duration_hrs": 28.0,
+            "fetch_length_nm": 580.0,
+            "quality": "moderate"
+          }
+        },
+        {
+          "type": "low_pressure",
+          "location": "38S 158W",
+          "location_lat": -38.0,
+          "location_lon": -158.0,
+          "pressure_mb": 985,
+          "wind_speed_kt": 45,
+          "movement": "SE at 14kt",
+          "intensification": "weakening",
+          "generation_time": "2025-03-12T00:00:00Z",
+          "fetch": {
+            "direction": "S",
+            "distance_nm": 2200.0,
+            "duration_hrs": 44.0,
+            "fetch_length_nm": 780.0,
+            "quality": "moderate"
+          }
+        }
+      ],
+      "predicted_swells": [
+        {
+          "source_system": "low_40N_155W",
+          "source_lat": 40.0,
+          "source_lon": -155.0,
+          "direction": "WNW",
+          "direction_degrees": 300,
+          "arrival_time": "2025-03-15T06:00-12:00Z",
+          "estimated_height": "5-7ft",
+          "estimated_period": "12-15s",
+          "confidence": 0.72,
+          "travel_time_hrs": 40.0,
+          "distance_nm": 1200.0,
+          "fetch_quality": "moderate"
+        },
+        {
+          "source_system": "low_38S_158W",
+          "source_lat": -38.0,
+          "source_lon": -158.0,
+          "direction": "SSW",
+          "direction_degrees": 200,
+          "arrival_time": "2025-03-14T18:00-2025-03-15T06:00Z",
+          "estimated_height": "4-6ft",
+          "estimated_period": "17-20s",
+          "confidence": 0.68,
+          "travel_time_hrs": 76.0,
+          "distance_nm": 2200.0,
+          "fetch_quality": "moderate"
+        }
+      ],
+      "frontal_boundaries": [],
+      "analysis_summary": {
+        "num_low_pressure": 2,
+        "num_high_pressure": 0,
+        "num_predicted_swells": 2,
+        "region": "North and South Pacific"
+      }
+    },
+    "narrative": "Active pattern with swell generators in both hemispheres. North Pacific low at 40N 155W (990mb) producing WNW swell with 580nm fetch over 28 hours. South Pacific low at 38S 158W (985mb, weakening) generated south swell with 780nm fetch over 44 hours. WNW swell estimated 5-7ft @ 12-15s arriving mid-morning. South swell estimated 4-6ft @ 17-20s, arrived overnight. West swell appears to be local windswell. Mixed swell environment with moderate surf on multiple shores.",
+    "metadata": {
+      "analysis_timestamp": "2025-03-15T12:00:00Z",
+      "models_used": [
+        "GFS",
+        "ECMWF"
+      ],
+      "confidence_factors": [
+        "two active systems",
+        "transition season variability"
+      ]
+    }
+  },
+  "swell_events": [
+    {
+      "direction": "WNW",
+      "height_range": "5-7ft",
+      "period_range": "12-15s",
+      "confidence": 0.72,
+      "source": "North Pacific low 990mb",
+      "timing": "Currently arriving"
+    },
+    {
+      "direction": "SSW",
+      "height_range": "4-6ft",
+      "period_range": "17-20s",
+      "confidence": 0.68,
+      "source": "South Pacific low 985mb",
+      "timing": "Arrived overnight, steady"
+    },
+    {
+      "direction": "W",
+      "height_range": "3-5ft",
+      "period_range": "8-11s",
+      "confidence": 0.6,
+      "source": "Local windswell",
+      "timing": "Ongoing"
+    }
+  ],
+  "shore_data": {
+    "north_shore": {
+      "exposure": "direct"
+    },
+    "south_shore": {
+      "exposure": "direct"
+    },
+    "east_shore": {
+      "exposure": "partial"
+    },
+    "west_shore": {
+      "exposure": "direct"
+    }
+  },
+  "seasonal_context": {
+    "season": "winter",
+    "typical_pattern": "Transition period, variable swells",
+    "current_phase": "late winter/early spring",
+    "trade_winds": "Light to moderate E trades"
+  },
+  "metadata": {
+    "forecast_date": "2025-03-15",
+    "valid_period": "48-hour",
+    "region": "Oahu",
+    "analyst": "SeniorForecaster"
+  }
+}

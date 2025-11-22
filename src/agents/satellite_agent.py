@@ -17,51 +17,51 @@ from ..core.http_client import HTTPClient
 class SatelliteAgent(BaseAgent):
     """
     Agent for collecting satellite imagery data.
-    
+
     Features:
     - Collects data from GOES satellites
     - Supports imagery from NOAA/NESDIS, NASA, and other sources
     - Handles dynamic URLs with time-based parameters
     - Extracts metadata from image filenames and headers
     """
-    
+
     def __init__(self, config: Config, http_client: Optional[HTTPClient] = None):
         """Initialize the SatelliteAgent."""
         super().__init__(config, http_client)
         self.logger = logging.getLogger('agent.satellite')
-    
+
     async def collect(self, data_dir: Path) -> List[Dict[str, Any]]:
         """
         Collect satellite imagery from configured sources.
-        
+
         Args:
             data_dir: Directory to store collected data
-            
+
         Returns:
             List of metadata dictionaries
         """
         # Create satellite data directory
         satellite_dir = data_dir / "satellite"
         satellite_dir.mkdir(exist_ok=True)
-        
+
         # Get satellite URLs from config
         satellite_urls = self.config.get_data_source_urls('satellite').get('satellite', [])
-        
+
         if not satellite_urls:
             self.logger.warning("No satellite URLs configured")
             return []
-        
+
         # Ensure HTTP client is available
         await self.ensure_http_client()
-        
+
         # Create tasks for all satellite URLs
         tasks = []
         for url in satellite_urls:
             tasks.append(self.process_satellite_url(url, satellite_dir))
-        
+
         # Execute all tasks
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         # Filter out exceptions
         metadata_list = []
         for result in results:
@@ -69,26 +69,26 @@ class SatelliteAgent(BaseAgent):
                 self.logger.error(f"Error processing satellite data: {result}")
             elif result:
                 metadata_list.append(result)
-        
+
         return metadata_list
-    
+
     async def process_satellite_url(self, url: str, satellite_dir: Path) -> Dict[str, Any]:
         """
         Process a single satellite URL.
-        
+
         Args:
             url: URL to the satellite data
             satellite_dir: Directory to store satellite data
-            
+
         Returns:
             Metadata dictionary
         """
         try:
             # Determine satellite type and region from URL
             satellite_info = self._determine_satellite_info(url)
-            
+
             self.logger.info(f"Processing {satellite_info['type']} satellite data for {satellite_info['region']}")
-            
+
             # Handle different URL types
             if url.endswith(('.png', '.jpg', '.gif')):
                 # Direct image URL
@@ -96,7 +96,7 @@ class SatelliteAgent(BaseAgent):
             else:
                 # Web page URL - need to find the image
                 return await self._process_satellite_page(url, satellite_dir, satellite_info)
-        
+
         except Exception as e:
             self.logger.error(f"Error processing satellite data from {url}: {e}")
             return self.create_metadata(
@@ -106,22 +106,22 @@ class SatelliteAgent(BaseAgent):
                 source_url=url,
                 error=str(e)
             )
-    
+
     async def _process_satellite_image(self, url: str, satellite_dir: Path, satellite_info: Dict[str, str]) -> Dict[str, Any]:
         """Process a direct satellite image URL."""
         # Generate filename from satellite info
         base_filename = url.split('/')[-1]
         satellite_type = satellite_info['type']
         region = satellite_info['region']
-        
+
         # Extract timestamp from URL or filename if possible
         timestamp = self._extract_timestamp(url, base_filename)
-        
+
         filename = f"satellite_{satellite_type}_{region}_{timestamp}_{base_filename}"
-        
+
         # Download the image
         result = await self.http_client.download(url, save_to_disk=True, custom_file_path=satellite_dir / filename)
-        
+
         if result.success:
             return self.create_metadata(
                 name=f"satellite_{satellite_type}_{region}",
@@ -143,7 +143,7 @@ class SatelliteAgent(BaseAgent):
                 source_url=url,
                 error=result.error
             )
-    
+
     async def _process_satellite_page(self, url: str, satellite_dir: Path, satellite_info: Dict[str, str]) -> Dict[str, Any]:
         """Process a satellite web page URL to extract images."""
         # Special handling for NOAA GOES sector pages
@@ -285,7 +285,7 @@ class SatelliteAgent(BaseAgent):
             'type': 'unknown',
             'region': 'unknown'
         }
-        
+
         # Determine satellite type
         if 'goes' in url_lower:
             if 'goes-west' in url_lower or 'goes-17' in url_lower or 'goes17' in url_lower:
@@ -300,7 +300,7 @@ class SatelliteAgent(BaseAgent):
             info['type'] = 'noaa'
         elif 'nasa' in url_lower:
             info['type'] = 'nasa'
-        
+
         # Determine region
         region_keywords = {
             'hawaii': ['hawaii', 'hi', 'pacific', 'pac'],
@@ -314,7 +314,7 @@ class SatelliteAgent(BaseAgent):
             'us': ['usa', 'us', 'conus'],
             'global': ['global', 'world']
         }
-        
+
         # Check URL for region keywords
         for region, keywords in region_keywords.items():
             for keyword in keywords:
@@ -323,9 +323,9 @@ class SatelliteAgent(BaseAgent):
                     break
             if info['region'] != 'unknown':
                 break
-        
+
         return info
-    
+
     def _extract_image_urls(self, html_content: str, base_url: str) -> List[str]:
         """Extract satellite image URLs from HTML content."""
         # Look for image URLs that are likely to be satellite images
@@ -338,45 +338,45 @@ class SatelliteAgent(BaseAgent):
             r'data-url="([^"]+\.(jpg|jpeg|png|gif))"',
             r'data-image="([^"]+\.(jpg|jpeg|png|gif))"'
         ]
-        
+
         # Prioritize satellite-specific filenames
         sat_keywords = ['satellite', 'goes', 'vis', 'ir', 'wv', 'geocolor', 'modis']
-        
+
         image_urls = []
         for pattern in image_patterns:
             matches = re.findall(pattern, html_content, re.IGNORECASE)
             for match in matches:
                 img_url = match[0]
-                
+
                 # Handle relative URLs
                 if not img_url.startswith(('http://', 'https://')):
                     img_url = img_url.lstrip('/')
-                    
+
                     # Add base URL
                     if base_url.endswith('/'):
                         img_url = base_url + img_url
                     else:
                         img_url = base_url + '/' + img_url
-                
+
                 # Check if this is likely a satellite image
                 is_sat_image = any(keyword in img_url.lower() for keyword in sat_keywords)
-                
+
                 if is_sat_image:
                     # Prioritize these images
                     image_urls.insert(0, img_url)
                 else:
                     image_urls.append(img_url)
-        
+
         return image_urls
-    
+
     def _extract_timestamp(self, url: str, filename: str) -> str:
         """
         Extract timestamp from URL or filename.
-        
+
         Args:
             url: Source URL
             filename: Base filename
-            
+
         Returns:
             Timestamp string or current date
         """
@@ -391,18 +391,18 @@ class SatelliteAgent(BaseAgent):
             # HHMMZ format (hour-minute UTC)
             r'(\d{4}Z)'
         ]
-        
+
         # Check both URL and filename for timestamp patterns
         for pattern in timestamp_patterns:
             # Check filename first
             match = re.search(pattern, filename)
             if match:
                 return match.group(1)
-            
+
             # Then check URL
             match = re.search(pattern, url)
             if match:
                 return match.group(1)
-        
+
         # Default to current date if no timestamp found
         return datetime.now().strftime("%Y%m%d")

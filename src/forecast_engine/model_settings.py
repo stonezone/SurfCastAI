@@ -48,4 +48,3 @@ class ModelSettings:
             kwargs["reasoning"] = {"effort": self.reasoning_effort}
 
         return kwargs
-

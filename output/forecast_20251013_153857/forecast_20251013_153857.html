@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawaii Surf Forecast</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: #f5f7fa;
+        }
+        h1, h2, h3 {
+            color: #0066cc;
+        }
+        h1 {
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .generated-date {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .forecast-section {
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .forecast-section h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #e5eaf1;
+            padding-bottom: 12px;
+        }
+        .shore-specific {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .shore-forecast {
+            flex: 1;
+            min-width: 300px;
+        }
+        .confidence-meter {
+            background-color: #e8ecf5;
+            height: 18px;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .confidence-level {
+            height: 100%;
+            background-color: #0066cc;
+        }
+        .confidence-factors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .factor {
+            flex: 1;
+            min-width: 160px;
+            background-color: #f0f4ff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .chart-card {
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .chart-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .history-card ul {
+            padding-left: 18px;
+        }
+        .history-card ul li {
+            margin-bottom: 6px;
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+            }
+            .shore-specific {
+                flex-direction: column;
+            }
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #d7dce5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hawaii Surf Forecast</h1>
+    <div class="generated-date">Generated on October 13, 2025 at 15:38 </div>
+    <div class="forecast-section">
+        <h2>Main Forecast</h2>
+        <p>SwellCaldWell Outlook</p>
+<p>| Day / Window | Direction (deg / cardinal) | Period (s) | H1/3 (ft) | H1/10 est (ft) | Trend | Notes |
+|---|---:|---:|---:|---:|---|---|
+| 2025-10-15 01:10 HST (physics) | n/a / NW | 18 | 6.0 | 9–14 | Building → peak (early 10/15) | Gulf Alaska long‑period groundswell (Physics-based arrival). Confidence: moderate. |
+| 2025-10-16 02:42 HST (physics) | n/a / N | 10 | 5.0 | n/a | Incoming | Secondary Gulf Alaska energy (shorter period). |
+| 2025-10-17 05:29–14:32 HST (physics) | n/a / NW | 11–14 | 4.0 | n/a–10 | Incoming (post‑window) | Aleutian / Central North Pacific pulses — main dateline/Aleutian arrivals start ~10/17. |
+| Background (buoy matrix obs — window 2025-10-10) | 35°–352° / NE–N | 10–11 | 6.2 | 8.1 | Decaying / residual | Earlier NE/N energy sampled by buoys (matrix). Exposure weights n/a. |
+| Short‑period trade/ESE (buoy matrix obs) | 110° / ESE | 9 | 5.6 | 7.3 | Stable / diurnal | Local easterly wind swell and trade chop — adds short‑period noise on E/SE faces. |</p>
+<h3>Summary</h3>
+<p>Dominant incoming pulse: Gulf Alaska long‑period groundswell — physics run times show a <strong>6 ft</strong> H1/3 @ 18s arrival early on Oct 15 (01:10 HST) with large H1/10 set faces possible (<strong>9–14 ft</strong> on exposed north/west reefs). Shorter‑period Gulf Alaska energy and dateline/Aleutian pulses follow mid‑ to late week (Oct 16–17). Trades remain in the pattern — short‑period E/SE wind swell and chop will contaminate face quality at times. Overall confidence: 0.6/1.0.</p>
+<h3>Details</h3>
+<ul>
+<li>Long‑period NW groundswell (primary): Physics propagation predicts the Gulf of Alaska pulse (<strong>6 ft</strong> H1/3 @ 18s) to begin impacting Oahu early 10/15 (01:10 HST). This is backed by pressure‑chart fetch: deep 966 mb low near 50N/170W with a tight gradient to a 1035 mb high — efficient long‑period generation. Expect dominant arrival to favor exposed north and northwest reefs; verify with regional buoys (suggest 51001, 51002, 46089 for North Pacific checks) and WW3/OPC updates. Confidence moderate.</li>
+<li>Secondary shorter NW energy: A shorter 10 s Gulf Alaska component (<strong>5 ft</strong> H1/3) is forecast ~10/16; expect elevated period mix and a slightly windier, lumpier character ahead of/behind the main 18s pulse.</li>
+<li>Dateline / Aleutian pulses: Multiple Aleutian‑track arrivals (<strong>11–14 s</strong>, H1/3 ≈ <strong>4 ft</strong>) are timed for ~10/17 — they sit just beyond the requested window but will modulate the tail of the Oct <strong>15–16 s</strong>ea state. Pressure‑chart analysis shows sustained frontal activity across 35–55N that supplies this energy.</li>
+<li>E/SE trades and wind swell: Buoy matrix and satellite/cloud fields indicate active tradewind cumulus and persistent easterly trades — a 5.<strong>6 ft</strong> H1/3 @ 9 s ESE component was observed (matrix window 10/10). Expect short‑period wind swell and surface chop on east and southeast exposures during the period; METAR at PHNL (2025‑10‑10 23:53 HST) showed light variable winds (VRB03KT) but satellite and pressure charts indicate trades will remain a factor.</li>
+<li>Small S / SSE contributions: Low‑significance southern energy (S 3.<strong>0 ft</strong> @ 12s; SSE 2.<strong>3 ft</strong> @11s in the matrix) is present as background. Southern hemispheric storms are noted on SIG WAVE charts but arrivals to Hawaii are likely later and reduced by decay/shadowing.</li>
+</ul>
+<p>Buoy/tide references: matrix swell components derived from buoy observations (matrix entries list “buoy” as source — exposure weights unavailable). For verification use NDBC buoys 51001, 51002, 46089 and local station/tide: NOAA 1612340 (latest obs 2025‑10‑11 00:00 HST: 0.<strong>45 ft</strong>). Recommended checks: KVM‑70 surface analyses, OPC 24–72 hr wave forecasts, NDBC spectral plots before committing to big exposures.</p>
+<h3>North Shore</h3>
+<ul>
+<li>Oct 13–14: small to moderate leftover northerly energy with short‑period lump from trades; H1/3 likely in the <strong>2–4 ft</strong> range at many breaks. Cleaner windows possible pre‑dawn if trades relax, but expect intermittent chop.</li>
+<li>Oct 15 (early AM): main call — Gulf Alaska 18s pulse arrives (~01:10 HST). Expect H1/3 ≈ <strong>6 ft (Hawaiian scale)</strong> on exposed north/northwest reefs; estimated H1/10 set faces <strong>9–14 ft</strong> depending on reef geometry and local focusing. Biggest sets will favor deep, fast‑reforming points and reef steps (e.g., Ehukai, Rocky Point, Velzyland on north shore exposures). Expect increased current/push and strong shorebreak on shallow reefs.</li>
+<li>Winds/tides: trades and a nearby subtropical ridge (1019–1035 mb) will keep east trades active around the island; if trades persist, the long‑period pulse will be wind‑chopped on windward exposures and cleaner on protected NW points. Confidence moderate (0.6); verify periods on buoys — &gt;<strong>14–16 s</strong> = big long‑period groundswell arrival signature.</li>
+</ul>
+<h3>South Shore</h3>
+<ul>
+<li>Fall pattern: south season winding down. Expect largely small conditions through Oct 15 — matrix shows S 3.<strong>0 ft</strong> @ 12 s and SSE 2.<strong>3 ft</strong> @ 11 s as weak background energy. H1/3 generally <strong>2–3 ft</strong>; H1/10 smaller (<strong>3–5 ft</strong> faces) at best on deep sand beaches.</li>
+<li>Eastern Pacific convective cluster off Mexico noted in satellite imagery could produce a faster southerly pulse if it consolidates, but current guidance flags low probability for a strong, direct south swell to Hawaii within the 3‑day window. Monitor tropical updates (NHC/Central Pacific) — Tropical Storm Raymond is well east/southeast of Hawaii and not expected to affect swell here.</li>
+<li>Expect onshore/easterly trades to produce short‑period chop on southeast exposures and make small south swells feel messy.</li>
+</ul>
+<p>OUTLOOK (beyond 2025-10-15)
+- Oct 16–18: main Gulf Alaska pulse should be on the decline after 10/15 peak but will leave a long‑period tail and increased NW energy through Oct 16. The shorter 10 s Gulf Alaska component may peak ~10/16 (physics arrival 10/16 02:42 HST).
+- Oct 17 onward: Aleutian/dateline pulses (<strong>11–14 s</strong> H1/3 ≈ <strong>4 ft</strong> per physics) begin to arrive ~10/17 and could re‑energize NW exposures — expect fluctuating period mix and persistent north/northwest energy through the week. Watch for constructive interference and directional shifts that can focus larger sets on particular reefs.
+- Southern hemi energy: trailing southern lows flagged in pressure charts may send small to moderate S/SSE energy out 8–12 days (watch late‑week into next week). Eastern Pacific convective activity remains a conditional wildcard — if it intensifies into a tropical cyclone it could produce meaningful southerly swell in 3–5 days; current satellite shows only a compact convective cluster.
+- Recommended follow‑ups: check NDBC buoy spectral plots and WW3/OPC model updates at 12–24 hr cadence. Key buoys: 51001, 51002, 46089; verify local winds and buoy periods before heading to exposed north/west spots.</p>
+<p>Data gaps / caveats
+- Matrix entries cite “buoy” but do not provide explicit buoy IDs or spectral energy breakdowns; exposure weighting is unavailable. Satellite composite lacked IR/wv timestamped channels in the digest. These gaps reduce exact arrival–height precision. Use the physics arrivals as a timing guide and cross‑check with buoy spectral peaks and WW3 model guidance before committing to big exposures.</p>
+<p>— Pat "SwellCaldWell" Caldwell, Surf News Network. Confidence (forecast): 0.6/1.0.</p>
+    </div>
+    <div class="shore-specific">
+        <div class="forecast-section shore-forecast">
+            <h2>North Shore Forecast</h2>
+            <p>Lead: Through Mon–Wed (Oct 13–15) the North Shore will be riding leftover northerly/NE energy — buoy data show ~6.<strong>2 ft</strong> H1/3 at <strong>10–11 s</strong> (rough H1/10 ≈ <strong>8 ft</strong>) from N to NE sources — with a fresher Gulf‑Alaska long‑period pulse (modelled <strong>6 ft</strong> @ 18 s) expected to start arriving early Wednesday (Oct 15 ~ 01:10 HST). Expect clean but punchy north‑to‑NE faces early in the window, with increased power and longer‑period punch as the 18 s energy fills in Wednesday AM.</p>
+<p>Wind / tide interplay (short): Buoys and METARs currently show light, variable surface winds (PHNL VRB03KT). That favors early morning sessions — reef breaks will be relatively clean before daytime trades build. Typical fall trade pickup (E–NE in the afternoon) will make exposed north corners and wide beach breaks windier and lumpier by late morning/afternoon. Tides will modulate shape: lower tides emphasize hollow reef lines (Pipeline/Sunset), mid–high tides sweeten Waimea runs but also deepen takeoff zones. Timing uncertainty: the Gulf‑Alaska 18 s arrival time has moderate timing error (±6–12 hr), so plan for the pulse from late Tue night into Wed morning.</p>
+<p>Flagship breaks — expectations
+- Ehukai / Pipeline (Banzai): Current N–NE <strong>10–11 s</strong> energy will produce solid, hollow reeftop faces — estimated <strong>6–8 ft</strong> H1/3 (H1/10 ~<strong>8 ft</strong>) with steep takeoffs. If the 18 s pulse arrives as modelled it will steepen sets and increase hold — expect bigger, more powerful barrels Wed AM. Best windows: early morning on light winds and a lower tide. Confidence moderate — direction shift from NE→NNW would change peak zone along the reef.
+- Sunset Beach: Responds to both the existing N/NE energy and the longer 18 s pulse. Expect long, powerful north‑facing walls and increased set intervals; faces roughly <strong>6–10 ft</strong> H1/3 depending on local refraction, and much more punch on the 18 s component. Early sessions will be cleaner; mid‑day trades will add texture. Watch for strong bowl‑to‑closeouts on big sets.
+- Waimea Bay: Currently mellow compared with classic winter big days but the incoming Gulf‑Alaska 18 s energy is the one to watch — it will preferentially load large north‑exposed points and Waimea’s shelf. If the pulse trends a touch more NNW than modelled, expect rapid size escalation Wed AM with powerful long‑period sets; estimated ramp into big‑swell territory for experienced teams (uncertainty high — monitor real‑time buoys).
+- (Optional) Velzyland / Rocky Points: Cleaner on NE wind angles; expect fun hollow walls on the current <strong>10–11 s</strong> background and longer drawn‑out faces if the 18 s pulse hooks more NW.</p>
+<p>Hazards: No formal big‑swell advisory flagged in this forecast, but the Wednesday 18 s pulse has the potential to push some exposed spots toward advisory thresholds. Long‑period energy increases shoreward runup, strong rips, and dangerous wash‑throughs — even <strong>6–8 ft</strong> H1/3 at 18 s packs far more punch than short period surf. If local lifeguards post advisories or beaches close, obey instructions. For the general public: strong currents, big shorebreak on shallow sandbars, and powerful shoreward surges are the primary hazards to watch.</p>
+<p>Uncertainties &amp; confidence: Data coverage is good (12/13 buoys, charts/satellite/tides successful). Overall forecast confidence is medium (0.64/1.00). The main uncertainties are (1) the exact timing and amplitude of the Gulf‑Alaska 18 s pulse (modelled arrival Wed 01:10 HST, confidence ~75%, timing ±6–12 hr), and (2) small changes in swell angle that will shift which reefs see the biggest faces. Expect ±<strong>1–2 ft</strong> sizing uncertainty across exposed points; monitor real‑time buoys and coastal reports for the Wednesday pulse.</p>
+        </div>
+        <div class="forecast-section shore-forecast">
+            <h2>South Shore Forecast</h2>
+            <p>Opening assessment (size, direction, timing)
+- Summary: South Shore will be driven by a modest S–ESE pulse with a secondary SSE component — steady but not large for mid‑October. Expect the most consistent energy from the S 3.<strong>0 ft</strong> @ 12 s source (exposure weight 0.96) with ESE 5.<strong>6 ft</strong> @ 9 s and SSE 2.<strong>3 ft</strong> @ 11 s providing directional texture and occasional punch.
+- H1/3 / H1/10 estimates (best practical ranges for Oct 13–15):
+  - Exposed points / Diamond Head / Kewalos: H1/3 ~ 3.0–4.<strong>0 ft</strong> (H1/10 ≈ 3.8–5.<strong>0 ft</strong>) at peak sets.
+  - Town breaks / Ala Moana / Point Panic: H1/3 ~ 2.0–3.<strong>0 ft</strong> (H1/10 ≈ 2.6–3.<strong>8 ft</strong>).
+  - Protected inside Waikiki and small reef pockets: H1/3 ~ 1.5–2.<strong>5 ft</strong> (H1/10 ≈ 2.0–3.<strong>2 ft</strong>).
+- Timing: energy is already present and will hold through the period. The strongest direct S energy is present throughout Oct 13–15. A large north (Gulf Alaska) long‑period arrival is forecast very early Oct 15 (<strong>6 ft</strong> @ 18 s arriving ~01:10 HST) — that will be primarily a north swell but could introduce cross‑seas and confused sets late on the 14th into the 15th.</p>
+<p>Town vs outlier breaks (Ala Moana, Waikiki, Diamond Head) — tides &amp; winds
+- Waikiki (inside breaks): Very consistent and forgiving. With the <strong>9–12 s</strong> periods on the street, expect long, rideable faces in the waist‑to‑chest range. Because Waikiki is sheltered, it will be the cleanest option if a light northerly component arrives with the Gulf Alaska pulse.
+- Ala Moana / Point Panic: Responds well to ESE–SSE energy — expect chest to head‑high sets on the outside sections at peak. Tends to be punchier than Waikiki but still friendly for intermediate longboarders. Mid‑tide windows usually best here; check local tide — small tidal range now but timing matters for peak sections.
+- Diamond Head / Kewalos (outlier points): Most exposed to S–SSE/ESE wrap. When the S 12 s component lines up you’ll see steeper, more punchy right and left peaks — these are the best windows for shortboards. Diamond Head will be the biggest, most critical venue for performance riders during higher sets.
+- Winds / best windows: Current METAR (PHNL) reports very light variable winds (VRB03KT). That pattern and the seasonal lull in trades favor clean early‑morning conditions. Expect light seabreeze development in the afternoons; mornings will be the best surf windows for clean faces Oct 13–15.
+- Tides: Latest sea level obs are low (≈0.<strong>45 ft</strong>). Tidal amplitude is small this period — plan sessions around mid to slightly rising tide for best point and reef shape, and avoid the lowest lows at exposed points if you’re after punchy sections.</p>
+<p>Wrap potential and background southern‑hemisphere pulses
+- Wrap analysis: Fall primary directions for the South Shore are S to SSW. The S 3.<strong>0 ft</strong> @ 12 s source (high exposure weight) is the direct driver — it will push into point reefs and wrap into protected town breaks reliably. ESE 5.<strong>6 ft</strong> @ 9 s (moderate exposure) and the SSE component will give additional angularity: ESE/SSE energy produces better backswell/fill into Ala Moana and Diamond Head’s more easterly facets.
+- Southern‑hemisphere pulses: We have only modest southern inputs on the charts for this period (ESE/SSE small–moderate). No large southern hemi train is forecast to arrive on Oct 13–15, so expect steady background S‑energy rather than a new big southern pulse. The primary risk to south‑facing consistency over these days is the north long‑period arrival (~Oct 15), which can create cross‑sea interference rather than boosting southshore size.</p>
+<p>Longboard vs shortboard suitability and crowd/consistency expectations
+- Longboards: Ideal at Waikiki and Ala Moana across the whole window — clean, rolling faces with <strong>9–12 s</strong> periods and light winds make for very good longboard conditions. Expect long runs, especially on rising to mid tide.
+- Shortboards: Diamond Head and Kewalos are the targets for shortboard performance — steeper faces and punchier sections on the larger sets. Shortboarders should aim for early mornings or moments when S and ESE align; watch for increased confusion when the north swell wraps in late on Oct 14–15.
+- Crowds: Expect typical weekday/weekend patterns — Waikiki and Ala Moana will attract the most people (reliable, forgiving waves). Diamond Head will be more selective and thus more crowded when the sets lift. Plan for higher numbers at dawn and late afternoon peak windows.</p>
+<p>Operational notes, hazards and final guidance
+- Expect clean mornings with light, variable winds; afternoons can trend toward a light seabreeze. Check the morning wind report before committing to the peak break.
+- The arriving Gulf Alaska long‑period swell (arriving ~01:10 HST Oct 15) is northern energy — it won’t massively increase southshore height but can generate confused cross‑seas, stronger currents, and occasional inconsistent sets late on the 14th into the 15th. Steer clear of tricky ledge/rock areas if conditions get mixed.
+- Always check the exact local tide chart for your launch time — small tide swings now but local reef and point performance is tide‑sensitive.</p>
+<p>Confidence statement
+- Overall confidence: medium (0.64/1.00). Data coverage was good (buoys 12/13, charts 3/3, METAR 2/2, satellite 1/1, tides 2/2, tropical 1/1) and detected multiple swell components. The S 3.<strong>0 ft</strong> @ 12 s source is the highest‑weight driver for the South Shore this period; however, cross‑sea potential from the Gulf Alaska arrival (~Oct 15 early AM) introduces uncertainty in set consistency late in the window. Check updated buoy and local wind observations if planning sessions on Oct 14–15.</p>
+<p>Bottom line: Expect a steady S–ESE mix Oct 13–15 with clean morning surf and reliable longboard conditions at Waikiki/Ala Moana. Shortboard performance windows at Diamond Head/Kewalos will be available on larger sets; late on Oct 14 into Oct 15 watch for cross‑sea confusion from an incoming north long‑period swell.</p>
+        </div>
+    </div>
+    <div class="forecast-section">
+        <h2>Daily Forecast</h2>
+        <p>HEADLINE — Light variable winds; leftover NE/N energy still favors the North Shore at dawn for surfable, occasionally head-high+ sets; south/east small and cleaner.</p>
+<p>NORTH SHORE — Faces: NE → N; size: expect occasional head‑high to overhead sets at exposed points (roughly <strong>6–8 ft</strong> faces at the peak of sets based on recent buoys, but likely fading); best window: dawn → late morning; hazards: strong rips, big sets, shallow reef at popular breaks — experienced surfers only on peak sets.</p>
+<p>SOUTH SHORE — Faces: S → SSE; size: small (knee‑to‑chest to occasional waist‑high); best window: morning→midday for cleaner conditions; hazards: local rips, crowded lineups — good option for longboards/longboarders and beginners at protected beaches.</p>
+<p>EAST/WEST — East: E/ENE energy wrapping into protected points — fun small‑to‑waist high rides in light winds. West: generally small and sheltered; best for longboarders or beginners on mornings with slack winds.</p>
+<p>WINDS — Latest METAR (PHNL) shows light, variable winds (~3 kt) at late Oct 10 observation; expect light/variable conditions into the morning which should keep many spots relatively clean — check updated local forecasts, but plan for light offshore/variable early and possible thermal onshores afternoon.</p>
+<p>TIDES — NOAA station 1612340 latest obs 0.<strong>45 ft</strong> (2025‑10‑11 00:00 HST). Most recent recorded extremes in the digest were a ~2.<strong>38 ft</strong> high and ~‑0.<strong>02 ft</strong> low (early Oct samples). Tide timing is changing fast — check a live tide app for precise high/low times at your break before you go.</p>
+<p>ACTION ITEM — Go if you’re competent on reef/point breaks: hit the North Shore at dawn for the best size and cleaner windows; otherwise choose south/east protected spots for smaller, cleaner surf mid‑morning; verify up‑to‑the‑hour wind and tide cams before walking out (data confidence medium).</p>
+    </div>
+    <div class="forecast-section history-card">
+        <h2>Historical Comparison</h2>
+        <p>Compared with <strong>forecast_20251012_205211</strong> generated on 2025-10-12T20:52:11.283920:</p>
+        <ul>
+            <li>Confidence up 0.06 since the previous run.</li>
+        </ul>
+    </div>
+<div class="forecast-section">
+    <h2>Forecast Confidence</h2>
+    <p>Overall confidence: 0.6/1.0</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 64%"></div>
+    </div>
+        <h3>Confidence Factors</h3>
+        <div class="confidence-factors">
+<div class="factor">
+    <p>Model Consensus: 0.7</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 70%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Source Reliability: 0.6</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 57%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Data Completeness: 0.5</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 50%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Forecast Horizon: 0.8</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 80%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Historical Accuracy: 0.7</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 70%"></div>
+    </div>
+</div>
+        </div>
+    </div>
+    <div class="footer">
+        Generated by SurfCastAI - AI-Powered Surf Forecasting
+    </div>
+</body>
+</html>

@@ -4,15 +4,30 @@ Standardized data model for buoy observations.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional, Union, Tuple
 import json
+import logging
+
+from ...utils.numeric import safe_float
+
+# Physical constraint bounds for buoy data validation
+WAVE_HEIGHT_BOUNDS = (0.0, 30.0)  # meters
+DOMINANT_PERIOD_BOUNDS = (4.0, 30.0)  # seconds (< 4s = phantom swell)
+AVERAGE_PERIOD_BOUNDS = (2.0, 25.0)  # seconds
+WIND_SPEED_BOUNDS = (0.0, 150.0)  # knots
+PRESSURE_BOUNDS = (900.0, 1100.0)  # millibars
+WATER_TEMP_BOUNDS = (-2.0, 35.0)  # celsius
+AIR_TEMP_BOUNDS = (-40.0, 50.0)  # celsius
+DIRECTION_BOUNDS = (0.0, 360.0)  # degrees
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class BuoyObservation:
     """
     Single observation from a buoy.
-    
+
     Attributes:
         timestamp: Time of observation in ISO format
         wave_height: Significant wave height in meters
@@ -37,15 +52,15 @@ class BuoyObservation:
     water_temperature: Optional[float] = None
     pressure: Optional[float] = None
     raw_data: Dict[str, Any] = field(default_factory=dict)
-    
+
     @classmethod
     def from_ndbc(cls, data: Dict[str, str]) -> 'BuoyObservation':
         """
         Create a BuoyObservation from NDBC data format.
-        
+
         Args:
             data: Dictionary with NDBC data fields
-            
+
         Returns:
             BuoyObservation instance
         """
@@ -59,37 +74,75 @@ class BuoyObservation:
         # ATMP - air temperature in Celsius
         # WTMP - water temperature in Celsius
         # PRES - atmospheric pressure in hPa
-        
+
         # Extract timestamp
         timestamp = data.get('Date', data.get('DATE', ''))
         if not timestamp:
             timestamp = datetime.now().isoformat()
-        
-        # Convert string values to float, handling missing or invalid values
-        def safe_float(value: str) -> Optional[float]:
-            try:
-                return float(value)
-            except (ValueError, TypeError):
-                return None
-        
+
         return cls(
             timestamp=timestamp,
-            wave_height=safe_float(data.get('WVHT', data.get('wave_height', None))),
-            dominant_period=safe_float(data.get('DPD', data.get('dominant_period', None))),
-            average_period=safe_float(data.get('APD', data.get('average_period', None))),
-            wave_direction=safe_float(data.get('MWD', data.get('wave_direction', None))),
-            wind_speed=safe_float(data.get('WSPD', data.get('wind_speed', None))),
-            wind_direction=safe_float(data.get('WDIR', data.get('wind_direction', None))),
-            air_temperature=safe_float(data.get('ATMP', data.get('air_temperature', None))),
-            water_temperature=safe_float(data.get('WTMP', data.get('water_temperature', None))),
-            pressure=safe_float(data.get('PRES', data.get('pressure', None))),
+            wave_height=safe_float(
+                data.get('WVHT', data.get('wave_height', None)),
+                min_val=WAVE_HEIGHT_BOUNDS[0],
+                max_val=WAVE_HEIGHT_BOUNDS[1],
+                field_name="wave_height"
+            ),
+            dominant_period=safe_float(
+                data.get('DPD', data.get('dominant_period', None)),
+                min_val=DOMINANT_PERIOD_BOUNDS[0],
+                max_val=DOMINANT_PERIOD_BOUNDS[1],
+                field_name="dominant_period"
+            ),
+            average_period=safe_float(
+                data.get('APD', data.get('average_period', None)),
+                min_val=AVERAGE_PERIOD_BOUNDS[0],
+                max_val=AVERAGE_PERIOD_BOUNDS[1],
+                field_name="average_period"
+            ),
+            wave_direction=safe_float(
+                data.get('MWD', data.get('wave_direction', None)),
+                min_val=DIRECTION_BOUNDS[0],
+                max_val=DIRECTION_BOUNDS[1],
+                field_name="wave_direction"
+            ),
+            wind_speed=safe_float(
+                data.get('WSPD', data.get('wind_speed', None)),
+                min_val=WIND_SPEED_BOUNDS[0],
+                max_val=WIND_SPEED_BOUNDS[1],
+                field_name="wind_speed"
+            ),
+            wind_direction=safe_float(
+                data.get('WDIR', data.get('wind_direction', None)),
+                min_val=DIRECTION_BOUNDS[0],
+                max_val=DIRECTION_BOUNDS[1],
+                field_name="wind_direction"
+            ),
+            air_temperature=safe_float(
+                data.get('ATMP', data.get('air_temperature', None)),
+                min_val=AIR_TEMP_BOUNDS[0],
+                max_val=AIR_TEMP_BOUNDS[1],
+                field_name="air_temperature"
+            ),
+            water_temperature=safe_float(
+                data.get('WTMP', data.get('water_temperature', None)),
+                min_val=WATER_TEMP_BOUNDS[0],
+                max_val=WATER_TEMP_BOUNDS[1],
+                field_name="water_temperature"
+            ),
+            pressure=safe_float(
+                data.get('PRES', data.get('pressure', None)),
+                min_val=PRESSURE_BOUNDS[0],
+                max_val=PRESSURE_BOUNDS[1],
+                field_name="pressure"
+            ),
             raw_data=data
         )
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert to dictionary.
-        
+
         Returns:
             Dictionary representation
         """
@@ -111,7 +164,7 @@ class BuoyObservation:
 class BuoyData:
     """
     Complete buoy dataset with metadata and observations.
-    
+
     Attributes:
         station_id: Buoy station ID
         name: Buoy name or description
@@ -119,6 +172,7 @@ class BuoyData:
         longitude: Buoy longitude
         observations: List of buoy observations
         metadata: Additional metadata
+        spec_file_path: Optional path to spectral data file (.spec)
     """
     station_id: str
     name: Optional[str] = None
@@ -126,27 +180,28 @@ class BuoyData:
     longitude: Optional[float] = None
     observations: List[BuoyObservation] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
+    spec_file_path: Optional[str] = None
+
     @property
     def latest_observation(self) -> Optional[BuoyObservation]:
         """Get the latest observation."""
         if not self.observations:
             return None
         return self.observations[0]
-    
+
     @classmethod
     def from_ndbc_json(cls, data: Dict[str, Any]) -> 'BuoyData':
         """
         Create a BuoyData from NDBC JSON data.
-        
+
         Args:
             data: Dictionary with NDBC JSON data
-            
+
         Returns:
             BuoyData instance
         """
         station_id = data.get('station_id', 'unknown')
-        
+
         # Create BuoyData instance
         buoy_data = cls(
             station_id=station_id,
@@ -155,17 +210,17 @@ class BuoyData:
             longitude=data.get('longitude'),
             metadata=data.get('metadata', {})
         )
-        
+
         # Add observations
         for obs in data.get('observations', []):
             buoy_data.observations.append(BuoyObservation.from_ndbc(obs))
-        
+
         return buoy_data
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert to dictionary.
-        
+
         Returns:
             Dictionary representation
         """
@@ -177,29 +232,29 @@ class BuoyData:
             'observations': [obs.to_dict() for obs in self.observations],
             'metadata': self.metadata
         }
-    
+
     def to_json(self) -> str:
         """
         Convert to JSON string.
-        
+
         Returns:
             JSON string
         """
         return json.dumps(self.to_dict(), indent=2)
-    
+
     @classmethod
     def from_json(cls, json_str: str) -> 'BuoyData':
         """
         Create a BuoyData from JSON string.
-        
+
         Args:
             json_str: JSON string
-            
+
         Returns:
             BuoyData instance
         """
         data = json.loads(json_str)
-        
+
         # Create BuoyData instance
         buoy_data = cls(
             station_id=data.get('station_id', 'unknown'),
@@ -208,7 +263,7 @@ class BuoyData:
             longitude=data.get('longitude'),
             metadata=data.get('metadata', {})
         )
-        
+
         # Add observations - handle both raw NDBC format and normalized format
         for obs in data.get('observations', []):
             # Check if this is raw NDBC format (has 'WVHT', 'DPD', etc.)
@@ -217,20 +272,65 @@ class BuoyData:
                 # Raw NDBC format - use from_ndbc to parse it
                 observation = BuoyObservation.from_ndbc(obs)
             else:
-                # Normalized format - create directly
+                # Normalized format - apply bounds validation
                 observation = BuoyObservation(
                     timestamp=obs.get('timestamp', ''),
-                    wave_height=obs.get('wave_height'),
-                    dominant_period=obs.get('dominant_period'),
-                    average_period=obs.get('average_period'),
-                    wave_direction=obs.get('wave_direction'),
-                    wind_speed=obs.get('wind_speed'),
-                    wind_direction=obs.get('wind_direction'),
-                    air_temperature=obs.get('air_temperature'),
-                    water_temperature=obs.get('water_temperature'),
-                    pressure=obs.get('pressure'),
+                    wave_height=safe_float(
+                        obs.get('wave_height'),
+                        WAVE_HEIGHT_BOUNDS[0],
+                        WAVE_HEIGHT_BOUNDS[1],
+                        'wave_height'
+                    ),
+                    dominant_period=safe_float(
+                        obs.get('dominant_period'),
+                        DOMINANT_PERIOD_BOUNDS[0],
+                        DOMINANT_PERIOD_BOUNDS[1],
+                        'dominant_period'
+                    ),
+                    average_period=safe_float(
+                        obs.get('average_period'),
+                        AVERAGE_PERIOD_BOUNDS[0],
+                        AVERAGE_PERIOD_BOUNDS[1],
+                        'average_period'
+                    ),
+                    wave_direction=safe_float(
+                        obs.get('wave_direction'),
+                        DIRECTION_BOUNDS[0],
+                        DIRECTION_BOUNDS[1],
+                        'wave_direction'
+                    ),
+                    wind_speed=safe_float(
+                        obs.get('wind_speed'),
+                        WIND_SPEED_BOUNDS[0],
+                        WIND_SPEED_BOUNDS[1],
+                        'wind_speed'
+                    ),
+                    wind_direction=safe_float(
+                        obs.get('wind_direction'),
+                        DIRECTION_BOUNDS[0],
+                        DIRECTION_BOUNDS[1],
+                        'wind_direction'
+                    ),
+                    air_temperature=safe_float(
+                        obs.get('air_temperature'),
+                        AIR_TEMP_BOUNDS[0],
+                        AIR_TEMP_BOUNDS[1],
+                        'air_temperature'
+                    ),
+                    water_temperature=safe_float(
+                        obs.get('water_temperature'),
+                        WATER_TEMP_BOUNDS[0],
+                        WATER_TEMP_BOUNDS[1],
+                        'water_temperature'
+                    ),
+                    pressure=safe_float(
+                        obs.get('pressure'),
+                        PRESSURE_BOUNDS[0],
+                        PRESSURE_BOUNDS[1],
+                        'pressure'
+                    ),
                     raw_data=obs.get('raw_data', {})
                 )
             buoy_data.observations.append(observation)
-        
+
         return buoy_data

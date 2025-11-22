@@ -1,0 +1,16 @@
+{
+  "test_case": "case_04_flat_conditions",
+  "description": "Summer flatspell with no significant swell activity",
+  "scenario": "High confidence in flat conditions - all shores minimal surf",
+  "expected_characteristics": [
+    "High confidence despite lack of swell (negative prediction confidence)",
+    "Clear communication of flat conditions",
+    "Explanation of blocking patterns",
+    "Minimal shore-by-shore variation (all flat)",
+    "Honest assessment: sometimes best forecast is 'nothing happening'"
+  ],
+  "created": "2025-10-12",
+  "author": "SurfCastAI Team",
+  "validation_method": "Test ability to confidently forecast flat conditions",
+  "special_notes": "Tests Pat Caldwell's approach: high confidence can mean confident in flatness"
+}

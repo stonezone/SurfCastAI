@@ -33,10 +33,10 @@ def setup_logging(config):
     """Set up logging."""
     log_level_str = config.get('general', 'log_level', 'INFO').upper()
     log_level = getattr(logging, log_level_str, logging.INFO)
-    
+
     # Get log file path
     log_file = config.get('general', 'log_file', 'surfcastai.log')
-    
+
     logging.basicConfig(
         level=log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -45,21 +45,21 @@ def setup_logging(config):
             logging.FileHandler(log_file)
         ]
     )
-    
+
     logger = logging.getLogger('surfcastai')
     logger.info(f"Logging initialized at level {log_level_str}")
-    
+
     return logger
 
 
 def validate_forecast_content(forecast, logger):
     """
     Validate the content of a generated forecast.
-    
+
     Args:
         forecast: The generated forecast data
         logger: Logger instance
-        
+
     Returns:
         Dictionary with validation results
     """
@@ -68,17 +68,17 @@ def validate_forecast_content(forecast, logger):
         'reasons': [],
         'metrics': {}
     }
-    
+
     # Check for required sections
     required_sections = ['main_forecast', 'north_shore', 'south_shore', 'daily']
     missing_sections = [section for section in required_sections if not forecast.get(section)]
-    
+
     if missing_sections:
         results['success'] = False
         reasons = f"Missing required forecast sections: {', '.join(missing_sections)}"
         results['reasons'].append(reasons)
         logger.error(reasons)
-    
+
     # Check for minimum content length
     min_length = 100  # characters
     for section in required_sections:
@@ -89,67 +89,67 @@ def validate_forecast_content(forecast, logger):
                 reason = f"Section '{section}' is too short ({len(content)} chars)"
                 results['reasons'].append(reason)
                 logger.error(reason)
-            
+
             # Track content metrics
             results['metrics'][f'{section}_length'] = len(content)
             results['metrics'][f'{section}_word_count'] = len(content.split())
-    
+
     # Check for forecast metadata
     if 'metadata' not in forecast:
         results['success'] = False
         reason = "Missing forecast metadata"
         results['reasons'].append(reason)
         logger.error(reason)
-    
+
     # Check for shore-specific information
     shore_keywords = {
         'north_shore': ['north', 'pipeline', 'sunset', 'waimea'],
         'south_shore': ['south', 'waikiki', 'ala moana', 'town']
     }
-    
+
     for shore, keywords in shore_keywords.items():
         if shore in forecast:
             content = forecast[shore].lower()
             found_keywords = [kw for kw in keywords if kw.lower() in content]
             keyword_ratio = len(found_keywords) / len(keywords)
-            
+
             results['metrics'][f'{shore}_keyword_ratio'] = keyword_ratio
-            
+
             if keyword_ratio < 0.5:  # At least half of the expected keywords should be present
                 logger.warning(f"Section '{shore}' may lack specificity (keyword ratio: {keyword_ratio:.2f})")
-    
+
     # Check for swell directional information
     directional_terms = ['north', 'south', 'east', 'west', 'nw', 'ne', 'sw', 'se', 'ene', 'ese', 'wnw', 'wsw']
     main_content = forecast.get('main_forecast', '').lower()
-    
+
     found_directional = [term for term in directional_terms if term in main_content]
     if not found_directional:
         results['success'] = False
         reason = "Main forecast lacks directional information"
         results['reasons'].append(reason)
         logger.error(reason)
-    
+
     # Check for wave height information (numbers followed by "ft" or "feet")
     height_pattern = r'\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?\s*(?:ft|feet|foot)'
     height_matches = re.findall(height_pattern, main_content)
-    
+
     if not height_matches:
         results['success'] = False
         reason = "Main forecast lacks wave height information"
         results['reasons'].append(reason)
         logger.error(reason)
-    
+
     # Check for timing information
     timing_terms = ['today', 'tomorrow', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
                    'morning', 'afternoon', 'evening', 'overnight', 'building', 'peaking', 'dropping']
-    
+
     found_timing = [term for term in timing_terms if term in main_content]
     if not found_timing:
         results['success'] = False
         reason = "Main forecast lacks timing information"
         results['reasons'].append(reason)
         logger.error(reason)
-    
+
     return results
 
 
@@ -160,7 +160,7 @@ def create_test_swell_forecast():
     start_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     peak_time = (now + timedelta(hours=12)).strftime("%Y-%m-%dT%H:%M:%SZ")
     end_time = (now + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    
+
     # Create a NW swell event (primary winter swell direction)
     event = SwellEvent(
         event_id="test_event_1",
@@ -178,7 +178,7 @@ def create_test_swell_forecast():
             "exposure_south_shore": 0.2
         }
     )
-    
+
     # Add primary component
     event.primary_components.append(
         SwellComponent(
@@ -189,7 +189,7 @@ def create_test_swell_forecast():
             source="model"
         )
     )
-    
+
     # Add secondary component
     event.secondary_components.append(
         SwellComponent(
@@ -200,7 +200,7 @@ def create_test_swell_forecast():
             source="model"
         )
     )
-    
+
     # Create a south swell event
     event2 = SwellEvent(
         event_id="test_event_2",
@@ -218,7 +218,7 @@ def create_test_swell_forecast():
             "exposure_south_shore": 0.8
         }
     )
-    
+
     # Add primary component
     event2.primary_components.append(
         SwellComponent(
@@ -229,7 +229,7 @@ def create_test_swell_forecast():
             source="model"
         )
     )
-    
+
     # Create a trade wind swell (common in Hawaii)
     event3 = SwellEvent(
         event_id="test_event_3",
@@ -247,7 +247,7 @@ def create_test_swell_forecast():
             "exposure_south_shore": 0.1
         }
     )
-    
+
     # Add primary component
     event3.primary_components.append(
         SwellComponent(
@@ -258,7 +258,7 @@ def create_test_swell_forecast():
             source="buoy"
         )
     )
-    
+
     # Create forecast locations
     north_shore = ForecastLocation(
         name="Oahu North Shore",
@@ -283,7 +283,7 @@ def create_test_swell_forecast():
             }
         }
     )
-    
+
     south_shore = ForecastLocation(
         name="Oahu South Shore",
         shore="South Shore",
@@ -307,11 +307,11 @@ def create_test_swell_forecast():
             }
         }
     )
-    
+
     # Add events to locations with selective exposure
     north_shore.swell_events.append(event)  # North Shore gets the NW swell (primary)
     north_shore.swell_events.append(event3)  # North Shore gets some trade wind swell
-    
+
     south_shore.swell_events.append(event2)  # South Shore gets the S swell (primary)
     # Small component of NW wrap
     small_wrap = SwellEvent(
@@ -326,7 +326,7 @@ def create_test_swell_forecast():
         metadata={"wrapped": True, "parent_event_id": "test_event_1"}
     )
     south_shore.swell_events.append(small_wrap)
-    
+
     # Create swell forecast
     forecast = SwellForecast(
         forecast_id="test_forecast",
@@ -354,80 +354,80 @@ def create_test_swell_forecast():
             }
         }
     )
-    
+
     # Add events and locations to forecast
     forecast.swell_events.extend([event, event2, event3])
     forecast.locations.extend([north_shore, south_shore])
-    
+
     return forecast
 
 
 async def test_forecast_engine(config, logger):
     """Test the forecast engine."""
     logger.info("Testing forecast engine")
-    
+
     # Create test forecast data
     swell_forecast = create_test_swell_forecast()
-    
+
     # Create forecast engine
     engine = ForecastEngine(config)
-    
+
     # Generate forecast
     logger.info("Generating forecast")
     forecast = await engine.generate_forecast(swell_forecast)
-    
+
     # Check results
     if 'error' in forecast:
         logger.error(f"Forecast generation failed: {forecast['error']}")
         return False
-    
+
     logger.info("Forecast generated successfully")
-    
+
     # Validate forecast content
     logger.info("Validating forecast content")
     validation_results = validate_forecast_content(forecast, logger)
-    
+
     if not validation_results['success']:
         logger.error(f"Forecast validation failed: {validation_results['reasons']}")
         return False
-    
+
     logger.info("Forecast content validated successfully")
     logger.info(f"Content quality metrics: {validation_results['metrics']}")
-    
+
     # Format forecast
     formatter = ForecastFormatter(config)
-    
+
     logger.info("Formatting forecast")
     formatted = formatter.format_forecast(forecast)
-    
+
     # Check results
     if 'error' in formatted:
         logger.error(f"Forecast formatting failed: {formatted['error']}")
         return False
-    
+
     logger.info("Forecast formatted successfully")
-    
+
     # Validate that all required output formats are present
     required_formats = config.get('forecast', 'formats', 'markdown,html').split(',')
     missing_formats = [fmt for fmt in required_formats if fmt not in formatted]
-    
+
     if missing_formats:
         logger.error(f"Missing required output formats: {', '.join(missing_formats)}")
         return False
-    
+
     # Validate file existence
     for fmt, path in formatted.items():
         if fmt != 'error' and not Path(path).exists():
             logger.error(f"Output file for {fmt} does not exist at path: {path}")
             return False
-    
+
     logger.info(f"Output files generated successfully: {formatted}")
-    
+
     # Check if additional validation is needed for PDF
     if 'pdf' in formatted and Path(formatted['pdf']).exists():
         logger.info("PDF output detected, performing additional validation")
         # This could be extended with PDF-specific checks if needed
-    
+
     return True
 
 
@@ -435,13 +435,13 @@ async def main():
     """Main function."""
     # Load configuration
     config = load_config()
-    
+
     # Set up logging
     logger = setup_logging(config)
-    
+
     # Test forecast engine
     success = await test_forecast_engine(config, logger)
-    
+
     if success:
         logger.info("Test completed successfully")
         return 0

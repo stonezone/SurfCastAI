@@ -1,0 +1,17 @@
+{
+  "test_case": "case_03_large_swells",
+  "description": "Extreme swell event with multi-system overlap",
+  "scenario": "XXL North Shore surf from historic North Pacific storm complex",
+  "expected_characteristics": [
+    "Multiple overlapping swell systems",
+    "Extreme wave heights (20-40ft faces)",
+    "High confidence despite complexity",
+    "Safety warnings and expert-only language",
+    "Detailed shore-specific hazard information",
+    "Eddie Aikau contest-level conditions"
+  ],
+  "created": "2025-10-12",
+  "author": "SurfCastAI Team",
+  "validation_method": "Compare against historic XXL North Shore events",
+  "special_notes": "Tests ability to communicate extreme conditions and safety concerns"
+}

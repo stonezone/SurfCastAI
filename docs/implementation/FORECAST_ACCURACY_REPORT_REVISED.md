@@ -1,7 +1,7 @@
 # Forecast Accuracy Report - REVISED
-**Date:** October 4, 2025  
-**Forecast ID:** forecast_20251004_113339  
-**Generated:** 2025-10-04 11:33 HST  
+**Date:** October 4, 2025
+**Forecast ID:** forecast_20251004_113339
+**Generated:** 2025-10-04 11:33 HST
 **Ground Truth:** Sunset Beach observation by experienced surfer
 
 ---
@@ -19,7 +19,7 @@ def get_hawaii_scale(self, meters: float) -> float:
     return meters * 2 * 3.28084  # ❌ WRONG - multiplies by 2
 ```
 
-**Issue:** This multiplies by 2, treating Hawaiian scale as face height. 
+**Issue:** This multiplies by 2, treating Hawaiian scale as face height.
 
 **Reality:** Hawaiian scale ≈ back height ≈ 0.5× face height
 
@@ -52,9 +52,9 @@ def get_hawaii_scale(self, meters: float) -> float:
 
 ### Ground Truth Observation
 
-**Location:** Sunset Beach  
-**Time:** Before dark, Oct 4 (~18:00 HST = 04:00 UTC Oct 5)  
-**Observer:** Experienced surfer (you)  
+**Location:** Sunset Beach
+**Time:** Before dark, Oct 4 (~18:00 HST = 04:00 UTC Oct 5)
+**Observer:** Experienced surfer (you)
 **Observed:** **5 ft Hawaiian sets** (10 ft faces)
 
 **Status:** Swell still building, remote buoys haven't peaked yet
@@ -70,9 +70,9 @@ def get_hawaii_scale(self, meters: float) -> float:
 - Actual: NW (326°)
 - Error: 6-16°
 
-✅ **Forecast period: EXCELLENT**  
+✅ **Forecast period: EXCELLENT**
 - Predicted: 14 seconds
-- Actual: 14 seconds  
+- Actual: 14 seconds
 - Error: 0s
 
 ✅ **Forecast timing: GOOD**
@@ -153,10 +153,10 @@ Should compare:
 | Deep-water | 15.7 ft H | **7.9 ft H** | 7.9 ft H* |
 | Breaking waves | 15-20 ft H | **9-10 ft H** | 5 ft H (building)** |
 
-*Calculated from 2.4m buoy reading  
+*Calculated from 2.4m buoy reading
 **Observed during build phase, peak not yet reached
 
-**Error with WRONG formula:** 769% overprediction  
+**Error with WRONG formula:** 769% overprediction
 **Error with CORRECT formula:** ~0% (excellent match to deep water)
 
 ### Overall Assessment
@@ -195,8 +195,8 @@ Result: ✅ Accurate and usable
 
 Your observation provides a perfect test case:
 
-**Deep-water swell:** 2.4m @ 14s NW  
-**Nearshore breaking (build phase):** 5 ft Hawaiian  
+**Deep-water swell:** 2.4m @ 14s NW
+**Nearshore breaking (build phase):** 5 ft Hawaiian
 **Ratio:** 5 ft / 7.9 ft = **0.63×** (swell hasn't peaked yet)
 
 This is LESS than deep-water because:
@@ -219,13 +219,13 @@ This matches typical Sunset Beach amplification for NW swells.
 def get_hawaii_scale(self, meters: float) -> float:
     """
     Convert wave height from meters to Hawaiian scale.
-    
+
     Hawaiian scale measures wave height from the back, approximately
     equal to the significant wave height (not face height).
-    
+
     Args:
         meters: Significant wave height in meters
-        
+
     Returns:
         Wave height in Hawaiian scale (feet)
     """
@@ -238,19 +238,19 @@ def get_hawaii_scale(self, meters: float) -> float:
 def _convert_to_hawaii_scale(self, meters: Optional[float]) -> Optional[float]:
     """
     Convert wave height from meters to Hawaiian scale.
-    
+
     Hawaiian scale measures wave height from the back, approximately
     equal to the significant wave height (not face height).
-    
+
     Args:
         meters: Significant wave height in meters
-        
+
     Returns:
         Wave height in Hawaiian scale (feet) or None if input is None
     """
     if meters is None:
         return None
-    
+
     # Hawaiian scale ≈ Hs in feet (back height, not face)
     return meters * 3.28084
 ```
@@ -266,11 +266,11 @@ Same fix as above.
 ```python
 def test_hawaiian_scale_conversion():
     processor = BuoyProcessor(config)
-    
+
     # Test case from Oct 4, 2025 ground truth
     # 2.4m deep-water swell
     assert processor.get_hawaii_scale(2.4) == pytest.approx(7.87, rel=0.01)
-    
+
     # Test other known conversions
     assert processor.get_hawaii_scale(1.0) == pytest.approx(3.28, rel=0.01)
     assert processor.get_hawaii_scale(3.0) == pytest.approx(9.84, rel=0.01)
@@ -392,14 +392,14 @@ With corrected formula:
 
 3. **Multiple validation paths:**
    - Deep-water buoy validation
-   - Nearshore buoy validation  
+   - Nearshore buoy validation
    - Surf observation validation
    - All three should agree within expected ranges
 
 ---
 
-**Report Compiled:** 2025-10-04  
-**Ground Truth Source:** Experienced surfer observation at Sunset Beach  
-**Critical Finding:** 2× multiplier bug in Hawaiian scale formula  
-**Fix Status:** Identified, ready to implement  
+**Report Compiled:** 2025-10-04
+**Ground Truth Source:** Experienced surfer observation at Sunset Beach
+**Critical Finding:** 2× multiplier bug in Hawaiian scale formula
+**Fix Status:** Identified, ready to implement
 **Expected Impact:** Transforms forecasts from unusable to professional-grade

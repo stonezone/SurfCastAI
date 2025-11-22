@@ -1,0 +1,184 @@
+{
+  "buoy_analysis": {
+    "confidence": 0.9,
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51001",
+          "buoy_name": "NW Hawaii (51001)",
+          "height_trend": "increasing_moderate",
+          "height_slope": 0.0178,
+          "height_current": 4.2,
+          "period_trend": "increasing_slight",
+          "period_slope": 0.0075,
+          "period_current": 16.5,
+          "direction_trend": "steady",
+          "direction_current": 318.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51201",
+          "buoy_name": "Waimea (51201)",
+          "height_trend": "increasing_moderate",
+          "height_slope": 0.0165,
+          "height_current": 3.8,
+          "period_trend": "steady",
+          "period_slope": 0.0035,
+          "period_current": 15.8,
+          "direction_trend": "steady",
+          "direction_current": 320.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51202",
+          "buoy_name": "Hanalei (51202)",
+          "height_trend": "increasing_moderate",
+          "height_slope": 0.0152,
+          "height_current": 3.5,
+          "period_trend": "steady",
+          "period_slope": 0.0028,
+          "period_current": 16.2,
+          "direction_trend": "steady",
+          "direction_current": 315.0,
+          "observations_count": 24
+        }
+      ],
+      "anomalies": [],
+      "quality_flags": {
+        "51001": "valid",
+        "51201": "valid",
+        "51202": "valid"
+      },
+      "cross_validation": {
+        "agreement_score": 0.92,
+        "height_agreement": 0.9,
+        "period_agreement": 0.94,
+        "num_buoys_compared": 3,
+        "interpretation": "excellent_agreement"
+      },
+      "summary_stats": {
+        "avg_wave_height": 3.83,
+        "max_wave_height": 4.2,
+        "min_wave_height": 3.5,
+        "avg_period": 16.17,
+        "max_period": 16.5,
+        "min_period": 15.8
+      }
+    },
+    "narrative": "Classic north shore swell building nicely with excellent agreement across all north-facing buoys. NW Hawaii (51001) at 4.2m @ 16.5s from 318\u00b0 (NW), Waimea (51201) at 3.8m @ 15.8s from 320\u00b0, Hanalei (51202) at 3.5m @ 16.2s from 315\u00b0. All three buoys showing moderate increasing trends and periods in the 15-17 second range indicating powerful long-period NW groundswell. Cross-validation excellent (0.92) with tight directional clustering around 315-320\u00b0. This is textbook winter surf for north-facing shores.",
+    "metadata": {
+      "buoys_analyzed": [
+        "51001",
+        "51201",
+        "51202"
+      ],
+      "analysis_timestamp": "2025-01-08T10:00:00Z",
+      "data_quality": "excellent"
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.88,
+    "data": {
+      "systems": [
+        {
+          "type": "low_pressure",
+          "location": "47N 168W",
+          "location_lat": 47.0,
+          "location_lon": -168.0,
+          "pressure_mb": 970,
+          "wind_speed_kt": 58,
+          "movement": "E at 22kt",
+          "intensification": "strengthening",
+          "generation_time": "2025-01-06T06:00:00Z",
+          "fetch": {
+            "direction": "NW",
+            "distance_nm": 1550.0,
+            "duration_hrs": 42.0,
+            "fetch_length_nm": 950.0,
+            "quality": "strong"
+          }
+        }
+      ],
+      "predicted_swells": [
+        {
+          "source_system": "low_47N_168W",
+          "source_lat": 47.0,
+          "source_lon": -168.0,
+          "direction": "NW",
+          "direction_degrees": 318,
+          "arrival_time": "2025-01-08T06:00-12:00Z",
+          "estimated_height": "10-14ft",
+          "estimated_period": "15-18s",
+          "confidence": 0.86,
+          "calculated_arrival": "2025-01-08T09:00:00Z",
+          "travel_time_hrs": 50.5,
+          "distance_nm": 1550.0,
+          "group_velocity_knots": 30.7,
+          "propagation_method": "physics_based",
+          "fetch_quality": "strong",
+          "fetch_duration_hrs": 42.0,
+          "fetch_length_nm": 950.0,
+          "source_pressure_mb": 970,
+          "source_wind_speed_kt": 58,
+          "source_trend": "strengthening"
+        }
+      ],
+      "frontal_boundaries": [],
+      "analysis_summary": {
+        "num_low_pressure": 1,
+        "num_high_pressure": 0,
+        "num_predicted_swells": 1,
+        "region": "North Pacific"
+      }
+    },
+    "narrative": "Powerful Aleutian low at 47N 168W with 970mb central pressure and 58-knot winds, still intensifying. Exceptional fetch window: 950 nautical miles sustained for 42 hours, one of the best setups of the season. Physics calculations show peak swell arriving mid-morning January 8th with heights of 10-14ft Hawaiian scale and periods of 15-18 seconds. Perfect NW direction (318\u00b0) for Pipeline, Sunset, and all north shore breaks. High confidence in this forecast\u2014classic winter swell event.",
+    "metadata": {
+      "analysis_timestamp": "2025-01-08T10:00:00Z",
+      "models_used": [
+        "GFS",
+        "ECMWF"
+      ],
+      "confidence_factors": [
+        "strong low",
+        "exceptional fetch",
+        "perfect direction"
+      ]
+    }
+  },
+  "swell_events": [
+    {
+      "direction": "NW",
+      "height_range": "10-14ft",
+      "period_range": "15-18s",
+      "confidence": 0.88,
+      "source": "Aleutian low 970mb",
+      "timing": "Currently arriving, peak next 6-12 hours"
+    }
+  ],
+  "shore_data": {
+    "north_shore": {
+      "exposure": "direct"
+    },
+    "south_shore": {
+      "exposure": "shadowed"
+    },
+    "east_shore": {
+      "exposure": "partial"
+    },
+    "west_shore": {
+      "exposure": "partial"
+    }
+  },
+  "seasonal_context": {
+    "season": "winter",
+    "typical_pattern": "Large NW swells, north shore prime",
+    "current_phase": "peak winter season",
+    "trade_winds": "Light E trades, favorable offshore on north shore"
+  },
+  "metadata": {
+    "forecast_date": "2025-01-08",
+    "valid_period": "48-hour",
+    "region": "Oahu",
+    "analyst": "SeniorForecaster"
+  }
+}

@@ -1,0 +1,17 @@
+# Test configuration for SurfCastAI
+
+general:
+  log_level: INFO
+  log_file: logs/surfcastai_test.log
+  output_directory: output/test
+
+openai:
+  model: gpt-4o
+  temperature: 0.7
+  max_tokens: 4000
+
+forecast:
+  templates_dir: config/prompts/v1
+  refinement_cycles: 1  # Set to 1 for faster tests
+  quality_threshold: 0.7
+  formats: markdown,html  # Exclude PDF for faster tests

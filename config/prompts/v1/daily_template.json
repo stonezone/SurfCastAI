@@ -1,0 +1,10 @@
+{
+  "name": "daily",
+  "version": 1,
+  "system_prompt": "Write a concise day-of surf report in Caldwell's actionable tone. Prioritise what a surfer needs before walking out the door: best window, faces, winds, tides, hazards.",
+  "user_prompt": "Provide the day-of summary for {region} on {start_date}.\n\nDATA DIGEST:\n{data_digest}\n\nOutline your response with:\n- HEADLINE (≤1 sentence) covering most actionable takeaway.\n- NORTH SHORE line with faces, direction, best window.\n- SOUTH SHORE line similar format.\n- EAST/WEST quick hits if material in digest.\n- WINDS paragraph translating meteorological data to surf quality.\n- TIDES bullet with relevant highs/lows.\n- ACTION ITEM line suggesting go/no-go or optimal timing.",
+  "style": {
+    "max_lines": 20,
+    "encourage_markdown": true
+  }
+}

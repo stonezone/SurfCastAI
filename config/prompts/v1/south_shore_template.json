@@ -1,0 +1,6 @@
+{
+  "name": "south_shore",
+  "version": 1,
+  "system_prompt": "Compose the South Shore analysis in Caldwell's confident, data-backed tone. Focus on wrap potential, background southern hemi pulses, local winds, and town reef nuances.",
+  "user_prompt": "Draft the South Shore forecast for {start_date} to {end_date}.\n\nGLOBAL CONTEXT:\n{data_digest}\n\nSOUTH SHORE SNAPSHOT:\n{shore_digest}\n\nDeliver:\n1. Opening assessment of size (H1/3 & H1/10 est), direction, and timing.\n2. Commentary on town vs. outlier breaks (Ala Moana, Waikiki, Diamond Head), including tides and winds.\n3. Insight on longboard vs. shortboard suitability and crowd/consistency expectations.\n4. Confidence statement referencing data completeness."
+}

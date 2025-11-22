@@ -3,8 +3,11 @@
 # SETUP INSTRUCTIONS:
 # 1. Copy this file to config.yaml: cp config/config.example.yaml config/config.yaml
 # 2. Create .env file with: OPENAI_API_KEY=your-actual-key-here
-# 3. Remove the api_key line from config.yaml (use .env instead)
+# 3. IMPORTANT: API keys MUST be in .env only (config file keys no longer supported)
 # 4. Adjust other settings as needed
+#
+# BREAKING CHANGE: As of this version, API keys must come from environment variables
+# only for security. Config file api_key field is deprecated and will be ignored.
 #
 # NOTE: config.yaml should NOT be committed to git (add to .gitignore)
 
@@ -14,10 +17,26 @@ general:
   output_directory: output
   data_directory: data
   timezone: Pacific/Honolulu
+  data_retention_days: 30
 
 openai:
-  model: gpt-4o
-  api_key: your-openai-api-key-here
+  # Default model - used as fallback if a specialist doesn't have one defined
+  # Also used by legacy code paths for backward compatibility
+  default_model: gpt-5-mini
+
+  # Specialist-specific model assignments (tiered AI architecture)
+  # Each specialist can use a different model based on task complexity:
+  #   - gpt-5-nano: Cheapest ($0.05/1M in, $0.40/1M out) - Simple analysis
+  #   - gpt-5-mini: Mid-tier ($0.25/1M in, $2.00/1M out) - Complex analysis, vision
+  #   - gpt-5: Premium ($1.25/1M in, $10.00/1M out) - High-quality synthesis
+  specialist_models:
+    buoy_analyst: gpt-5-nano        # Simple buoy data analysis
+    pressure_analyst: gpt-5-mini    # Complex meteorology with vision API
+    senior_forecaster: gpt-5        # Final high-quality forecast synthesis
+
+  # Global OpenAI settings (apply to all models)
+  # NOTE: API key must be set via OPENAI_API_KEY environment variable in .env file
+  # The api_key field is DEPRECATED and no longer supported for security reasons
   temperature: 0.7
   max_tokens: 4000
 
@@ -49,6 +68,9 @@ rate_limits:
   "www.nhc.noaa.gov":
     requests_per_second: 0.1
     burst_size: 1
+  "marine-api.open-meteo.com":
+    requests_per_second: 0.3
+    burst_size: 3
   default:
     requests_per_second: 0.2
     burst_size: 2
@@ -57,19 +79,30 @@ data_sources:
   buoys:
     enabled: true
     urls:
+      # Standard observations (.txt files)
       - "https://www.ndbc.noaa.gov/data/realtime2/51001.txt"
       - "https://www.ndbc.noaa.gov/data/realtime2/51002.txt"
       - "https://www.ndbc.noaa.gov/data/realtime2/51003.txt"
       - "https://www.ndbc.noaa.gov/data/realtime2/51004.txt"
       - "https://www.ndbc.noaa.gov/data/realtime2/51101.txt"
       - "https://www.ndbc.noaa.gov/data/realtime2/51201.txt"
-      - "https://www.ndbc.noaa.gov/data/realtime2/51201.spec"
       - "https://www.ndbc.noaa.gov/data/realtime2/51202.txt"
-      - "https://www.ndbc.noaa.gov/data/realtime2/51202.spec"
       - "https://www.ndbc.noaa.gov/data/realtime2/51207.txt"
-      - "https://www.ndbc.noaa.gov/data/realtime2/51207.spec"
       - "https://www.ndbc.noaa.gov/data/realtime2/51211.txt"
       - "https://www.ndbc.noaa.gov/data/realtime2/51212.txt"
+      # Spectral data (.spec files) - enables multi-component swell separation
+      - "https://www.ndbc.noaa.gov/data/realtime2/51001.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51002.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51004.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51101.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51201.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51202.spec"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51207.spec"
+      # Directional spectral data (.swdir files) - wave direction by frequency
+      - "https://www.ndbc.noaa.gov/data/realtime2/51004.swdir"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51201.swdir"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51202.swdir"
+      - "https://www.ndbc.noaa.gov/data/realtime2/51207.swdir"
   weather:
     enabled: true
     urls:
@@ -91,6 +124,17 @@ data_sources:
       - "https://nomads.ncep.noaa.gov:9090/dods/gfs_0p25"
       - "https://nomads.ncep.noaa.gov:9090/dods/wave_multi_1.glo_0.16"
       - "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/"
+  marine_forecasts:
+    enabled: true
+    urls:
+      # Open-Meteo Marine API - Free wave forecasts (no API key required)
+      # Provides hourly wave_height, wave_period, wave_direction for 7 days
+      - "https://marine-api.open-meteo.com/v1/marine?latitude=21.7&longitude=-158.0&hourly=wave_height,wave_period,wave_direction"  # North Shore
+      - "https://marine-api.open-meteo.com/v1/marine?latitude=21.3&longitude=-157.9&hourly=wave_height,wave_period,wave_direction"  # South Shore (Honolulu)
+      - "https://marine-api.open-meteo.com/v1/marine?latitude=21.4&longitude=-157.7&hourly=wave_height,wave_period,wave_direction"  # East Shore (Kailua)
+      - "https://marine-api.open-meteo.com/v1/marine?latitude=21.5&longitude=-158.2&hourly=wave_height,wave_period,wave_direction"  # West Shore (Waianae)
+      - "https://marine-api.open-meteo.com/v1/marine?latitude=21.5&longitude=-157.95&hourly=wave_height,wave_period,wave_direction"  # Central Oahu
+      - "https://marine-api.open-meteo.com/v1/marine?latitude=21.0&longitude=-158.5&hourly=wave_height,wave_period,wave_direction"  # Offshore West
   satellite:
     enabled: true
     urls:
@@ -98,11 +142,25 @@ data_sources:
   charts:
     enabled: true
     urls:
-      - "https://ocean.weather.gov/P_sfc_full_ocean_color.png"
-      - "https://ocean.weather.gov/P_sfc_24hr_ocean_color.png"
-      - "https://ocean.weather.gov/P_sfc_48hr_ocean_color.png"
-      - "https://ocean.weather.gov/P_sfc_96hr_ocean_color.png"
-      - "https://ocean.weather.gov/P_sfc_120hr_ocean_color.png"
+      # Surface pressure analysis and forecasts
+      - "https://www.weather.gov/images/hfo/graphics/npac.gif"           # OPC North Pacific surface analysis (0 hr)
+      - "https://tgftp.nws.noaa.gov/fax/PJBA99.gif"                      # OPC 24 hr surface forecast (fax graphic)
+      - "https://tgftp.nws.noaa.gov/fax/PWFE11.gif"                      # OPC 48 hr surface forecast (fax graphic)
+      - "https://ocean.weather.gov/P_sfc_24hr_ocean_color.png"           # 24hr surface pressure
+      - "https://ocean.weather.gov/P_sfc_48hr_ocean_color.png"           # 48hr surface pressure
+      - "https://ocean.weather.gov/P_sfc_96hr_ocean_color.png"           # 96hr surface pressure
+      - "https://ocean.weather.gov/P_sfc_120hr_ocean_color.png"          # 120hr surface pressure
+      # Wave period analysis and forecasts - critical for swell timing
+      - "https://ocean.weather.gov/shtml/P_024hrwper_thumb.gif"          # 24hr wave period forecast
+      - "https://ocean.weather.gov/shtml/P_048hrwper_color.gif"          # 48hr wave period forecast
+      - "https://ocean.weather.gov/shtml/P_072hrwper_thumb.gif"          # 72hr wave period forecast
+      - "https://ocean.weather.gov/shtml/P_096hrwper_color.gif"          # 96hr wave period forecast
+      # Sea-state (wave height) analysis and forecasts
+      - "https://ocean.weather.gov/shtml/P_00hrww.gif"                   # Current sea-state analysis
+      - "https://ocean.weather.gov/shtml/P_48hrww.gif"                   # 48hr wind/wave forecast
+      - "https://ocean.weather.gov/shtml/P_96hrww.gif"                   # 96hr wind/wave forecast
+      # Surface wind analysis - for fetch and local wind wave generation
+      - "https://ocean.weather.gov/P_w_sfc_color.png"                    # Surface wind analysis
   tropical:
     enabled: true
     urls:
@@ -127,11 +185,12 @@ processing:
     min_combined_confidence: 0.6
 
 forecast:
-  templates_dir: src/forecast_engine/templates
+  templates_dir: config/prompts/v1
   refinement_cycles: 2
   quality_threshold: 0.8
   use_local_generator: true
-  formats: markdown,html,pdf
+  use_specialist_team: true   # Multi-agent architecture enabled
+  formats: markdown,html
   max_images: 10              # GPT-5 limit (can reduce to 6-8 for cost)
   token_budget: 150000        # Conservative for gpt-5-mini
   warn_threshold: 200000      # GPT-5 context limit

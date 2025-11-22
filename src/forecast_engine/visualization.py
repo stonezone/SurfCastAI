@@ -113,7 +113,14 @@ class ForecastVisualizer:
     def _build_shore_focus_chart(self, forecast_data: Dict[str, Any], assets_dir: Path) -> Optional[str]:
         """Summarise expected face heights per shore based on event exposure."""
         try:
+            # Support both formats: locations (list) and shore_data (dict)
             locations = forecast_data.get("locations", [])
+            shore_data = forecast_data.get("shore_data", {})
+
+            # Convert shore_data dict to locations list format if needed
+            if not locations and shore_data:
+                locations = list(shore_data.values())
+
             if not locations:
                 return None
 

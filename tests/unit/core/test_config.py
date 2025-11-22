@@ -331,17 +331,20 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(api_key, 'test-key-from-env')
 
     @patch.dict(os.environ, {}, clear=True)
-    def test_openai_api_key_from_config(self):
-        """Test openai_api_key falls back to config file."""
+    def test_openai_api_key_raises_without_env(self):
+        """Test openai_api_key raises ValueError when environment variable not set."""
         # Clear OPENAI_API_KEY if it exists
         os.environ.pop('OPENAI_API_KEY', None)
 
         config = Config()
         config._config = self.sample_config
 
-        # Should fall back to config file
-        api_key = config.openai_api_key
-        self.assertEqual(api_key, 'test-api-key-from-config')
+        # Should raise ValueError when API key is not in environment
+        with self.assertRaises(ValueError) as context:
+            api_key = config.openai_api_key
+
+        self.assertIn("OPENAI_API_KEY environment variable not set", str(context.exception))
+        self.assertIn("For security, API keys must come from environment variables only", str(context.exception))
 
     def test_openai_model_property(self):
         """Test openai_model property."""

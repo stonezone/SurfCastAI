@@ -1,0 +1,202 @@
+# NDBC Spectral Analysis Algorithm - Visual Flowchart
+
+## Input: .spec File
+┌─────────────────────────────────────────────────────────────┐
+│ #YY  MM DD hh mm WVHT  SwH  SwP  WWH  WWP SwD WWD  APD MWD │
+│ 2025 10 10 12 00  2.5  2.1  14.3  0.8  8.2  NW  W   11.2  310│
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+                    ┌──────────────┐
+                    │ Parse Fields │
+                    └──────────────┘
+                           ↓
+        ┌──────────────────┴──────────────────┐
+        ↓                                     ↓
+┌───────────────────┐              ┌───────────────────┐
+│ Swell Component   │              │ Wind Wave Component│
+│ Height: 2.1m      │              │ Height: 0.8m      │
+│ Period: 14.3s     │              │ Period: 8.2s      │
+│ Direction: NW     │              │ Direction: W      │
+└───────────────────┘              └───────────────────┘
+        ↓                                     ↓
+┌───────────────────┐              ┌───────────────────┐
+│ Validate Period   │              │ Validate Period   │
+│ 8.0 ≤ T ≤ 25.0?  │              │ T ≥ 4.0?         │
+│ ✓ YES (14.3s)    │              │ ✓ YES (8.2s)     │
+└───────────────────┘              └───────────────────┘
+        ↓                                     ↓
+┌───────────────────┐              ┌───────────────────┐
+│ Convert Direction │              │ Convert Direction │
+│ NW → 315°         │              │ W → 270°          │
+└───────────────────┘              └───────────────────┘
+        ↓                                     ↓
+        └──────────────────┬──────────────────┘
+                           ↓
+                ┌──────────────────────┐
+                │ Check Separation     │
+                │ Period Δ = 6.1s      │
+                │ Direction Δ = 45°    │
+                │ ✓ SEPARATE (Δ > 3s) │
+                └──────────────────────┘
+                           ↓
+                ┌──────────────────────┐
+                │ Calculate Energy     │
+                │ E = H²/(16×Δf)       │
+                │ Swell: 2.1² = 4.41   │
+                │ Wind: 0.8² = 0.64    │
+                └──────────────────────┘
+                           ↓
+                ┌──────────────────────┐
+                │ Energy Threshold     │
+                │ Swell: 100% (primary)│
+                │ Wind: 14.5% (> 10%) │
+                │ ✓ INCLUDE BOTH       │
+                └──────────────────────┘
+                           ↓
+                ┌──────────────────────┐
+                │ Rank by Energy       │
+                │ 1. Swell (4.41)      │
+                │ 2. Wind Wave (0.64)  │
+                └──────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
+│ Output: SpectralAnalysisResult                              │
+│                                                             │
+│ peaks = [                                                   │
+│   SpectralPeak(                                            │
+│     period=14.3s, direction=315°, height=2.1m,            │
+│     energy=4.41, type='swell', confidence=0.85            │
+│   ),                                                       │
+│   SpectralPeak(                                            │
+│     period=8.2s, direction=270°, height=0.8m,             │
+│     energy=0.64, type='wind_wave', confidence=0.75        │
+│   )                                                        │
+│ ]                                                          │
+└─────────────────────────────────────────────────────────────┘
+
+
+## Future: 2D Spectral Matrix Analysis
+
+Input: Raw .data_spec File
+┌──────────────────────────────────────────────────┐
+│ Frequency (Hz) vs Direction (°) Energy Matrix   │
+│                                                  │
+│       0°    30°   60°   90°  ... 330°           │
+│ 0.05  0.1   0.2   0.3   0.1  ... 0.2            │
+│ 0.06  0.5   1.2   0.8   0.3  ... 0.4            │
+│ 0.07  2.1   3.5   1.5   0.5  ... 1.8  ← Peak!   │
+│ 0.08  1.0   1.5   0.8   0.3  ... 0.9            │
+│ ...                                              │
+└──────────────────────────────────────────────────┘
+                    ↓
+         ┌─────────────────────┐
+         │ Gaussian Smoothing  │
+         │ σ = 1.0             │
+         └─────────────────────┘
+                    ↓
+         ┌─────────────────────┐
+         │ Find Local Maxima   │
+         │ 3×3 Neighborhood    │
+         │ Scan                │
+         └─────────────────────┘
+                    ↓
+      ┌──────────────┬──────────────┬──────────────┐
+      ↓              ↓              ↓              ↓
+   Peak 1         Peak 2         Peak 3         Peak 4
+   f=0.071Hz      f=0.063Hz      f=0.083Hz      f=0.100Hz
+   T=14.0s        T=16.0s        T=12.0s        T=10.0s
+   θ=315°         θ=330°         θ=270°         θ=45°
+   E=3.5          E=2.5          E=1.0          E=0.2
+      ↓              ↓              ↓              ↓
+   ✓ Valid        ✓ Valid        ✓ Valid        ✗ E < 10%
+   (8-25s)        (8-25s)        (8-25s)        (too low)
+      ↓              ↓              ↓
+      └──────────────┴──────────────┘
+                    ↓
+         ┌─────────────────────┐
+         │ Merge Similar Peaks │
+         │                     │
+         │ Peak 1 vs Peak 2:   │
+         │   ΔT=2s, Δθ=15°     │
+         │   → MERGE (ΔT < 3s) │
+         │                     │
+         │ Peak 1 vs Peak 3:   │
+         │   ΔT=2s, Δθ=45°     │
+         │   → SEPARATE (Δθ≥30°)│
+         └─────────────────────┘
+                    ↓
+      ┌──────────────┬──────────────┐
+      ↓              ↓              ↓
+  Merged Peak     Peak 3         (Discarded)
+  T=15.0s         T=12.0s
+  θ=322.5°        θ=270°
+  H=3.1m          H=1.5m
+  E=3.0           E=1.0
+      ↓              ↓
+      └──────────────┘
+                    ↓
+         ┌─────────────────────┐
+         │ Rank by Energy      │
+         │ 1. Merged (E=3.0)   │
+         │ 2. Peak 3 (E=1.0)   │
+         └─────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────────┐
+│ Output: Multi-Component Swell Forecast          │
+│                                                 │
+│ Primary: 3.1m @ 15.0s, 322.5° (NW)             │
+│ Secondary: 1.5m @ 12.0s, 270° (W)              │
+│                                                 │
+│ Forecast: "NW swell 10-12 ft Hawaiian scale    │
+│ (15s period) with smaller W swell 5 ft (12s)"  │
+└─────────────────────────────────────────────────┘
+
+
+## Decision Tree: Separation Logic
+
+                  ┌─────────────────┐
+                  │ Two Peaks Found │
+                  └────────┬────────┘
+                           ↓
+              ┌────────────┴────────────┐
+              │ Calculate Differences    │
+              │ ΔT = |T₁ - T₂|          │
+              │ Δθ = min(|θ₁-θ₂|, 360-|θ₁-θ₂|) │
+              └────────────┬────────────┘
+                           ↓
+                   ┌───────┴───────┐
+                   │ ΔT ≥ 3s?      │
+                   └───┬───────┬───┘
+                      YES      NO
+                       ↓       ↓
+              ┌────────┴────┐  ┌────────┐
+              │ SEPARATE    │  │Δθ ≥30°?│
+              │ (Different  │  └───┬──┬─┘
+              │ arrival     │     YES NO
+              │ times)      │      ↓  ↓
+              └─────────────┘  ┌───┴──┴───┐
+                               │  MERGE   │
+                               │ (Same    │
+                               │ source)  │
+                               └──────────┘
+
+Example 1: ΔT=6s, Δθ=20° → SEPARATE (period check passes)
+Example 2: ΔT=2s, Δθ=45° → SEPARATE (direction check passes)
+Example 3: ΔT=2s, Δθ=15° → MERGE (both checks fail)
+
+
+## Physics: Why 3 Seconds Matters
+
+Deep Water Dispersion: c = gT/(2π)
+
+T = 16s → c = 25.0 m/s → Distance in 24h = 2160 km
+T = 13s → c = 20.3 m/s → Distance in 24h = 1754 km
+                          Δ = 406 km
+
+After storm fetch of 1000 km:
+  Arrival time difference = 1000/(25.0) - 1000/(20.3)
+                          = 40.0h - 49.3h
+                          = 9.3 hours
+
+→ Swells separated by 3+ seconds arrive hours apart
+→ Treat as distinct events

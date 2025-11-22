@@ -19,15 +19,15 @@ from src.core.config import Config
 
 class TestWaveModelProcessor(unittest.TestCase):
     """Tests for the WaveModelProcessor class."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         # Create mock config
         self.config = MagicMock(spec=Config)
-        
+
         # Create processor
         self.processor = WaveModelProcessor(self.config)
-        
+
         # Sample SWAN model data
         self.sample_swan_data = {
             "metadata": {
@@ -87,7 +87,7 @@ class TestWaveModelProcessor(unittest.TestCase):
                 }
             ]
         }
-        
+
         # Sample WW3 model data
         self.sample_ww3_data = {
             "header": {
@@ -130,67 +130,67 @@ class TestWaveModelProcessor(unittest.TestCase):
                 }
             ]
         }
-    
+
     def test_validate_valid_swan_data(self):
         """Test validation with valid SWAN data."""
         errors = self.processor.validate(self.sample_swan_data)
         self.assertEqual(len(errors), 0, "Should not have validation errors")
-    
+
     def test_validate_valid_ww3_data(self):
         """Test validation with valid WW3 data."""
         errors = self.processor.validate(self.sample_ww3_data)
         self.assertEqual(len(errors), 0, "Should not have validation errors")
-    
+
     def test_validate_invalid_data(self):
         """Test validation with invalid data."""
         # Test missing forecasts
         invalid_data = {"metadata": {"model": "SWAN"}, "forecasts": []}
         errors = self.processor.validate(invalid_data)
         self.assertGreater(len(errors), 0, "Should have validation errors")
-        
+
         # Test unknown format
         invalid_data = {"wrong_key": "value"}
         errors = self.processor.validate(invalid_data)
         self.assertGreater(len(errors), 0, "Should have validation errors")
-    
+
     def test_process_swan_data(self):
         """Test processing with SWAN data."""
         result = self.processor.process(self.sample_swan_data)
-        
+
         # Check success
         self.assertTrue(result.success, "Processing should succeed")
         self.assertIsNone(result.error, "Should not have error")
-        
+
         # Check data type
         self.assertIsInstance(result.data, ModelData, "Result should be ModelData")
-        
+
         # Check basic properties
         model_data = result.data
         self.assertEqual(model_data.model_id, 'swan', "Model ID should be 'swan'")
         self.assertEqual(model_data.region, 'hawaii', "Region should be 'hawaii'")
         self.assertEqual(len(model_data.forecasts), 3, "Should have 3 forecasts")
-        
+
         # Check metadata
         self.assertIn('analysis', model_data.metadata, "Should have analysis metadata")
         self.assertIn('shore_analysis', model_data.metadata, "Should have shore analysis metadata")
         self.assertIn('swell_events', model_data.metadata, "Should have swell events metadata")
-    
+
     def test_process_ww3_data(self):
         """Test processing with WW3 data."""
         result = self.processor.process(self.sample_ww3_data)
-        
+
         # Check success
         self.assertTrue(result.success, "Processing should succeed")
-        
+
         # Check data type
         self.assertIsInstance(result.data, ModelData, "Result should be ModelData")
-        
+
         # Check basic properties
         model_data = result.data
         self.assertEqual(model_data.model_id, 'ww3', "Model ID should be 'ww3'")
         self.assertEqual(model_data.region, 'north_pacific', "Region should be 'north_pacific'")
         self.assertEqual(len(model_data.forecasts), 2, "Should have 2 forecasts")
-    
+
     def test_clean_forecasts(self):
         """Test forecast cleaning."""
         # Create test model data with some invalid points
@@ -205,30 +205,30 @@ class TestWaveModelProcessor(unittest.TestCase):
                 ]
             )
         ]
-        
+
         model_data = ModelData(
             model_id="test",
             run_time="2023-01-01T00:00:00Z",
             region="test",
             forecasts=forecasts
         )
-        
+
         # Clean forecasts
         result = self.processor._clean_forecasts(model_data)
-        
+
         # Check cleaned points
         self.assertEqual(len(result.forecasts), 1, "Should still have 1 forecast")
         self.assertEqual(len(result.forecasts[0].points), 2, "Should have 2 valid points")
-        
+
         # Check invalid point was removed
         heights = [p.wave_height for p in result.forecasts[0].points]
         self.assertNotIn(-1.0, heights, "Negative height should be removed")
-        
+
         # Check invalid period was set to None
         for point in result.forecasts[0].points:
             if point.wave_height == 2.3:
                 self.assertIsNone(point.wave_period, "Invalid period should be set to None")
-    
+
     def test_detect_swell_events(self):
         """Test swell event detection."""
         # Create model data with a clear swell event
@@ -240,41 +240,41 @@ class TestWaveModelProcessor(unittest.TestCase):
                 wave_height = 1.5 + (hour / 18) * 1.5  # Rising to peak at hour 18
             else:
                 wave_height = 3.0 - ((hour - 18) / 18) * 1.5  # Falling after peak
-            
+
             forecasts.append(
                 ModelForecast(
                     timestamp=f"2023-01-01T{hour:02d}:00:00Z",
                     forecast_hour=hour,
                     points=[
                         ModelPoint(
-                            latitude=21.6, 
-                            longitude=-158.1, 
-                            wave_height=wave_height, 
-                            wave_period=12.0, 
+                            latitude=21.6,
+                            longitude=-158.1,
+                            wave_height=wave_height,
+                            wave_period=12.0,
                             wave_direction=315
                         )
                     ]
                 )
             )
-        
+
         model_data = ModelData(
             model_id="test",
             run_time="2023-01-01T00:00:00Z",
             region="test",
             forecasts=forecasts
         )
-        
+
         # Detect swell events
         events = self.processor._detect_swell_events(model_data)
-        
+
         # Check event detection
         self.assertGreaterEqual(len(events), 1, "Should detect at least one event")
-        
+
         # Check peak time
         peak_event = events[0]
         self.assertEqual(peak_event['peak_hour'], 18, "Peak should be at hour 18")
         self.assertAlmostEqual(peak_event['peak_height'], 3.0, places=1, msg="Peak height should be about 3.0")
-    
+
     def test_hawaii_scale_conversion(self):
         """Test Hawaiian scale conversion."""
         # Test various wave heights
@@ -283,10 +283,10 @@ class TestWaveModelProcessor(unittest.TestCase):
             (2.0, 13.12),  # 2m ≈ 13.12ft face
             (3.0, 19.68)   # 3m ≈ 19.68ft face
         ]
-        
+
         for meters, expected_feet in test_cases:
             result = self.processor.get_hawaii_scale(meters)
-            self.assertAlmostEqual(result, expected_feet, places=1, 
+            self.assertAlmostEqual(result, expected_feet, places=1,
                 msg=f"{meters}m should convert to ~{expected_feet}ft in Hawaiian scale")
 
 

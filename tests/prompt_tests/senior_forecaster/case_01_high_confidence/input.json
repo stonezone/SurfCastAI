@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "forecast_date": "2025-10-15",
+    "valid_period": "48hr",
+    "forecast_date": "2025-10-15"
+  },
+  "seasonal_context": {
+    "season": "winter",
+    "typical_patterns": "North Pacific storms generate NW swells"
+  },
+  "buoy_analysis": {
+    "confidence": 0.92,
+    "narrative": "Buoy 51001 (NW Hawaii) shows strong NW swell signal building since 06:00 HST. Wave heights increased from 8ft @ 14s to 12ft @ 16s over 6 hours, indicating a well-organized groundswell. Direction steady at 315° (NW). Buoy 51201 (North Shore) confirms with 10ft @ 15s from 320°. Spectral analysis shows clean single-peak energy, no overlapping systems. Cross-buoy timing suggests swell propagating at expected group velocity (~30 kt). High confidence in NW swell arrival and size.",
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51001",
+          "trend_type": "increasing",
+          "rate": 0.67,
+          "confidence": 0.95
+        },
+        {
+          "buoy_id": "51201",
+          "trend_type": "increasing",
+          "rate": 0.50,
+          "confidence": 0.90
+        }
+      ],
+      "anomalies": [],
+      "cross_validation": {
+        "agreement_level": "strong",
+        "consistent_buoys": ["51001", "51201", "51101"]
+      }
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.88,
+    "narrative": "Surface analysis shows deep low-pressure center (968 mb) at 45°N, 165°W on Oct 12, generating NW fetch of 800+ nautical miles. Sustained winds 40-50 kt in fetch window for 24+ hours. Wave period forecast charts show 14-16s energy arriving North Shore on Oct 15-16. No competing systems. High pressure ridge to south will provide favorable offshore winds for North Shore. Pattern matches historical NW swell events with high confidence.",
+    "data": {
+      "weather_systems": [
+        {
+          "type": "low_pressure",
+          "location": {"lat": 45.0, "lon": -165.0},
+          "central_pressure": 968,
+          "movement": "E at 15 kt"
+        }
+      ],
+      "predicted_swells": [
+        {
+          "source_lat": 45.0,
+          "source_lon": -165.0,
+          "target_lat": 21.7,
+          "target_lon": -158.0,
+          "fetch_distance_nm": 850,
+          "fetch_duration_hrs": 36,
+          "peak_wind_speed_kt": 48,
+          "estimated_period_s": 15.5,
+          "estimated_height_ft": 12.0,
+          "arrival_time": "2025-10-15T12:00:00",
+          "confidence": 0.90
+        }
+      ],
+      "frontal_boundaries": []
+    }
+  },
+  "contradictions": [],
+  "key_findings": [
+    "Strong agreement between buoy observations and pressure forecast",
+    "NW swell building as predicted from Oct 12 storm system",
+    "Peak arrival expected Oct 15 afternoon through Oct 16",
+    "Favorable offshore winds from high pressure ridge",
+    "No competing swell systems - clean NW dominant"
+  ],
+  "shore_forecasts": {
+    "north": {
+      "conditions": "Excellent",
+      "wave_height_ft": "12-15 faces",
+      "primary_swell": "NW 315° @ 15s",
+      "wind": "Light offshore (E 5-10 kt)",
+      "rating": 9
+    },
+    "south": {
+      "conditions": "Flat",
+      "wave_height_ft": "1-2",
+      "primary_swell": "Shadow from NW swell",
+      "wind": "Light variable",
+      "rating": 2
+    },
+    "east": {
+      "conditions": "Small",
+      "wave_height_ft": "2-3",
+      "primary_swell": "Local windswell",
+      "wind": "Moderate trades (E 15 kt)",
+      "rating": 4
+    },
+    "west": {
+      "conditions": "Fair",
+      "wave_height_ft": "4-6 faces",
+      "primary_swell": "Wrap from NW swell",
+      "wind": "Light offshore",
+      "rating": 6
+    }
+  },
+  "swell_breakdown": [
+    {
+      "direction": 315,
+      "period": 15.5,
+      "height": 12.0,
+      "source": "North Pacific low (45N, 165W)",
+      "arrival": "Oct 15 12:00 HST",
+      "duration": "36 hours",
+      "confidence": 0.90
+    }
+  ]
+}

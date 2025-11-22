@@ -23,15 +23,15 @@ from src.core.config import Config
 
 class TestDataFusionSystem(unittest.TestCase):
     """Tests for the DataFusionSystem class."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         # Create mock config
         self.config = MagicMock(spec=Config)
-        
+
         # Create processor
         self.fusion_system = DataFusionSystem(self.config)
-        
+
         # Sample buoy data
         self.sample_buoy_data = BuoyData(
             station_id="51001",
@@ -48,7 +48,7 @@ class TestDataFusionSystem(unittest.TestCase):
             ],
             metadata={}
         )
-        
+
         # Sample weather data
         self.sample_weather_data = WeatherData(
             provider="nws",
@@ -75,7 +75,7 @@ class TestDataFusionSystem(unittest.TestCase):
                 }
             }
         )
-        
+
         # Sample model data
         self.sample_model_data = ModelData(
             model_id="swan",
@@ -110,7 +110,7 @@ class TestDataFusionSystem(unittest.TestCase):
                 ]
             }
         )
-        
+
         # Sample fusion input data
         self.sample_fusion_data = {
             "metadata": {
@@ -121,83 +121,144 @@ class TestDataFusionSystem(unittest.TestCase):
             "weather_data": [self.sample_weather_data],
             "model_data": [self.sample_model_data]
         }
-    
+
     def test_validate_valid_data(self):
         """Test validation with valid data."""
         errors = self.fusion_system.validate(self.sample_fusion_data)
         self.assertEqual(len(errors), 0, "Should not have validation errors")
-    
+
     def test_validate_invalid_data(self):
         """Test validation with invalid data."""
         # Test missing metadata
         invalid_data = {}
         errors = self.fusion_system.validate(invalid_data)
         self.assertGreater(len(errors), 0, "Should have validation errors")
-        
+
         # Test no data sources
         invalid_data = {"metadata": {}}
         errors = self.fusion_system.validate(invalid_data)
         self.assertGreater(len(errors), 0, "Should have validation errors")
-    
+
     def test_process_fusion_data(self):
         """Test processing with fusion data."""
         result = self.fusion_system.process(self.sample_fusion_data)
-        
+
         # Check success
         self.assertTrue(result.success, "Processing should succeed")
         self.assertIsNone(result.error, "Should not have error")
-        
+
         # Check data type
         self.assertIsInstance(result.data, SwellForecast, "Result should be SwellForecast")
-        
+
         # Check basic properties
         forecast = result.data
         self.assertEqual(forecast.forecast_id, "test_forecast", "Forecast ID should match input")
-        
+
         # Check locations
         self.assertGreaterEqual(len(forecast.locations), 4, "Should have at least 4 Hawaii locations")
-        
+
         # Check swell events
         self.assertGreaterEqual(len(forecast.swell_events), 1, "Should have at least 1 swell event")
-        
+
         # Check metadata
         self.assertIn('confidence', forecast.metadata, "Should have confidence metadata")
-    
+
     def test_extract_buoy_data(self):
         """Test buoy data extraction."""
         result = self.fusion_system._extract_buoy_data(self.sample_fusion_data)
-        
+
         self.assertEqual(len(result), 1, "Should extract 1 buoy data object")
         self.assertEqual(result[0].station_id, "51001", "Station ID should match")
-    
+
     def test_extract_weather_data(self):
         """Test weather data extraction."""
         result = self.fusion_system._extract_weather_data(self.sample_fusion_data)
-        
+
         self.assertEqual(len(result), 1, "Should extract 1 weather data object")
         self.assertEqual(result[0].provider, "nws", "Provider should match")
-    
+
     def test_extract_model_data(self):
         """Test model data extraction."""
         result = self.fusion_system._extract_model_data(self.sample_fusion_data)
-        
+
         self.assertEqual(len(result), 1, "Should extract 1 model data object")
         self.assertEqual(result[0].model_id, "swan", "Model ID should match")
-    
+
     def test_identify_swell_events(self):
         """Test swell event identification."""
         buoy_data = self.fusion_system._extract_buoy_data(self.sample_fusion_data)
         model_data = self.fusion_system._extract_model_data(self.sample_fusion_data)
-        
+
         events = self.fusion_system._identify_swell_events(buoy_data, model_data)
-        
+
         self.assertGreaterEqual(len(events), 2, "Should identify at least 2 swell events")
-        
+
         # Check for both buoy and model events
         sources = [e.source for e in events]
         self.assertIn("buoy", sources, "Should include buoy events")
         self.assertIn("model", sources, "Should include model events")
-    
+
+    def test_integrate_altimetry_metadata(self):
+        forecast = SwellForecast(forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={})
+        entries = [
+            {
+                'file_path': '/tmp/altimetry.png',
+                'description': 'SSH anomaly',
+                'source_url': 'https://example.com/alt.png',
+                'type': 'image'
+            }
+        ]
+
+        self.fusion_system._integrate_altimetry_data(forecast, entries)
+        self.assertIn('altimetry', forecast.metadata)
+        self.assertEqual(forecast.metadata['altimetry'][0]['file_path'], '/tmp/altimetry.png')
+
+    def test_integrate_nearshore_metadata(self):
+        forecast = SwellForecast(forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={})
+        entries = [
+            {
+                'station_id': 'hanalei_225',
+                'station_name': 'Hanalei',
+                'significant_height_m': 2.4,
+                'peak_period_s': 14.8,
+                'file_path': '/tmp/hanalei.json'
+            }
+        ]
+
+        self.fusion_system._integrate_nearshore_data(forecast, entries)
+        self.assertIn('nearshore_buoys', forecast.metadata)
+        self.assertEqual(forecast.metadata['nearshore_buoys'][0]['station_id'], 'hanalei_225')
+
+    def test_integrate_upper_air_metadata(self):
+        forecast = SwellForecast(forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={})
+        entries = [
+            {
+                'analysis_level': '250',
+                'product_type': 'jet_stream',
+                'source_id': 'wpc_250mb'
+            }
+        ]
+
+        self.fusion_system._integrate_upper_air_data(forecast, entries)
+        self.assertIn('upper_air', forecast.metadata)
+        self.assertIn('upper_air_summary', forecast.metadata)
+        self.assertIn('250', forecast.metadata['upper_air_summary'])
+
+    def test_integrate_climatology_metadata(self):
+        forecast = SwellForecast(forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={})
+        entries = [
+            {
+                'source_id': 'snn_nsstat10',
+                'format': 'text',
+                'file_path': '/tmp/nsstat10.txt'
+            }
+        ]
+
+        self.fusion_system._integrate_climatology_data(forecast, entries)
+        self.assertIn('climatology', forecast.metadata)
+        self.assertIn('climatology_summary', forecast.metadata)
+        self.assertIn('snn_nsstat10', forecast.metadata['climatology_summary'])
+
     def test_calculate_shore_impacts(self):
         """Test shore impact calculation."""
         # Create a test forecast
@@ -205,10 +266,10 @@ class TestDataFusionSystem(unittest.TestCase):
             forecast_id="test",
             generated_time=datetime.now().isoformat()
         )
-        
+
         # Add Hawaii locations
         self.fusion_system._add_hawaii_locations(forecast)
-        
+
         # Add a test swell event
         event = SwellEvent(
             event_id="test_event",
@@ -219,43 +280,43 @@ class TestDataFusionSystem(unittest.TestCase):
             hawaii_scale=15.0
         )
         forecast.swell_events.append(event)
-        
+
         # Calculate shore impacts
         self.fusion_system._calculate_shore_impacts(forecast, [self.sample_weather_data])
-        
+
         # Check that North Shore has higher quality than South Shore
         north_shore = next(l for l in forecast.locations if l.shore.lower() == "north shore")
         south_shore = next(l for l in forecast.locations if l.shore.lower() == "south shore")
-        
+
         self.assertIn('overall_quality', north_shore.metadata)
         self.assertIn('overall_quality', south_shore.metadata)
-        
+
         north_quality = north_shore.metadata['overall_quality']
         south_quality = south_shore.metadata['overall_quality']
-        
-        self.assertGreater(north_quality, south_quality, 
+
+        self.assertGreater(north_quality, south_quality,
                           "North Shore should have higher quality for NW swell")
-    
+
     def test_calculate_confidence_scores(self):
         """Test confidence score calculation."""
         forecast = SwellForecast(
             forecast_id="test",
             generated_time=datetime.now().isoformat()
         )
-        
+
         buoy_data = self.fusion_system._extract_buoy_data(self.sample_fusion_data)
         weather_data = self.fusion_system._extract_weather_data(self.sample_fusion_data)
         model_data = self.fusion_system._extract_model_data(self.sample_fusion_data)
-        
+
         warnings, metadata = self.fusion_system._calculate_confidence_scores(
             forecast, buoy_data, weather_data, model_data
         )
-        
+
         self.assertIn('confidence', metadata, "Should have confidence metadata")
         self.assertIn('overall_score', metadata['confidence'], "Should have overall score")
-        self.assertIsInstance(metadata['confidence']['overall_score'], float, 
+        self.assertIsInstance(metadata['confidence']['overall_score'], float,
                              "Overall score should be a float")
-    
+
     def test_convert_to_hawaii_scale(self):
         """Test Hawaiian scale conversion."""
         # Test various wave heights
@@ -264,12 +325,12 @@ class TestDataFusionSystem(unittest.TestCase):
             (2.0, 13.12),  # 2m ≈ 13.12ft face
             (3.0, 19.68)   # 3m ≈ 19.68ft face
         ]
-        
+
         for meters, expected_feet in test_cases:
             result = self.fusion_system._convert_to_hawaii_scale(meters)
-            self.assertAlmostEqual(result, expected_feet, places=1, 
+            self.assertAlmostEqual(result, expected_feet, places=1,
                 msg=f"{meters}m should convert to ~{expected_feet}ft in Hawaiian scale")
-        
+
         # Test None input
         self.assertIsNone(self.fusion_system._convert_to_hawaii_scale(None),
                          "None input should return None")

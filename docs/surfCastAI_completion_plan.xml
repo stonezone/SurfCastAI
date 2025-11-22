@@ -17,11 +17,11 @@
     <system_overview>
       Hawaii surf forecasting system that collects marine data from 100+ sources,
       processes it intelligently, and generates AI-powered forecasts using OpenAI models.
-      
+
       THEORY: AI can ingest and process more data than humans to generate superior forecasts.
       PERSONAL USE: For personal surf forecasting, not commercial deployment.
     </system_overview>
-    
+
     <current_state>
       <completed>
         <item>Phase 1: Validation system with SQLite database ✅</item>
@@ -30,13 +30,13 @@
         <item>Professional launcher interface ✅</item>
         <item>Comprehensive documentation ✅</item>
       </completed>
-      
+
       <in_progress>
         <item>Phase 2: Intelligent processing pipeline (50%)</item>
         <item>Processing modules exist but unconnected</item>
         <item>Token optimization not yet validated</item>
       </in_progress>
-      
+
       <blockers>
         <blocker priority="CRITICAL">System uses GPT-4.1, needs GPT-5 upgrade</blocker>
         <blocker priority="HIGH">Processing pipeline incomplete - modules not orchestrated</blocker>
@@ -44,7 +44,7 @@
         <blocker priority="MEDIUM">Missing comprehensive test coverage</blocker>
       </blockers>
     </current_state>
-    
+
     <architecture>
       <current_flow>
         102 raw data files → GPT-4.1 multi-agent → Forecast
@@ -52,7 +52,7 @@
         Time: 120-180 seconds
         Tokens: ~150,000/forecast
       </current_flow>
-      
+
       <target_flow>
         102 raw files → Intelligent Processing → 10-15 priority items → GPT-5 → Forecast
         Target Cost: &lt;$0.15/forecast (80% reduction)
@@ -60,7 +60,7 @@
         Target Tokens: &lt;45,000/forecast (70% reduction)
       </target_flow>
     </architecture>
-    
+
     <technology_versions>
       <openai>
         <current_model>gpt-4.1</current_model>
@@ -79,7 +79,7 @@
           <feature>custom tools with plaintext (not just JSON)</feature>
         </features>
       </openai>
-      
+
       <python>3.9+</python>
       <dependencies>requirements.txt + numpy, scipy, markdown, weasyprint</dependencies>
     </technology_versions>
@@ -87,7 +87,7 @@
 
   <!-- Structured Implementation Plan -->
   <implementation_plan>
-    
+
     <!-- PHASE 1: GPT-5 Migration (CRITICAL) -->
     <phase id="1" priority="CRITICAL">
       <name>GPT-5 Model Migration</name>
@@ -95,7 +95,7 @@
         GPT-5 offers superior reasoning, larger context windows, and better cost efficiency.
         Must migrate before Phase 2 completion to take advantage of new capabilities.
       </rationale>
-      
+
       <tasks>
         <task id="1.1" priority="CRITICAL">
           <title>Update config.ini with GPT-5 model specifications</title>
@@ -115,7 +115,7 @@
             <test>Model selection logic works correctly</test>
           </validation>
         </task>
-        
+
         <task id="1.2" priority="CRITICAL">
           <title>Update analysis/pacific_forecast_analyzer.py for GPT-5</title>
           <actions>
@@ -136,7 +136,7 @@
             <test>Token usage measured and logged</test>
           </validation>
         </task>
-        
+
         <task id="1.3" priority="HIGH">
           <title>Update all agent modules for GPT-5</title>
           <actions>
@@ -155,7 +155,7 @@
             <test>No hardcoded gpt-4.1 references remain</test>
           </validation>
         </task>
-        
+
         <task id="1.4" priority="MEDIUM">
           <title>Update prompts.json for GPT-5 capabilities</title>
           <actions>
@@ -172,7 +172,7 @@
             <test>Quality comparison: GPT-5 vs GPT-4.1 forecasts</test>
           </validation>
         </task>
-        
+
         <task id="1.5" priority="MEDIUM">
           <title>Update documentation with GPT-5 information</title>
           <actions>
@@ -189,7 +189,7 @@
           </files>
         </task>
       </tasks>
-      
+
       <success_criteria>
         <criterion>All code uses GPT-5 models (gpt-5, gpt-5-mini, gpt-5-nano)</criterion>
         <criterion>No gpt-4.1 references remain in codebase</criterion>
@@ -207,7 +207,7 @@
         Intelligent processing extracts key insights, reduces to 10-15 priority items,
         dramatically reducing cost (80%) and time (67%).
       </rationale>
-      
+
       <tasks>
         <task id="2.1" priority="CRITICAL">
           <title>Complete processing/pipeline.py orchestrator</title>
@@ -241,7 +241,7 @@
             <test>Metrics logged to validation database</test>
           </validation>
         </task>
-        
+
         <task id="2.2" priority="HIGH">
           <title>Fix pattern_integrator.py module connections</title>
           <actions>
@@ -269,7 +269,7 @@
             <test>Pattern recognition runs without errors</test>
           </validation>
         </task>
-        
+
         <task id="2.3" priority="HIGH">
           <title>Integrate processing pipeline with collector.py</title>
           <actions>
@@ -289,7 +289,7 @@
             <test>Pipeline can be disabled via config</test>
           </validation>
         </task>
-        
+
         <task id="2.4" priority="HIGH">
           <title>Update pacific_forecast_analyzer.py to use processed data</title>
           <actions>
@@ -309,7 +309,7 @@
             <test>Forecast quality maintained or improved</test>
           </validation>
         </task>
-        
+
         <task id="2.5" priority="MEDIUM">
           <title>Implement climatology database integration</title>
           <actions>
@@ -330,7 +330,7 @@
             <test>Seasonal trends integration functional</test>
           </validation>
         </task>
-        
+
         <task id="2.6" priority="LOW">
           <title>Implement chart OCR capabilities (optional enhancement)</title>
           <actions>
@@ -350,7 +350,7 @@
           </validation>
         </task>
       </tasks>
-      
+
       <success_criteria>
         <criterion>Processing pipeline fully operational</criterion>
         <criterion>Token reduction: 70%+ vs raw data</criterion>
@@ -369,7 +369,7 @@
         Ensure intelligent pipeline and GPT-5 migration maintain or improve forecast accuracy.
         Measure cost and performance improvements quantitatively.
       </rationale>
-      
+
       <tasks>
         <task id="3.1" priority="CRITICAL">
           <title>Create comprehensive test suite for processing pipeline</title>
@@ -392,7 +392,7 @@
             <test>Code coverage 80%+ for processing modules</test>
           </validation>
         </task>
-        
+
         <task id="3.2" priority="CRITICAL">
           <title>Validate GPT-5 forecast quality vs GPT-4.1</title>
           <actions>
@@ -411,7 +411,7 @@
             <test>Results documented with quantitative metrics</test>
           </validation>
         </task>
-        
+
         <task id="3.3" priority="HIGH">
           <title>Measure cost and performance improvements</title>
           <actions>
@@ -442,7 +442,7 @@
             <test>Forecast quality maintained or improved</test>
           </validation>
         </task>
-        
+
         <task id="3.4" priority="MEDIUM">
           <title>Test GPT-5 nano vs mini vs full for different scenarios</title>
           <actions>
@@ -461,7 +461,7 @@
             <test>Cost-quality tradeoffs quantified</test>
           </validation>
         </task>
-        
+
         <task id="3.5" priority="MEDIUM">
           <title>Integration testing with real data bundles</title>
           <actions>
@@ -485,7 +485,7 @@
           </validation>
         </task>
       </tasks>
-      
+
       <success_criteria>
         <criterion>All tests passing</criterion>
         <criterion>Code coverage 80%+ for critical modules</criterion>
@@ -507,7 +507,7 @@
         Ensure project is well-documented for future development and maintenance.
         Update all documentation to reflect GPT-5 migration and Phase 2 completion.
       </rationale>
-      
+
       <tasks>
         <task id="4.1" priority="HIGH">
           <title>Update README.md comprehensively</title>
@@ -523,7 +523,7 @@
             <file action="modify">README.md</file>
           </files>
         </task>
-        
+
         <task id="4.2" priority="HIGH">
           <title>Update CLAUDE.md project status</title>
           <actions>
@@ -536,7 +536,7 @@
             <file action="modify">CLAUDE.md</file>
           </files>
         </task>
-        
+
         <task id="4.3" priority="MEDIUM">
           <title>Create comprehensive Phase 2 documentation</title>
           <actions>
@@ -555,7 +555,7 @@
             <file action="create">docs/PROCESSING_ARCHITECTURE.md</file>
           </files>
         </task>
-        
+
         <task id="4.4" priority="MEDIUM">
           <title>Create API documentation for processing modules</title>
           <actions>
@@ -569,7 +569,7 @@
             <file action="create">docs/PROCESSING_API.md</file>
           </files>
         </task>
-        
+
         <task id="4.5" priority="LOW">
           <title>Update launcher and CLI documentation</title>
           <actions>
@@ -582,7 +582,7 @@
             <file action="modify">LAUNCHER_GUIDE.md</file>
           </files>
         </task>
-        
+
         <task id="4.6" priority="LOW">
           <title>Create CHANGELOG.md</title>
           <actions>
@@ -597,7 +597,7 @@
           </files>
         </task>
       </tasks>
-      
+
       <success_criteria>
         <criterion>README.md updated with all Phase 2 changes</criterion>
         <criterion>CLAUDE.md reflects current project status</criterion>
@@ -613,7 +613,7 @@
       <rationale>
         Fine-tune performance, add monitoring, prepare for regular production use.
       </rationale>
-      
+
       <tasks>
         <task id="5.1" priority="MEDIUM">
           <title>Implement intelligent model routing</title>
@@ -637,7 +637,7 @@
             <test>Cost optimization achieved without quality loss</test>
           </validation>
         </task>
-        
+
         <task id="5.2" priority="MEDIUM">
           <title>Add performance monitoring and metrics</title>
           <actions>
@@ -662,7 +662,7 @@
             <test>Reports generated successfully</test>
           </validation>
         </task>
-        
+
         <task id="5.3" priority="LOW">
           <title>Optimize prompt engineering for GPT-5</title>
           <actions>
@@ -682,7 +682,7 @@
             <test>Token usage reduced</test>
           </validation>
         </task>
-        
+
         <task id="5.4" priority="LOW">
           <title>Add caching and optimization for repeated requests</title>
           <actions>
@@ -700,7 +700,7 @@
             <test>Cache invalidation works correctly</test>
           </validation>
         </task>
-        
+
         <task id="5.5" priority="LOW">
           <title>Production deployment documentation</title>
           <actions>
@@ -715,7 +715,7 @@
           </files>
         </task>
       </tasks>
-      
+
       <success_criteria>
         <criterion>Intelligent model routing implemented and tested</criterion>
         <criterion>Performance monitoring and metrics functional</criterion>
@@ -734,7 +734,7 @@
       <target_coverage>80%+ for critical modules</target_coverage>
       <frameworks>pytest</frameworks>
     </unit_tests>
-    
+
     <integration_tests>
       <description>Test full pipeline: collect → process → forecast</description>
       <scenarios>
@@ -744,7 +744,7 @@
         <scenario>Storm conditions (high complexity)</scenario>
       </scenarios>
     </integration_tests>
-    
+
     <validation_tests>
       <description>Validate forecast accuracy against real observations</description>
       <metrics>
@@ -755,7 +755,7 @@
         <metric>Processing Time - target &lt;60 seconds</metric>
       </metrics>
     </validation_tests>
-    
+
     <regression_tests>
       <description>Ensure changes don't degrade existing functionality</description>
       <frequency>Before each phase completion</frequency>
@@ -770,37 +770,37 @@
         <current>0% (raw data)</current>
         <measurement>Compare tokens: processed vs raw</measurement>
       </metric>
-      
+
       <metric name="cost_reduction">
         <target>80%+</target>
         <current>$0.50-0.75 per forecast</current>
         <measurement>Track cost per forecast in validation DB</measurement>
       </metric>
-      
+
       <metric name="processing_time">
         <target>&lt;60 seconds total</target>
         <current>120-180 seconds</current>
         <measurement>Measure end-to-end forecast generation time</measurement>
       </metric>
-      
+
       <metric name="forecast_accuracy">
         <target>Maintain or improve MAE ≤1.5 ft</target>
         <current>Baseline from Phase 1</current>
         <measurement>Validation database - compare predictions vs actuals</measurement>
       </metric>
     </technical>
-    
+
     <quality>
       <metric name="code_coverage">
         <target>80%+ for critical modules</target>
         <measurement>pytest --cov</measurement>
       </metric>
-      
+
       <metric name="documentation_completeness">
         <target>All modules documented with API docs</target>
         <measurement>Manual review</measurement>
       </metric>
-      
+
       <metric name="test_passing">
         <target>100% tests passing</target>
         <measurement>pytest exit code</measurement>
@@ -820,7 +820,7 @@
         <file>requirements.txt - Python dependencies</file>
         <file>prompts.json - AI prompt templates</file>
       </critical_files>
-      
+
       <directories>
         <dir>agents/ - Data collection agents (buoy, model, chart, api, region)</dir>
         <dir>processing/ - Phase 2 processing modules (PARTIALLY IMPLEMENTED)</dir>
@@ -843,28 +843,28 @@
       <solution>Search entire codebase for "gpt-4" and replace with configurable model selection</solution>
       <command>grep -r "gpt-4" --include="*.py" .</command>
     </pitfall>
-    
+
     <pitfall category="Token Counting">
       <issue>Not measuring token usage accurately</issue>
       <solution>Use OpenAI's tiktoken library for accurate counting, log to validation DB</solution>
       <code>import tiktoken; enc = tiktoken.encoding_for_model("gpt-5"); tokens = len(enc.encode(text))</code>
     </pitfall>
-    
+
     <pitfall category="Cost Tracking">
       <issue>Not tracking actual API costs</issue>
       <solution>Parse API response usage data, calculate cost using model pricing, log to DB</solution>
     </pitfall>
-    
+
     <pitfall category="Processing Pipeline">
       <issue>Modules not connecting properly</issue>
       <solution>Use structured data contracts (dataclasses), not loose dictionaries</solution>
     </pitfall>
-    
+
     <pitfall category="Testing">
       <issue>Testing with stale or invalid data</issue>
       <solution>Use recent data bundles from pacific_data/, create test fixtures</solution>
     </pitfall>
-    
+
     <pitfall category="Configuration">
       <issue>Hardcoded values instead of config-driven</issue>
       <solution>Always use config.ini for parameters, make everything configurable</solution>
@@ -878,24 +878,24 @@
       <command>./surf accuracy</command>
       <command>cat CLAUDE.md | head -50</command>
     </section>
-    
+
     <section name="Testing">
       <command>pytest tests/ -v</command>
       <command>pytest tests/test_processing_pipeline.py -v</command>
       <command>pytest --cov=processing --cov-report=html</command>
     </section>
-    
+
     <section name="Data Collection and Forecasting">
       <command>python collector.py</command>
       <command>python analysis/pacific_forecast_analyzer.py</command>
       <command>python analysis/pacific_forecast_analyzer.py --bundle-id BUNDLE_ID</command>
     </section>
-    
+
     <section name="Validation">
       <command>python run_validation.py</command>
       <command>./surf accuracy</command>
     </section>
-    
+
     <section name="Code Quality">
       <command>grep -r "gpt-4" --include="*.py" .</command>
       <command>pylint processing/*.py</command>
@@ -912,7 +912,7 @@
       <step order="4">Phase 4: Documentation and Finalization</step>
       <step order="5">Phase 5: Optimization and Production Readiness</step>
     </priority_order>
-    
+
     <approach>
       <guideline>Work incrementally - complete each task before moving to next</guideline>
       <guideline>Test after each significant change</guideline>
@@ -921,7 +921,7 @@
       <guideline>Follow user's architectural principles: contracts, DI, stateless boundaries</guideline>
       <guideline>Version verification: Confirm GPT-5 model names via web search if uncertain</guideline>
     </approach>
-    
+
     <safety_checks>
       <check>Never modify config.ini (gitignored) - only config.example.ini</check>
       <check>Never commit API keys or sensitive data</check>
@@ -929,7 +929,7 @@
       <check>Validate against Phase 1 system before declaring success</check>
       <check>Maintain backward compatibility with existing data bundles</check>
     </safety_checks>
-    
+
     <validation_requirements>
       <requirement>All tests must pass before phase completion</requirement>
       <requirement>Forecast accuracy must maintain or improve vs baseline</requirement>
@@ -946,13 +946,13 @@
       This system is for PERSONAL USE ONLY - not commercial deployment.
       Focus on accuracy and learning, not business scaling.
     </note>
-    
+
     <note type="gpt5_context">
       GPT-5 was released August 2025 with three variants:
       - gpt-5: Full reasoning model ($1.25/$10 per 1M tokens)
       - gpt-5-mini: Balanced model ($0.25/$2 per 1M tokens)
       - gpt-5-nano: Ultra-fast model ($0.05/$0.40 per 1M tokens)
-      
+
       Key features:
       - 256k-400k context window (vs 128k in GPT-4)
       - 45% fewer hallucinations
@@ -960,13 +960,13 @@
       - verbosity parameter (low/medium/high)
       - 90% cache discount for repeated inputs
     </note>
-    
+
     <note type="theory">
       PROJECT THEORY: AI can ingest more data than humans and process it all
       to generate superior forecasts. The key is INTELLIGENT PROCESSING before
       AI analysis - extract insights, build consensus, prioritize signal over noise.
     </note>
-    
+
     <note type="validation_driven">
       Every change MUST be measured against the Phase 1 validation system.
       No improvement is real unless quantified. No optimization is successful

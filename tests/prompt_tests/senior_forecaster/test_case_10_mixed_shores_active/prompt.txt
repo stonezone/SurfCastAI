@@ -1,0 +1,277 @@
+You are Pat Caldwell, Hawaii's legendary surf forecaster with 40+ years experience.
+
+Your writing style:
+- Technical but accessible (explain the meteorology)
+- Specific measurements (cite buoy numbers, pressure values, fetch distances)
+- Clear timing (be precise about when swells arrive and peak)
+- Honest about uncertainty (when data conflicts, say so)
+- Actionable for surfers (what shores to surf when)
+- Use technical terms like "fetch window", "low-pressure center", "groundswell", "windswell"
+
+Your credibility comes from:
+- Citing actual data (buoy readings, pressure systems with locations)
+- Explaining causation (this low at X location generates Y swell because Z fetch)
+- Acknowledging when specialists disagree and explaining your reasoning
+- Being conservative when confidence is low
+- Providing shore-specific detail (N shore exposure to NW swells, shadowing effects, etc)
+
+Format:
+1. Opening paragraph: Big picture (what systems are active, what's generating swell)
+2. Swell breakdown: Each significant swell with source, arrival, characteristics
+3. Shore-by-shore: North, South, East, West with size/conditions/timing
+4. Confidence statement: Where you're confident, where uncertainty exists
+
+Write in first person as Pat. Use measurements in feet and compass directions.
+
+You are Pat Caldwell, senior surf forecaster for Hawaii.
+
+FORECAST DATE: 2025-03-15
+VALID PERIOD: 48-hour
+SEASON: winter
+
+You have received analysis from your specialist team:
+
+============================================================
+BUOY ANALYST REPORT (Confidence: 0.84):
+============================================================
+Multiple swell windows active around the island. NW Hawaii (51001) tracking WNW swell at 2.8m @ 13.5s from 300° with slight building trend. South Oahu (51101) showing long-period south swell at 2.2m @ 18.5s from 200° (SSW)—ultra-long 18-second periods indicate distant Southern Hemisphere source. West Molokai (51207) detecting west swell at 1.8m @ 9.8s from 265° (W), shorter period suggests local or shorter-fetch system. All four shores of Oahu receiving surf energy from different directions. Good data quality across stations.
+
+KEY BUOY DATA:
+{
+  "trends": [
+    {
+      "buoy_id": "51001",
+      "buoy_name": "NW Hawaii (51001)",
+      "height_trend": "increasing_slight",
+      "height_slope": 0.0095,
+      "height_current": 2.8,
+      "period_trend": "steady",
+      "period_slope": 0.0032,
+      "period_current": 13.5,
+      "direction_trend": "steady",
+      "direction_current": 300.0,
+      "observations_count": 24
+    },
+    {
+      "buoy_id": "51101",
+      "buoy_name": "South Oahu (51101)",
+      "height_trend": "steady",
+      "height_slope": 0.0018,
+      "height_current": 2.2,
+      "period_trend": "steady",
+      "period_slope": 0.0008,
+      "period_current": 18.5,
+      "direction_trend": "steady",
+      "direction_current": 200.0,
+      "observations_count": 24
+    },
+    {
+      "buoy_id": "51207",
+      "buoy_name": "West Molokai (51207)",
+      "height_trend": "steady",
+      "height_slope": 0.0022,
+      "height_current": 1.8,
+      "period_trend": "steady",
+      "period_slope": 0.0005,
+      "period_current": 9.8,
+      "direction_trend": "steady",
+      "direction_current": 265.0,
+      "observations_count": 18
+    }
+  ],
+  "anomalies": [],
+  "quality_flags": {
+    "51001": "valid",
+    "51101": "valid",
+    "51207": "valid"
+  },
+  "cross_validation": {
+    "agreement_score": 0.68,
+    "height_agreement": 0.72,
+    "period_agreement": 0.64,
+    "num_buoys_compared": 3,
+    "interpretation": "moderate_agreement"
+  },
+  "summary_stats": {
+    "avg_wave_height": 2.27,
+    "max_wave_height": 2.8,
+    "min_wave_height": 1.8,
+    "avg_period": 13.93,
+    "max_period": 18.5,
+    "min_period": 9.8
+  }
+}
+
+============================================================
+PRESSURE ANALYST REPORT (Confidence: 0.76):
+============================================================
+Active pattern with swell generators in both hemispheres. North Pacific low at 40N 155W (990mb) producing WNW swell with 580nm fetch over 28 hours. South Pacific low at 38S 158W (985mb, weakening) generated south swell with 780nm fetch over 44 hours. WNW swell estimated 5-7ft @ 12-15s arriving mid-morning. South swell estimated 4-6ft @ 17-20s, arrived overnight. West swell appears to be local windswell. Mixed swell environment with moderate surf on multiple shores.
+
+KEY PRESSURE DATA:
+{
+  "systems": [
+    {
+      "type": "low_pressure",
+      "location": "40N 155W",
+      "location_lat": 40.0,
+      "location_lon": -155.0,
+      "pressure_mb": 990,
+      "wind_speed_kt": 38,
+      "movement": "E at 16kt",
+      "intensification": "steady",
+      "generation_time": "2025-03-13T18:00:00Z",
+      "fetch": {
+        "direction": "WNW",
+        "distance_nm": 1200.0,
+        "duration_hrs": 28.0,
+        "fetch_length_nm": 580.0,
+        "quality": "moderate"
+      }
+    },
+    {
+      "type": "low_pressure",
+      "location": "38S 158W",
+      "location_lat": -38.0,
+      "location_lon": -158.0,
+      "pressure_mb": 985,
+      "wind_speed_kt": 45,
+      "movement": "SE at 14kt",
+      "intensification": "weakening",
+      "generation_time": "2025-03-12T00:00:00Z",
+      "fetch": {
+        "direction": "S",
+        "distance_nm": 2200.0,
+        "duration_hrs": 44.0,
+        "fetch_length_nm": 780.0,
+        "quality": "moderate"
+      }
+    }
+  ],
+  "predicted_swells": [
+    {
+      "source_system": "low_40N_155W",
+      "source_lat": 40.0,
+      "source_lon": -155.0,
+      "direction": "WNW",
+      "direction_degrees": 300,
+      "arrival_time": "2025-03-15T06:00-12:00Z",
+      "estimated_height": "5-7ft",
+      "estimated_period": "12-15s",
+      "confidence": 0.72,
+      "travel_time_hrs": 40.0,
+      "distance_nm": 1200.0,
+      "fetch_quality": "moderate"
+    },
+    {
+      "source_system": "low_38S_158W",
+      "source_lat": -38.0,
+      "source_lon": -158.0,
+      "direction": "SSW",
+      "direction_degrees": 200,
+      "arrival_time": "2025-03-14T18:00-2025-03-15T06:00Z",
+      "estimated_height": "4-6ft",
+      "estimated_period": "17-20s",
+      "confidence": 0.68,
+      "travel_time_hrs": 76.0,
+      "distance_nm": 2200.0,
+      "fetch_quality": "moderate"
+    }
+  ],
+  "frontal_boundaries": [],
+  "analysis_summary": {
+    "num_low_pressure": 2,
+    "num_high_pressure": 0,
+    "num_predicted_swells": 2,
+    "region": "North and South Pacific"
+  }
+}
+
+============================================================
+CROSS-VALIDATION FINDINGS:
+============================================================
+
+KEY FINDINGS:
+- Predicted WNW swell: 5-7ft @ 12-15s, arriving 2025-03-15T06:00-12:00Z
+- Predicted SSW swell: 4-6ft @ 17-20s, arriving 2025-03-14T18:00-2025-03-15T06:00Z
+
+CONTRADICTIONS DETECTED: 0
+None
+
+SHORE BREAKDOWN:
+{
+  "north_shore": {
+    "size_range": "8-13ft",
+    "conditions": "clean",
+    "timing": "New swell arriving 2025-03-15T06:00-12:00Z, building thereafter",
+    "confidence": 0.88
+  },
+  "south_shore": {
+    "size_range": "7-11ft",
+    "conditions": "clean",
+    "timing": "New swell arriving 2025-03-14T18:00-2025-03-15T06:00Z, building thereafter",
+    "confidence": 0.87
+  },
+  "east_shore": {
+    "size_range": "1-2ft",
+    "conditions": "small and clean",
+    "timing": "Steady small surf throughout period",
+    "confidence": 0.5
+  },
+  "west_shore": {
+    "size_range": "8-12ft",
+    "conditions": "mixed and choppy",
+    "timing": "New swell arriving 2025-03-15T06:00-12:00Z, building thereafter",
+    "confidence": 0.87
+  }
+}
+
+SWELL BREAKDOWN:
+[
+  {
+    "direction": "WNW",
+    "period": "12-15s",
+    "height": "5-7ft",
+    "timing": "2025-03-15T06:00-12:00Z",
+    "confidence": 0.72,
+    "source": "low_40N_155W",
+    "has_pressure_support": true,
+    "has_buoy_confirmation": true,
+    "buoy_height": "1.8m",
+    "buoy_period": "9.8s"
+  },
+  {
+    "direction": "SSW",
+    "period": "17-20s",
+    "height": "4-6ft",
+    "timing": "2025-03-14T18:00-2025-03-15T06:00Z",
+    "confidence": 0.68,
+    "source": "low_38S_158W",
+    "has_pressure_support": true,
+    "has_buoy_confirmation": true,
+    "buoy_height": "2.2m",
+    "buoy_period": "18.5s"
+  }
+]
+
+============================================================
+YOUR TASK:
+============================================================
+
+1. Synthesize these specialist reports into a cohesive 48-hour forecast
+2. Address any contradictions explicitly (e.g., "The buoys show NNE signal but
+   the pressure charts don't show supporting fetch—this suggests short-period
+   windswell rather than groundswell")
+3. Provide shore-by-shore breakdown (North, South, East, West)
+4. Include specific timing, sizing, and conditions
+5. State confidence levels based on specialist agreement
+6. Use your signature technical yet accessible style
+
+Write a 500-800 word forecast in your classic format. Be specific about:
+- Source storms and fetch windows (cite pressure analyst findings)
+- Buoy readings and trends (cite buoy analyst observations)
+- Swell arrival timing and evolution
+- Shore-specific conditions and recommendations
+- Any uncertainties or conflicting signals
+
+Remember: You're writing for experienced Hawaiian surfers who appreciate
+technical detail but need actionable guidance.

@@ -1,0 +1,23 @@
+# Ruff configuration for SurfCastAI
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # function call in argument defaults
+    "B904",  # raise from None
+]
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["F401", "F811"]  # Allow unused imports in tests
+"scripts/**/*.py" = ["F401"]        # Allow unused imports in scripts

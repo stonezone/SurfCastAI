@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawaii Surf Forecast</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: #f5f7fa;
+        }
+        h1, h2, h3 {
+            color: #0066cc;
+        }
+        h1 {
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .generated-date {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .forecast-section {
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .forecast-section h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #e5eaf1;
+            padding-bottom: 12px;
+        }
+        .shore-specific {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .shore-forecast {
+            flex: 1;
+            min-width: 300px;
+        }
+        .confidence-meter {
+            background-color: #e8ecf5;
+            height: 18px;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .confidence-level {
+            height: 100%;
+            background-color: #0066cc;
+        }
+        .confidence-factors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .factor {
+            flex: 1;
+            min-width: 160px;
+            background-color: #f0f4ff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .chart-card {
+            background-color: #ffffff;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .chart-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .history-card ul {
+            padding-left: 18px;
+        }
+        .history-card ul li {
+            margin-bottom: 6px;
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+            }
+            .shore-specific {
+                flex-direction: column;
+            }
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #d7dce5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hawaii Surf Forecast</h1>
+    <div class="generated-date">Generated on October 16, 2025 at 09:21 </div>
+    <div class="forecast-section">
+        <h2>Main Forecast</h2>
+        <p>| SwellCaldWell Outlook | |
+|---|---|
+| Day/Window | Direction (deg/cardinal) | Period (s) | H1/3 (ft) | H1/10 est (ft) | Trend | Notes |
+| Thu 10/16 (day) | NNW (330–345) | 11–13 | 1–2 | 3–4 faces | steady small | Glancing backside Gulf leak; verify on 51101/51001 and nearshore 51201. Trades E 10–20 kt. |
+| Fri 10/17 (late) → Sat 10/18 (day) | NW–NNW (305–325) | 12–14 | 2–3 Fri PM rising <strong>3–5 S</strong>at | 4–6 Fri PM, <strong>6–8 S</strong>at faces | up | Aleutian mid-period pulse per physics (<strong>5 ft</strong> @ 13 s) fills Sat; W-N spots benefit first. Watch 51001/51101 → 51003 → 51201. |
+| Fri 10/17 (late) → Sat 10/18 (day) | S–SSW (190–205) | 16–18 forerunners then 14–16 | 1–2 Fri PM rising <strong>2–3 S</strong>at (magnet 3–4) | 3–4 Fri PM, <strong>4–5 S</strong>at faces | up | SPAC gales per sat; first lines late Fri/Sat. Check 51002 then Barbers 51211. Shadowing varies by spot. |
+| Thu 10/16 → Sat 10/18 | ENE–E (060–090) | 7–9 | 3–4 (Windward) | 5 faces | steady | Ridge-driven trades maintain short-period windswell. Track 51004/51002 and 51202 (Mokapu). |
+| Sat 10/18 (late into Sun 10/19) | NW–N (310–335) | 16–18 | 4–6 late Sat night into Sun | 8–10 faces | building beyond window | Next pulse from Gulf (physics: <strong>5 ft</strong> @ 18 s Sun pre-dawn). More in Outlook. |</p>
+<h3>Summary</h3>
+<ul>
+<li>Dominant theme: new mid-period NW–NNW builds late Fri, peaks Sat for Oahu’s North Shore in the fun/moderate zone, with reinforcing, longer-period NW due very late Sat night into Sun.</li>
+<li>South Shore: overlapping S–SSW pulses creep in late Fri/Sat with modest surf at magnets.</li>
+<li>Winds: moderate E–ENE trades around 10–20 kt hold; typical windward showers. Overall forecast confidence: 0.68/1.00.</li>
+</ul>
+<h3>Details</h3>
+<ul>
+<li>North Pacific/North Shores</li>
+<li>Synoptic: A 1008 mb gale near 36N 165W along a front (about 1000 nm NNW) plus a broader 998 mb low near 45N 170W are the primary NW–NNW producers. A deeper 977 mb Gulf low is aimed mainly at N America but leaks longer-period energy toward HI.</li>
+<li>Timing/energy: Physics-based arrivals favor a mid-period NW component <strong>5 ft</strong> @ 13 s from the Aleutian sector Saturday late morning to afternoon, with a longer-period reinforcer <strong>5 ft</strong> @ 18 s from the Gulf early Sunday. Satellite shows no clean, long-line NW this morning, consistent with a gradual ramp, not an abrupt jump.</li>
+<li>Buoys: Watch NW buoys 51101 and 51001 for <strong>12–14 s</strong> energy upticks today into Friday, then 51003 west of Kauai prior to Oahu nearshore 51201 (Waimea) spectral confirmation. The Swell Matrix lists <strong>12–15 s</strong> NW–NNW peaks this morning, but given chart/sat context, those raw magnitudes likely overstate nearshore impact; we weight synoptic/physics more heavily.</li>
+<li>South Pacific/South Shores</li>
+<li>Synoptic: Two SPAC gales (primary near 45S 145W, secondary near <strong>40–45S</strong> 170W) present multi-day fetches. Great-circle windows favor 170–205° into Hawaii, with the eastern system sending the first forerunners.</li>
+<li>Timing/energy: Long-period forerunners <strong>18–20 s</strong> could trickle late Fri, with more actionable <strong>14–16 s</strong> energy Saturday into Sunday. Expect a modest event: H1/3 <strong>2–3 ft</strong> Saturday (magnets 3–4), H1/10 sets <strong>4–5 ft</strong>. Verify first lines on 51002, then shoreline on Barbers 51211.</li>
+<li>Trades/East</li>
+<li>High pressure 1030 mb near 35N 140W sustains the trade belt. Short-period ENE–E windswell remains steady at H1/3 <strong>3–4 ft</strong> Windward; H1/10 sets near <strong>5 ft</strong> at magnets. Track 51004/51002 and nearshore 51202 (Mokapu) for steep <strong>7–9 s</strong> energy.</li>
+<li>Weather/Wind</li>
+<li>METAR PHNL 0853 HST: 080° at 14 kt; clear. Expect typical morning land-breeze clean-ups leeward, trades on by late morning. No Kona signals. Light windward showers.</li>
+</ul>
+<h3>North Shore</h3>
+<ul>
+<li>Thu 10/16: H1/3 <strong>1–2 ft</strong>, H1/10 sets <strong>3–4 ft</strong> faces at focal reefs. Mostly knee–waist with occasional chest at magnets. E–ENE trades 10–20 kt add some texture; early best. Confidence: medium.</li>
+<li>Fri 10/17: Slow build. AM similar to Thu; PM bumps to H1/3 <strong>2–3 ft</strong> with H1/10 <strong>4–6 ft</strong> faces at the most exposed 305–325° windows. Trades similar; morning glassiest. Confidence: medium; watch 51101/51001 and 51201 for the turn.</li>
+<li>Sat 10/18: Main mid-period NW–NNW fills. H1/3 <strong>3–5 ft</strong>, H1/10 sets <strong>6–8 ft</strong> faces, largest at reefs open to 305–325°. Periods <strong>12–14 s</strong> dominate; lulls between pulses. Afternoon sea-breeze/trade mix can add bump; dawn patrol favored. Confidence: medium.</li>
+</ul>
+<h3>South Shore</h3>
+<ul>
+<li>Thu 10/16: Background mix. H1/3 <strong>1–2 ft</strong>, stray H1/10 sets to <strong>3 ft</strong> faces at 190–200° magnets. Light AM, onshore texture PM. Confidence: medium-high.</li>
+<li>Fri 10/17: Forerunners late. Daytime similar to Thu; late-day long-period scouts possible. H1/3 <strong>1–2 ft</strong>; late H1/10 sets to <strong>3–4 ft</strong> faces at top south magnets. Confidence: medium; confirm on 51002, then 51211 overnight.</li>
+<li>Sat 10/18: Modest S–SSW event. H1/3 <strong>2–3 ft</strong> area-wide; best 200–205° exposures <strong>3–4 ft</strong> with H1/10 sets <strong>4–5 ft</strong> faces. Long intervals = patience. Trades side/offshore early for Ala Moana–Waikiki; variable bumps PM. Confidence: medium.</li>
+</ul>
+<h3>East Shore</h3>
+<ul>
+<li>Thu 10/16 through Sat 10/18: Consistent trade-sea. H1/3 <strong>3–4 ft</strong>; H1/10 sets near <strong>5 ft</strong> faces at Windward magnets. Short <strong>7–9 s</strong> periods; choppy except morning lulls. Confidence: high.</li>
+</ul>
+<h3>West Shore</h3>
+<ul>
+<li>Wrap from both sides. Thu small: H1/3 <strong>1–2 ft</strong>. Fri PM into Sat: combo wrap gives H1/3 <strong>2–3 ft</strong>, H1/10 sets <strong>4–5 ft</strong> faces at southerly-open exposures and <strong>3–4 ft</strong> at NW-open pockets. Trades add midday texture. Confidence: medium.</li>
+</ul>
+<h3>Outlook</h3>
+<ul>
+<li>Sun 10/19: Reinforcing longer-period NW (physics: <strong>5 ft</strong> @ 18 s) arrives pre-dawn, building through the morning. North Shore H1/3 <strong>4–6 ft</strong> with H1/10 sets <strong>8–10 ft</strong> faces at 310–335° exposures; still below true advisory levels but a solid early-season pulse. South Shore holds <strong>2–3 ft</strong> with <strong>3–4 ft</strong> at magnets; overlapping SSW continues. Trades persist.</li>
+<li>Mon 10/20: NW eases slowly, H1/3 <strong>3–5 ft</strong> with fewer <strong>6–8 ft</strong> face sets; periods trending <strong>13–15 s</strong>. South gradually eases 1.5–2.<strong>5 ft</strong>. Trades steady.</li>
+<li>Tue 10/21: Potential small WNW from the Kuril sector (physics: <strong>3 ft</strong> @ 13 s) late day into Wed keeps background WNW alive near H1/3 <strong>1–3 ft</strong>; confidence low. Trades ongoing.</li>
+</ul>
+<h3>Notes And Data Gaps</h3>
+<ul>
+<li>The Swell Matrix shows sizable <strong>12–15 s</strong> NW/NNW spectral energy early Thu; synoptic/satellite do not support an oversized local event. We discount raw buoy magnitudes in favor of physics-based arrivals and OPC/jet diagnostics. Continue to validate against 51101/51001 (upstream), 51003 (Kauai), and nearshore 51201/51202/51211 as the ramps materialize. Climatology (SNN October stats) supports the timing/magnitude of a modest early-season NW this weekend. Tropical cyclone formation: none expected next 7 days (CPHC).</li>
+</ul>
+    </div>
+    <div class="shore-specific">
+        <div class="forecast-section shore-forecast">
+            <h2>North Shore Forecast</h2>
+            <p>Dominant swell is a mixed NW–NNW (300–340°) event at <strong>12–15 seconds</strong> with deepwater H1/3 roughly <strong>13–14 ft</strong>, yielding about <strong>18–22 ft</strong> faces on the most exposed outer reefs for the H1/3 sets, with occasional <strong>24–28 ft</strong> H1/10 pulses. Peak is centered Thursday 10/16, easing Friday 10/17, with a modest mid-period Aleutian reinforcement arriving near midday Saturday 10/18 to slow the fade.</p>
+<p>Buoy and exposure read
+- Buoys show concurrent NW (321°, 15 s) and WNW (300°, 14 s) near <strong>13 ft</strong> H1/3 plus NNW (331–344°, <strong>12–13 s</strong>) near <strong>11–14 ft</strong> H1/3. The NW (321°, 15 s) carries the highest exposure weight to the North Shore (≈0.98), with NNW 331° at ≈0.90; the WNW 300° energy is partially shadowed (≈0.50), so size/quality will vary by break.
+- Trend: peak Thursday AM, slow easing into Friday; Saturday AM smaller then a minor Aleutian reinforcement (~<strong>5 ft</strong> @ 13 s) around late morning/early afternoon should hold or nudge surf back up a notch at the most open exposures.</p>
+<p>Wind and tide interplay
+- Trades from the E near 10–15 kt (PHNL 080° at 14 kt) give side-offshore flow for the North Shore: cleanest at daybreak with increasing cross-bump and surface chop late morning through afternoon.
+- Tide feed is sparse on exact highs/lows; observed level around 1.<strong>4 ft</strong> mid-morning suggests a moderate diurnal swing. Expect lower dawn tides to sharpen reefs (more makeable barrels where sand hasn’t filled in), with the late-morning push helping consistency but also increasing sweep at outer reefs. Note that Sunset tolerates more tide than Pipe; a bit of tide helps Pipe/Backdoor.</p>
+<p>Flagship breaks
+- Pipeline/Backdoor (prefers 300–310°; partial shadow to 300° and more crossed with 330–340°):
+  • Thu 10/16: <strong>8–12 ft</strong> faces with occasional <strong>14–16 ft</strong> sets on the WNW pulses; crossed-up and warbly on the more NNW sets. Best early with trades light; increasing side-off trades and mid-tide may fatten it. Confidence moderate.
+  • Fri 10/17: easing to <strong>6–10 ft</strong> faces, still mixed; best windows early. 
+  • Sat 10/18: <strong>6–9 ft</strong> AM, with a slight PM bump possible on the Aleutian 13 s reinforcement. Backdoor improves on any WNW pulses; Pipe prefers a touch more tide.
+- Sunset (very open to 300–330°, exposure ≈0.9–1.0):
+  • Thu 10/16: <strong>15–20 ft</strong> faces, infrequent <strong>22–25 ft</strong> sets on the 15 s NW pulses; powerful sweep and warble with trades. Best early. 
+  • Fri 10/17: <strong>12–18 ft</strong> faces, easing and becoming more organized with the fade. 
+  • Sat 10/18: <strong>10–14 ft</strong> AM, holding <strong>12–15 ft</strong> PM with the mid-period bump. 
+- Waimea (likes 310–340°, needs size/period):
+  • Thu 10/16: <strong>18–22 ft</strong> faces with occasional <strong>24–26 ft</strong> bombs; not a “clean, long-interval” day but enough 15 s NW energy to break solidly between wind bumps. 
+  • Fri 10/17: <strong>15–20 ft</strong> faces, slowly easing; still cleanup sets. 
+  • Sat 10/18: <strong>12–16 ft</strong> AM; PM may hold near <strong>14–18 ft</strong> on the reinforcement at the most exposed.</p>
+<p>Hazards
+- Advisory-level surf likely for north-facing shores Thu into early Fri: strong and pervasive rip currents, longshore sweep, and periodic wash-throughs at outer reef channels; rogue sets <strong>2–3 ft</strong> above background. Use caution around exposed rocks and harbor entrances (surges possible at Hale‘iwa). Conditions deteriorate with the afternoon trades.</p>
+<p>Confidence
+- Overall medium (0.68): robust buoy coverage (14/17), nearshore buoys (4/4) and altimetry support the size; exposure weighting clearly favors NW–NNW (0.9–1.0) over WNW (≈0.5). Uncertainty is higher on exact peak timing and set consistency due to the overlapping directions/periods and moderate quality index (0.53). Tide timing specifics are less certain given partial tide data. Tropical influence is nil per the CPHC outlook.</p>
+<p>Outlook note
+- A modest Aleutian mid-period pulse (~<strong>5 ft</strong> @ 13 s) arrives late morning to midday Saturday 10/18, likely holding surf into the afternoon at the most exposed spots. A longer-period Gulf pulse (18 s) is slated for early Sunday 10/19 and lies just beyond this forecast window.</p>
+        </div>
+        <div class="forecast-section shore-forecast">
+            <h2>South Shore Forecast</h2>
+            <p>South Shore forecast (Thu 10/16 – Sat 10/18), Caldwell-style</p>
+<p>1) Opening assessment: size, direction, timing
+- Thu 10/16: Background southern hemi lingering at SW-SSW 220–205° with dominant <strong>13–14s</strong> energy, modest in size. Expect South Shore H1/3 around 1.<strong>5–2 ft</strong>, with H1/10 occasionally 2.<strong>5–3 ft</strong>. First traces of wrap from the large NNW–WNW episode (300–340°, <strong>12–15s</strong>) begin to leak into the most westerly-exposed Town reefs late day via Ka‘ena refraction; long lulls.
+- Fri 10/17: Wrap becomes more noticeable as the NNW/WNW energy settles and bends more into Town. Refraction fractions into the best magnets tend to run on the order of 0.06–0.10 for this angle/period; that supports H1/3 <strong>2–3 ft</strong> at the focal reefs with H1/10 to 3.<strong>5–4 ft</strong> on the best sets. Non-magnets stay <strong>1–2 ft</strong> H1/3 with sporadic larger sets.
+- Sat 10/18: Similar to Fri in the morning, then a minor day-time bump in wrap as a fresh Aleutian pulse near <strong>5 ft</strong> at 13s reaches O‘ahu around late morning to midday. Expect magnets <strong>2–3 ft</strong> H1/3 with occasional 3.<strong>5–4 ft</strong> H1/10 sets, most other Town spots 1.5–2.<strong>5 ft</strong> H1/3 with infrequent pluses. The southern hemi background holds at small levels and slowly eases.</p>
+<p>Directional mix
+- Primary: SW–SSW 220–200° at <strong>13–14s</strong>, slowly trending down.
+- Secondary: Wrapped NNW–WNW 300–330° at <strong>12–15s</strong>, peaking for South Shore exposure Fri PM into Sat with long-period, slow-frequency sets.</p>
+<p>2) Town vs. outlier breaks, with winds and tides
+- Ala Moana/Rockpiles/Kewalos: Best shot at wrap. Expect the most size Fri–Sat with long lulls and sneaker sets. Bowls outer/central reefs pull in the WNW wrap better than Waikīkī and handle moderate trades decently. Mid tides help the reefs stand up; a higher mid-morning tide can soften the inside at Bowls while improving the outer ledges.
+- Waikīkī (Queens/Canoes): Mostly the SW-SSW background. Consistency better than the wrap magnets but smaller: Thu 1.<strong>5–2 ft</strong> H1/3; Fri–Sat 1.5–2.<strong>5 ft</strong> with rare <strong>3 ft</strong> H1/10. Higher tides slow things down and favor longboards; lower afternoon tides add a bit more push on the reefs but won’t change size much.
+- Diamond Head: Picks up tradeswell/ENE wrap more than NNW wrap. Expect peaky, wind-textured surf with mixed SW background: generally <strong>2–3 ft</strong> faces with chest-high sets in the stronger afternoon trades. Cleanest early before trades ramp; still manageable with trades given the headland’s orientation.
+- Winds: Trades from the E (070–090°) around 10–18 kt—lightest dawns with land-breeze tendencies, then moderate mid to late mornings and breezier afternoons. That’s semi-offshore to cross-offshore for much of Town, keeping surface fairly clean early; more side-on and bumpy at Diamond Head afternoons.
+- Tides: Modest fall swings. Expect a mid-morning higher tide and a later-day lower tide; plan for the cleanest surfaces at dawn with improving push on the reefs as the tide drops mid to late afternoon, but be mindful that higher tides can dampen Waikīkī rollers.</p>
+<p>3) Board call, crowd, and consistency
+- Longboards: Best call most breaks, all three days—especially Waikīkī and the non-magnet Town reefs where the SW background is small but steady.
+- Shortboards: Windows at Bowls/Rockpiles/Kewalos Fri–Sat on the wrap sets, and at Diamond Head for those who don’t mind trade-texture. Expect long lulls (15–25 minutes) on the wrap; be patient and sit deep on the ledges.
+- Crowds/consistency: Typical Town crowds. Consistency below average at the wrap magnets with long-period sets and long waits; more even but smaller throughput at Waikīkī.</p>
+<p>4) Confidence statement
+- Confidence: Medium (0.68). Buoy coverage is strong (14/17), satellite/altimetry and model guidance are aligned, and tropical interference is nil. Main uncertainty is the efficiency of NNW/WNW refraction around Ka‘ena into specific Town reefs and how much the mid-morning higher tides will modulate set quality. Expect variability spot to spot based on subtle bathymetric focusing.</p>
+<p>Bottom line
+- Thu: Small SSW background controls; first trickles of wrap late. 1.<strong>5–2 ft</strong> H1/3 most spots; magnets see rare <strong>3 ft</strong> H1/10 late.
+- Fri: Wrap up. Magnets <strong>2–3 ft</strong> H1/3 with 3.<strong>5–4 ft</strong> H1/10 sets; others <strong>1–2 ft</strong> with sporadic pluses.
+- Sat: Similar early, slight midday bump as new 13s Aleutian energy arrives. Magnets still <strong>2–3 ft</strong> H1/3, infrequent 3.<strong>5–4 ft</strong> H1/10; elsewhere 1.5–2.<strong>5 ft</strong>. Trades favor early sessions; Diamond Head offers the trade-wind option with more texture.</p>
+        </div>
+    </div>
+    <div class="forecast-section">
+        <h2>Daily Forecast</h2>
+        <p>HEADLINE: Warning-level NW swell slamming North/West; dawn-to-midmorning is the go—advanced only up north.</p>
+<p>NORTH SHORE: 15–25+ ft faces (outer reefs/Waimea bigger), from NNW–WNW (300–340°). Best window: first light to midmorning before trades roughen; extreme currents and long lulls with rogue sets.</p>
+<p>SOUTH SHORE: <strong>3–5 ft</strong> faces, occasional <strong>6 ft</strong> at standout SW exposures, from SW (220–230°). Best window: midmorning through early afternoon under grooming trades; expect long-period sets with lulls.</p>
+<h3>East/West:</h3>
+<ul>
+<li>WEST: <strong>10–20 ft</strong> faces, largest at exposed WNW magnets; early best with lightest winds, very strong sweep.</li>
+<li>EAST: <strong>3–5 ft</strong> wind-chop on trade-exposed breaks; poor to fair only in protected corners.</li>
+</ul>
+<p>WINDS: E trades near 10–20 kt (PHNL ~080° at 14 kt mid-morning). Side-offshore/cross for North and West (texture rising late morning), offshore for many South Shore breaks (generally clean), onshore and choppy for Windward.</p>
+<p>TIDES (Honolulu 1612340):
+- Latest obs 08:48 HST: 1.<strong>39 ft</strong>.
+- Plan around a midday high near ~<strong>2 ft</strong> and a falling tide late-day toward a low this evening; aim for the mid-tide push on reefs.</p>
+<p>HAZARDS: Powerful surf and surging sets on N/W shores; strong rip/longshore currents, channel wash-throughs, harbor surges, and coastal run-up. Know your limits; spotters recommended.</p>
+<p>ACTION ITEM: Go early—north/west only for experts; otherwise target Town midmorning for the cleanest, most manageable surf. Novices avoid N/W today.</p>
+    </div>
+    <div class="forecast-section history-card">
+        <h2>Historical Comparison</h2>
+        <p>Compared with <strong>forecast_20251016_090333</strong> generated on 2025-10-16T09:03:33.081480:</p>
+        <ul>
+            <li>Confidence up 0.00 since the previous run.</li>
+        </ul>
+    </div>
+<div class="forecast-section">
+    <h2>Forecast Confidence</h2>
+    <p>Overall confidence: 0.7/1.0</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 68%"></div>
+    </div>
+        <h3>Confidence Factors</h3>
+        <div class="confidence-factors">
+<div class="factor">
+    <p>Model Consensus: 0.7</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 70%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Source Reliability: 0.7</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 73%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Data Completeness: 0.5</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 50%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Forecast Horizon: 0.8</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 80%"></div>
+    </div>
+</div>
+<div class="factor">
+    <p>Historical Accuracy: 0.7</p>
+    <div class="confidence-meter">
+        <div class="confidence-level" style="width: 70%"></div>
+    </div>
+</div>
+        </div>
+    </div>
+    <div class="footer">
+        Generated by SurfCastAI - AI-Powered Surf Forecasting
+    </div>
+</body>
+</html>

@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
 from src.processing.data_fusion_system import DataFusionSystem
-from src.processing.confidence_scorer import ConfidenceScorer, ConfidenceCategory
+from src.processing.confidence_scorer import ConfidenceScorer
 from src.core.config import Config
 
 
@@ -94,8 +94,8 @@ class TestConfidenceScorerIntegration:
         # Check score range
         assert 0.0 <= confidence['overall_score'] <= 1.0
 
-        # Check category is valid
-        valid_categories = [c.value for c in ConfidenceCategory]
+        # Check category is valid (string format: 'high', 'medium', or 'low')
+        valid_categories = ['high', 'medium', 'low']
         assert confidence['category'] in valid_categories
 
     def test_confidence_factors_present(self, fusion_system, sample_input_data):
@@ -119,21 +119,22 @@ class TestConfidenceScorerIntegration:
     def test_confidence_breakdown_complete(self, fusion_system, sample_input_data):
         """Test that confidence breakdown includes all required info."""
         result = fusion_system.process(sample_input_data)
-        breakdown = result.data.metadata['confidence']['breakdown']
+        confidence = result.data.metadata['confidence']
 
-        # Check required breakdown fields
-        assert 'overall_score' in breakdown
-        assert 'overall_score_out_of_10' in breakdown
-        assert 'category' in breakdown
-        assert 'factors' in breakdown
-        assert 'factor_descriptions' in breakdown
-        assert 'source_counts' in breakdown
-        assert 'total_sources' in breakdown
+        # Check required fields in confidence report
+        assert 'overall_score' in confidence
+        assert 'category' in confidence
+        assert 'factors' in confidence
+        assert 'breakdown' in confidence
+        assert 'warnings' in confidence
 
-        # Verify score conversions
-        overall = breakdown['overall_score']
-        overall_10 = breakdown['overall_score_out_of_10']
-        assert abs(overall_10 - (overall * 10)) < 0.2
+        # Verify breakdown is a dict with source-level scores
+        breakdown = confidence['breakdown']
+        assert isinstance(breakdown, dict)
+
+        # Check that all breakdown values are in valid range
+        for source_name, source_score in breakdown.items():
+            assert 0.0 <= source_score <= 1.0, f"{source_name} score out of range"
 
     def test_confidence_with_multiple_models(self, fusion_system, sample_input_data):
         """Test confidence with multiple model sources (better consensus)."""
@@ -282,6 +283,56 @@ class TestConfidenceScorerIntegration:
         assert 'source_reliability' in confidence['factors']
         # Should have reasonable reliability from NDBC buoy
         assert confidence['factors']['source_reliability'] > 0.5
+
+    def test_confidence_category_correctness(self, fusion_system, sample_input_data):
+        """Test that confidence category correctly reflects overall score."""
+        result = fusion_system.process(sample_input_data)
+        confidence = result.data.metadata['confidence']
+
+        overall_score = confidence['overall_score']
+        category = confidence['category']
+
+        # Verify category matches score thresholds
+        if overall_score >= 0.7:
+            assert category == 'high'
+        elif overall_score >= 0.4:
+            assert category == 'medium'
+        else:
+            assert category == 'low'
+
+    def test_confidence_warnings_content(self, fusion_system, sample_input_data):
+        """Test that confidence warnings contain meaningful information."""
+        result = fusion_system.process(sample_input_data)
+        confidence = result.data.metadata['confidence']
+
+        # Warnings should be a list of strings
+        assert isinstance(confidence['warnings'], list)
+
+        # If warnings exist, they should be non-empty strings
+        for warning in confidence['warnings']:
+            assert isinstance(warning, str)
+            assert len(warning) > 0
+
+    def test_confidence_factors_weighted_correctly(self, fusion_system, sample_input_data):
+        """Test that confidence factors are weighted according to specification."""
+        result = fusion_system.process(sample_input_data)
+        confidence = result.data.metadata['confidence']
+
+        factors = confidence['factors']
+        overall_score = confidence['overall_score']
+
+        # Calculate expected overall score manually
+        # Using default weights from ConfidenceWeights
+        expected = (
+            factors['model_consensus'] * 0.30 +
+            factors['source_reliability'] * 0.25 +
+            factors['data_completeness'] * 0.20 +
+            factors['forecast_horizon'] * 0.15 +
+            factors['historical_accuracy'] * 0.10
+        )
+
+        # Should match within floating point precision
+        assert abs(overall_score - expected) < 0.001
 
 
 if __name__ == '__main__':

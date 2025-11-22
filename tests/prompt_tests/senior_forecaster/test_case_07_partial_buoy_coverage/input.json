@@ -1,0 +1,153 @@
+{
+  "buoy_analysis": {
+    "confidence": 0.62,
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51201",
+          "buoy_name": "Waimea (51201)",
+          "height_trend": "increasing_moderate",
+          "height_slope": 0.0132,
+          "height_current": 2.9,
+          "period_trend": "increasing_slight",
+          "period_slope": 0.0055,
+          "period_current": 13.8,
+          "direction_trend": "steady",
+          "direction_current": 325.0,
+          "observations_count": 24
+        }
+      ],
+      "anomalies": [],
+      "quality_flags": {
+        "51001": "excluded",
+        "51201": "valid",
+        "51202": "excluded"
+      },
+      "cross_validation": {
+        "agreement_score": 0.5,
+        "height_agreement": 0.5,
+        "period_agreement": 0.5,
+        "num_buoys_compared": 1,
+        "interpretation": "poor_agreement"
+      },
+      "summary_stats": {
+        "avg_wave_height": 2.9,
+        "max_wave_height": 2.9,
+        "min_wave_height": 2.9,
+        "avg_period": 13.8,
+        "max_period": 13.8,
+        "min_period": 13.8
+      }
+    },
+    "narrative": "Limited buoy coverage with only Waimea (51201) reporting. NW Hawaii (51001) and Hanalei (51202) are offline. Waimea shows 2.9m @ 13.8s from 325\u00b0 (NW) with moderate increasing trend. The 13-14 second period suggests groundswell, and the building trend indicates incoming swell. However, single-buoy data provides lower confidence as cross-validation is impossible. Unable to verify spatial consistency or detect localized anomalies.",
+    "metadata": {
+      "buoys_analyzed": [
+        "51001",
+        "51201",
+        "51202"
+      ],
+      "analysis_timestamp": "2025-01-22T08:00:00Z",
+      "data_quality": "fair",
+      "warnings": [
+        "single_buoy_only",
+        "no_cross_validation"
+      ]
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.85,
+    "data": {
+      "systems": [
+        {
+          "type": "low_pressure",
+          "location": "46N 165W",
+          "location_lat": 46.0,
+          "location_lon": -165.0,
+          "pressure_mb": 975,
+          "wind_speed_kt": 52,
+          "movement": "E at 20kt",
+          "intensification": "steady",
+          "generation_time": "2025-01-20T12:00:00Z",
+          "fetch": {
+            "direction": "NW",
+            "distance_nm": 1480.0,
+            "duration_hrs": 34.0,
+            "fetch_length_nm": 820.0,
+            "quality": "strong"
+          }
+        }
+      ],
+      "predicted_swells": [
+        {
+          "source_system": "low_46N_165W",
+          "source_lat": 46.0,
+          "source_lon": -165.0,
+          "direction": "NW",
+          "direction_degrees": 325,
+          "arrival_time": "2025-01-22T06:00-12:00Z",
+          "estimated_height": "7-10ft",
+          "estimated_period": "13-16s",
+          "confidence": 0.82,
+          "travel_time_hrs": 45.5,
+          "distance_nm": 1480.0,
+          "fetch_quality": "strong"
+        }
+      ],
+      "frontal_boundaries": [],
+      "analysis_summary": {
+        "num_low_pressure": 1,
+        "num_high_pressure": 0,
+        "num_predicted_swells": 1,
+        "region": "North Pacific"
+      }
+    },
+    "narrative": "Strong low at 46N 165W with 975mb and 52kt winds generating solid NW swell. Fetch window of 820nm sustained for 34 hours provides good swell generation. Predicted arrival early morning January 22nd with 7-10ft faces and 13-16s periods. Pressure analysis has good confidence, though buoy coverage is limited for verification.",
+    "metadata": {
+      "analysis_timestamp": "2025-01-22T08:00:00Z",
+      "models_used": [
+        "GFS",
+        "ECMWF"
+      ],
+      "confidence_factors": [
+        "strong system",
+        "good fetch"
+      ]
+    }
+  },
+  "swell_events": [
+    {
+      "direction": "NW",
+      "height_range": "7-10ft",
+      "period_range": "13-16s",
+      "confidence": 0.75,
+      "source": "North Pacific low 975mb",
+      "timing": "Currently arriving"
+    }
+  ],
+  "shore_data": {
+    "north_shore": {
+      "exposure": "direct"
+    },
+    "south_shore": {
+      "exposure": "shadowed"
+    },
+    "east_shore": {
+      "exposure": "partial"
+    },
+    "west_shore": {
+      "exposure": "partial"
+    }
+  },
+  "seasonal_context": {
+    "season": "winter",
+    "typical_pattern": "NW swells dominant",
+    "current_phase": "peak winter",
+    "trade_winds": "Light E trades"
+  },
+  "metadata": {
+    "forecast_date": "2025-01-22",
+    "valid_period": "48-hour",
+    "region": "Oahu",
+    "analyst": "SeniorForecaster"
+  }
+}

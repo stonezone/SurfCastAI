@@ -60,3 +60,14 @@ logs/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# Local agent artifacts
+.code/agents/**
+
+# Pre-commit
+.pre-commit-config.yaml.backup
+.mypy_cache/
+.ruff_cache/
+
+# Archives
+ARCHIVE_*/

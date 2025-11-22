@@ -17,51 +17,51 @@ from ..core.http_client import HTTPClient
 class BuoyAgent(BaseAgent):
     """
     Agent for collecting buoy data from NOAA National Data Buoy Center (NDBC).
-    
+
     Features:
     - Collects real-time buoy data
     - Parses tabular data into structured format
     - Extracts current conditions for quick access
     - Supports multiple buoy stations
     """
-    
+
     def __init__(self, config: Config, http_client: Optional[HTTPClient] = None):
         """Initialize the BuoyAgent."""
         super().__init__(config, http_client)
         self.base_url = "https://www.ndbc.noaa.gov"
-    
+
     async def collect(self, data_dir: Path) -> List[Dict[str, Any]]:
         """
         Collect buoy data from NDBC.
-        
+
         Args:
             data_dir: Directory to store collected data
-            
+
         Returns:
             List of metadata dictionaries
         """
         # Ensure data directory exists
         buoy_dir = data_dir / "buoys"
         buoy_dir.mkdir(exist_ok=True)
-        
+
         # Get buoy URLs from config
         buoy_urls = self.config.get_data_source_urls('buoys').get('buoys', [])
-        
+
         if not buoy_urls:
             self.logger.warning("No buoy URLs configured")
             return []
-        
+
         # Ensure HTTP client is available
         await self.ensure_http_client()
-        
+
         # Create tasks for all buoy URLs
         tasks = []
         for url in buoy_urls:
             tasks.append(self.process_buoy(url, buoy_dir))
-        
+
         # Execute all tasks
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         # Filter out exceptions
         metadata_list = []
         for result in results:
@@ -69,9 +69,9 @@ class BuoyAgent(BaseAgent):
                 self.logger.error(f"Error processing buoy: {result}")
             elif result:
                 metadata_list.append(result)
-        
+
         return metadata_list
-    
+
     async def process_buoy(self, url: str, buoy_dir: Path) -> Dict[str, Any]:
         """Process a single buoy endpoint (HTML, text, or spectral)."""
         station_id = 'unknown'
@@ -262,11 +262,11 @@ class BuoyAgent(BaseAgent):
     def _parse_buoy_table(self, table, station_id: str) -> Dict[str, Any]:
         """
         Parse NDBC buoy data table into structured format.
-        
+
         Args:
             table: BeautifulSoup table element
             station_id: Buoy station ID
-            
+
         Returns:
             Structured buoy data dictionary
         """
@@ -275,16 +275,16 @@ class BuoyAgent(BaseAgent):
                 'station_id': station_id,
                 'observations': []
             }
-            
+
             # Find all rows
             rows = table.find_all('tr')
-            
+
             # Extract headers
             headers = []
             header_row = rows[0] if rows else None
             if header_row:
                 headers = [th.text.strip() for th in header_row.find_all(['th', 'td'])]
-            
+
             # Extract data rows
             for row in rows[1:]:
                 cells = row.find_all('td')
@@ -294,7 +294,7 @@ class BuoyAgent(BaseAgent):
                         if i < len(headers):
                             observation[headers[i]] = cell.text.strip()
                     data['observations'].append(observation)
-            
+
             # Extract current conditions if available
             if data['observations']:
                 current = data['observations'][0]
@@ -308,9 +308,9 @@ class BuoyAgent(BaseAgent):
                     'air_temp': current.get('ATMP', 'N/A'),
                     'pressure': current.get('PRES', 'N/A')
                 }
-            
+
             return data
-            
+
         except Exception as e:
             self.logger.error(f"Error parsing buoy table: {e}")
             return {

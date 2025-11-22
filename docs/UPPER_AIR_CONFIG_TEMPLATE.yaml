@@ -1,0 +1,173 @@
+# Upper Air Analysis Configuration Template
+# For SurfCastAI upper_air / UpperAirAgent
+
+data_sources:
+  upper_air:
+    provider: "SPC (NOAA/NCEP)"
+    organization: "Storm Prediction Center"
+    description: "Real-time upper air analysis maps (250mb jet stream and 500mb heights)"
+    url_base: "https://www.spc.noaa.gov/obswx/maps"
+
+    # Primary endpoint definitions
+    endpoints:
+      - id: "250mb_jet_stream"
+        name: "250 mb Jet Stream Analysis"
+        description: "Upper-level jet stream and wind speeds at 250 millibars"
+        pressure_level: 250
+        unit: "mb"
+        meteorological_field: "wind"
+        url_template: "https://www.spc.noaa.gov/obswx/maps/250_{date}_00.gif"
+        url_formats:
+          - format: "gif"
+            url_template: "https://www.spc.noaa.gov/obswx/maps/250_{date}_00.gif"
+            mime_type: "image/gif"
+            typical_size: "48KB"
+          - format: "pdf"
+            url_template: "https://www.spc.noaa.gov/obswx/maps/250_{date}_00.pdf"
+            mime_type: "application/pdf"
+        preferred_format: "gif"
+
+      - id: "500mb_heights"
+        name: "500 mb Geopotential Height Analysis"
+        description: "Mid-level atmospheric pressure heights and pattern analysis"
+        pressure_level: 500
+        unit: "mb"
+        meteorological_field: "height"
+        url_template: "https://www.spc.noaa.gov/obswx/maps/500_{date}_00.gif"
+        url_formats:
+          - format: "gif"
+            url_template: "https://www.spc.noaa.gov/obswx/maps/500_{date}_00.gif"
+            mime_type: "image/gif"
+            typical_size: "42KB"
+          - format: "pdf"
+            url_template: "https://www.spc.noaa.gov/obswx/maps/500_{date}_00.pdf"
+            mime_type: "application/pdf"
+        preferred_format: "gif"
+
+    # Template variables
+    template_variables:
+      date:
+        format: "YYMMDD"
+        description: "2-digit year + 2-digit month + 2-digit day"
+        examples:
+          - date_display: "2025-10-16"
+            template_value: "251016"
+          - date_display: "2025-01-01"
+            template_value: "250101"
+          - date_display: "2024-12-25"
+            template_value: "241225"
+
+    # Temporal characteristics
+    temporal:
+      update_frequency: "daily"
+      synoptic_times:
+        - "00Z"  # Midnight UTC (only available time)
+      available_hours:
+        - 00    # 00 UTC only
+      not_available_hours:
+        - 06    # Return HTTP 403
+        - 12    # Return HTTP 403
+        - 18    # Return HTTP 403
+      archive_available: true
+      archive_start_date: "2011-01-08"  # YYYYMMDD format
+
+    # Data access
+    access:
+      authentication_required: false
+      rate_limiting: false
+      cors_enabled: true
+      public_domain: true
+
+    # Fallback strategy
+    fallback:
+      strategy: "date_backtrack"
+      max_attempts: 3
+      backtrack_increment_days: 1
+      description: |
+        If the current date's analysis is not available (403/404):
+        1. Try current date
+        2. Try previous day (UTC -1 day)
+        3. Try 2 days back
+        4. Give up after 3 days if not found
+
+    # Time-based retrieval logic
+    retrieval:
+      description: |
+        Analysis is issued at 00Z UTC (midnight).
+        If current UTC hour < 02, use yesterday's 00Z analysis.
+        If current UTC hour >= 02, use today's 00Z analysis.
+      logic:
+        - condition: "current_utc_hour < 2"
+          use_date: "yesterday"
+        - condition: "current_utc_hour >= 2"
+          use_date: "today"
+
+    # Examples
+    examples:
+      current_date_example: "2025-10-16"
+      urls:
+        250mb_gif: "https://www.spc.noaa.gov/obswx/maps/250_251016_00.gif"
+        250mb_pdf: "https://www.spc.noaa.gov/obswx/maps/250_251016_00.pdf"
+        500mb_gif: "https://www.spc.noaa.gov/obswx/maps/500_251016_00.gif"
+        500mb_pdf: "https://www.spc.noaa.gov/obswx/maps/500_251016_00.pdf"
+
+    # Deprecated endpoints (DO NOT USE)
+    deprecated:
+      - url: "https://www.wpc.ncep.noaa.gov/noaa/noaa250_curr.gif"
+        status: "HTTP 404 Not Found"
+        reason: "Endpoint no longer available"
+        since: "2025-10-16"
+        replacement: "https://www.spc.noaa.gov/obswx/maps/250_{date}_00.gif"
+
+      - url: "https://www.wpc.ncep.noaa.gov/noaa/noaa500_curr.gif"
+        status: "HTTP 404 Not Found"
+        reason: "Endpoint no longer available"
+        since: "2025-10-16"
+        replacement: "https://www.spc.noaa.gov/obswx/maps/500_{date}_00.gif"
+
+    # Metadata about this configuration
+    metadata:
+      last_updated: "2025-10-16"
+      status: "ACTIVE"
+      tested_date: "2025-10-16"
+      tested_by: "Cloud Research Bot"
+      http_test_results:
+        250mb_gif_status: 200
+        500mb_gif_status: 200
+        250mb_pdf_status: 200
+        500mb_pdf_status: 200
+      documentation:
+        - url: "https://www.spc.noaa.gov/obswx/maps/"
+          title: "SPC Upper Air Maps"
+        - url: "https://www.wpc.ncep.noaa.gov/sfc/upper-air.html"
+          title: "WPC Upper Air Analysis Page"
+
+# Agent implementation hints
+upper_air_agent:
+  class_name: "UpperAirAgent"
+  inputs:
+    date: "datetime.datetime"
+    format: "str"  # 'gif' or 'pdf'
+  outputs:
+    - filename: "250mb_analysis_{date}.gif"
+      url: "https://www.spc.noaa.gov/obswx/maps/250_{date}_00.gif"
+    - filename: "500mb_analysis_{date}.gif"
+      url: "https://www.spc.noaa.gov/obswx/maps/500_{date}_00.gif"
+  url_template_expansion: |
+    # Python code to expand template
+    from datetime import datetime, timedelta
+
+    def expand_upper_air_url(pressure_level: int, date: datetime = None) -> str:
+        if date is None:
+            date = datetime.utcnow()
+
+        # Handle 00Z-only availability
+        if date.hour < 2:
+            date = date - timedelta(days=1)
+
+        date_str = date.strftime("%y%m%d")
+        return f"https://www.spc.noaa.gov/obswx/maps/{pressure_level}_{date_str}_00.gif"
+
+    # Usage:
+    # url_250 = expand_upper_air_url(250)
+    # url_500 = expand_upper_air_url(500)

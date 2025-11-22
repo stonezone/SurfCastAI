@@ -19,15 +19,15 @@ from src.core.config import Config
 
 class TestWeatherProcessor(unittest.TestCase):
     """Tests for the WeatherProcessor class."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         # Create mock config
         self.config = MagicMock(spec=Config)
-        
+
         # Create processor
         self.processor = WeatherProcessor(self.config)
-        
+
         # Sample weather data
         self.sample_data = {
             "properties": {
@@ -61,51 +61,51 @@ class TestWeatherProcessor(unittest.TestCase):
                 ]
             }
         }
-    
+
     def test_validate_valid_data(self):
         """Test validation with valid data."""
         errors = self.processor.validate(self.sample_data)
         self.assertEqual(len(errors), 0, "Should not have validation errors")
-    
+
     def test_validate_invalid_data(self):
         """Test validation with invalid data."""
         # Test missing properties
         invalid_data = {"wrong_key": "value"}
         errors = self.processor.validate(invalid_data)
         self.assertGreater(len(errors), 0, "Should have validation errors")
-        
+
         # Test empty periods
         invalid_data = {"properties": {"periods": []}}
         errors = self.processor.validate(invalid_data)
         self.assertGreater(len(errors), 0, "Should have validation errors")
-    
+
     def test_process_valid_data(self):
         """Test processing with valid data."""
         result = self.processor.process(self.sample_data)
-        
+
         # Check success
         self.assertTrue(result.success, "Processing should succeed")
         self.assertIsNone(result.error, "Should not have error")
-        
+
         # Check data type
         self.assertIsInstance(result.data, WeatherData, "Result should be WeatherData")
-        
+
         # Check basic properties
         weather_data = result.data
         self.assertEqual(weather_data.provider, 'nws', "Provider should be 'nws'")
         self.assertEqual(len(weather_data.periods), 2, "Should have 2 periods")
-        
+
         # Check period data
         first_period = weather_data.periods[0]
         self.assertIsInstance(first_period, WeatherPeriod, "Period should be WeatherPeriod")
         self.assertEqual(first_period.temperature_unit, 'C', "Temperature unit should be converted to C")
         self.assertEqual(first_period.wind_speed_unit, 'm/s', "Wind speed unit should be converted to m/s")
-        
+
         # Check metadata
         self.assertIn('wind_analysis', weather_data.metadata, "Should have wind analysis metadata")
         self.assertIn('text_extraction', weather_data.metadata, "Should have text extraction metadata")
         self.assertIn('surf_weather', weather_data.metadata, "Should have surf weather metadata")
-    
+
     def test_standardize_units(self):
         """Test unit standardization."""
         # Create test data
@@ -130,21 +130,21 @@ class TestWeatherProcessor(unittest.TestCase):
                 )
             ]
         )
-        
+
         # Standardize units
         result = self.processor._standardize_units(weather_data)
-        
+
         # Check units
         self.assertEqual(result.periods[0].temperature_unit, 'C', "Temperature unit should be C")
         self.assertEqual(result.periods[0].wind_speed_unit, 'm/s', "Wind speed unit should be m/s")
         self.assertEqual(result.periods[1].temperature_unit, 'C', "Temperature unit should be C")
         self.assertEqual(result.periods[1].wind_speed_unit, 'm/s', "Wind speed unit should be m/s")
-        
+
         # Check converted values (approximate due to floating point)
         self.assertAlmostEqual(result.periods[0].temperature, 26.67, delta=0.1, msg="80F should be ~26.67C")
         self.assertAlmostEqual(result.periods[0].wind_speed, 6.7, delta=0.1, msg="15mph should be ~6.7m/s")
         self.assertAlmostEqual(result.periods[1].wind_speed, 5.14, delta=0.1, msg="10knots should be ~5.14m/s")
-    
+
     def test_is_offshore_wind(self):
         """Test offshore wind determination."""
         # Test cases: (shore_direction, wind_direction, expected_result)
@@ -157,12 +157,12 @@ class TestWeatherProcessor(unittest.TestCase):
             (270, 90, True),   # West shore, east wind (offshore)
             (90, 270, True),   # East shore, west wind (offshore)
         ]
-        
+
         for shore_dir, wind_dir, expected in test_cases:
             result = self.processor._is_offshore_wind(shore_dir, wind_dir)
-            self.assertEqual(result, expected, 
+            self.assertEqual(result, expected,
                 f"Shore {shore_dir}, Wind {wind_dir} should be {'offshore' if expected else 'not offshore'}")
-    
+
     def test_get_surf_quality_factor(self):
         """Test surf quality factor calculation."""
         # Create test data
@@ -193,11 +193,11 @@ class TestWeatherProcessor(unittest.TestCase):
                 }
             }
         )
-        
+
         # Test quality factors
         north_factor = self.processor.get_surf_quality_factor(weather_data, 'north shore')
         south_factor = self.processor.get_surf_quality_factor(weather_data, 'south shore')
-        
+
         # Check factors (north should be better than south)
         self.assertGreater(north_factor, 0.6, "North shore factor should be good")
         self.assertLess(south_factor, 0.4, "South shore factor should be poor")

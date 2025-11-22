@@ -89,7 +89,7 @@ Looking at the metadata:
 
 **Only buoy data was successfully processed.** Missing:
 - ❌ Weather data
-- ❌ Wave model data  
+- ❌ Wave model data
 - ❌ Satellite imagery
 
 ### What's happening in the pipeline?
@@ -113,7 +113,7 @@ Looking at the metadata:
 # Issue: Swell events showing period = 0.0 s
 ```
 **Actions:**
-- [ ] Read `src/processing/buoy_processor.py` 
+- [ ] Read `src/processing/buoy_processor.py`
 - [ ] Find swell event detection logic
 - [ ] Check if spectral period (SwP/DPD) is being extracted
 - [ ] Verify it's being included in swell event output
@@ -272,7 +272,7 @@ Looking at the metadata:
       "type": "low"
     },
     {
-      "time": "2025-10-05T12:34:00Z", 
+      "time": "2025-10-05T12:34:00Z",
       "height_feet": 1.85,
       "type": "high"
     }

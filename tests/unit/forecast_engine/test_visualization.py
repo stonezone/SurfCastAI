@@ -99,4 +99,3 @@ class TestForecastVisualization(unittest.TestCase):
         self.assertIn("confidence_change", summary)
         self.assertIn("hawaiian_avg_change", summary)
         self.assertTrue(summary.get("summary_lines"))
-

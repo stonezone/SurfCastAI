@@ -12,6 +12,11 @@ from .exceptions import (
 from .security import (
     validate_url, sanitize_filename, validate_file_path, is_subpath
 )
+from .prompt_loader import PromptLoader
+from .validation_feedback import (
+    ValidationFeedback, PerformanceReport, ShorePerformance
+)
+from .numeric import safe_float
 
 __all__ = [
     'SurfCastAIError',
@@ -28,5 +33,10 @@ __all__ = [
     'validate_url',
     'sanitize_filename',
     'validate_file_path',
-    'is_subpath'
+    'is_subpath',
+    'PromptLoader',
+    'ValidationFeedback',
+    'PerformanceReport',
+    'ShorePerformance',
+    'safe_float'
 ]

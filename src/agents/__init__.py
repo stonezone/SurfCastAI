@@ -11,6 +11,11 @@ from .metar_agent import MetarAgent
 from .tide_agent import TideAgent
 from .chart_agent import ChartAgent
 from .tropical_agent import TropicalAgent
+from .marine_forecast_agent import MarineForecastAgent
+from .cdip_agent import CDIPAgent
+from .altimetry_agent import AltimetryAgent
+from .upper_air_agent import UpperAirAgent
+from .climatology_agent import ClimatologyAgent
 
 __all__ = [
     'BaseAgent',
@@ -21,5 +26,10 @@ __all__ = [
     'MetarAgent',
     'TideAgent',
     'ChartAgent',
-    'TropicalAgent'
+    'TropicalAgent',
+    'MarineForecastAgent',
+    'CDIPAgent',
+    'AltimetryAgent',
+    'UpperAirAgent',
+    'ClimatologyAgent'
 ]

@@ -224,7 +224,7 @@ class TestForecastValidator:
         # RMSE = sqrt((0.5^2 + 0.5^2 + 2.0^2) / 3) = sqrt(4.5 / 3) = 1.225
         assert abs(metrics['rmse'] - 1.225) < 0.01
 
-        # Categorical accuracy: 
+        # Categorical accuracy:
         # - pred=large vs actual=7.5ft (moderate) → MISMATCH
         # - pred=moderate vs actual=4.5ft (moderate) → MATCH
         # - pred=moderate vs actual=8.0ft (large) → MISMATCH

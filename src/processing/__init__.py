@@ -11,7 +11,7 @@ from .data_fusion_system import DataFusionSystem
 
 __all__ = [
     'SwellComponent',
-    'SwellEvent', 
+    'SwellEvent',
     'ForecastLocation',
     'SwellForecast',
     'dict_to_swell_forecast',

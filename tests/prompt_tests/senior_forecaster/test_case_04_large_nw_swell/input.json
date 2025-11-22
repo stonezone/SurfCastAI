@@ -1,0 +1,184 @@
+{
+  "buoy_analysis": {
+    "confidence": 0.95,
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51001",
+          "buoy_name": "NW Hawaii (51001)",
+          "height_trend": "increasing_strong",
+          "height_slope": 0.0245,
+          "height_current": 5.8,
+          "period_trend": "increasing_moderate",
+          "period_slope": 0.0125,
+          "period_current": 18.2,
+          "direction_trend": "steady",
+          "direction_current": 310.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51201",
+          "buoy_name": "Waimea (51201)",
+          "height_trend": "increasing_strong",
+          "height_slope": 0.0228,
+          "height_current": 5.2,
+          "period_trend": "increasing_moderate",
+          "period_slope": 0.0108,
+          "period_current": 17.5,
+          "direction_trend": "steady",
+          "direction_current": 315.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51202",
+          "buoy_name": "Hanalei (51202)",
+          "height_trend": "increasing_moderate",
+          "height_slope": 0.0198,
+          "height_current": 4.8,
+          "period_trend": "steady",
+          "period_slope": 0.0045,
+          "period_current": 17.8,
+          "direction_trend": "steady",
+          "direction_current": 312.0,
+          "observations_count": 24
+        }
+      ],
+      "anomalies": [],
+      "quality_flags": {
+        "51001": "valid",
+        "51201": "valid",
+        "51202": "valid"
+      },
+      "cross_validation": {
+        "agreement_score": 0.96,
+        "height_agreement": 0.94,
+        "period_agreement": 0.98,
+        "num_buoys_compared": 3,
+        "interpretation": "excellent_agreement"
+      },
+      "summary_stats": {
+        "avg_wave_height": 5.27,
+        "max_wave_height": 5.8,
+        "min_wave_height": 4.8,
+        "avg_period": 17.83,
+        "max_period": 18.2,
+        "min_period": 17.5
+      }
+    },
+    "narrative": "Major northwest swell event underway with all buoys showing strong increasing trends. NW Hawaii (51001) now at 5.8m @ 18.2s from 310\u00b0, up significantly from 3.5m 12 hours ago. Waimea (51201) at 5.2m @ 17.5s and Hanalei (51202) at 4.8m @ 17.8s, all confirming powerful long-period northwest groundswell. Periods in the 17-18 second range indicate very long fetch and strong storm generation. Cross-validation excellent across all three buoys. This is a high-confidence observation of a major winter swell event with continued building expected.",
+    "metadata": {
+      "buoys_analyzed": [
+        "51001",
+        "51201",
+        "51202"
+      ],
+      "analysis_timestamp": "2025-12-18T06:00:00Z",
+      "data_quality": "excellent"
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.93,
+    "data": {
+      "systems": [
+        {
+          "type": "low_pressure",
+          "location": "48N 170W",
+          "location_lat": 48.0,
+          "location_lon": -170.0,
+          "pressure_mb": 960,
+          "wind_speed_kt": 65,
+          "movement": "E at 25kt",
+          "intensification": "strengthening",
+          "generation_time": "2025-12-16T00:00:00Z",
+          "fetch": {
+            "direction": "NW",
+            "distance_nm": 1600.0,
+            "duration_hrs": 48.0,
+            "fetch_length_nm": 1100.0,
+            "quality": "strong"
+          }
+        }
+      ],
+      "predicted_swells": [
+        {
+          "source_system": "low_48N_170W",
+          "source_lat": 48.0,
+          "source_lon": -170.0,
+          "direction": "NW",
+          "direction_degrees": 310,
+          "arrival_time": "2025-12-18T00:00-06:00Z",
+          "estimated_height": "15-20ft",
+          "estimated_period": "16-20s",
+          "confidence": 0.92,
+          "calculated_arrival": "2025-12-18T03:00:00Z",
+          "travel_time_hrs": 51.0,
+          "distance_nm": 1600.0,
+          "group_velocity_knots": 31.4,
+          "propagation_method": "physics_based",
+          "fetch_quality": "strong",
+          "fetch_duration_hrs": 48.0,
+          "fetch_length_nm": 1100.0,
+          "source_pressure_mb": 960,
+          "source_wind_speed_kt": 65,
+          "source_trend": "strengthening"
+        }
+      ],
+      "frontal_boundaries": [],
+      "analysis_summary": {
+        "num_low_pressure": 1,
+        "num_high_pressure": 0,
+        "num_predicted_swells": 1,
+        "region": "North Pacific"
+      }
+    },
+    "narrative": "Explosive low-pressure system at 48N 170W with 960mb central pressure and 65-knot winds, one of the strongest systems of the season. Massive fetch window: 1,100 nautical miles sustained for 48 hours, generating powerful long-period northwest swell. System still intensifying. Physics calculations show peak swell arriving early December 18th with heights of 15-20ft Hawaiian scale and periods of 16-20 seconds. This is a major winter swell event with potential for very large surf on north-facing shores. High confidence given the strong, well-organized system and exceptional fetch geometry.",
+    "metadata": {
+      "analysis_timestamp": "2025-12-18T06:00:00Z",
+      "models_used": [
+        "GFS",
+        "ECMWF"
+      ],
+      "confidence_factors": [
+        "very strong low",
+        "exceptional fetch",
+        "model agreement"
+      ]
+    }
+  },
+  "swell_events": [
+    {
+      "direction": "NW",
+      "height_range": "15-20ft",
+      "period_range": "16-20s",
+      "confidence": 0.93,
+      "source": "Major Aleutian low 960mb",
+      "timing": "Currently arriving, peak next 6-12 hours"
+    }
+  ],
+  "shore_data": {
+    "north_shore": {
+      "exposure": "direct"
+    },
+    "south_shore": {
+      "exposure": "shadowed"
+    },
+    "east_shore": {
+      "exposure": "partial"
+    },
+    "west_shore": {
+      "exposure": "partial"
+    }
+  },
+  "seasonal_context": {
+    "season": "winter",
+    "typical_pattern": "Large NW swells from North Pacific storms",
+    "current_phase": "peak winter season",
+    "trade_winds": "Light E trades, offshore on north shore"
+  },
+  "metadata": {
+    "forecast_date": "2025-12-18",
+    "valid_period": "48-hour",
+    "region": "Oahu",
+    "analyst": "SeniorForecaster"
+  }
+}

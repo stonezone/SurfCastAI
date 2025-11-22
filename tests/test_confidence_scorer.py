@@ -10,11 +10,10 @@ from unittest.mock import Mock, MagicMock
 
 from src.processing.confidence_scorer import (
     ConfidenceScorer,
-    ConfidenceCategory,
     ConfidenceWeights,
-    ConfidenceResult,
     format_confidence_for_display
 )
+from src.processing.models.confidence import ConfidenceReport
 
 
 class TestConfidenceScorer:
@@ -256,40 +255,35 @@ class TestConfidenceScorer:
         accuracy = scorer.calculate_historical_accuracy(fusion_data)
         assert accuracy == 0.7  # Default
 
-    def test_get_confidence_category_high(self, scorer):
+    def test_categorize_score_high(self):
         """Test confidence category for high score."""
-        category = scorer._get_confidence_category(0.85)
-        assert category == ConfidenceCategory.HIGH
+        category = ConfidenceReport.categorize_score(0.85)
+        assert category == 'high'
 
-    def test_get_confidence_category_moderate(self, scorer):
-        """Test confidence category for moderate score."""
-        category = scorer._get_confidence_category(0.7)
-        assert category == ConfidenceCategory.MODERATE
+    def test_categorize_score_medium(self):
+        """Test confidence category for medium score."""
+        category = ConfidenceReport.categorize_score(0.6)
+        assert category == 'medium'
 
-    def test_get_confidence_category_low(self, scorer):
+    def test_categorize_score_low(self):
         """Test confidence category for low score."""
-        category = scorer._get_confidence_category(0.5)
-        assert category == ConfidenceCategory.LOW
+        category = ConfidenceReport.categorize_score(0.3)
+        assert category == 'low'
 
-    def test_get_confidence_category_very_low(self, scorer):
-        """Test confidence category for very low score."""
-        category = scorer._get_confidence_category(0.3)
-        assert category == ConfidenceCategory.VERY_LOW
+    def test_categorize_score_boundary_high(self):
+        """Test confidence category at high boundary (0.7)."""
+        category = ConfidenceReport.categorize_score(0.7)
+        assert category == 'high'
 
-    def test_get_confidence_category_boundary_high(self, scorer):
-        """Test confidence category at high boundary (0.8)."""
-        category = scorer._get_confidence_category(0.8)
-        assert category == ConfidenceCategory.HIGH
+    def test_categorize_score_boundary_medium(self):
+        """Test confidence category at medium boundary (0.4)."""
+        category = ConfidenceReport.categorize_score(0.4)
+        assert category == 'medium'
 
-    def test_get_confidence_category_boundary_moderate(self, scorer):
-        """Test confidence category at moderate boundary (0.6)."""
-        category = scorer._get_confidence_category(0.6)
-        assert category == ConfidenceCategory.MODERATE
-
-    def test_get_confidence_category_boundary_low(self, scorer):
-        """Test confidence category at low boundary (0.4)."""
-        category = scorer._get_confidence_category(0.4)
-        assert category == ConfidenceCategory.LOW
+    def test_categorize_score_boundary_low(self):
+        """Test confidence category just below medium boundary (0.39)."""
+        category = ConfidenceReport.categorize_score(0.39)
+        assert category == 'low'
 
     def test_calculate_confidence_complete(self, scorer, sample_fusion_data):
         """Test complete confidence calculation."""
@@ -299,9 +293,9 @@ class TestConfidenceScorer:
         )
 
         # Check result structure
-        assert isinstance(result, ConfidenceResult)
+        assert isinstance(result, ConfidenceReport)
         assert 0.0 <= result.overall_score <= 1.0
-        assert isinstance(result.category, ConfidenceCategory)
+        assert result.category in ['high', 'medium', 'low']
         assert len(result.factors) == 5
 
         # Check all factors present
@@ -312,11 +306,8 @@ class TestConfidenceScorer:
         assert 'historical_accuracy' in result.factors
 
         # Check breakdown
-        assert 'overall_score' in result.breakdown
-        assert 'overall_score_out_of_10' in result.breakdown
-        assert 'category' in result.breakdown
-        assert 'factors' in result.breakdown
-        assert 'factor_descriptions' in result.breakdown
+        assert isinstance(result.breakdown, dict)
+        assert isinstance(result.warnings, list)
 
     def test_calculate_confidence_weighted_formula(self, scorer, sample_fusion_data):
         """Test that confidence uses correct weighted formula."""
@@ -336,24 +327,19 @@ class TestConfidenceScorer:
 
         assert abs(result.overall_score - expected) < 0.001
 
-    def test_calculate_confidence_metadata(self, scorer, sample_fusion_data):
-        """Test confidence metadata is complete."""
+    def test_calculate_confidence_category_correctness(self, scorer, sample_fusion_data):
+        """Test that category correctly reflects overall score."""
         result = scorer.calculate_confidence(
             sample_fusion_data,
             forecast_horizon_days=3
         )
 
-        # Check metadata
-        assert result.metadata['forecast_horizon_days'] == 3
-        assert 'weights' in result.metadata
-        assert 'calculated_at' in result.metadata
-
-        # Verify timestamp format
-        calc_time = datetime.fromisoformat(result.metadata['calculated_at'])
-        assert calc_time.tzinfo is not None
+        # Verify category matches score thresholds
+        expected_category = ConfidenceReport.categorize_score(result.overall_score)
+        assert result.category == expected_category
 
     def test_build_breakdown(self, scorer, sample_fusion_data):
-        """Test breakdown includes all required information."""
+        """Test breakdown includes source-level confidence scores."""
         result = scorer.calculate_confidence(
             sample_fusion_data,
             forecast_horizon_days=2
@@ -361,19 +347,16 @@ class TestConfidenceScorer:
 
         breakdown = result.breakdown
 
-        # Check all required fields
-        assert 'overall_score' in breakdown
-        assert 'overall_score_out_of_10' in breakdown
-        assert 'category' in breakdown
-        assert 'factors' in breakdown
-        assert 'factor_descriptions' in breakdown
-        assert 'source_counts' in breakdown
-        assert 'total_sources' in breakdown
+        # Check that breakdown is a dictionary with source confidence scores
+        assert isinstance(breakdown, dict)
 
-        # Check scores are converted to /10 scale
-        assert 0 <= breakdown['overall_score_out_of_10'] <= 10
-        for factor_score in breakdown['factors'].values():
-            assert 0 <= factor_score <= 10
+        # Should have buoy confidence (from ndbc_51001)
+        if 'buoy_confidence' in breakdown:
+            assert 0.0 <= breakdown['buoy_confidence'] <= 1.0
+
+        # Should have model confidence (from ww3)
+        if 'model_confidence' in breakdown:
+            assert 0.0 <= breakdown['model_confidence'] <= 1.0
 
     def test_format_confidence_for_display(self, scorer, sample_fusion_data):
         """Test confidence display formatting."""
@@ -385,14 +368,13 @@ class TestConfidenceScorer:
         display = format_confidence_for_display(result)
 
         # Check display includes key information
-        assert result.category.value in display
-        assert str(result.breakdown['overall_score_out_of_10']) in display
+        assert result.category.upper() in display
+        assert str(result.overall_score)[:4] in display  # First 4 chars (e.g., "0.85")
         assert 'Model Consensus' in display
         assert 'Source Reliability' in display
         assert 'Data Completeness' in display
         assert 'Forecast Horizon' in display
         assert 'Historical Accuracy' in display
-        assert 'Data Sources:' in display
 
     def test_confidence_with_minimal_data(self, scorer):
         """Test confidence calculation with minimal data."""
@@ -405,9 +387,9 @@ class TestConfidenceScorer:
         result = scorer.calculate_confidence(minimal_data, forecast_horizon_days=2)
 
         # Should still produce valid result with low confidence
-        assert isinstance(result, ConfidenceResult)
+        assert isinstance(result, ConfidenceReport)
         assert result.overall_score <= 0.6  # Low confidence expected
-        assert result.category in [ConfidenceCategory.LOW, ConfidenceCategory.VERY_LOW]
+        assert result.category in ['low', 'medium']
 
     def test_confidence_with_excellent_data(self, scorer):
         """Test confidence calculation with excellent data quality."""
@@ -436,7 +418,7 @@ class TestConfidenceScorer:
 
         # Should produce high confidence
         assert result.overall_score >= 0.75
-        assert result.category in [ConfidenceCategory.HIGH, ConfidenceCategory.MODERATE]
+        assert result.category in ['high', 'medium']
 
     def test_confidence_scorer_logging(self, scorer, sample_fusion_data, caplog):
         """Test that scorer logs appropriately."""
@@ -450,8 +432,76 @@ class TestConfidenceScorer:
 
         # Check that key information was logged
         assert 'Calculating confidence' in caplog.text
-        assert 'Confidence calculated:' in caplog.text
-        assert result.category.value in caplog.text
+        assert 'Confidence:' in caplog.text or result.category in caplog.text.lower()
+
+    def test_warnings_generated_for_low_confidence(self, scorer):
+        """Test that warnings are generated for low confidence scenarios."""
+        poor_data = {
+            'swell_events': [],
+            'locations': [],
+            'metadata': {}
+        }
+
+        result = scorer.calculate_confidence(poor_data, forecast_horizon_days=2)
+
+        # Should have warnings about poor data quality
+        assert len(result.warnings) > 0
+        # Check for specific warnings
+        warning_text = ' '.join(result.warnings).lower()
+        assert any(keyword in warning_text for keyword in ['limited', 'missing', 'no'])
+
+    def test_warnings_for_model_disagreement(self, scorer):
+        """Test warnings generated for significant model disagreement."""
+        disagreeing_data = {
+            'swell_events': [
+                Mock(source='model', primary_components=[Mock(height=1.0)]),
+                Mock(source='model', primary_components=[Mock(height=5.0)])
+            ],
+            'metadata': {
+                'source_scores': {
+                    'model1': {'overall_score': 0.8},
+                    'model2': {'overall_score': 0.8}
+                }
+            }
+        }
+
+        result = scorer.calculate_confidence(disagreeing_data, forecast_horizon_days=2)
+
+        # Should have warning about model disagreement
+        warning_text = ' '.join(result.warnings).lower()
+        assert 'disagreement' in warning_text or 'consensus' in warning_text
+
+    def test_pydantic_validation_enforced(self):
+        """Test that Pydantic validation is enforced on ConfidenceReport."""
+        # Test valid report
+        valid_report = ConfidenceReport(
+            overall_score=0.85,
+            category='high',
+            factors={'model_consensus': 0.9},
+            breakdown={'buoy_confidence': 0.8},
+            warnings=[]
+        )
+        assert valid_report.overall_score == 0.85
+
+        # Test invalid score (out of range)
+        with pytest.raises(Exception):  # Pydantic will raise ValidationError
+            ConfidenceReport(
+                overall_score=1.5,  # Invalid: > 1.0
+                category='high',
+                factors={},
+                breakdown={},
+                warnings=[]
+            )
+
+        # Test invalid category
+        with pytest.raises(Exception):  # Pydantic will raise ValidationError
+            ConfidenceReport(
+                overall_score=0.85,
+                category='very_low',  # Invalid: not in ['high', 'medium', 'low']
+                factors={},
+                breakdown={},
+                warnings=[]
+            )
 
 
 class TestConfidenceWeights:

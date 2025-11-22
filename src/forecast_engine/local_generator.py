@@ -137,7 +137,7 @@ class LocalForecastGenerator:
         tide_line = self._tide_summary()
 
         action_line = (
-            "Target dawn patrol for clean faces before trades rise after lunch; town reefs handle winds best." 
+            "Target dawn patrol for clean faces before trades rise after lunch; town reefs handle winds best."
         )
 
         parts = [
@@ -257,7 +257,7 @@ class LocalForecastGenerator:
         south_hint = "South" if any(e for e in self.events if self._event_has_shore(e, "south_shore")) else "South"
         return (
             f"Expect {season_phrase} patterns to hold. {north_hint} Shore stays active through the next couple of days "
-            f"while {south_hint} Shore trends toward seasonal background. Monitor new NDBC runs for updates."  
+            f"while {south_hint} Shore trends toward seasonal background. Monitor new NDBC runs for updates."
         )
 
     # ------------------------------------------------------------------
@@ -279,7 +279,7 @@ class LocalForecastGenerator:
         speed = self.weather.get("wind_speed", 15)
         shoreline = "North Shore" if shore_key == "north_shore" else "South Shore"
         return (
-            f"{shoreline} sees {direction} trades around {speed} kt; aim for morning windows before onshores roughen the faces."  
+            f"{shoreline} sees {direction} trades around {speed} kt; aim for morning windows before onshores roughen the faces."
         )
 
     def _tide_summary(self) -> str:

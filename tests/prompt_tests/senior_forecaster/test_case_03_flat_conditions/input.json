@@ -1,0 +1,132 @@
+{
+  "buoy_analysis": {
+    "confidence": 0.78,
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51001",
+          "buoy_name": "NW Hawaii (51001)",
+          "height_trend": "steady",
+          "height_slope": 0.0002,
+          "height_current": 1.2,
+          "period_trend": "steady",
+          "period_slope": -0.0001,
+          "period_current": 8.5,
+          "direction_trend": "steady",
+          "direction_current": 75.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51201",
+          "buoy_name": "Waimea (51201)",
+          "height_trend": "steady",
+          "height_slope": 0.0001,
+          "height_current": 0.9,
+          "period_trend": "steady",
+          "period_slope": 0.0,
+          "period_current": 7.8,
+          "direction_trend": "steady",
+          "direction_current": 85.0,
+          "observations_count": 24
+        }
+      ],
+      "anomalies": [],
+      "quality_flags": {
+        "51001": "valid",
+        "51201": "valid",
+        "51202": "valid"
+      },
+      "cross_validation": {
+        "agreement_score": 0.88,
+        "height_agreement": 0.9,
+        "period_agreement": 0.86,
+        "num_buoys_compared": 2,
+        "interpretation": "excellent_agreement"
+      },
+      "summary_stats": {
+        "avg_wave_height": 1.05,
+        "max_wave_height": 1.2,
+        "min_wave_height": 0.9,
+        "avg_period": 8.15,
+        "max_period": 8.5,
+        "min_period": 7.8
+      }
+    },
+    "narrative": "Very small surf across all buoy stations indicating summer flat spell. NW Hawaii (51001) showing 1.2m @ 8.5s from 75\u00b0 (ENE), characteristic of light trade wind swell. Waimea (51201) confirms with 0.9m @ 7.8s from 85\u00b0 (E). All trends are steady with no significant changes expected. Cross-validation excellent between stations. This is typical mid-summer trade wind chop with no groundswell activity.",
+    "metadata": {
+      "buoys_analyzed": [
+        "51001",
+        "51201",
+        "51202"
+      ],
+      "analysis_timestamp": "2025-07-20T10:00:00Z",
+      "data_quality": "good"
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.82,
+    "data": {
+      "systems": [
+        {
+          "type": "high_pressure",
+          "location": "33N 145W",
+          "location_lat": 33.0,
+          "location_lon": -145.0,
+          "pressure_mb": 1026,
+          "wind_speed_kt": 12,
+          "movement": "stationary",
+          "intensification": "steady",
+          "generation_time": null,
+          "fetch": null
+        }
+      ],
+      "predicted_swells": [],
+      "frontal_boundaries": [],
+      "analysis_summary": {
+        "num_low_pressure": 0,
+        "num_high_pressure": 1,
+        "num_predicted_swells": 0,
+        "region": "North Pacific"
+      }
+    },
+    "narrative": "Dominant high pressure ridge centered at 33N 145W with 1026mb providing stable, quiet pattern. No active low-pressure systems in the North Pacific. No significant fetch windows identified. Light trade winds expected to continue. No incoming swells forecast for the next 72 hours. Typical summer flat pattern.",
+    "metadata": {
+      "analysis_timestamp": "2025-07-20T10:00:00Z",
+      "models_used": [
+        "GFS",
+        "ECMWF"
+      ],
+      "confidence_factors": [
+        "stable high pressure",
+        "no active systems"
+      ]
+    }
+  },
+  "swell_events": [],
+  "shore_data": {
+    "north_shore": {
+      "exposure": "direct"
+    },
+    "south_shore": {
+      "exposure": "direct"
+    },
+    "east_shore": {
+      "exposure": "direct"
+    },
+    "west_shore": {
+      "exposure": "partial"
+    }
+  },
+  "seasonal_context": {
+    "season": "summer",
+    "typical_pattern": "Light trades, flat north shores, small south swells",
+    "current_phase": "summer flat spell",
+    "trade_winds": "Light E trades 10-15kt"
+  },
+  "metadata": {
+    "forecast_date": "2025-07-20",
+    "valid_period": "48-hour",
+    "region": "Oahu",
+    "analyst": "SeniorForecaster"
+  }
+}

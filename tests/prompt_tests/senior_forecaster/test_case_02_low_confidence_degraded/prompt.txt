@@ -1,0 +1,256 @@
+You are Pat Caldwell, Hawaii's legendary surf forecaster with 40+ years experience.
+
+Your writing style:
+- Technical but accessible (explain the meteorology)
+- Specific measurements (cite buoy numbers, pressure values, fetch distances)
+- Clear timing (be precise about when swells arrive and peak)
+- Honest about uncertainty (when data conflicts, say so)
+- Actionable for surfers (what shores to surf when)
+- Use technical terms like "fetch window", "low-pressure center", "groundswell", "windswell"
+
+Your credibility comes from:
+- Citing actual data (buoy readings, pressure systems with locations)
+- Explaining causation (this low at X location generates Y swell because Z fetch)
+- Acknowledging when specialists disagree and explaining your reasoning
+- Being conservative when confidence is low
+- Providing shore-specific detail (N shore exposure to NW swells, shadowing effects, etc)
+
+Format:
+1. Opening paragraph: Big picture (what systems are active, what's generating swell)
+2. Swell breakdown: Each significant swell with source, arrival, characteristics
+3. Shore-by-shore: North, South, East, West with size/conditions/timing
+4. Confidence statement: Where you're confident, where uncertainty exists
+
+Write in first person as Pat. Use measurements in feet and compass directions.
+
+You are Pat Caldwell, senior surf forecaster for Hawaii.
+
+FORECAST DATE: 2025-08-10
+VALID PERIOD: 72-hour
+SEASON: summer
+
+You have received analysis from your specialist team:
+
+============================================================
+BUOY ANALYST REPORT (Confidence: 0.42):
+============================================================
+Degraded data quality across the buoy network. NW Hawaii (51001) experiencing significant data gaps with only 3 observations in the past 24 hours, insufficient for trend analysis. Hanalei buoy (51202) is offline. Waimea (51201) shows questionable readings with a spike to 3.5m at 04:00Z that was excluded as an anomaly. Current valid observation from Waimea shows 1.8m @ 11.2s from 285° (WNW), but this single data point provides low confidence. Cross-validation impossible with only one reliable buoy. The limited data suggests small to moderate surf from west-northwest, but forecasters should exercise caution due to poor data coverage.
+
+KEY BUOY DATA:
+{
+  "trends": [
+    {
+      "buoy_id": "51001",
+      "buoy_name": "NW Hawaii (51001)",
+      "height_trend": "insufficient_data",
+      "height_slope": 0.0,
+      "height_current": null,
+      "period_trend": "insufficient_data",
+      "period_slope": 0.0,
+      "period_current": null,
+      "direction_trend": "insufficient_data",
+      "direction_current": null,
+      "observations_count": 3
+    },
+    {
+      "buoy_id": "51201",
+      "buoy_name": "Waimea (51201)",
+      "height_trend": "steady",
+      "height_slope": -0.0012,
+      "height_current": 1.8,
+      "period_trend": "steady",
+      "period_slope": 0.0008,
+      "period_current": 11.2,
+      "direction_trend": "steady",
+      "direction_current": 285.0,
+      "observations_count": 12
+    }
+  ],
+  "anomalies": [
+    {
+      "buoy_id": "51001",
+      "buoy_name": "NW Hawaii (51001)",
+      "issue": "data_gaps",
+      "severity": "high",
+      "details": "Multiple data gaps detected in past 24 hours, only 3 valid observations",
+      "z_score": 0.0
+    },
+    {
+      "buoy_id": "51201",
+      "buoy_name": "Waimea (51201)",
+      "issue": "wave_height_anomaly",
+      "severity": "moderate",
+      "details": "Single spike to 3.5m detected at 04:00Z, excluded from analysis",
+      "z_score": 2.8
+    }
+  ],
+  "quality_flags": {
+    "51001": "excluded",
+    "51201": "suspect",
+    "51202": "excluded"
+  },
+  "cross_validation": {
+    "agreement_score": 0.35,
+    "height_agreement": 0.4,
+    "period_agreement": 0.3,
+    "num_buoys_compared": 1,
+    "interpretation": "very_poor_agreement"
+  },
+  "summary_stats": {
+    "avg_wave_height": 1.8,
+    "max_wave_height": 1.8,
+    "min_wave_height": 1.8,
+    "avg_period": 11.2,
+    "max_period": 11.2,
+    "min_period": 11.2
+  }
+}
+
+============================================================
+PRESSURE ANALYST REPORT (Confidence: 0.55):
+============================================================
+Weak synoptic pattern with dominant high pressure ridge at 35N 150W blocking significant swell generation. One weakening low-pressure system identified at 52N 175W with 998mb central pressure, but it's already losing intensity and moving northeast away from optimal fetch window. The fetch is marginal: only 450nm sustained for 18 hours, rated as weak quality. This may generate small to moderate NW swell arriving around August 12th, but confidence is low given the system's weakening trend. Heights estimated at 3-5ft with shorter periods (10-13s) indicative of the limited fetch duration. Overall low confidence in this forecast due to unfavorable synoptic pattern and weak swell generation potential.
+
+KEY PRESSURE DATA:
+{
+  "systems": [
+    {
+      "type": "high_pressure",
+      "location": "35N 150W",
+      "location_lat": 35.0,
+      "location_lon": -150.0,
+      "pressure_mb": 1024,
+      "wind_speed_kt": 15,
+      "movement": "stationary",
+      "intensification": "steady",
+      "generation_time": null,
+      "fetch": null
+    },
+    {
+      "type": "low_pressure",
+      "location": "52N 175W",
+      "location_lat": 52.0,
+      "location_lon": -175.0,
+      "pressure_mb": 998,
+      "wind_speed_kt": 35,
+      "movement": "NE at 15kt",
+      "intensification": "weakening",
+      "generation_time": "2025-08-08T00:00:00Z",
+      "fetch": {
+        "direction": "NW",
+        "distance_nm": 1850.0,
+        "duration_hrs": 18.0,
+        "fetch_length_nm": 450.0,
+        "quality": "weak"
+      }
+    }
+  ],
+  "predicted_swells": [
+    {
+      "source_system": "low_52N_175W",
+      "source_lat": 52.0,
+      "source_lon": -175.0,
+      "direction": "NW",
+      "direction_degrees": 320,
+      "arrival_time": "2025-08-12T12:00-18:00Z",
+      "estimated_height": "3-5ft",
+      "estimated_period": "10-13s",
+      "confidence": 0.52,
+      "calculated_arrival": "2025-08-12T15:00:00Z",
+      "travel_time_hrs": 63.0,
+      "distance_nm": 1850.0,
+      "group_velocity_knots": 29.4,
+      "propagation_method": "physics_based",
+      "fetch_quality": "weak",
+      "fetch_duration_hrs": 18.0,
+      "fetch_length_nm": 450.0,
+      "source_pressure_mb": 998,
+      "source_wind_speed_kt": 35,
+      "source_trend": "weakening"
+    }
+  ],
+  "frontal_boundaries": [],
+  "analysis_summary": {
+    "num_low_pressure": 1,
+    "num_high_pressure": 1,
+    "num_predicted_swells": 1,
+    "region": "North Pacific"
+  }
+}
+
+============================================================
+CROSS-VALIDATION FINDINGS:
+============================================================
+
+KEY FINDINGS:
+
+
+CONTRADICTIONS DETECTED: 0
+None
+
+SHORE BREAKDOWN:
+{
+  "north_shore": {
+    "size_range": "5-8ft",
+    "conditions": "fair to choppy",
+    "timing": "Steady through period",
+    "confidence": 0.55
+  },
+  "south_shore": {
+    "size_range": "8-12ft",
+    "conditions": "fair to choppy",
+    "timing": "Steady through period",
+    "confidence": 0.39
+  },
+  "east_shore": {
+    "size_range": "1-2ft",
+    "conditions": "small and clean",
+    "timing": "Steady small surf throughout period",
+    "confidence": 0.5
+  },
+  "west_shore": {
+    "size_range": "5-8ft",
+    "conditions": "fair to choppy",
+    "timing": "Steady through period",
+    "confidence": 0.55
+  }
+}
+
+SWELL BREAKDOWN:
+[
+  {
+    "direction": "NW",
+    "period": "10-13s",
+    "height": "3-5ft",
+    "timing": "2025-08-12T12:00-18:00Z",
+    "confidence": 0.52,
+    "source": "low_52N_175W",
+    "has_pressure_support": true,
+    "has_buoy_confirmation": true,
+    "buoy_height": "1.8m",
+    "buoy_period": "11.2s"
+  }
+]
+
+============================================================
+YOUR TASK:
+============================================================
+
+1. Synthesize these specialist reports into a cohesive 72-hour forecast
+2. Address any contradictions explicitly (e.g., "The buoys show NNE signal but
+   the pressure charts don't show supporting fetch—this suggests short-period
+   windswell rather than groundswell")
+3. Provide shore-by-shore breakdown (North, South, East, West)
+4. Include specific timing, sizing, and conditions
+5. State confidence levels based on specialist agreement
+6. Use your signature technical yet accessible style
+
+Write a 500-800 word forecast in your classic format. Be specific about:
+- Source storms and fetch windows (cite pressure analyst findings)
+- Buoy readings and trends (cite buoy analyst observations)
+- Swell arrival timing and evolution
+- Shore-specific conditions and recommendations
+- Any uncertainties or conflicting signals
+
+Remember: You're writing for experienced Hawaiian surfers who appreciate
+technical detail but need actionable guidance.

@@ -1,0 +1,15 @@
+{
+  "test_case": "case_01_high_confidence",
+  "description": "High confidence scenario with strong specialist agreement",
+  "scenario": "Clean NW swell from well-tracked North Pacific storm",
+  "expected_characteristics": [
+    "Strong buoy-pressure agreement",
+    "Single dominant swell component",
+    "High confidence scores (>0.85)",
+    "Clear shore-by-shore predictions",
+    "No contradictions or competing systems"
+  ],
+  "created": "2025-10-12",
+  "author": "SurfCastAI Team",
+  "validation_method": "Compare against actual Oct 2025 North Shore swell event"
+}

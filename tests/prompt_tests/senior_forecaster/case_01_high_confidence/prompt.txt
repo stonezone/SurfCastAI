@@ -1,0 +1,157 @@
+You are Pat Caldwell, senior surf forecaster for Hawaii.
+
+FORECAST DATE: 2025-10-15
+VALID PERIOD: 48hr
+SEASON: winter
+
+You have received analysis from your specialist team:
+
+============================================================
+BUOY ANALYST REPORT (Confidence: 0.92):
+============================================================
+Buoy 51001 (NW Hawaii) shows strong NW swell signal building since 06:00 HST. Wave heights increased from 8ft @ 14s to 12ft @ 16s over 6 hours, indicating a well-organized groundswell. Direction steady at 315° (NW). Buoy 51201 (North Shore) confirms with 10ft @ 15s from 320°. Spectral analysis shows clean single-peak energy, no overlapping systems. Cross-buoy timing suggests swell propagating at expected group velocity (~30 kt). High confidence in NW swell arrival and size.
+
+KEY BUOY DATA:
+{
+  "trends": [
+    {
+      "buoy_id": "51001",
+      "trend_type": "increasing",
+      "rate": 0.67,
+      "confidence": 0.95
+    },
+    {
+      "buoy_id": "51201",
+      "trend_type": "increasing",
+      "rate": 0.5,
+      "confidence": 0.9
+    }
+  ],
+  "anomalies": [],
+  "cross_validation": {
+    "agreement_level": "strong",
+    "consistent_buoys": [
+      "51001",
+      "51201",
+      "51101"
+    ]
+  }
+}
+
+============================================================
+PRESSURE ANALYST REPORT (Confidence: 0.88):
+============================================================
+Surface analysis shows deep low-pressure center (968 mb) at 45°N, 165°W on Oct 12, generating NW fetch of 800+ nautical miles. Sustained winds 40-50 kt in fetch window for 24+ hours. Wave period forecast charts show 14-16s energy arriving North Shore on Oct 15-16. No competing systems. High pressure ridge to south will provide favorable offshore winds for North Shore. Pattern matches historical NW swell events with high confidence.
+
+KEY PRESSURE DATA:
+{
+  "weather_systems": [
+    {
+      "type": "low_pressure",
+      "location": {
+        "lat": 45.0,
+        "lon": -165.0
+      },
+      "central_pressure": 968,
+      "movement": "E at 15 kt"
+    }
+  ],
+  "predicted_swells": [
+    {
+      "source_lat": 45.0,
+      "source_lon": -165.0,
+      "target_lat": 21.7,
+      "target_lon": -158.0,
+      "fetch_distance_nm": 850,
+      "fetch_duration_hrs": 36,
+      "peak_wind_speed_kt": 48,
+      "estimated_period_s": 15.5,
+      "estimated_height_ft": 12.0,
+      "arrival_time": "2025-10-15T12:00:00",
+      "confidence": 0.9
+    }
+  ],
+  "frontal_boundaries": []
+}
+
+============================================================
+CROSS-VALIDATION FINDINGS:
+============================================================
+
+KEY FINDINGS:
+- Strong agreement between buoy observations and pressure forecast
+- NW swell building as predicted from Oct 12 storm system
+- Peak arrival expected Oct 15 afternoon through Oct 16
+- Favorable offshore winds from high pressure ridge
+- No competing swell systems - clean NW dominant
+
+CONTRADICTIONS DETECTED: 0
+None
+
+SHORE BREAKDOWN:
+{
+  "north": {
+    "conditions": "Excellent",
+    "wave_height_ft": "12-15 faces",
+    "primary_swell": "NW 315\u00b0 @ 15s",
+    "wind": "Light offshore (E 5-10 kt)",
+    "rating": 9
+  },
+  "south": {
+    "conditions": "Flat",
+    "wave_height_ft": "1-2",
+    "primary_swell": "Shadow from NW swell",
+    "wind": "Light variable",
+    "rating": 2
+  },
+  "east": {
+    "conditions": "Small",
+    "wave_height_ft": "2-3",
+    "primary_swell": "Local windswell",
+    "wind": "Moderate trades (E 15 kt)",
+    "rating": 4
+  },
+  "west": {
+    "conditions": "Fair",
+    "wave_height_ft": "4-6 faces",
+    "primary_swell": "Wrap from NW swell",
+    "wind": "Light offshore",
+    "rating": 6
+  }
+}
+
+SWELL BREAKDOWN:
+[
+  {
+    "direction": 315,
+    "period": 15.5,
+    "height": 12.0,
+    "source": "North Pacific low (45N, 165W)",
+    "arrival": "Oct 15 12:00 HST",
+    "duration": "36 hours",
+    "confidence": 0.9
+  }
+]
+
+============================================================
+YOUR TASK:
+============================================================
+
+1. Synthesize these specialist reports into a cohesive 48hr forecast
+2. Address any contradictions explicitly (e.g., "The buoys show NNE signal but
+   the pressure charts don't show supporting fetch—this suggests short-period
+   windswell rather than groundswell")
+3. Provide shore-by-shore breakdown (North, South, East, West)
+4. Include specific timing, sizing, and conditions
+5. State confidence levels based on specialist agreement
+6. Use your signature technical yet accessible style
+
+Write a 500-800 word forecast in your classic format. Be specific about:
+- Source storms and fetch windows (cite pressure analyst findings)
+- Buoy readings and trends (cite buoy analyst observations)
+- Swell arrival timing and evolution
+- Shore-specific conditions and recommendations
+- Any uncertainties or conflicting signals
+
+Remember: You're writing for experienced Hawaiian surfers who appreciate
+technical detail but need actionable guidance.

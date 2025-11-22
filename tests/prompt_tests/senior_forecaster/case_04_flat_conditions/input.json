@@ -1,0 +1,100 @@
+{
+  "metadata": {
+    "forecast_date": "2025-08-10",
+    "valid_period": "48hr"
+  },
+  "seasonal_context": {
+    "season": "summer",
+    "typical_patterns": "Flat period, minimal swell activity all shores"
+  },
+  "buoy_analysis": {
+    "confidence": 0.78,
+    "narrative": "All buoys showing minimal swell activity. Buoy 51001: 2-3ft @ 6-8s from variable directions - pure windswell. Buoy 51201: 1-2ft @ 7s - below significant wave height threshold. Buoy 51004: 2ft @ 9s from 110° - weak trade windswell. Spectral analysis shows no long-period energy, all short-period chop. No groundswell components detected. High confidence in flat conditions - data quality good, just nothing happening.",
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51001",
+          "trend_type": "flat",
+          "rate": 0.0,
+          "confidence": 0.80
+        },
+        {
+          "buoy_id": "51201",
+          "trend_type": "flat",
+          "rate": 0.0,
+          "confidence": 0.85
+        }
+      ],
+      "anomalies": [],
+      "cross_validation": {
+        "agreement_level": "strong",
+        "consistent_buoys": ["51001", "51201", "51004", "51202"]
+      }
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.75,
+    "narrative": "No active storm systems in relevant swell windows for Hawaii. North Pacific: large high pressure dome blocking any storm development. South Pacific: nearest low-pressure system 55°S, 140°W - too far south and weak (998 mb) to generate significant swell. Wave period charts show no long-period energy forecast through Aug 12. Pattern indicates continued flat conditions. High confidence in lack of swell - sometimes the most confident forecast is 'nothing happening.'",
+    "data": {
+      "weather_systems": [
+        {
+          "type": "high_pressure",
+          "location": {"lat": 40.0, "lon": -150.0},
+          "central_pressure": 1026,
+          "movement": "Stationary"
+        }
+      ],
+      "predicted_swells": [],
+      "frontal_boundaries": []
+    }
+  },
+  "contradictions": [],
+  "key_findings": [
+    "Flat conditions confirmed across all data sources",
+    "No groundswell energy detected - pure windswell conditions",
+    "High pressure dome blocking North Pacific storm activity",
+    "No Southern Hemisphere systems in range",
+    "High confidence in continued flatspell through forecast period"
+  ],
+  "shore_forecasts": {
+    "north": {
+      "conditions": "Flat",
+      "wave_height_ft": "1-2",
+      "primary_swell": "Minimal windswell",
+      "wind": "Light variable (E 5 kt)",
+      "rating": 1
+    },
+    "south": {
+      "conditions": "Flat",
+      "wave_height_ft": "1 or less",
+      "primary_swell": "None",
+      "wind": "Light variable",
+      "rating": 1
+    },
+    "east": {
+      "conditions": "Small windswell",
+      "wave_height_ft": "2-3",
+      "primary_swell": "Trade windswell 110° @ 9s",
+      "wind": "Light trades (E 10 kt)",
+      "rating": 3
+    },
+    "west": {
+      "conditions": "Flat",
+      "wave_height_ft": "1 or less",
+      "primary_swell": "None",
+      "wind": "Light variable",
+      "rating": 1
+    }
+  },
+  "swell_breakdown": [
+    {
+      "direction": 110,
+      "period": 9.0,
+      "height": 2.5,
+      "source": "Trade wind windswell",
+      "arrival": "Persistent",
+      "duration": "Continuous (weak)",
+      "confidence": 0.75
+    }
+  ]
+}

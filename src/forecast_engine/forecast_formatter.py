@@ -22,51 +22,51 @@ from .historical import HistoricalComparator
 class ForecastFormatter:
     """
     Formatter for converting forecasts into various output formats.
-    
+
     Features:
     - Converts raw forecast text to structured formats
     - Supports markdown, HTML, and PDF output
     - Provides customization options for different formats
     - Handles shore-specific and daily forecast variants
     """
-    
+
     def __init__(self, config: Config):
         """
         Initialize the forecast formatter.
-        
+
         Args:
             config: Application configuration
         """
         self.config = config
         self.logger = logging.getLogger('forecast.formatter')
-        
+
         # Load formatting options
         self.formats = self.config.get('forecast', 'formats', 'markdown,html,pdf').split(',')
         self.output_dir = Path(self.config.get('general', 'output_directory', './output'))
-        
+
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self.visualizer = ForecastVisualizer(self.logger.getChild('visuals'))
         self.history = HistoricalComparator(self.output_dir, self.logger.getChild('history'))
-    
+
     def format_forecast(self, forecast_data: Dict[str, Any]) -> Dict[str, str]:
         """
         Format a forecast into the configured output formats.
-        
+
         Args:
             forecast_data: Complete forecast data with generated text
-            
+
         Returns:
             Dictionary with paths to formatted output files
         """
         try:
             self.logger.info("Starting forecast formatting")
-            
+
             # Extract forecast information
             forecast_id = forecast_data.get('forecast_id', f"forecast_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
             generated_time = forecast_data.get('generated_time', datetime.now().isoformat())
-            
+
             # Create forecast directory
             forecast_dir = self.output_dir / forecast_id
             forecast_dir.mkdir(exist_ok=True)
@@ -122,29 +122,29 @@ class ForecastFormatter:
                     self.logger.info(f"PDF format saved to: {pdf_path}")
                 except Exception as e:
                     self.logger.error(f"Failed to generate pdf: {e}")
-            
+
             # Save original forecast data for reference
             with open(forecast_dir / 'forecast_data.json', 'w') as f:
                 # Convert to JSON-serializable format
                 serializable_data = self._make_serializable(forecast_data)
                 json.dump(serializable_data, f, indent=2)
-            
+
             output_paths['json'] = str(forecast_dir / 'forecast_data.json')
-            
+
             self.logger.info(f"Forecast formatting completed for forecast ID: {forecast_id}")
             return output_paths
-            
+
         except Exception as e:
             self.logger.error(f"Error formatting forecast: {e}")
             return {'error': str(e)}
-    
+
     def _make_serializable(self, data: Any) -> Any:
         """
         Make data JSON-serializable.
-        
+
         Args:
             data: Data to make serializable
-            
+
         Returns:
             JSON-serializable data
         """
@@ -157,7 +157,7 @@ class ForecastFormatter:
         else:
             # Convert to string representation
             return str(data)
-    
+
     def _format_markdown(self, forecast_data: Dict[str, Any], output_dir: Path) -> Path:
         """Format forecast as markdown."""
         self.logger.info("Formatting forecast as markdown")
@@ -550,32 +550,32 @@ class ForecastFormatter:
     def _format_pdf(self, forecast_data: Dict[str, Any], output_dir: Path) -> Path:
         """
         Format forecast as PDF.
-        
+
         Args:
             forecast_data: Complete forecast data
             output_dir: Output directory
-            
+
         Returns:
             Path to PDF file
         """
         self.logger.info("Formatting forecast as PDF")
-        
+
         # Create HTML version first
         html_path = self._format_html(forecast_data, output_dir)
-        
+
         try:
             # Import weasyprint for PDF generation
             import weasyprint
-            
+
             # Extract forecast information
             forecast_id = forecast_data.get('forecast_id')
-            
+
             # Generate PDF
             pdf_path = output_dir / f"{forecast_id}.pdf"
             weasyprint.HTML(filename=str(html_path), base_url=str(output_dir)).write_pdf(pdf_path)
-            
+
             return pdf_path
-            
+
         except ImportError:
             self.logger.error("WeasyPrint not installed. Please install it with: pip install weasyprint")
             # Return the HTML path as fallback
@@ -584,27 +584,27 @@ class ForecastFormatter:
             self.logger.error(f"Error generating PDF: {e}")
             # Return the HTML path as fallback
             return html_path
-    
+
     def _format_forecast_text(self, text: str) -> str:
         """
         Format raw forecast text by adding proper markdown structure.
-        
+
         Args:
             text: Raw forecast text
-            
+
         Returns:
             Formatted text
         """
         # Add heading levels to all-caps lines
         lines = text.split('\n')
         formatted_lines = []
-        
+
         for line in lines:
             # Skip empty lines
             if not line.strip():
                 formatted_lines.append(line)
                 continue
-            
+
             # Check if line is an all-caps header
             if line.isupper() and len(line) > 5:
                 # Convert to title case for better readability
@@ -616,55 +616,55 @@ class ForecastFormatter:
                 formatted_lines.append(f"### {title_line}")
             else:
                 formatted_lines.append(line)
-        
+
         formatted_text = '\n'.join(formatted_lines)
-        
+
         # Highlight important terms (feet, wave heights, etc.)
         formatted_text = re.sub(r'(\d+[\-\–]?\d*\s*(?:feet|foot|ft)(?:\s*\(Hawaiian\s*(?:scale)?\)?)?)',
                               r'**\1**', formatted_text, flags=re.IGNORECASE)
-        
+
         formatted_text = re.sub(r'(\d+[\-\–]\d+\s*(?:seconds|second|sec|s))',
                               r'**\1**', formatted_text, flags=re.IGNORECASE)
-        
+
         return formatted_text
-    
+
     def _markdown_to_html(self, markdown_text: str) -> str:
         """
         Convert markdown to HTML.
-        
+
         Args:
             markdown_text: Markdown text
-            
+
         Returns:
             HTML text
         """
         try:
             # Try to import markdown
             import markdown
-            
+
             # Convert markdown to HTML
             html = markdown.markdown(markdown_text)
             return html
-            
+
         except ImportError:
             self.logger.warning("Markdown not installed. Using basic HTML conversion.")
-            
+
             # Basic conversion
             html = markdown_text
-            
+
             # Convert headers
             html = re.sub(r'^### (.*?)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
             html = re.sub(r'^## (.*?)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
             html = re.sub(r'^# (.*?)$', r'<h1>\1</h1>', html, flags=re.MULTILINE)
-            
+
             # Convert bold
             html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
-            
+
             # Convert italic
             html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', html)
-            
+
             # Convert paragraphs
             html = re.sub(r'\n\n', r'</p><p>', html)
             html = f"<p>{html}</p>"
-            
+
             return html

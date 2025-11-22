@@ -1,0 +1,162 @@
+{
+  "buoy_analysis": {
+    "confidence": 0.82,
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51001",
+          "buoy_name": "NW Hawaii (51001)",
+          "height_trend": "steady",
+          "height_slope": 0.0008,
+          "height_current": 2.1,
+          "period_trend": "steady",
+          "period_slope": -0.0005,
+          "period_current": 11.8,
+          "direction_trend": "steady",
+          "direction_current": 305.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51201",
+          "buoy_name": "Waimea (51201)",
+          "height_trend": "decreasing_slight",
+          "height_slope": -0.0042,
+          "height_current": 1.8,
+          "period_trend": "decreasing_slight",
+          "period_slope": -0.0028,
+          "period_current": 11.2,
+          "direction_trend": "steady",
+          "direction_current": 310.0,
+          "observations_count": 24
+        }
+      ],
+      "anomalies": [],
+      "quality_flags": {
+        "51001": "valid",
+        "51201": "valid"
+      },
+      "cross_validation": {
+        "agreement_score": 0.86,
+        "height_agreement": 0.88,
+        "period_agreement": 0.84,
+        "num_buoys_compared": 2,
+        "interpretation": "excellent_agreement"
+      },
+      "summary_stats": {
+        "avg_wave_height": 1.95,
+        "max_wave_height": 2.1,
+        "min_wave_height": 1.8,
+        "avg_period": 11.5,
+        "max_period": 11.8,
+        "min_period": 11.2
+      }
+    },
+    "narrative": "Buoys showing small to moderate NW swell that appears to be fading. NW Hawaii (51001) at 2.1m @ 11.8s from 305\u00b0 with steady to slight declining trend. Waimea (51201) confirms with 1.8m @ 11.2s from 310\u00b0, also showing slight decrease. Periods in the 11-12 second range suggest medium-period swell, not long-period groundswell. Current observations indicate modest surf levels trending down, contrary to model predictions of building swell.",
+    "metadata": {
+      "buoys_analyzed": [
+        "51001",
+        "51201"
+      ],
+      "analysis_timestamp": "2025-11-05T10:00:00Z",
+      "data_quality": "good"
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.75,
+    "data": {
+      "systems": [
+        {
+          "type": "low_pressure",
+          "location": "44N 168W",
+          "location_lat": 44.0,
+          "location_lon": -168.0,
+          "pressure_mb": 978,
+          "wind_speed_kt": 50,
+          "movement": "E at 22kt",
+          "intensification": "strengthening",
+          "generation_time": "2025-11-04T00:00:00Z",
+          "fetch": {
+            "direction": "NW",
+            "distance_nm": 1520.0,
+            "duration_hrs": 32.0,
+            "fetch_length_nm": 780.0,
+            "quality": "strong"
+          }
+        }
+      ],
+      "predicted_swells": [
+        {
+          "source_system": "low_44N_168W",
+          "source_lat": 44.0,
+          "source_lon": -168.0,
+          "direction": "NW",
+          "direction_degrees": 315,
+          "arrival_time": "2025-11-05T12:00-18:00Z",
+          "estimated_height": "8-11ft",
+          "estimated_period": "14-17s",
+          "confidence": 0.74,
+          "calculated_arrival": "2025-11-05T15:00:00Z",
+          "travel_time_hrs": 47.0,
+          "distance_nm": 1520.0,
+          "group_velocity_knots": 32.3,
+          "propagation_method": "physics_based",
+          "fetch_quality": "strong",
+          "fetch_duration_hrs": 32.0,
+          "fetch_length_nm": 780.0,
+          "source_pressure_mb": 978,
+          "source_wind_speed_kt": 50,
+          "source_trend": "strengthening"
+        }
+      ],
+      "frontal_boundaries": [],
+      "analysis_summary": {
+        "num_low_pressure": 1,
+        "num_high_pressure": 0,
+        "num_predicted_swells": 1,
+        "region": "North Pacific"
+      }
+    },
+    "narrative": "Models show strong low-pressure system at 44N 168W with 978mb and 50kt winds, still strengthening. Fetch analysis indicates 780nm window sustained for 32 hours, rated as strong quality. Physics-based calculations predict significant NW swell arriving mid-afternoon November 5th with heights of 8-11ft and periods of 14-17 seconds. However, current buoy observations show only 2.1m (about 4-5ft faces) and shorter 11-12s periods with declining trends. This discrepancy suggests either: (1) arrival timing is later than calculated, (2) fetch window less favorable than modeled, or (3) swell heights overestimated.",
+    "metadata": {
+      "analysis_timestamp": "2025-11-05T10:00:00Z",
+      "models_used": [
+        "GFS",
+        "ECMWF"
+      ],
+      "confidence_factors": [
+        "strong system",
+        "BUT buoy contradiction"
+      ],
+      "warnings": [
+        "buoy_model_disagreement"
+      ]
+    }
+  },
+  "swell_events": [],
+  "shore_data": {
+    "north_shore": {
+      "exposure": "direct"
+    },
+    "south_shore": {
+      "exposure": "shadowed"
+    },
+    "east_shore": {
+      "exposure": "partial"
+    },
+    "west_shore": {
+      "exposure": "partial"
+    }
+  },
+  "seasonal_context": {
+    "season": "winter",
+    "typical_pattern": "NW swells from North Pacific",
+    "current_phase": "early winter",
+    "trade_winds": "Light E trades"
+  },
+  "metadata": {
+    "forecast_date": "2025-11-05",
+    "valid_period": "48-hour",
+    "region": "Oahu",
+    "analyst": "SeniorForecaster"
+  }
+}

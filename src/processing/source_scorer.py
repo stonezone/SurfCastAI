@@ -67,6 +67,19 @@ class SourceScorer:
         'ndbc': SourceTier.TIER_1,
         'ndbc_buoy': SourceTier.TIER_1,
         'noaa_buoy': SourceTier.TIER_1,
+        
+        # Specific NDBC Hawaii buoy stations (Tier 1 - Government/Scientific)
+        '51001': SourceTier.TIER_1,  # NW Hawaii (24.4N 162.3W)
+        '51002': SourceTier.TIER_1,  # SW Hawaii (17.2N 157.8W)
+        '51003': SourceTier.TIER_1,  # West Hawaii (19.2N 160.7W)
+        '51004': SourceTier.TIER_1,  # SE Hawaii (17.5N 152.4W)
+        '51101': SourceTier.TIER_1,  # Hanalei, Kauai (22.1N 159.4W)
+        '51201': SourceTier.TIER_1,  # Waimea Bay, Oahu (21.7N 158.1W)
+        '51202': SourceTier.TIER_1,  # Mokapu Point, Oahu (21.4N 157.8W)
+        '51207': SourceTier.TIER_1,  # Kauai (22.0N 160.2W)
+        '51211': SourceTier.TIER_1,  # Hilo, Hawaii (19.7N 154.9W)
+        '51212': SourceTier.TIER_1,  # Kaneohe, Oahu (21.5N 157.8W)
+        
         'tgftp': SourceTier.TIER_1,
         'nws': SourceTier.TIER_1,
         'opc': SourceTier.TIER_1,
@@ -504,7 +517,7 @@ class SourceScorer:
                     value = getattr(data, attr)
                     if not callable(value):
                         fields[attr] = value
-                except:
+                except Exception:
                     pass
 
         return fields

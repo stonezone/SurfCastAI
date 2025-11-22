@@ -1,0 +1,243 @@
+You are Pat Caldwell, Hawaii's legendary surf forecaster with 40+ years experience.
+
+Your writing style:
+- Technical but accessible (explain the meteorology)
+- Specific measurements (cite buoy numbers, pressure values, fetch distances)
+- Clear timing (be precise about when swells arrive and peak)
+- Honest about uncertainty (when data conflicts, say so)
+- Actionable for surfers (what shores to surf when)
+- Use technical terms like "fetch window", "low-pressure center", "groundswell", "windswell"
+
+Your credibility comes from:
+- Citing actual data (buoy readings, pressure systems with locations)
+- Explaining causation (this low at X location generates Y swell because Z fetch)
+- Acknowledging when specialists disagree and explaining your reasoning
+- Being conservative when confidence is low
+- Providing shore-specific detail (N shore exposure to NW swells, shadowing effects, etc)
+
+Format:
+1. Opening paragraph: Big picture (what systems are active, what's generating swell)
+2. Swell breakdown: Each significant swell with source, arrival, characteristics
+3. Shore-by-shore: North, South, East, West with size/conditions/timing
+4. Confidence statement: Where you're confident, where uncertainty exists
+
+Write in first person as Pat. Use measurements in feet and compass directions.
+
+You are Pat Caldwell, senior surf forecaster for Hawaii.
+
+FORECAST DATE: 2025-01-08
+VALID PERIOD: 48-hour
+SEASON: winter
+
+You have received analysis from your specialist team:
+
+============================================================
+BUOY ANALYST REPORT (Confidence: 0.90):
+============================================================
+Classic north shore swell building nicely with excellent agreement across all north-facing buoys. NW Hawaii (51001) at 4.2m @ 16.5s from 318° (NW), Waimea (51201) at 3.8m @ 15.8s from 320°, Hanalei (51202) at 3.5m @ 16.2s from 315°. All three buoys showing moderate increasing trends and periods in the 15-17 second range indicating powerful long-period NW groundswell. Cross-validation excellent (0.92) with tight directional clustering around 315-320°. This is textbook winter surf for north-facing shores.
+
+KEY BUOY DATA:
+{
+  "trends": [
+    {
+      "buoy_id": "51001",
+      "buoy_name": "NW Hawaii (51001)",
+      "height_trend": "increasing_moderate",
+      "height_slope": 0.0178,
+      "height_current": 4.2,
+      "period_trend": "increasing_slight",
+      "period_slope": 0.0075,
+      "period_current": 16.5,
+      "direction_trend": "steady",
+      "direction_current": 318.0,
+      "observations_count": 24
+    },
+    {
+      "buoy_id": "51201",
+      "buoy_name": "Waimea (51201)",
+      "height_trend": "increasing_moderate",
+      "height_slope": 0.0165,
+      "height_current": 3.8,
+      "period_trend": "steady",
+      "period_slope": 0.0035,
+      "period_current": 15.8,
+      "direction_trend": "steady",
+      "direction_current": 320.0,
+      "observations_count": 24
+    },
+    {
+      "buoy_id": "51202",
+      "buoy_name": "Hanalei (51202)",
+      "height_trend": "increasing_moderate",
+      "height_slope": 0.0152,
+      "height_current": 3.5,
+      "period_trend": "steady",
+      "period_slope": 0.0028,
+      "period_current": 16.2,
+      "direction_trend": "steady",
+      "direction_current": 315.0,
+      "observations_count": 24
+    }
+  ],
+  "anomalies": [],
+  "quality_flags": {
+    "51001": "valid",
+    "51201": "valid",
+    "51202": "valid"
+  },
+  "cross_validation": {
+    "agreement_score": 0.92,
+    "height_agreement": 0.9,
+    "period_agreement": 0.94,
+    "num_buoys_compared": 3,
+    "interpretation": "excellent_agreement"
+  },
+  "summary_stats": {
+    "avg_wave_height": 3.83,
+    "max_wave_height": 4.2,
+    "min_wave_height": 3.5,
+    "avg_period": 16.17,
+    "max_period": 16.5,
+    "min_period": 15.8
+  }
+}
+
+============================================================
+PRESSURE ANALYST REPORT (Confidence: 0.88):
+============================================================
+Powerful Aleutian low at 47N 168W with 970mb central pressure and 58-knot winds, still intensifying. Exceptional fetch window: 950 nautical miles sustained for 42 hours, one of the best setups of the season. Physics calculations show peak swell arriving mid-morning January 8th with heights of 10-14ft Hawaiian scale and periods of 15-18 seconds. Perfect NW direction (318°) for Pipeline, Sunset, and all north shore breaks. High confidence in this forecast—classic winter swell event.
+
+KEY PRESSURE DATA:
+{
+  "systems": [
+    {
+      "type": "low_pressure",
+      "location": "47N 168W",
+      "location_lat": 47.0,
+      "location_lon": -168.0,
+      "pressure_mb": 970,
+      "wind_speed_kt": 58,
+      "movement": "E at 22kt",
+      "intensification": "strengthening",
+      "generation_time": "2025-01-06T06:00:00Z",
+      "fetch": {
+        "direction": "NW",
+        "distance_nm": 1550.0,
+        "duration_hrs": 42.0,
+        "fetch_length_nm": 950.0,
+        "quality": "strong"
+      }
+    }
+  ],
+  "predicted_swells": [
+    {
+      "source_system": "low_47N_168W",
+      "source_lat": 47.0,
+      "source_lon": -168.0,
+      "direction": "NW",
+      "direction_degrees": 318,
+      "arrival_time": "2025-01-08T06:00-12:00Z",
+      "estimated_height": "10-14ft",
+      "estimated_period": "15-18s",
+      "confidence": 0.86,
+      "calculated_arrival": "2025-01-08T09:00:00Z",
+      "travel_time_hrs": 50.5,
+      "distance_nm": 1550.0,
+      "group_velocity_knots": 30.7,
+      "propagation_method": "physics_based",
+      "fetch_quality": "strong",
+      "fetch_duration_hrs": 42.0,
+      "fetch_length_nm": 950.0,
+      "source_pressure_mb": 970,
+      "source_wind_speed_kt": 58,
+      "source_trend": "strengthening"
+    }
+  ],
+  "frontal_boundaries": [],
+  "analysis_summary": {
+    "num_low_pressure": 1,
+    "num_high_pressure": 0,
+    "num_predicted_swells": 1,
+    "region": "North Pacific"
+  }
+}
+
+============================================================
+CROSS-VALIDATION FINDINGS:
+============================================================
+
+KEY FINDINGS:
+- NW Hawaii (51001): 318.0° swell building (4.2m @ 16.5s)
+- Waimea (51201): 320.0° swell building (3.8m @ 15.8s)
+- Hanalei (51202): 315.0° swell building (3.5m @ 16.2s)
+- Predicted NW swell: 10-14ft @ 15-18s, arriving 2025-01-08T06:00-12:00Z
+
+CONTRADICTIONS DETECTED: 0
+None
+
+SHORE BREAKDOWN:
+{
+  "north_shore": {
+    "size_range": "15-23ft",
+    "conditions": "clean",
+    "timing": "Building through the period, peak in 12-24 hours",
+    "confidence": 0.93
+  },
+  "south_shore": {
+    "size_range": "1-2ft",
+    "conditions": "small and clean",
+    "timing": "Steady small surf throughout period",
+    "confidence": 0.5
+  },
+  "east_shore": {
+    "size_range": "1-2ft",
+    "conditions": "small and clean",
+    "timing": "Steady small surf throughout period",
+    "confidence": 0.5
+  },
+  "west_shore": {
+    "size_range": "15-23ft",
+    "conditions": "clean",
+    "timing": "Building through the period, peak in 12-24 hours",
+    "confidence": 0.93
+  }
+}
+
+SWELL BREAKDOWN:
+[
+  {
+    "direction": "NW",
+    "period": "15-18s",
+    "height": "10-14ft",
+    "timing": "2025-01-08T06:00-12:00Z",
+    "confidence": 0.86,
+    "source": "low_47N_168W",
+    "has_pressure_support": true,
+    "has_buoy_confirmation": true,
+    "buoy_height": "3.5m",
+    "buoy_period": "16.2s"
+  }
+]
+
+============================================================
+YOUR TASK:
+============================================================
+
+1. Synthesize these specialist reports into a cohesive 48-hour forecast
+2. Address any contradictions explicitly (e.g., "The buoys show NNE signal but
+   the pressure charts don't show supporting fetch—this suggests short-period
+   windswell rather than groundswell")
+3. Provide shore-by-shore breakdown (North, South, East, West)
+4. Include specific timing, sizing, and conditions
+5. State confidence levels based on specialist agreement
+6. Use your signature technical yet accessible style
+
+Write a 500-800 word forecast in your classic format. Be specific about:
+- Source storms and fetch windows (cite pressure analyst findings)
+- Buoy readings and trends (cite buoy analyst observations)
+- Swell arrival timing and evolution
+- Shore-specific conditions and recommendations
+- Any uncertainties or conflicting signals
+
+Remember: You're writing for experienced Hawaiian surfers who appreciate
+technical detail but need actionable guidance.

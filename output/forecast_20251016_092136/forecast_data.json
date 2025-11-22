@@ -1,0 +1,651 @@
+{
+  "forecast_id": "forecast_20251016_092136",
+  "generated_time": "2025-10-16T09:21:36.744924",
+  "main_forecast": "| SwellCaldWell Outlook | |\n|---|---|\n| Day/Window | Direction (deg/cardinal) | Period (s) | H1/3 (ft) | H1/10 est (ft) | Trend | Notes |\n| Thu 10/16 (day) | NNW (330\u2013345) | 11\u201313 | 1\u20132 | 3\u20134 faces | steady small | Glancing backside Gulf leak; verify on 51101/51001 and nearshore 51201. Trades E 10\u201320 kt. |\n| Fri 10/17 (late) \u2192 Sat 10/18 (day) | NW\u2013NNW (305\u2013325) | 12\u201314 | 2\u20133 Fri PM rising 3\u20135 Sat | 4\u20136 Fri PM, 6\u20138 Sat faces | up | Aleutian mid-period pulse per physics (5 ft @ 13 s) fills Sat; W-N spots benefit first. Watch 51001/51101 \u2192 51003 \u2192 51201. |\n| Fri 10/17 (late) \u2192 Sat 10/18 (day) | S\u2013SSW (190\u2013205) | 16\u201318 forerunners then 14\u201316 | 1\u20132 Fri PM rising 2\u20133 Sat (magnet 3\u20134) | 3\u20134 Fri PM, 4\u20135 Sat faces | up | SPAC gales per sat; first lines late Fri/Sat. Check 51002 then Barbers 51211. Shadowing varies by spot. |\n| Thu 10/16 \u2192 Sat 10/18 | ENE\u2013E (060\u2013090) | 7\u20139 | 3\u20134 (Windward) | 5 faces | steady | Ridge-driven trades maintain short-period windswell. Track 51004/51002 and 51202 (Mokapu). |\n| Sat 10/18 (late into Sun 10/19) | NW\u2013N (310\u2013335) | 16\u201318 | 4\u20136 late Sat night into Sun | 8\u201310 faces | building beyond window | Next pulse from Gulf (physics: 5 ft @ 18 s Sun pre-dawn). More in Outlook. |\n\nSUMMARY\n- Dominant theme: new mid-period NW\u2013NNW builds late Fri, peaks Sat for Oahu\u2019s North Shore in the fun/moderate zone, with reinforcing, longer-period NW due very late Sat night into Sun.\n- South Shore: overlapping S\u2013SSW pulses creep in late Fri/Sat with modest surf at magnets.\n- Winds: moderate E\u2013ENE trades around 10\u201320 kt hold; typical windward showers. Overall forecast confidence: 0.68/1.00.\n\nDETAILS\n- North Pacific/North Shores\n  - Synoptic: A 1008 mb gale near 36N 165W along a front (about 1000 nm NNW) plus a broader 998 mb low near 45N 170W are the primary NW\u2013NNW producers. A deeper 977 mb Gulf low is aimed mainly at N America but leaks longer-period energy toward HI.\n  - Timing/energy: Physics-based arrivals favor a mid-period NW component 5 ft @ 13 s from the Aleutian sector Saturday late morning to afternoon, with a longer-period reinforcer 5 ft @ 18 s from the Gulf early Sunday. Satellite shows no clean, long-line NW this morning, consistent with a gradual ramp, not an abrupt jump.\n  - Buoys: Watch NW buoys 51101 and 51001 for 12\u201314 s energy upticks today into Friday, then 51003 west of Kauai prior to Oahu nearshore 51201 (Waimea) spectral confirmation. The Swell Matrix lists 12\u201315 s NW\u2013NNW peaks this morning, but given chart/sat context, those raw magnitudes likely overstate nearshore impact; we weight synoptic/physics more heavily.\n- South Pacific/South Shores\n  - Synoptic: Two SPAC gales (primary near 45S 145W, secondary near 40\u201345S 170W) present multi-day fetches. Great-circle windows favor 170\u2013205\u00b0 into Hawaii, with the eastern system sending the first forerunners.\n  - Timing/energy: Long-period forerunners 18\u201320 s could trickle late Fri, with more actionable 14\u201316 s energy Saturday into Sunday. Expect a modest event: H1/3 2\u20133 ft Saturday (magnets 3\u20134), H1/10 sets 4\u20135 ft. Verify first lines on 51002, then shoreline on Barbers 51211.\n- Trades/East\n  - High pressure 1030 mb near 35N 140W sustains the trade belt. Short-period ENE\u2013E windswell remains steady at H1/3 3\u20134 ft Windward; H1/10 sets near 5 ft at magnets. Track 51004/51002 and nearshore 51202 (Mokapu) for steep 7\u20139 s energy.\n- Weather/Wind\n  - METAR PHNL 0853 HST: 080\u00b0 at 14 kt; clear. Expect typical morning land-breeze clean-ups leeward, trades on by late morning. No Kona signals. Light windward showers.\n\nNORTH SHORE\n- Thu 10/16: H1/3 1\u20132 ft, H1/10 sets 3\u20134 ft faces at focal reefs. Mostly knee\u2013waist with occasional chest at magnets. E\u2013ENE trades 10\u201320 kt add some texture; early best. Confidence: medium.\n- Fri 10/17: Slow build. AM similar to Thu; PM bumps to H1/3 2\u20133 ft with H1/10 4\u20136 ft faces at the most exposed 305\u2013325\u00b0 windows. Trades similar; morning glassiest. Confidence: medium; watch 51101/51001 and 51201 for the turn.\n- Sat 10/18: Main mid-period NW\u2013NNW fills. H1/3 3\u20135 ft, H1/10 sets 6\u20138 ft faces, largest at reefs open to 305\u2013325\u00b0. Periods 12\u201314 s dominate; lulls between pulses. Afternoon sea-breeze/trade mix can add bump; dawn patrol favored. Confidence: medium.\n\nSOUTH SHORE\n- Thu 10/16: Background mix. H1/3 1\u20132 ft, stray H1/10 sets to 3 ft faces at 190\u2013200\u00b0 magnets. Light AM, onshore texture PM. Confidence: medium-high.\n- Fri 10/17: Forerunners late. Daytime similar to Thu; late-day long-period scouts possible. H1/3 1\u20132 ft; late H1/10 sets to 3\u20134 ft faces at top south magnets. Confidence: medium; confirm on 51002, then 51211 overnight.\n- Sat 10/18: Modest S\u2013SSW event. H1/3 2\u20133 ft area-wide; best 200\u2013205\u00b0 exposures 3\u20134 ft with H1/10 sets 4\u20135 ft faces. Long intervals = patience. Trades side/offshore early for Ala Moana\u2013Waikiki; variable bumps PM. Confidence: medium.\n\nEAST SHORE\n- Thu 10/16 through Sat 10/18: Consistent trade-sea. H1/3 3\u20134 ft; H1/10 sets near 5 ft faces at Windward magnets. Short 7\u20139 s periods; choppy except morning lulls. Confidence: high.\n\nWEST SHORE\n- Wrap from both sides. Thu small: H1/3 1\u20132 ft. Fri PM into Sat: combo wrap gives H1/3 2\u20133 ft, H1/10 sets 4\u20135 ft faces at southerly-open exposures and 3\u20134 ft at NW-open pockets. Trades add midday texture. Confidence: medium.\n\nOUTLOOK\n- Sun 10/19: Reinforcing longer-period NW (physics: 5 ft @ 18 s) arrives pre-dawn, building through the morning. North Shore H1/3 4\u20136 ft with H1/10 sets 8\u201310 ft faces at 310\u2013335\u00b0 exposures; still below true advisory levels but a solid early-season pulse. South Shore holds 2\u20133 ft with 3\u20134 ft at magnets; overlapping SSW continues. Trades persist.\n- Mon 10/20: NW eases slowly, H1/3 3\u20135 ft with fewer 6\u20138 ft face sets; periods trending 13\u201315 s. South gradually eases 1.5\u20132.5 ft. Trades steady.\n- Tue 10/21: Potential small WNW from the Kuril sector (physics: 3 ft @ 13 s) late day into Wed keeps background WNW alive near H1/3 1\u20133 ft; confidence low. Trades ongoing.\n\nNOTES AND DATA GAPS\n- The Swell Matrix shows sizable 12\u201315 s NW/NNW spectral energy early Thu; synoptic/satellite do not support an oversized local event. We discount raw buoy magnitudes in favor of physics-based arrivals and OPC/jet diagnostics. Continue to validate against 51101/51001 (upstream), 51003 (Kauai), and nearshore 51201/51202/51211 as the ramps materialize. Climatology (SNN October stats) supports the timing/magnitude of a modest early-season NW this weekend. Tropical cyclone formation: none expected next 7 days (CPHC).",
+  "north_shore": "Dominant swell is a mixed NW\u2013NNW (300\u2013340\u00b0) event at 12\u201315 seconds with deepwater H1/3 roughly 13\u201314 ft, yielding about 18\u201322 ft faces on the most exposed outer reefs for the H1/3 sets, with occasional 24\u201328 ft H1/10 pulses. Peak is centered Thursday 10/16, easing Friday 10/17, with a modest mid-period Aleutian reinforcement arriving near midday Saturday 10/18 to slow the fade.\n\nBuoy and exposure read\n- Buoys show concurrent NW (321\u00b0, 15 s) and WNW (300\u00b0, 14 s) near 13 ft H1/3 plus NNW (331\u2013344\u00b0, 12\u201313 s) near 11\u201314 ft H1/3. The NW (321\u00b0, 15 s) carries the highest exposure weight to the North Shore (\u22480.98), with NNW 331\u00b0 at \u22480.90; the WNW 300\u00b0 energy is partially shadowed (\u22480.50), so size/quality will vary by break.\n- Trend: peak Thursday AM, slow easing into Friday; Saturday AM smaller then a minor Aleutian reinforcement (~5 ft @ 13 s) around late morning/early afternoon should hold or nudge surf back up a notch at the most open exposures.\n\nWind and tide interplay\n- Trades from the E near 10\u201315 kt (PHNL 080\u00b0 at 14 kt) give side-offshore flow for the North Shore: cleanest at daybreak with increasing cross-bump and surface chop late morning through afternoon.\n- Tide feed is sparse on exact highs/lows; observed level around 1.4 ft mid-morning suggests a moderate diurnal swing. Expect lower dawn tides to sharpen reefs (more makeable barrels where sand hasn\u2019t filled in), with the late-morning push helping consistency but also increasing sweep at outer reefs. Note that Sunset tolerates more tide than Pipe; a bit of tide helps Pipe/Backdoor.\n\nFlagship breaks\n- Pipeline/Backdoor (prefers 300\u2013310\u00b0; partial shadow to 300\u00b0 and more crossed with 330\u2013340\u00b0):\n  \u2022 Thu 10/16: 8\u201312 ft faces with occasional 14\u201316 ft sets on the WNW pulses; crossed-up and warbly on the more NNW sets. Best early with trades light; increasing side-off trades and mid-tide may fatten it. Confidence moderate.\n  \u2022 Fri 10/17: easing to 6\u201310 ft faces, still mixed; best windows early. \n  \u2022 Sat 10/18: 6\u20139 ft AM, with a slight PM bump possible on the Aleutian 13 s reinforcement. Backdoor improves on any WNW pulses; Pipe prefers a touch more tide.\n- Sunset (very open to 300\u2013330\u00b0, exposure \u22480.9\u20131.0):\n  \u2022 Thu 10/16: 15\u201320 ft faces, infrequent 22\u201325 ft sets on the 15 s NW pulses; powerful sweep and warble with trades. Best early. \n  \u2022 Fri 10/17: 12\u201318 ft faces, easing and becoming more organized with the fade. \n  \u2022 Sat 10/18: 10\u201314 ft AM, holding 12\u201315 ft PM with the mid-period bump. \n- Waimea (likes 310\u2013340\u00b0, needs size/period):\n  \u2022 Thu 10/16: 18\u201322 ft faces with occasional 24\u201326 ft bombs; not a \u201cclean, long-interval\u201d day but enough 15 s NW energy to break solidly between wind bumps. \n  \u2022 Fri 10/17: 15\u201320 ft faces, slowly easing; still cleanup sets. \n  \u2022 Sat 10/18: 12\u201316 ft AM; PM may hold near 14\u201318 ft on the reinforcement at the most exposed.\n\nHazards\n- Advisory-level surf likely for north-facing shores Thu into early Fri: strong and pervasive rip currents, longshore sweep, and periodic wash-throughs at outer reef channels; rogue sets 2\u20133 ft above background. Use caution around exposed rocks and harbor entrances (surges possible at Hale\u2018iwa). Conditions deteriorate with the afternoon trades.\n\nConfidence\n- Overall medium (0.68): robust buoy coverage (14/17), nearshore buoys (4/4) and altimetry support the size; exposure weighting clearly favors NW\u2013NNW (0.9\u20131.0) over WNW (\u22480.5). Uncertainty is higher on exact peak timing and set consistency due to the overlapping directions/periods and moderate quality index (0.53). Tide timing specifics are less certain given partial tide data. Tropical influence is nil per the CPHC outlook.\n\nOutlook note\n- A modest Aleutian mid-period pulse (~5 ft @ 13 s) arrives late morning to midday Saturday 10/18, likely holding surf into the afternoon at the most exposed spots. A longer-period Gulf pulse (18 s) is slated for early Sunday 10/19 and lies just beyond this forecast window.",
+  "south_shore": "South Shore forecast (Thu 10/16 \u2013 Sat 10/18), Caldwell-style\n\n1) Opening assessment: size, direction, timing\n- Thu 10/16: Background southern hemi lingering at SW-SSW 220\u2013205\u00b0 with dominant 13\u201314s energy, modest in size. Expect South Shore H1/3 around 1.5\u20132 ft, with H1/10 occasionally 2.5\u20133 ft. First traces of wrap from the large NNW\u2013WNW episode (300\u2013340\u00b0, 12\u201315s) begin to leak into the most westerly-exposed Town reefs late day via Ka\u2018ena refraction; long lulls.\n- Fri 10/17: Wrap becomes more noticeable as the NNW/WNW energy settles and bends more into Town. Refraction fractions into the best magnets tend to run on the order of 0.06\u20130.10 for this angle/period; that supports H1/3 2\u20133 ft at the focal reefs with H1/10 to 3.5\u20134 ft on the best sets. Non-magnets stay 1\u20132 ft H1/3 with sporadic larger sets.\n- Sat 10/18: Similar to Fri in the morning, then a minor day-time bump in wrap as a fresh Aleutian pulse near 5 ft at 13s reaches O\u2018ahu around late morning to midday. Expect magnets 2\u20133 ft H1/3 with occasional 3.5\u20134 ft H1/10 sets, most other Town spots 1.5\u20132.5 ft H1/3 with infrequent pluses. The southern hemi background holds at small levels and slowly eases.\n\nDirectional mix\n- Primary: SW\u2013SSW 220\u2013200\u00b0 at 13\u201314s, slowly trending down.\n- Secondary: Wrapped NNW\u2013WNW 300\u2013330\u00b0 at 12\u201315s, peaking for South Shore exposure Fri PM into Sat with long-period, slow-frequency sets.\n\n2) Town vs. outlier breaks, with winds and tides\n- Ala Moana/Rockpiles/Kewalos: Best shot at wrap. Expect the most size Fri\u2013Sat with long lulls and sneaker sets. Bowls outer/central reefs pull in the WNW wrap better than Waik\u012bk\u012b and handle moderate trades decently. Mid tides help the reefs stand up; a higher mid-morning tide can soften the inside at Bowls while improving the outer ledges.\n- Waik\u012bk\u012b (Queens/Canoes): Mostly the SW-SSW background. Consistency better than the wrap magnets but smaller: Thu 1.5\u20132 ft H1/3; Fri\u2013Sat 1.5\u20132.5 ft with rare 3 ft H1/10. Higher tides slow things down and favor longboards; lower afternoon tides add a bit more push on the reefs but won\u2019t change size much.\n- Diamond Head: Picks up tradeswell/ENE wrap more than NNW wrap. Expect peaky, wind-textured surf with mixed SW background: generally 2\u20133 ft faces with chest-high sets in the stronger afternoon trades. Cleanest early before trades ramp; still manageable with trades given the headland\u2019s orientation.\n- Winds: Trades from the E (070\u2013090\u00b0) around 10\u201318 kt\u2014lightest dawns with land-breeze tendencies, then moderate mid to late mornings and breezier afternoons. That\u2019s semi-offshore to cross-offshore for much of Town, keeping surface fairly clean early; more side-on and bumpy at Diamond Head afternoons.\n- Tides: Modest fall swings. Expect a mid-morning higher tide and a later-day lower tide; plan for the cleanest surfaces at dawn with improving push on the reefs as the tide drops mid to late afternoon, but be mindful that higher tides can dampen Waik\u012bk\u012b rollers.\n\n3) Board call, crowd, and consistency\n- Longboards: Best call most breaks, all three days\u2014especially Waik\u012bk\u012b and the non-magnet Town reefs where the SW background is small but steady.\n- Shortboards: Windows at Bowls/Rockpiles/Kewalos Fri\u2013Sat on the wrap sets, and at Diamond Head for those who don\u2019t mind trade-texture. Expect long lulls (15\u201325 minutes) on the wrap; be patient and sit deep on the ledges.\n- Crowds/consistency: Typical Town crowds. Consistency below average at the wrap magnets with long-period sets and long waits; more even but smaller throughput at Waik\u012bk\u012b.\n\n4) Confidence statement\n- Confidence: Medium (0.68). Buoy coverage is strong (14/17), satellite/altimetry and model guidance are aligned, and tropical interference is nil. Main uncertainty is the efficiency of NNW/WNW refraction around Ka\u2018ena into specific Town reefs and how much the mid-morning higher tides will modulate set quality. Expect variability spot to spot based on subtle bathymetric focusing.\n\nBottom line\n- Thu: Small SSW background controls; first trickles of wrap late. 1.5\u20132 ft H1/3 most spots; magnets see rare 3 ft H1/10 late.\n- Fri: Wrap up. Magnets 2\u20133 ft H1/3 with 3.5\u20134 ft H1/10 sets; others 1\u20132 ft with sporadic pluses.\n- Sat: Similar early, slight midday bump as new 13s Aleutian energy arrives. Magnets still 2\u20133 ft H1/3, infrequent 3.5\u20134 ft H1/10; elsewhere 1.5\u20132.5 ft. Trades favor early sessions; Diamond Head offers the trade-wind option with more texture.",
+  "daily": "HEADLINE: Warning-level NW swell slamming North/West; dawn-to-midmorning is the go\u2014advanced only up north.\n\nNORTH SHORE: 15\u201325+ ft faces (outer reefs/Waimea bigger), from NNW\u2013WNW (300\u2013340\u00b0). Best window: first light to midmorning before trades roughen; extreme currents and long lulls with rogue sets.\n\nSOUTH SHORE: 3\u20135 ft faces, occasional 6 ft at standout SW exposures, from SW (220\u2013230\u00b0). Best window: midmorning through early afternoon under grooming trades; expect long-period sets with lulls.\n\nEAST/WEST:\n- WEST: 10\u201320 ft faces, largest at exposed WNW magnets; early best with lightest winds, very strong sweep.\n- EAST: 3\u20135 ft wind-chop on trade-exposed breaks; poor to fair only in protected corners.\n\nWINDS: E trades near 10\u201320 kt (PHNL ~080\u00b0 at 14 kt mid-morning). Side-offshore/cross for North and West (texture rising late morning), offshore for many South Shore breaks (generally clean), onshore and choppy for Windward.\n\nTIDES (Honolulu 1612340):\n- Latest obs 08:48 HST: 1.39 ft.\n- Plan around a midday high near ~2 ft and a falling tide late-day toward a low this evening; aim for the mid-tide push on reefs.\n\nHAZARDS: Powerful surf and surging sets on N/W shores; strong rip/longshore currents, channel wash-throughs, harbor surges, and coastal run-up. Know your limits; spotters recommended.\n\nACTION ITEM: Go early\u2014north/west only for experts; otherwise target Town midmorning for the cleanest, most manageable surf. Novices avoid N/W today.",
+  "metadata": {
+    "bundle_id": "daec3114-8e94-44fc-b403-b16608f7ec3c",
+    "timestamp": "2025-10-16T18:59:13.936760+00:00",
+    "region": "Hawaii",
+    "agent_results": {
+      "buoys": {
+        "total": 17,
+        "successful": 14,
+        "failed": 3,
+        "success_rate": 82.4,
+        "total_size_bytes": 18666161
+      },
+      "weather": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 0
+      },
+      "models": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 372508
+      },
+      "satellite": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 18119577
+      },
+      "metar": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 1095
+      },
+      "tides": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 270710
+      },
+      "charts": {
+        "total": 3,
+        "successful": 3,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 231037
+      },
+      "tropical": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 766
+      },
+      "nearshore_buoys": {
+        "total": 4,
+        "successful": 4,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 832048
+      },
+      "altimetry": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 84988
+      },
+      "upper_air": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0,
+        "success_rate": 100.0,
+        "total_size_bytes": 90344
+      },
+      "climatology": {
+        "total": 3,
+        "successful": 2,
+        "failed": 1,
+        "success_rate": 66.7,
+        "total_size_bytes": 76842
+      }
+    },
+    "stats": {
+      "total_files": 40,
+      "successful_files": 36,
+      "failed_files": 4,
+      "total_size_mb": 36.95
+    },
+    "source_scores": {
+      "51202": {
+        "overall_score": 0.7622762231990741,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.9613811159953704,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "51002": {
+        "overall_score": 0.7614428897152777,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.9572144485763889,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "51101": {
+        "overall_score": 0.7614428895972222,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.9572144479861111,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "51212": {
+        "overall_score": 0.762831778386574,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.9641588919328704,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "51004": {
+        "overall_score": 0.7614428894074073,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.9572144470370371,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "51207": {
+        "overall_score": 0.7622762226574074,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.961381113287037,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "51211": {
+        "overall_score": 0.7628317781319444,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.9641588906597223,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "51001": {
+        "overall_score": 0.7614428891597221,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.9572144457986111,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "46086": {
+        "overall_score": 0.5114428890185185,
+        "tier": "TIER_4",
+        "tier_score": 0.5,
+        "freshness_score": 0.9572144450925926,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "51201": {
+        "overall_score": 0.7622762222152778,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.9613811110763889,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      },
+      "nws": {
+        "overall_score": 0.6699999999999999,
+        "tier": "TIER_1",
+        "tier_score": 1.0,
+        "freshness_score": 0.5,
+        "completeness_score": 0.0,
+        "accuracy_score": 0.7
+      }
+    },
+    "weather": {
+      "metar_station": "PHNL",
+      "metar_issued": "2025-10-16T18:53:00Z",
+      "wind_direction": 80,
+      "wind_speed_ms": 7.2,
+      "temperature": 29.0,
+      "pressure_hpa": 1017.6,
+      "metar": {
+        "station": "PHNL",
+        "metar": "PHNL 161853Z 08014KT 10SM CLR 29/20 A3005 RMK AO2 SLP173 T02890200 $",
+        "issued": "2025-10-16T18:53:00Z",
+        "wind_direction_deg": 80,
+        "wind_speed_kt": 14,
+        "wind_speed_ms": 7.2,
+        "visibility_sm": 10.0,
+        "temperature_c": 29.0,
+        "dewpoint_c": 20.0,
+        "pressure_inhg": 30.05,
+        "pressure_hpa": 1017.6,
+        "raw_lines": [
+          "2025/10/16 18:53",
+          "PHNL 161853Z 08014KT 10SM CLR 29/20 A3005 RMK AO2 SLP173 T02890200 $"
+        ],
+        "source_url": "https://tgftp.nws.noaa.gov/data/observations/metar/stations/PHNL.TXT"
+      }
+    },
+    "tides": {
+      "high_tide": [
+        [
+          "2025-10-14T21:04:00Z",
+          2.07
+        ],
+        [
+          "2025-10-14T21:05:00Z",
+          2.07
+        ],
+        [
+          "2025-10-14T21:06:00Z",
+          2.07
+        ]
+      ],
+      "low_tide": [
+        [
+          "2025-10-16T05:05:00Z",
+          0.2
+        ],
+        [
+          "2025-10-16T05:06:00Z",
+          0.2
+        ],
+        [
+          "2025-10-16T05:07:00Z",
+          0.2
+        ]
+      ],
+      "station": "1612340",
+      "latest_water_level": {
+        "time": "2025-10-16T18:48:00Z",
+        "height_ft": 1.39
+      }
+    },
+    "tropical": {
+      "headline": "Central Pacific Tropical Weather Outlook",
+      "entries": [
+        {
+          "title": "Central Pacific Tropical Weather Outlook",
+          "summary": "\n        000<br />ACPN50 PHFO 161727<br />TWOCP <br /><br />Tropical Weather Outlook<br />NWS Central Pacific Hurricane Center Honolulu HI<br />Issued by NWS National Hurricane Center Miami FL<br />800 AM HST Thu Oct 16 2025<br /><br />For the central North Pacific...between 140W and 180W:<br /><br />Tropical cyclone formation is not expected during the next 7 days.<br /><br />$$<br />Forecaster Bucci<br />NNNN\n      ",
+          "link": "https://www.nhc.noaa.gov/text/HFOTWOCP.shtml"
+        }
+      ]
+    },
+    "charts": [
+      {
+        "type": "PJBA99.gif",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/PJBA99.gif",
+        "source_url": "https://tgftp.nws.noaa.gov/fax/PJBA99.gif"
+      },
+      {
+        "type": "npac.gif",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/npac.gif",
+        "source_url": "https://www.weather.gov/images/hfo/graphics/npac.gif"
+      },
+      {
+        "type": "PJBA99.gif",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/PJBA99.gif",
+        "source_url": "https://tgftp.nws.noaa.gov/fax/PJBA99.gif"
+      },
+      {
+        "type": "PWFE11.gif",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/PWFE11.gif",
+        "source_url": "https://tgftp.nws.noaa.gov/fax/PWFE11.gif"
+      },
+      {
+        "type": "PWFE11.gif",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/PWFE11.gif",
+        "source_url": "https://tgftp.nws.noaa.gov/fax/PWFE11.gif"
+      },
+      {
+        "type": "npac.gif",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/npac.gif",
+        "source_url": "https://www.weather.gov/images/hfo/graphics/npac.gif"
+      }
+    ],
+    "altimetry": [
+      {
+        "description": "Sea Surface Height (SSH) from ERDDAP_Upwell",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/altimetry/ssh_hawaii_ERDDAP_Upwell.png",
+        "source_url": "https://upwell.pfeg.noaa.gov/erddap/griddap/nesdisSSH1day.graph?sla[(latest)][(15):(30)][(-165):(-150)]&.draw=surface&.vars=longitude|latitude|sla&.size=800|600&.png",
+        "type": "png_image",
+        "analysis_level": null,
+        "netcdf_summary": null,
+        "netcdf_dimensions": null
+      }
+    ],
+    "nearshore_buoys": [
+      {
+        "station_id": "hanalei_225",
+        "station_name": "hanalei_225",
+        "significant_height_m": 1.6,
+        "peak_period_s": 13.0,
+        "peak_direction_deg": 339.0,
+        "observation_timestamp": "2025-10-16 18:26:00Z",
+        "quality_flags": null,
+        "spectral_bins": null,
+        "spectral_frequency_spacing": null,
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/nearshore_buoys/nearshore_buoys/hanalei_225.json"
+      },
+      {
+        "station_id": "waimea_106",
+        "station_name": "waimea_106",
+        "significant_height_m": 2.0,
+        "peak_period_s": 15.0,
+        "peak_direction_deg": 321.0,
+        "observation_timestamp": "2025-10-16 18:26:00Z",
+        "quality_flags": null,
+        "spectral_bins": null,
+        "spectral_frequency_spacing": null,
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/nearshore_buoys/nearshore_buoys/waimea_106.json"
+      },
+      {
+        "station_id": "pauwela_249",
+        "station_name": "pauwela_249",
+        "significant_height_m": 1.7,
+        "peak_period_s": 15.0,
+        "peak_direction_deg": 310.0,
+        "observation_timestamp": "2025-10-16 18:30:00Z",
+        "quality_flags": null,
+        "spectral_bins": null,
+        "spectral_frequency_spacing": null,
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/nearshore_buoys/nearshore_buoys/pauwela_249.json"
+      },
+      {
+        "station_id": "barbers_239",
+        "station_name": "barbers_239",
+        "significant_height_m": 1.2,
+        "peak_period_s": 13.0,
+        "peak_direction_deg": 219.0,
+        "observation_timestamp": "2025-10-16 18:26:00Z",
+        "quality_flags": null,
+        "spectral_bins": null,
+        "spectral_frequency_spacing": null,
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/nearshore_buoys/nearshore_buoys/barbers_239.json"
+      }
+    ],
+    "upper_air": [
+      {
+        "name": "spc_250mb_250_250_{date}_00.gif",
+        "description": "SPC 250 mb wind analysis (00Z only)",
+        "type": "image",
+        "source": "UpperAirAgent",
+        "status": "success",
+        "timestamp": "2025-10-16T18:59:18.471104+00:00",
+        "source_url": "https://www.spc.noaa.gov/obswx/maps/250_251016_00.gif",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/upper_air/spc_250mb_250_250_{date}_00.gif",
+        "size_bytes": 48442,
+        "content_type": "image/gif",
+        "download_time": 3.9250409603118896,
+        "analysis_level": "250",
+        "product_type": "jet_stream",
+        "source_id": "spc_250mb",
+        "data_source": "SPC"
+      },
+      {
+        "name": "spc_500mb_500_500_{date}_00.gif",
+        "description": "SPC 500 mb height analysis (00Z only)",
+        "type": "image",
+        "source": "UpperAirAgent",
+        "status": "success",
+        "timestamp": "2025-10-16T18:59:19.221070+00:00",
+        "source_url": "https://www.spc.noaa.gov/obswx/maps/500_251016_00.gif",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/upper_air/spc_500mb_500_500_{date}_00.gif",
+        "size_bytes": 41902,
+        "content_type": "image/gif",
+        "download_time": 0.7498250007629395,
+        "analysis_level": "500",
+        "product_type": "height_anomaly",
+        "source_id": "spc_500mb",
+        "data_source": "SPC"
+      }
+    ],
+    "upper_air_summary": {
+      "250": {
+        "product_type": "jet_stream",
+        "products": [
+          {
+            "source_id": "spc_250mb",
+            "description": "SPC 250 mb wind analysis (00Z only)",
+            "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/upper_air/spc_250mb_250_250_{date}_00.gif",
+            "retrieved_at": "2025-10-16T18:59:18.471104+00:00"
+          }
+        ]
+      },
+      "500": {
+        "product_type": "height_anomaly",
+        "products": [
+          {
+            "source_id": "spc_500mb",
+            "description": "SPC 500 mb height analysis (00Z only)",
+            "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/upper_air/spc_500mb_500_500_{date}_00.gif",
+            "retrieved_at": "2025-10-16T18:59:19.221070+00:00"
+          }
+        ]
+      }
+    },
+    "climatology": [
+      {
+        "name": "snn_nsstat10.txt",
+        "description": "SNN North Shore monthly stats (October)",
+        "type": "text",
+        "source": "ClimatologyAgent",
+        "status": "success",
+        "timestamp": "2025-10-16T18:59:17.164060+00:00",
+        "source_url": "https://www.surfnewsnetwork.com/wp-content/uploads/2024/11/nsstat10.txt",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/climatology/climatology/snn_nsstat10.txt",
+        "size_bytes": 4615,
+        "source_id": "snn_nsstat10",
+        "format": "text",
+        "line_count": 68
+      },
+      {
+        "name": "uh_oahu_climo",
+        "description": "Failed to fetch climatology resource uh_oahu_climo",
+        "type": "unknown",
+        "source": "ClimatologyAgent",
+        "status": "failed",
+        "timestamp": "2025-10-16T18:59:25.510341+00:00",
+        "source_url": "http://uhslc.soest.hawaii.edu/outreach/climo/oahu_surf_climatlogy.html",
+        "error": "HTTP client error: Cannot connect to host uhslc.soest.hawaii.edu:80 ssl:default [nodename nor servname provided, or not known]",
+        "status_code": null
+      },
+      {
+        "name": "goddard_caldwell_db.html",
+        "description": "NOAA NCEI Goddard-Caldwell visual database metadata",
+        "type": "html",
+        "source": "ClimatologyAgent",
+        "status": "success",
+        "timestamp": "2025-10-16T18:59:27.485895+00:00",
+        "source_url": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.nodc%3A0001754/html",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/climatology/climatology/goddard_caldwell_db.html",
+        "size_bytes": 72227,
+        "source_id": "goddard_caldwell_db",
+        "format": "html",
+        "character_count": 72227
+      }
+    ],
+    "climatology_summary": {
+      "snn_nsstat10": {
+        "format": "text",
+        "description": "SNN North Shore monthly stats (October)",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/climatology/climatology/snn_nsstat10.txt",
+        "line_count": 68,
+        "record_count": null,
+        "source_url": "https://www.surfnewsnetwork.com/wp-content/uploads/2024/11/nsstat10.txt"
+      },
+      "uh_oahu_climo": {
+        "format": "unknown",
+        "description": "Failed to fetch climatology resource uh_oahu_climo",
+        "file_path": null,
+        "line_count": null,
+        "record_count": null,
+        "source_url": "http://uhslc.soest.hawaii.edu/outreach/climo/oahu_surf_climatlogy.html"
+      },
+      "goddard_caldwell_db": {
+        "format": "html",
+        "description": "NOAA NCEI Goddard-Caldwell visual database metadata",
+        "file_path": "data/daec3114-8e94-44fc-b403-b16608f7ec3c/climatology/climatology/goddard_caldwell_db.html",
+        "line_count": null,
+        "record_count": null,
+        "source_url": "https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.nodc%3A0001754/html"
+      }
+    },
+    "confidence": {
+      "overall_score": 0.6827206061701914,
+      "category": "medium",
+      "factors": {
+        "model_consensus": 0.7,
+        "source_reliability": 0.7308824246807659,
+        "data_completeness": 0.5,
+        "forecast_horizon": 0.8,
+        "historical_accuracy": 0.7
+      },
+      "breakdown": {
+        "pressure_confidence": 0.6699999999999999
+      },
+      "warnings": [
+        "No buoy data available",
+        "No model data available"
+      ]
+    },
+    "confidence_report": {
+      "overall_score": 0.6827206061701914,
+      "category": "medium",
+      "factors": {
+        "model_consensus": 0.7,
+        "source_reliability": 0.7308824246807659,
+        "data_completeness": 0.5,
+        "forecast_horizon": 0.8,
+        "historical_accuracy": 0.7
+      },
+      "breakdown": {
+        "pressure_confidence": 0.6699999999999999
+      },
+      "warnings": [
+        "No buoy data available",
+        "No model data available"
+      ]
+    },
+    "source_data": {
+      "swell_events": 7,
+      "locations": 4
+    },
+    "api_usage": {
+      "total_cost": 0.286414,
+      "api_calls": 6,
+      "input_tokens": 14763,
+      "output_tokens": 26796,
+      "model": "gpt-5"
+    },
+    "seasonal_context": {
+      "current_season": "fall",
+      "month": 10,
+      "seasonal_patterns": {
+        "north_shore": {
+          "primary_swell_direction": "NW to WNW",
+          "typical_size_range": "2-6+ feet (Hawaiian)",
+          "quality": "Medium",
+          "consistency": "Medium",
+          "typical_conditions": "Early season NW swells begin to arrive. Transition period with improving conditions as winter approaches."
+        },
+        "south_shore": {
+          "primary_swell_direction": "S to SSW",
+          "typical_size_range": "1-3 feet (Hawaiian)",
+          "quality": "Medium-Low",
+          "consistency": "Medium-Low",
+          "typical_conditions": "End of south swell season with decreasing activity and size."
+        }
+      }
+    },
+    "images": {
+      "pressure_charts": [
+        "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/npac.gif",
+        "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/PJBA99.gif",
+        "data/daec3114-8e94-44fc-b403-b16608f7ec3c/charts/PWFE11.gif"
+      ],
+      "satellite": [
+        "data/daec3114-8e94-44fc-b403-b16608f7ec3c/satellite/satellite/satellite_goes_hawaii_20251016_latest.jpg"
+      ],
+      "wave_models": [],
+      "sst_charts": []
+    },
+    "storm_arrivals": [
+      {
+        "storm_id": "aleutian_20251016_001",
+        "storm_location": {
+          "lat": 36.0,
+          "lon": -165.0
+        },
+        "storm_wind_speed_kt": 40.0,
+        "storm_central_pressure_mb": null,
+        "detection_time": "2025-10-16T09:24:08.068333",
+        "arrival_time": "2025-10-18T11:04:40.723259",
+        "travel_time_hours": 49.675737479319444,
+        "travel_time_days": 2.0698223949716437,
+        "distance_nm": 982.8305026606229,
+        "estimated_period_seconds": 13.038068736,
+        "estimated_height_ft": 5.1,
+        "group_velocity_knots": 19.784920215221486,
+        "confidence": 0.75
+      },
+      {
+        "storm_id": "gulf_alaska_20251016_004",
+        "storm_location": {
+          "lat": 50.0,
+          "lon": -150.0
+        },
+        "storm_wind_speed_kt": 50.0,
+        "storm_central_pressure_mb": null,
+        "detection_time": "2025-10-16T09:24:08.068333",
+        "arrival_time": "2025-10-19T01:29:47.386088",
+        "travel_time_hours": 64.09425493205214,
+        "travel_time_days": 2.6705939555021723,
+        "distance_nm": 1777.260971330854,
+        "estimated_period_seconds": 18.27305088,
+        "estimated_height_ft": 5.2,
+        "group_velocity_knots": 27.72886545315132,
+        "confidence": 0.75
+      },
+      {
+        "storm_id": "aleutian_20251016_002",
+        "storm_location": {
+          "lat": 45.0,
+          "lon": -170.0
+        },
+        "storm_wind_speed_kt": 40.0,
+        "storm_central_pressure_mb": null,
+        "detection_time": "2025-10-16T09:24:08.068333",
+        "arrival_time": "2025-10-19T10:33:41.730181",
+        "travel_time_hours": 73.15935051342719,
+        "travel_time_days": 3.0483062713927995,
+        "distance_nm": 1568.0729056477114,
+        "estimated_period_seconds": 14.124574464,
+        "estimated_height_ft": 4.4,
+        "group_velocity_knots": 21.43366356648994,
+        "confidence": 0.7
+      },
+      {
+        "storm_id": "kuril_20251016_003",
+        "storm_location": {
+          "lat": 38.0,
+          "lon": 155.0
+        },
+        "storm_wind_speed_kt": 40.0,
+        "storm_central_pressure_mb": null,
+        "detection_time": "2025-10-16T09:24:08.068333",
+        "arrival_time": "2025-10-21T23:21:02.380563",
+        "travel_time_hours": 133.94842006387483,
+        "travel_time_days": 5.581184169328118,
+        "distance_nm": 2650.1588039187363,
+        "estimated_period_seconds": 13.038068736,
+        "estimated_height_ft": 3.0,
+        "group_velocity_knots": 19.784920215221486,
+        "confidence": 0.75
+      }
+    ],
+    "visualizations": {},
+    "historical_summary": {
+      "previous_id": "forecast_20251016_090333",
+      "previous_generated": "2025-10-16T09:03:33.081480",
+      "confidence_change": -0.0,
+      "hawaiian_avg_change": null,
+      "dominant_shift": null,
+      "summary_lines": [
+        "Confidence up 0.00 since the previous run."
+      ],
+      "source_path": "output/forecast_20251016_090333/forecast_data.json"
+    }
+  }
+}

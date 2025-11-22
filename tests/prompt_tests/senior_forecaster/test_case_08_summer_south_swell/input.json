@@ -1,0 +1,174 @@
+{
+  "buoy_analysis": {
+    "confidence": 0.8,
+    "data": {
+      "trends": [
+        {
+          "buoy_id": "51101",
+          "buoy_name": "South Oahu (51101)",
+          "height_trend": "increasing_slight",
+          "height_slope": 0.0065,
+          "height_current": 1.5,
+          "period_trend": "steady",
+          "period_slope": 0.0012,
+          "period_current": 17.2,
+          "direction_trend": "steady",
+          "direction_current": 185.0,
+          "observations_count": 24
+        },
+        {
+          "buoy_id": "51201",
+          "buoy_name": "Waimea (51201)",
+          "height_trend": "steady",
+          "height_slope": 0.0005,
+          "height_current": 0.8,
+          "period_trend": "steady",
+          "period_slope": 0.0002,
+          "period_current": 8.2,
+          "direction_trend": "steady",
+          "direction_current": 82.0,
+          "observations_count": 24
+        }
+      ],
+      "anomalies": [],
+      "quality_flags": {
+        "51001": "valid",
+        "51101": "valid",
+        "51201": "valid"
+      },
+      "cross_validation": {
+        "agreement_score": 0.78,
+        "height_agreement": 0.8,
+        "period_agreement": 0.76,
+        "num_buoys_compared": 2,
+        "interpretation": "good_agreement"
+      },
+      "summary_stats": {
+        "avg_wave_height": 1.15,
+        "max_wave_height": 1.5,
+        "min_wave_height": 0.8,
+        "avg_period": 12.7,
+        "max_period": 17.2,
+        "min_period": 8.2
+      }
+    },
+    "narrative": "Classic summer pattern with small south swell showing on southern buoy. South Oahu (51101) tracking 1.5m @ 17.2s from 185\u00b0 (S), with slight building trend. The ultra-long 17-second period is characteristic of Southern Hemisphere groundswell from distant storms. Waimea (51201) shows only light trade wind chop at 0.8m @ 8.2s from 82\u00b0 (E). Good data quality with clear differentiation between south groundswell and trade wind energy.",
+    "metadata": {
+      "buoys_analyzed": [
+        "51001",
+        "51101",
+        "51201"
+      ],
+      "analysis_timestamp": "2025-06-15T14:00:00Z",
+      "data_quality": "good"
+    }
+  },
+  "pressure_analysis": {
+    "confidence": 0.72,
+    "data": {
+      "systems": [
+        {
+          "type": "high_pressure",
+          "location": "38N 148W",
+          "location_lat": 38.0,
+          "location_lon": -148.0,
+          "pressure_mb": 1022,
+          "wind_speed_kt": 10,
+          "movement": "stationary",
+          "intensification": "steady",
+          "generation_time": null,
+          "fetch": null
+        },
+        {
+          "type": "low_pressure",
+          "location": "42S 165W",
+          "location_lat": -42.0,
+          "location_lon": -165.0,
+          "pressure_mb": 988,
+          "wind_speed_kt": 42,
+          "movement": "E at 18kt",
+          "intensification": "weakening",
+          "generation_time": "2025-06-11T00:00:00Z",
+          "fetch": {
+            "direction": "S",
+            "distance_nm": 2400.0,
+            "duration_hrs": 40.0,
+            "fetch_length_nm": 720.0,
+            "quality": "moderate"
+          }
+        }
+      ],
+      "predicted_swells": [
+        {
+          "source_system": "low_42S_165W",
+          "source_lat": -42.0,
+          "source_lon": -165.0,
+          "direction": "S",
+          "direction_degrees": 185,
+          "arrival_time": "2025-06-15T06:00-18:00Z",
+          "estimated_height": "2-4ft",
+          "estimated_period": "16-19s",
+          "confidence": 0.7,
+          "calculated_arrival": "2025-06-15T12:00:00Z",
+          "travel_time_hrs": 84.0,
+          "distance_nm": 2400.0,
+          "fetch_quality": "moderate"
+        }
+      ],
+      "frontal_boundaries": [],
+      "analysis_summary": {
+        "num_low_pressure": 1,
+        "num_high_pressure": 1,
+        "num_predicted_swells": 1,
+        "region": "South Pacific"
+      }
+    },
+    "narrative": "North Pacific dominated by high pressure ridge (1022mb at 38N 148W) blocking swell generation. South Pacific low at 42S 165W (988mb, weakening) generated south swell with 720nm fetch over 40 hours. Long travel distance (2,400nm) over 3.5 days produces ultra-long periods (16-19s) but modest heights (2-4ft Hawaiian scale) due to spreading loss. Typical summer south swell pattern.",
+    "metadata": {
+      "analysis_timestamp": "2025-06-15T14:00:00Z",
+      "models_used": [
+        "GFS"
+      ],
+      "confidence_factors": [
+        "distant source",
+        "long travel time"
+      ]
+    }
+  },
+  "swell_events": [
+    {
+      "direction": "S",
+      "height_range": "2-4ft",
+      "period_range": "16-19s",
+      "confidence": 0.72,
+      "source": "South Pacific low 988mb",
+      "timing": "Currently arriving"
+    }
+  ],
+  "shore_data": {
+    "north_shore": {
+      "exposure": "shadowed"
+    },
+    "south_shore": {
+      "exposure": "direct"
+    },
+    "east_shore": {
+      "exposure": "partial"
+    },
+    "west_shore": {
+      "exposure": "shadowed"
+    }
+  },
+  "seasonal_context": {
+    "season": "summer",
+    "typical_pattern": "Small south swells with ultra-long periods, flat north shores",
+    "current_phase": "mid-summer",
+    "trade_winds": "Light E trades 10-15kt"
+  },
+  "metadata": {
+    "forecast_date": "2025-06-15",
+    "valid_period": "48-hour",
+    "region": "Oahu",
+    "analyst": "SeniorForecaster"
+  }
+}
