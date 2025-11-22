@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+
 import pytest
 
 from src.core.bundle_manager import BundleManager
@@ -112,6 +113,7 @@ class TestAtomicMarkerUpdates:
 
         # Temporarily replace NamedTemporaryFile
         import tempfile as tempfile_module
+
         original_func = tempfile_module.NamedTemporaryFile
         tempfile_module.NamedTemporaryFile = tracking_tempfile
 
@@ -121,8 +123,9 @@ class TestAtomicMarkerUpdates:
             tempfile_module.NamedTemporaryFile = original_func
 
         # Verify temp file was created in same directory as marker
-        assert temp_file_path == tmp_path, \
-            f"Temp file created in {temp_file_path}, expected {tmp_path}"
+        assert (
+            temp_file_path == tmp_path
+        ), f"Temp file created in {temp_file_path}, expected {tmp_path}"
 
     def test_marker_file_never_contains_partial_data(self, tmp_path):
         """Test that marker file is never left in partial state."""
@@ -138,7 +141,6 @@ class TestAtomicMarkerUpdates:
             # After each write, marker should contain complete bundle ID
             if marker_file.exists():
                 content = marker_file.read_text()
-                assert content in bundle_ids, \
-                    f"Marker contains unexpected content: {content}"
+                assert content in bundle_ids, f"Marker contains unexpected content: {content}"
                 # Content should not be truncated or empty
                 assert len(content) > 0, "Marker file is empty"

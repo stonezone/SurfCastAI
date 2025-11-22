@@ -25,7 +25,8 @@ class _ConfigPath(_ConfigPathBase):
         return self
 
     def __str__(self) -> str:  # pragma: no cover - simple accessor
-        return getattr(self, '_raw', super().__str__())
+        return getattr(self, "_raw", super().__str__())
+
 
 # Load environment variables from .env file at module import
 # This ensures env vars are available before any config is loaded

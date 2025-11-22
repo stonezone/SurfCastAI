@@ -18,5 +18,5 @@ echo "$OUTPUT" >> "$LOG_FILE"
 echo "" >> "$LOG_FILE"
 
 echo "Weekly accuracy report written to $LOG_FILE"
-echo "Summary:" 
+echo "Summary:"
 echo "$OUTPUT" | sed -n '1,10p'

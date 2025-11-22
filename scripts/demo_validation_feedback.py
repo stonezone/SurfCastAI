@@ -29,16 +29,13 @@ def main():
         description="Demonstrate ValidationFeedback system for adaptive forecasting"
     )
     parser.add_argument(
-        '--db-path',
+        "--db-path",
         type=str,
-        default='data/validation.db',
-        help='Path to validation database (default: data/validation.db)'
+        default="data/validation.db",
+        help="Path to validation database (default: data/validation.db)",
     )
     parser.add_argument(
-        '--lookback',
-        type=int,
-        default=7,
-        help='Number of days to analyze (default: 7)'
+        "--lookback", type=int, default=7, help="Number of days to analyze (default: 7)"
     )
     args = parser.parse_args()
 
@@ -148,5 +145,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

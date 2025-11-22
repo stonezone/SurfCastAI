@@ -4,20 +4,20 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
-import re
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 # Rate limiting imports
 try:  # pragma: no cover - dependency optional in some environments
     from slowapi import Limiter, _rate_limit_exceeded_handler
-    from slowapi.util import get_remote_address
     from slowapi.errors import RateLimitExceeded
+    from slowapi.util import get_remote_address
+
     _SLOWAPI_AVAILABLE = True
 except ImportError:  # Fallback when slowapi is unavailable
     _SLOWAPI_AVAILABLE = False
@@ -27,7 +27,7 @@ except ImportError:  # Fallback when slowapi is unavailable
 
     class Limiter:  # type: ignore
         def __init__(self, *args, **kwargs):
-            self._default_limits = kwargs.get('default_limits', [])
+            self._default_limits = kwargs.get("default_limits", [])
 
         def limit(self, *args, **kwargs):
             def decorator(func):
@@ -36,15 +36,15 @@ except ImportError:  # Fallback when slowapi is unavailable
             return decorator
 
     def get_remote_address(request: Request) -> str:  # type: ignore
-        return request.client.host if request.client else '0.0.0.0'
+        return request.client.host if request.client else "0.0.0.0"
 
     def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):  # type: ignore
         return JSONResponse(
             status_code=429,
             content={
                 "error": "Rate limit exceeded",
-                "message": "Too many requests. Please try again later."
-            }
+                "message": "Too many requests. Please try again later.",
+            },
         )
 
     # Provide stub modules so downstream imports succeed
@@ -60,9 +60,9 @@ except ImportError:  # Fallback when slowapi is unavailable
     slowapi_errors_module.RateLimitExceeded = RateLimitExceeded
     slowapi_util_module.get_remote_address = get_remote_address
 
-    sys.modules.setdefault('slowapi', slowapi_module)
-    sys.modules.setdefault('slowapi.errors', slowapi_errors_module)
-    sys.modules.setdefault('slowapi.util', slowapi_util_module)
+    sys.modules.setdefault("slowapi", slowapi_module)
+    sys.modules.setdefault("slowapi.errors", slowapi_errors_module)
+    sys.modules.setdefault("slowapi.util", slowapi_util_module)
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -85,30 +85,23 @@ def validate_forecast_id(forecast_id: str) -> str:
     # Check for path traversal sequences
     if ".." in forecast_id or "/" in forecast_id or "\\" in forecast_id:
         raise HTTPException(
-            status_code=400,
-            detail="Invalid forecast_id: path traversal not allowed"
+            status_code=400, detail="Invalid forecast_id: path traversal not allowed"
         )
 
     # Check for null bytes
     if "\x00" in forecast_id:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid forecast_id: null bytes not allowed"
-        )
+        raise HTTPException(status_code=400, detail="Invalid forecast_id: null bytes not allowed")
 
     # Ensure forecast_id matches expected pattern (forecast_YYYYMMDD_HHMMSS)
-    if not re.match(r'^forecast_\d{8}_\d{6}$', forecast_id):
+    if not re.match(r"^forecast_\d{8}_\d{6}$", forecast_id):
         raise HTTPException(
-            status_code=400,
-            detail="Invalid forecast_id format: must be forecast_YYYYMMDD_HHMMSS"
+            status_code=400, detail="Invalid forecast_id format: must be forecast_YYYYMMDD_HHMMSS"
         )
 
     return forecast_id
 
 
-def sanitize_and_validate_path(
-    user_input: str, base_dir: Path, should_exist: bool = True
-) -> Path:
+def sanitize_and_validate_path(user_input: str, base_dir: Path, should_exist: bool = True) -> Path:
     """
     Sanitize and validate a file path to prevent directory traversal.
 
@@ -144,6 +137,7 @@ def sanitize_and_validate_path(
 
     return full_path
 
+
 OUTPUT_ROOT = Path(os.getenv("SURFCAST_OUTPUT_DIR", "output"))
 OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -170,15 +164,13 @@ async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
         content={
             "error": "Rate limit exceeded",
             "message": "Too many requests. Please try again later.",
-            "detail": str(exc.detail) if hasattr(exc, 'detail') else None
+            "detail": str(exc.detail) if hasattr(exc, "detail") else None,
         },
-        headers={
-            "Retry-After": "3600"  # Suggest retry after 1 hour
-        }
+        headers={"Retry-After": "3600"},  # Suggest retry after 1 hour
     )
 
 
-def _forecast_dirs() -> List[Path]:
+def _forecast_dirs() -> list[Path]:
     candidates = [p for p in OUTPUT_ROOT.iterdir() if p.is_dir()]
     return sorted(candidates, key=lambda p: p.stat().st_mtime, reverse=True)
 
@@ -203,7 +195,7 @@ async def index(request: Request) -> HTMLResponse:
         body = "<p>No forecasts generated yet. Run the pipeline to create one.</p>"
     else:
         items = "".join(
-            f"<li><a href=\"/forecasts/{fid}\">{fid}</a> <small>({generated})</small></li>"
+            f'<li><a href="/forecasts/{fid}">{fid}</a> <small>({generated})</small></li>'
             for fid, generated in rows
         )
         body = f"<ul>{items}</ul>"
@@ -247,16 +239,15 @@ async def serve_forecast(forecast_id: str, request: Request) -> HTMLResponse:
         output_dir = OUTPUT_ROOT.resolve()
         if not validated_html.resolve().is_relative_to(output_dir):
             raise HTTPException(
-                status_code=403,
-                detail="Access denied: path outside output directory"
+                status_code=403, detail="Access denied: path outside output directory"
             )
 
         return HTMLResponse(content=validated_html.read_text())
-    except SecurityError as e:
+    except SecurityError:
         raise HTTPException(status_code=403, detail="Access denied: Invalid path")
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -289,17 +280,16 @@ async def forecast_detail(forecast_id: str, request: Request) -> JSONResponse:
         output_dir = OUTPUT_ROOT.resolve()
         if not validated_path.resolve().is_relative_to(output_dir):
             raise HTTPException(
-                status_code=403,
-                detail="Access denied: path outside output directory"
+                status_code=403, detail="Access denied: path outside output directory"
             )
 
         payload = json.loads(validated_path.read_text())
         return JSONResponse(payload)
-    except SecurityError as e:
+    except SecurityError:
         raise HTTPException(status_code=403, detail="Access denied: Invalid path")
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -323,8 +313,7 @@ async def serve_asset(forecast_id: str, path: str, request: Request) -> FileResp
         output_dir = OUTPUT_ROOT.resolve()
         if not validated_path.resolve().is_relative_to(output_dir):
             raise HTTPException(
-                status_code=403,
-                detail="Access denied: path outside output directory"
+                status_code=403, detail="Access denied: path outside output directory"
             )
 
         # Additional check: ensure it's a file, not a directory
@@ -332,11 +321,11 @@ async def serve_asset(forecast_id: str, path: str, request: Request) -> FileResp
             raise HTTPException(status_code=403, detail="Cannot serve directories")
 
         return FileResponse(validated_path)
-    except SecurityError as e:
+    except SecurityError:
         raise HTTPException(status_code=403, detail="Access denied: Invalid path")
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

@@ -3,15 +3,15 @@ Base Agent abstract class for SurfCastAI.
 
 Provides a standard interface for all data collection agents.
 """
-from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
-import logging
-from datetime import datetime, timezone
-from pathlib import Path
 
-from ..core.http_client import HTTPClient
+import logging
+from abc import ABC, abstractmethod
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
 from ..core.config import Config
-from ..utils.exceptions import DataCollectionError
+from ..core.http_client import HTTPClient
 
 
 class BaseAgent(ABC):
@@ -25,7 +25,7 @@ class BaseAgent(ABC):
     - Error handling and logging
     """
 
-    def __init__(self, config: Config, http_client: Optional[HTTPClient] = None):
+    def __init__(self, config: Config, http_client: HTTPClient | None = None):
         """
         Initialize the agent.
 
@@ -39,7 +39,7 @@ class BaseAgent(ABC):
         self.logger = logging.getLogger(f"agent.{self.agent_name.lower()}")
 
     @abstractmethod
-    async def collect(self, data_dir: Path) -> List[Dict[str, Any]]:
+    async def collect(self, data_dir: Path) -> list[dict[str, Any]]:
         """
         Collect data from the agent's sources.
 
@@ -55,12 +55,12 @@ class BaseAgent(ABC):
         self,
         name: str,
         description: str,
-        data_type: str = 'unknown',
-        source_url: Optional[str] = None,
-        file_path: Optional[str] = None,
-        error: Optional[str] = None,
-        **kwargs
-    ) -> Dict[str, Any]:
+        data_type: str = "unknown",
+        source_url: str | None = None,
+        file_path: str | None = None,
+        error: str | None = None,
+        **kwargs,
+    ) -> dict[str, Any]:
         """
         Create standardized metadata for collected data.
 
@@ -76,23 +76,23 @@ class BaseAgent(ABC):
         Returns:
             Standardized metadata dictionary
         """
-        status = 'failed' if error else 'success'
+        status = "failed" if error else "success"
 
         metadata = {
-            'name': name,
-            'description': description,
-            'type': data_type,
-            'source': self.agent_name,
-            'status': status,
-            'timestamp': datetime.now(timezone.utc).isoformat()
+            "name": name,
+            "description": description,
+            "type": data_type,
+            "source": self.agent_name,
+            "status": status,
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
         if source_url:
-            metadata['source_url'] = source_url
+            metadata["source_url"] = source_url
         if file_path:
-            metadata['file_path'] = file_path
+            metadata["file_path"] = file_path
         if error:
-            metadata['error'] = error
+            metadata["error"] = error
 
         # Add any additional fields
         metadata.update(kwargs)
@@ -101,27 +101,27 @@ class BaseAgent(ABC):
 
     def _get_timestamp(self) -> str:
         """Get current timestamp in ISO format."""
-        return datetime.now(timezone.utc).isoformat()
+        return datetime.now(UTC).isoformat()
 
     async def ensure_http_client(self):
         """Ensure HTTP client is available."""
         if self.http_client is None:
             self.logger.info("Creating HTTP client")
             self.http_client = HTTPClient(
-                timeout=self.config.getint('data_collection', 'timeout', 30),
-                max_concurrent=self.config.getint('data_collection', 'max_concurrent', 10),
-                retry_attempts=self.config.getint('data_collection', 'retry_attempts', 3),
-                user_agent=self.config.get('data_collection', 'user_agent', 'SurfCastAI/1.0'),
-                output_dir=self.config.data_directory
+                timeout=self.config.getint("data_collection", "timeout", 30),
+                max_concurrent=self.config.getint("data_collection", "max_concurrent", 10),
+                retry_attempts=self.config.getint("data_collection", "retry_attempts", 3),
+                user_agent=self.config.get("data_collection", "user_agent", "SurfCastAI/1.0"),
+                output_dir=self.config.data_directory,
             )
 
     async def download_file(
         self,
         url: str,
-        filename: Optional[str] = None,
-        data_dir: Optional[Path] = None,
-        description: str = ""
-    ) -> Dict[str, Any]:
+        filename: str | None = None,
+        data_dir: Path | None = None,
+        description: str = "",
+    ) -> dict[str, Any]:
         """
         Download a file with error handling.
 
@@ -139,7 +139,7 @@ class BaseAgent(ABC):
         try:
             # Generate filename if not provided
             if not filename:
-                filename = url.split('/')[-1]
+                filename = url.split("/")[-1]
 
             # Set up file path
             if data_dir:
@@ -149,7 +149,9 @@ class BaseAgent(ABC):
 
             # Download the file
             self.logger.info(f"Downloading {url} to {file_path}")
-            result = await self.http_client.download(url, save_to_disk=True, custom_file_path=file_path)
+            result = await self.http_client.download(
+                url, save_to_disk=True, custom_file_path=file_path
+            )
 
             if result.success:
                 return self.create_metadata(
@@ -160,7 +162,7 @@ class BaseAgent(ABC):
                     file_path=result.file_path,
                     size_bytes=result.size_bytes,
                     content_type=result.content_type,
-                    download_time=result.download_time
+                    download_time=result.download_time,
                 )
             else:
                 return self.create_metadata(
@@ -169,7 +171,7 @@ class BaseAgent(ABC):
                     data_type=self._get_data_type(result.content_type),
                     source_url=url,
                     error=result.error,
-                    status_code=result.status_code
+                    status_code=result.status_code,
                 )
 
         except Exception as e:
@@ -179,10 +181,10 @@ class BaseAgent(ABC):
                 description=description or f"Failed to download from {url}",
                 data_type="unknown",
                 source_url=url,
-                error=str(e)
+                error=str(e),
             )
 
-    def _get_data_type(self, content_type: Optional[str]) -> str:
+    def _get_data_type(self, content_type: str | None) -> str:
         """
         Determine data type from content type.
 
@@ -197,19 +199,19 @@ class BaseAgent(ABC):
 
         content_type = content_type.lower()
 
-        if 'json' in content_type:
-            return 'json'
-        elif 'html' in content_type:
-            return 'html'
-        elif 'xml' in content_type:
-            return 'xml'
-        elif 'text' in content_type:
-            return 'text'
-        elif 'image' in content_type:
-            return 'image'
-        elif 'application/pdf' in content_type:
-            return 'pdf'
-        elif 'application/octet-stream' in content_type:
-            return 'binary'
+        if "json" in content_type:
+            return "json"
+        elif "html" in content_type:
+            return "html"
+        elif "xml" in content_type:
+            return "xml"
+        elif "text" in content_type:
+            return "text"
+        elif "image" in content_type:
+            return "image"
+        elif "application/pdf" in content_type:
+            return "pdf"
+        elif "application/octet-stream" in content_type:
+            return "binary"
         else:
-            return 'unknown'
+            return "unknown"

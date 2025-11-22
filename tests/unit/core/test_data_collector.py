@@ -1,9 +1,9 @@
 """Tests for DataCollector metrics resets."""
 
 import asyncio
+import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import unittest
 
 from src.core.config import Config
 from src.core.data_collector import DataCollector
@@ -27,17 +27,17 @@ class TestDataCollectorStatsReset(unittest.IsolatedAsyncioTestCase):
 
         config = Config()
         config._config = {
-            'general': {
-                'data_directory': self.temp_dir.name,
+            "general": {
+                "data_directory": self.temp_dir.name,
             },
-            'data_sources': {
-                'dummy': {'enabled': True},
+            "data_sources": {
+                "dummy": {"enabled": True},
             },
         }
 
         self.collector = DataCollector(config)
         self.agent = _DummyAgent()
-        self.collector.agents = {'dummy': self.agent}
+        self.collector.agents = {"dummy": self.agent}
 
     async def asyncTearDown(self) -> None:
         await asyncio.sleep(0)
@@ -45,47 +45,41 @@ class TestDataCollectorStatsReset(unittest.IsolatedAsyncioTestCase):
 
     async def test_stats_reset_between_runs(self) -> None:
         first_metadata = [
-            {'status': 'success', 'size_bytes': 512},
-            {'status': 'success', 'size_bytes': 256},
-            {'status': 'error', 'size_bytes': 0},
+            {"status": "success", "size_bytes": 512},
+            {"status": "success", "size_bytes": 256},
+            {"status": "error", "size_bytes": 0},
         ]
         self.agent.metadata = first_metadata
 
         first_result = await self.collector.collect_data()
 
-        self.assertEqual(first_result['stats']['total_files'], 3)
-        self.assertEqual(first_result['stats']['successful_files'], 2)
-        self.assertEqual(first_result['stats']['failed_files'], 1)
+        self.assertEqual(first_result["stats"]["total_files"], 3)
+        self.assertEqual(first_result["stats"]["successful_files"], 2)
+        self.assertEqual(first_result["stats"]["failed_files"], 1)
 
         second_metadata = [
-            {'status': 'success', 'size_bytes': 1024},
-            {'status': 'success', 'size_bytes': 2048},
+            {"status": "success", "size_bytes": 1024},
+            {"status": "success", "size_bytes": 2048},
         ]
         self.agent.metadata = second_metadata
 
         second_result = await self.collector.collect_data()
 
         expected_total = len(second_metadata)
-        expected_success = sum(1 for item in second_metadata if item['status'] == 'success')
+        expected_success = sum(1 for item in second_metadata if item["status"] == "success")
         expected_failed = expected_total - expected_success
-        expected_size = sum(item['size_bytes'] for item in second_metadata)
+        expected_size = sum(item["size_bytes"] for item in second_metadata)
 
-        self.assertEqual(self.collector.stats['total_files'], expected_total)
-        self.assertEqual(self.collector.stats['successful_files'], expected_success)
-        self.assertEqual(self.collector.stats['failed_files'], expected_failed)
-        self.assertEqual(self.collector.stats['total_size_bytes'], expected_size)
-        self.assertEqual(second_result['stats']['total_files'], expected_total)
-        self.assertEqual(
-            self.collector.stats['agents']['dummy']['total'], expected_total
-        )
+        self.assertEqual(self.collector.stats["total_files"], expected_total)
+        self.assertEqual(self.collector.stats["successful_files"], expected_success)
+        self.assertEqual(self.collector.stats["failed_files"], expected_failed)
+        self.assertEqual(self.collector.stats["total_size_bytes"], expected_size)
+        self.assertEqual(second_result["stats"]["total_files"], expected_total)
+        self.assertEqual(self.collector.stats["agents"]["dummy"]["total"], expected_total)
 
-        self.assertEqual(
-            self.collector.stats['agents']['dummy']['successful'], expected_success
-        )
-        self.assertEqual(
-            self.collector.stats['agents']['dummy']['failed'], expected_failed
-        )
+        self.assertEqual(self.collector.stats["agents"]["dummy"]["successful"], expected_success)
+        self.assertEqual(self.collector.stats["agents"]["dummy"]["failed"], expected_failed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

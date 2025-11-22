@@ -5,26 +5,21 @@ This module analyzes buoy observations from multiple stations,
 detecting trends, anomalies, and cross-buoy agreement patterns.
 """
 
-import os
 import logging
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timedelta
+import os
+from datetime import datetime
 from statistics import mean, stdev
-import asyncio
+from typing import Any
 
-from .base_specialist import BaseSpecialist, SpecialistOutput
 from ...processing.models.buoy_data import BuoyData, BuoyObservation
+from .base_specialist import BaseSpecialist
 from .schemas import (
-    BuoyAnalystOutput,
     BuoyAnalystData,
-    BuoyTrend,
+    BuoyAnalystOutput,
     BuoyAnomaly,
+    BuoyTrend,
     CrossValidation,
     SummaryStats,
-    TrendType,
-    SeverityLevel,
-    QualityFlag,
-    AgreementLevel
 )
 
 
@@ -56,7 +51,12 @@ class BuoyAnalyst(BaseSpecialist):
         }
     """
 
-    def __init__(self, config: Optional[Any] = None, model_name: Optional[str] = None, engine: Optional[Any] = None):
+    def __init__(
+        self,
+        config: Any | None = None,
+        model_name: str | None = None,
+        engine: Any | None = None,
+    ):
         """
         Initialize the buoy analyst.
 
@@ -66,7 +66,7 @@ class BuoyAnalyst(BaseSpecialist):
             engine: Reference to ForecastEngine for centralized API calls and cost tracking
         """
         super().__init__(config, model_name, engine)
-        self.logger = logging.getLogger('specialist.buoy_analyst')
+        self.logger = logging.getLogger("specialist.buoy_analyst")
 
         # Validate engine parameter is provided
         if engine is None:
@@ -79,16 +79,18 @@ class BuoyAnalyst(BaseSpecialist):
         # Load OpenAI configuration
         # Note: model_name is now set by BaseSpecialist from config
         if config:
-            self.openai_api_key = config.get('openai', 'api_key') or os.environ.get('OPENAI_API_KEY')
-            self.max_tokens = config.getint('openai', 'max_tokens', 2000)
+            self.openai_api_key = config.get("openai", "api_key") or os.environ.get(
+                "OPENAI_API_KEY"
+            )
+            self.max_tokens = config.getint("openai", "max_tokens", 2000)
         else:
-            self.openai_api_key = os.environ.get('OPENAI_API_KEY')
+            self.openai_api_key = os.environ.get("OPENAI_API_KEY")
             self.max_tokens = 2000
 
         # Anomaly detection threshold (standard deviations)
         self.anomaly_threshold = 2.0
 
-    async def analyze(self, data: Dict[str, Any]) -> BuoyAnalystOutput:
+    async def analyze(self, data: dict[str, Any]) -> BuoyAnalystOutput:
         """
         Analyze buoy data and return structured insights.
 
@@ -102,9 +104,9 @@ class BuoyAnalyst(BaseSpecialist):
             ValueError: If input data is invalid
         """
         # Validate input
-        self._validate_input(data, ['buoy_data'])
+        self._validate_input(data, ["buoy_data"])
 
-        buoy_data_list = data['buoy_data']
+        buoy_data_list = data["buoy_data"]
         if not isinstance(buoy_data_list, list) or len(buoy_data_list) == 0:
             raise ValueError("buoy_data must be a non-empty list")
 
@@ -146,41 +148,41 @@ class BuoyAnalyst(BaseSpecialist):
                 anomalies=buoy_anomalies,
                 quality_flags=quality_flags,
                 cross_validation=cross_validation_obj,
-                summary_stats=summary_stats_obj
+                summary_stats=summary_stats_obj,
             )
 
             # Generate AI narrative (pass dict version for backward compatibility)
-            narrative = await self._generate_narrative({
-                'trends': trends,
-                'anomalies': anomalies,
-                'quality_flags': quality_flags,
-                'cross_validation': cross_validation,
-                'summary_stats': summary_stats_dict
-            }, buoy_objects)
+            narrative = await self._generate_narrative(
+                {
+                    "trends": trends,
+                    "anomalies": anomalies,
+                    "quality_flags": quality_flags,
+                    "cross_validation": cross_validation,
+                    "summary_stats": summary_stats_dict,
+                },
+                buoy_objects,
+            )
 
             # Create metadata
             metadata = {
-                'num_buoys': len(buoy_objects),
-                'total_observations': sum(len(b.observations) for b in buoy_objects),
-                'analysis_method': 'trend_anomaly_cross_validation',
-                'timestamp': datetime.now().isoformat()
+                "num_buoys": len(buoy_objects),
+                "total_observations": sum(len(b.observations) for b in buoy_objects),
+                "analysis_method": "trend_anomaly_cross_validation",
+                "timestamp": datetime.now().isoformat(),
             }
 
-            self._log_analysis_complete(confidence, metadata['total_observations'])
+            self._log_analysis_complete(confidence, metadata["total_observations"])
 
             # Return Pydantic model instead of SpecialistOutput
             return BuoyAnalystOutput(
-                confidence=confidence,
-                data=structured_data,
-                narrative=narrative,
-                metadata=metadata
+                confidence=confidence, data=structured_data, narrative=narrative, metadata=metadata
             )
 
         except Exception as e:
             self.logger.error(f"Error in buoy analysis: {e}")
             raise
 
-    def _normalize_buoy_data(self, buoy_data_list: List[Any]) -> List[BuoyData]:
+    def _normalize_buoy_data(self, buoy_data_list: list[Any]) -> list[BuoyData]:
         """
         Convert mixed format buoy data to BuoyData objects.
 
@@ -197,31 +199,33 @@ class BuoyAnalyst(BaseSpecialist):
             elif isinstance(item, dict):
                 # Convert dict to BuoyData
                 buoy = BuoyData(
-                    station_id=item.get('station_id', 'unknown'),
-                    name=item.get('name'),
-                    latitude=item.get('latitude'),
-                    longitude=item.get('longitude'),
-                    metadata=item.get('metadata', {})
+                    station_id=item.get("station_id", "unknown"),
+                    name=item.get("name"),
+                    latitude=item.get("latitude"),
+                    longitude=item.get("longitude"),
+                    metadata=item.get("metadata", {}),
                 )
 
                 # Add observations
-                for obs_dict in item.get('observations', []):
+                for obs_dict in item.get("observations", []):
                     if isinstance(obs_dict, BuoyObservation):
                         buoy.observations.append(obs_dict)
                     elif isinstance(obs_dict, dict):
-                        buoy.observations.append(BuoyObservation(
-                            timestamp=obs_dict.get('timestamp', ''),
-                            wave_height=obs_dict.get('wave_height'),
-                            dominant_period=obs_dict.get('dominant_period'),
-                            average_period=obs_dict.get('average_period'),
-                            wave_direction=obs_dict.get('wave_direction'),
-                            wind_speed=obs_dict.get('wind_speed'),
-                            wind_direction=obs_dict.get('wind_direction'),
-                            air_temperature=obs_dict.get('air_temperature'),
-                            water_temperature=obs_dict.get('water_temperature'),
-                            pressure=obs_dict.get('pressure'),
-                            raw_data=obs_dict.get('raw_data', {})
-                        ))
+                        buoy.observations.append(
+                            BuoyObservation(
+                                timestamp=obs_dict.get("timestamp", ""),
+                                wave_height=obs_dict.get("wave_height"),
+                                dominant_period=obs_dict.get("dominant_period"),
+                                average_period=obs_dict.get("average_period"),
+                                wave_direction=obs_dict.get("wave_direction"),
+                                wind_speed=obs_dict.get("wind_speed"),
+                                wind_direction=obs_dict.get("wind_direction"),
+                                air_temperature=obs_dict.get("air_temperature"),
+                                water_temperature=obs_dict.get("water_temperature"),
+                                pressure=obs_dict.get("pressure"),
+                                raw_data=obs_dict.get("raw_data", {}),
+                            )
+                        )
 
                 normalized.append(buoy)
             else:
@@ -229,7 +233,7 @@ class BuoyAnalyst(BaseSpecialist):
 
         return normalized
 
-    def _analyze_trends(self, buoy_data: List[BuoyData]) -> List[Dict[str, Any]]:
+    def _analyze_trends(self, buoy_data: list[BuoyData]) -> list[dict[str, Any]]:
         """
         Analyze trends in wave height, period, and direction.
 
@@ -266,24 +270,24 @@ class BuoyAnalyst(BaseSpecialist):
             direction_trend = self._calculate_trend(directions)
 
             trend = {
-                'buoy_id': buoy.station_id,
-                'buoy_name': buoy.name or buoy.station_id,
-                'height_trend': height_trend['description'],
-                'height_slope': height_trend['slope'],
-                'height_current': heights[-1] if heights else None,
-                'period_trend': period_trend['description'],
-                'period_slope': period_trend['slope'],
-                'period_current': periods[-1] if periods else None,
-                'direction_trend': direction_trend['description'],
-                'direction_current': directions[-1] if directions else None,
-                'observations_count': len(buoy.observations)
+                "buoy_id": buoy.station_id,
+                "buoy_name": buoy.name or buoy.station_id,
+                "height_trend": height_trend["description"],
+                "height_slope": height_trend["slope"],
+                "height_current": heights[-1] if heights else None,
+                "period_trend": period_trend["description"],
+                "period_slope": period_trend["slope"],
+                "period_current": periods[-1] if periods else None,
+                "direction_trend": direction_trend["description"],
+                "direction_current": directions[-1] if directions else None,
+                "observations_count": len(buoy.observations),
             }
 
             trends.append(trend)
 
         return trends
 
-    def _calculate_trend(self, values: List[float]) -> Dict[str, Any]:
+    def _calculate_trend(self, values: list[float]) -> dict[str, Any]:
         """
         Calculate simple linear trend.
 
@@ -294,33 +298,30 @@ class BuoyAnalyst(BaseSpecialist):
             Dictionary with slope and description
         """
         if len(values) < 2:
-            return {'slope': 0.0, 'description': 'insufficient_data'}
+            return {"slope": 0.0, "description": "insufficient_data"}
 
         # Simple slope calculation: (last - first) / (n - 1)
         slope = (values[-1] - values[0]) / (len(values) - 1)
 
         # Categorize trend
         if abs(slope) < 0.01:
-            description = 'steady'
+            description = "steady"
         elif slope > 0.1:
-            description = 'increasing_strong'
+            description = "increasing_strong"
         elif slope > 0.05:
-            description = 'increasing_moderate'
+            description = "increasing_moderate"
         elif slope > 0:
-            description = 'increasing_slight'
+            description = "increasing_slight"
         elif slope < -0.1:
-            description = 'decreasing_strong'
+            description = "decreasing_strong"
         elif slope < -0.05:
-            description = 'decreasing_moderate'
+            description = "decreasing_moderate"
         else:
-            description = 'decreasing_slight'
+            description = "decreasing_slight"
 
-        return {
-            'slope': round(slope, 4),
-            'description': description
-        }
+        return {"slope": round(slope, 4), "description": description}
 
-    def _detect_anomalies(self, buoy_data: List[BuoyData]) -> List[Dict[str, Any]]:
+    def _detect_anomalies(self, buoy_data: list[BuoyData]) -> list[dict[str, Any]]:
         """
         Detect anomalies using Z-score analysis.
 
@@ -361,36 +362,40 @@ class BuoyAnalyst(BaseSpecialist):
             if latest_obs.wave_height is not None and height_std > 0:
                 height_zscore = abs((latest_obs.wave_height - height_mean) / height_std)
                 if height_zscore > self.anomaly_threshold:
-                    anomalies.append({
-                        'buoy_id': buoy.station_id,
-                        'buoy_name': buoy.name or buoy.station_id,
-                        'issue': f'wave_height_anomaly',
-                        'severity': 'high' if height_zscore > 3.0 else 'moderate',
-                        'details': f'Height {latest_obs.wave_height}m is {height_zscore:.1f} std devs from mean {height_mean:.2f}m',
-                        'z_score': round(height_zscore, 2)
-                    })
+                    anomalies.append(
+                        {
+                            "buoy_id": buoy.station_id,
+                            "buoy_name": buoy.name or buoy.station_id,
+                            "issue": "wave_height_anomaly",
+                            "severity": "high" if height_zscore > 3.0 else "moderate",
+                            "details": f"Height {latest_obs.wave_height}m is {height_zscore:.1f} std devs from mean {height_mean:.2f}m",
+                            "z_score": round(height_zscore, 2),
+                        }
+                    )
 
             # Check period anomaly
             if latest_obs.dominant_period is not None and period_std > 0:
                 period_zscore = abs((latest_obs.dominant_period - period_mean) / period_std)
                 if period_zscore > self.anomaly_threshold:
-                    anomalies.append({
-                        'buoy_id': buoy.station_id,
-                        'buoy_name': buoy.name or buoy.station_id,
-                        'issue': f'period_anomaly',
-                        'severity': 'high' if period_zscore > 3.0 else 'moderate',
-                        'details': f'Period {latest_obs.dominant_period}s is {period_zscore:.1f} std devs from mean {period_mean:.2f}s',
-                        'z_score': round(period_zscore, 2)
-                    })
+                    anomalies.append(
+                        {
+                            "buoy_id": buoy.station_id,
+                            "buoy_name": buoy.name or buoy.station_id,
+                            "issue": "period_anomaly",
+                            "severity": "high" if period_zscore > 3.0 else "moderate",
+                            "details": f"Period {latest_obs.dominant_period}s is {period_zscore:.1f} std devs from mean {period_mean:.2f}s",
+                            "z_score": round(period_zscore, 2),
+                        }
+                    )
 
         return anomalies
 
     def _assign_quality_flags(
         self,
-        buoy_data: List[BuoyData],
-        anomalies: List[Dict[str, Any]],
-        trends: List[Dict[str, Any]]
-    ) -> Dict[str, str]:
+        buoy_data: list[BuoyData],
+        anomalies: list[dict[str, Any]],
+        trends: list[dict[str, Any]],
+    ) -> dict[str, str]:
         """
         Assign quality flags to each buoy based on anomalies and trends.
 
@@ -412,15 +417,17 @@ class BuoyAnalyst(BaseSpecialist):
         # Create lookup dictionaries for anomalies and trends
         anomaly_map = {}
         for anomaly in anomalies:
-            buoy_id = anomaly['buoy_id']
-            severity = anomaly['severity']
-            z_score = anomaly.get('z_score', 0)
+            buoy_id = anomaly["buoy_id"]
+            severity = anomaly["severity"]
+            z_score = anomaly.get("z_score", 0)
 
             if buoy_id not in anomaly_map:
                 anomaly_map[buoy_id] = []
-            anomaly_map[buoy_id].append({'severity': severity, 'z_score': z_score, 'issue': anomaly['issue']})
+            anomaly_map[buoy_id].append(
+                {"severity": severity, "z_score": z_score, "issue": anomaly["issue"]}
+            )
 
-        trend_map = {t['buoy_id']: t for t in trends}
+        trend_map = {t["buoy_id"]: t for t in trends}
 
         # Assign quality flags for each buoy
         for buoy in buoy_data:
@@ -430,14 +437,17 @@ class BuoyAnalyst(BaseSpecialist):
 
             # Check for single-scan spike (only 1-2 observations OR large spike with declining trend)
             is_single_scan = len(buoy.observations) <= 2
-            height_trend_desc = buoy_trend.get('height_trend', '')
-            is_declining_strongly = 'decreasing_strong' in height_trend_desc or 'decreasing_moderate' in height_trend_desc
+            height_trend_desc = buoy_trend.get("height_trend", "")
+            is_declining_strongly = (
+                "decreasing_strong" in height_trend_desc
+                or "decreasing_moderate" in height_trend_desc
+            )
 
             # Determine quality flag
             if buoy_anomalies:
                 # Check for high severity or single-scan spike
-                has_high_severity = any(a['severity'] == 'high' for a in buoy_anomalies)
-                has_moderate_severity = any(a['severity'] == 'moderate' for a in buoy_anomalies)
+                has_high_severity = any(a["severity"] == "high" for a in buoy_anomalies)
+                has_moderate_severity = any(a["severity"] == "moderate" for a in buoy_anomalies)
 
                 if has_high_severity or (is_single_scan and buoy_anomalies):
                     # EXCLUDED: High severity anomaly or single-scan spike
@@ -466,7 +476,7 @@ class BuoyAnalyst(BaseSpecialist):
 
         return quality_flags
 
-    def _calculate_cross_validation(self, buoy_data: List[BuoyData]) -> Dict[str, Any]:
+    def _calculate_cross_validation(self, buoy_data: list[BuoyData]) -> dict[str, Any]:
         """
         Calculate agreement between buoys.
 
@@ -492,7 +502,7 @@ class BuoyAnalyst(BaseSpecialist):
                     latest_directions.append(latest.wave_direction)
 
         # Calculate coefficient of variation (lower is better agreement)
-        def calculate_agreement(values: List[float]) -> float:
+        def calculate_agreement(values: list[float]) -> float:
             if len(values) < 2:
                 return 0.0
             avg = mean(values)
@@ -506,30 +516,30 @@ class BuoyAnalyst(BaseSpecialist):
         period_agreement = calculate_agreement(latest_periods)
 
         # Overall agreement (weighted average)
-        overall_agreement = (height_agreement * 0.6 + period_agreement * 0.4)
+        overall_agreement = height_agreement * 0.6 + period_agreement * 0.4
 
         return {
-            'agreement_score': round(overall_agreement, 3),
-            'height_agreement': round(height_agreement, 3),
-            'period_agreement': round(period_agreement, 3),
-            'num_buoys_compared': len(buoy_data),
-            'interpretation': self._interpret_agreement(overall_agreement)
+            "agreement_score": round(overall_agreement, 3),
+            "height_agreement": round(height_agreement, 3),
+            "period_agreement": round(period_agreement, 3),
+            "num_buoys_compared": len(buoy_data),
+            "interpretation": self._interpret_agreement(overall_agreement),
         }
 
     def _interpret_agreement(self, score: float) -> str:
         """Interpret agreement score."""
         if score >= 0.9:
-            return 'excellent_agreement'
+            return "excellent_agreement"
         elif score >= 0.75:
-            return 'good_agreement'
+            return "good_agreement"
         elif score >= 0.6:
-            return 'moderate_agreement'
+            return "moderate_agreement"
         elif score >= 0.4:
-            return 'poor_agreement'
+            return "poor_agreement"
         else:
-            return 'very_poor_agreement'
+            return "very_poor_agreement"
 
-    def _calculate_summary_stats(self, buoy_data: List[BuoyData]) -> Dict[str, Any]:
+    def _calculate_summary_stats(self, buoy_data: list[BuoyData]) -> dict[str, Any]:
         """
         Calculate summary statistics across all buoys.
 
@@ -550,22 +560,22 @@ class BuoyAnalyst(BaseSpecialist):
                     all_periods.append(obs.dominant_period)
 
         stats = {
-            'avg_wave_height': round(mean(all_heights), 2) if all_heights else None,
-            'max_wave_height': round(max(all_heights), 2) if all_heights else None,
-            'min_wave_height': round(min(all_heights), 2) if all_heights else None,
-            'avg_period': round(mean(all_periods), 2) if all_periods else None,
-            'max_period': round(max(all_periods), 2) if all_periods else None,
-            'min_period': round(min(all_periods), 2) if all_periods else None,
+            "avg_wave_height": round(mean(all_heights), 2) if all_heights else None,
+            "max_wave_height": round(max(all_heights), 2) if all_heights else None,
+            "min_wave_height": round(min(all_heights), 2) if all_heights else None,
+            "avg_period": round(mean(all_periods), 2) if all_periods else None,
+            "max_period": round(max(all_periods), 2) if all_periods else None,
+            "min_period": round(min(all_periods), 2) if all_periods else None,
         }
 
         return stats
 
     def _calculate_analysis_confidence(
         self,
-        buoy_data: List[BuoyData],
-        trends: List[Dict[str, Any]],
-        anomalies: List[Dict[str, Any]],
-        cross_validation: Dict[str, Any]
+        buoy_data: list[BuoyData],
+        trends: list[dict[str, Any]],
+        anomalies: list[dict[str, Any]],
+        cross_validation: dict[str, Any],
     ) -> float:
         """
         Calculate overall confidence in the analysis.
@@ -585,7 +595,7 @@ class BuoyAnalyst(BaseSpecialist):
         completeness = buoys_with_data / max(total_buoys, 1)
 
         # Data consistency: based on cross-validation agreement
-        consistency = cross_validation.get('agreement_score', 0.5)
+        consistency = cross_validation.get("agreement_score", 0.5)
 
         # Data quality: inverse of anomaly rate (fewer anomalies = higher quality)
         anomaly_rate = len(anomalies) / max(total_buoys, 1)
@@ -594,9 +604,7 @@ class BuoyAnalyst(BaseSpecialist):
         return self._calculate_confidence(completeness, consistency, quality)
 
     async def _generate_narrative(
-        self,
-        structured_data: Dict[str, Any],
-        buoy_data: List[BuoyData]
+        self, structured_data: dict[str, Any], buoy_data: list[BuoyData]
     ) -> str:
         """
         Generate AI narrative analysis using GPT-5-nano.
@@ -629,8 +637,7 @@ Write a 500-1000 word narrative analysis that is:
             # Use engine's centralized OpenAI client for cost tracking
             self.logger.info(f"Calling {self.model_name} for buoy analysis narrative...")
             narrative = await self.engine.openai_client.call_openai_api(
-                system_prompt=system_prompt,
-                user_prompt=prompt
+                system_prompt=system_prompt, user_prompt=prompt
             )
 
             if narrative and len(narrative) > 0:
@@ -645,15 +652,13 @@ Write a 500-1000 word narrative analysis that is:
             raise
 
     def _build_analysis_prompt(
-        self,
-        structured_data: Dict[str, Any],
-        buoy_data: List[BuoyData]
+        self, structured_data: dict[str, Any], buoy_data: list[BuoyData]
     ) -> str:
         """Build the analysis prompt for GPT."""
-        trends = structured_data.get('trends', [])
-        anomalies = structured_data.get('anomalies', [])
-        cross_val = structured_data.get('cross_validation', {})
-        stats = structured_data.get('summary_stats', {})
+        trends = structured_data.get("trends", [])
+        anomalies = structured_data.get("anomalies", [])
+        cross_val = structured_data.get("cross_validation", {})
+        stats = structured_data.get("summary_stats", {})
 
         prompt = f"""Analyze the following buoy data from {len(buoy_data)} stations around Oahu:
 
@@ -674,7 +679,7 @@ TRENDS DETECTED:
         for anomaly in anomalies:
             prompt += f"  - {anomaly['buoy_name']}: {anomaly['issue']} ({anomaly['severity']}) - {anomaly['details']}\n"
 
-        prompt += f"\nCROSS-BUOY VALIDATION:\n"
+        prompt += "\nCROSS-BUOY VALIDATION:\n"
         prompt += f"  - Overall agreement: {cross_val.get('agreement_score')} ({cross_val.get('interpretation')})\n"
         prompt += f"  - Height agreement: {cross_val.get('height_agreement')}\n"
         prompt += f"  - Period agreement: {cross_val.get('period_agreement')}\n"
@@ -683,12 +688,12 @@ TRENDS DETECTED:
 
         return prompt
 
-    def _generate_template_narrative(self, structured_data: Dict[str, Any]) -> str:
+    def _generate_template_narrative(self, structured_data: dict[str, Any]) -> str:
         """Generate a template narrative when AI is unavailable."""
-        trends = structured_data.get('trends', [])
-        anomalies = structured_data.get('anomalies', [])
-        cross_val = structured_data.get('cross_validation', {})
-        stats = structured_data.get('summary_stats', {})
+        trends = structured_data.get("trends", [])
+        anomalies = structured_data.get("anomalies", [])
+        cross_val = structured_data.get("cross_validation", {})
+        stats = structured_data.get("summary_stats", {})
 
         narrative = f"""BUOY ANALYSIS SUMMARY
 
@@ -702,15 +707,19 @@ TREND ANALYSIS:
             narrative += f"\n{trend['buoy_name']}: "
             narrative += f"Height {trend['height_trend']}, Period {trend['period_trend']}"
 
-        narrative += f"\n\nDATA QUALITY:\n"
+        narrative += "\n\nDATA QUALITY:\n"
         narrative += f"Cross-buoy agreement: {cross_val.get('interpretation', 'unknown')}\n"
         narrative += f"Anomalies detected: {len(anomalies)}\n"
 
         if anomalies:
             narrative += "\nANOMALY DETAILS:\n"
             for anomaly in anomalies:
-                narrative += f"- {anomaly['buoy_name']}: {anomaly['issue']} ({anomaly['severity']})\n"
+                narrative += (
+                    f"- {anomaly['buoy_name']}: {anomaly['issue']} ({anomaly['severity']})\n"
+                )
 
-        narrative += "\n(Note: This is a template narrative. Configure OpenAI API for detailed AI analysis.)"
+        narrative += (
+            "\n(Note: This is a template narrative. Configure OpenAI API for detailed AI analysis.)"
+        )
 
         return narrative

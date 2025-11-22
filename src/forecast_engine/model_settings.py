@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 @dataclass(slots=True)
@@ -11,12 +11,14 @@ class ModelSettings:
     """Light-weight container describing how to call an OpenAI model."""
 
     name: str
-    max_output_tokens: Optional[int]
-    verbosity: Optional[str]
-    reasoning_effort: Optional[str]
+    max_output_tokens: int | None
+    verbosity: str | None
+    reasoning_effort: str | None
 
     @classmethod
-    def from_config(cls, raw: Dict[str, Any], defaults: Optional[Dict[str, Any]] = None) -> "ModelSettings":
+    def from_config(
+        cls, raw: dict[str, Any], defaults: dict[str, Any] | None = None
+    ) -> ModelSettings:
         """Create settings from loosely structured config data."""
 
         defaults = defaults or {}
@@ -33,10 +35,10 @@ class ModelSettings:
             reasoning_effort=pick("reasoning_effort"),
         )
 
-    def into_response_kwargs(self) -> Dict[str, Any]:
+    def into_response_kwargs(self) -> dict[str, Any]:
         """Map the settings into keyword args understood by the Responses API."""
 
-        kwargs: Dict[str, Any] = {"model": self.name}
+        kwargs: dict[str, Any] = {"model": self.name}
 
         if self.max_output_tokens is not None:
             kwargs["max_output_tokens"] = int(self.max_output_tokens)

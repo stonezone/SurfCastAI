@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Optional
 
 
 class PromptLoader:
@@ -15,17 +15,17 @@ class PromptLoader:
 
     def __init__(
         self,
-        base_dir: Optional[str],
+        base_dir: str | None,
         *,
-        version: Optional[str] = "v1",
-        logger: Optional[logging.Logger] = None,
-        fallback_provider: Optional[Callable[[], Dict[str, Dict]]] = None,
+        version: str | None = "v1",
+        logger: logging.Logger | None = None,
+        fallback_provider: Callable[[], dict[str, dict]] | None = None,
     ) -> None:
         self.base_dir = Path(base_dir) if base_dir else None
         self.version = version
         self.logger = logger or logging.getLogger("utils.prompt_loader")
         self._fallback_provider = fallback_provider
-        self._prompts: Dict[str, Dict] = {}
+        self._prompts: dict[str, dict] = {}
         self._fallback_active = False
         self.reload()
 
@@ -34,7 +34,7 @@ class PromptLoader:
     # ------------------------------------------------------------------
     def reload(self) -> None:
         """Reload prompt files from disk, falling back when necessary."""
-        loaded: Dict[str, Dict] = {}
+        loaded: dict[str, dict] = {}
 
         version_dir = self._resolve_version_dir()
         if version_dir and version_dir.exists():
@@ -54,7 +54,7 @@ class PromptLoader:
     def has_prompt(self, name: str) -> bool:
         return name in self._prompts
 
-    def get_prompt(self, name: str) -> Dict:
+    def get_prompt(self, name: str) -> dict:
         return self._prompts[name]
 
     def available_prompts(self) -> Iterable[str]:
@@ -63,9 +63,9 @@ class PromptLoader:
     def is_fallback_enabled(self) -> bool:
         return self._fallback_active
 
-    def as_templates(self, aliases: Optional[Dict[str, str]] = None) -> Dict[str, Dict]:
+    def as_templates(self, aliases: dict[str, str] | None = None) -> dict[str, dict]:
         """Return prompts mapped for PromptTemplates consumption."""
-        mapping: Dict[str, Dict] = {}
+        mapping: dict[str, dict] = {}
         for name, prompt in self._prompts.items():
             mapping[name] = prompt
             if aliases and name in aliases:
@@ -75,14 +75,14 @@ class PromptLoader:
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
-    def _resolve_version_dir(self) -> Optional[Path]:
+    def _resolve_version_dir(self) -> Path | None:
         if self.base_dir is None:
             return None
         if self.version:
             return self.base_dir / self.version
         return self.base_dir
 
-    def _load_prompt_file(self, path: Path) -> Optional[Dict]:
+    def _load_prompt_file(self, path: Path) -> dict | None:
         try:
             data = json.loads(path.read_text())
         except Exception as error:  # broad: json + IO
@@ -95,7 +95,7 @@ class PromptLoader:
 
         return data
 
-    def _is_valid_prompt(self, prompt: Dict) -> bool:
+    def _is_valid_prompt(self, prompt: dict) -> bool:
         return all(field in prompt for field in self.REQUIRED_FIELDS)
 
     def _activate_fallback(self) -> None:
@@ -106,4 +106,3 @@ class PromptLoader:
         else:
             self._prompts = {}
             self._fallback_active = False
-

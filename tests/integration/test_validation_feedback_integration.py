@@ -9,6 +9,7 @@ import sqlite3
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
+
 import pytest
 
 from src.utils.validation_feedback import ValidationFeedback
@@ -17,7 +18,7 @@ from src.utils.validation_feedback import ValidationFeedback
 @pytest.fixture
 def realistic_db():
     """Create database with realistic multi-day validation data."""
-    temp_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.db')
+    temp_file = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".db")
     temp_file.close()
     db_path = Path(temp_file.name)
 
@@ -78,7 +79,7 @@ def realistic_db():
 
             cursor.execute(
                 "INSERT INTO forecasts (forecast_id, created_at) VALUES (?, ?)",
-                (forecast_id, day.timestamp())
+                (forecast_id, day.timestamp()),
             )
 
             # North Shore: accurate predictions (MAE ~1.2 ft, slight underprediction)
@@ -90,13 +91,19 @@ def realistic_db():
                 cursor.execute(
                     """INSERT INTO predictions (forecast_id, shore, forecast_time, valid_time, predicted_height)
                        VALUES (?, ?, ?, ?, ?)""",
-                    (forecast_id, 'North Shore', pred_time.timestamp(), pred_time.timestamp(), predicted)
+                    (
+                        forecast_id,
+                        "North Shore",
+                        pred_time.timestamp(),
+                        pred_time.timestamp(),
+                        predicted,
+                    ),
                 )
                 pred_id = cursor.lastrowid
 
                 cursor.execute(
                     "INSERT INTO actuals (buoy_id, observation_time, wave_height) VALUES (?, ?, ?)",
-                    ('51201', pred_time.timestamp(), actual)
+                    ("51201", pred_time.timestamp(), actual),
                 )
                 actual_id = cursor.lastrowid
 
@@ -105,8 +112,16 @@ def realistic_db():
                     """INSERT INTO validations (forecast_id, prediction_id, actual_id, validated_at,
                                                height_error, mae, rmse, category_match)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (forecast_id, pred_id, actual_id, pred_time.timestamp(),
-                     predicted - actual, error, error, True)
+                    (
+                        forecast_id,
+                        pred_id,
+                        actual_id,
+                        pred_time.timestamp(),
+                        predicted - actual,
+                        error,
+                        error,
+                        True,
+                    ),
                 )
 
             # South Shore: overpredicting (MAE ~1.8 ft, +0.8 ft bias)
@@ -118,13 +133,19 @@ def realistic_db():
                 cursor.execute(
                     """INSERT INTO predictions (forecast_id, shore, forecast_time, valid_time, predicted_height)
                        VALUES (?, ?, ?, ?, ?)""",
-                    (forecast_id, 'South Shore', pred_time.timestamp(), pred_time.timestamp(), predicted)
+                    (
+                        forecast_id,
+                        "South Shore",
+                        pred_time.timestamp(),
+                        pred_time.timestamp(),
+                        predicted,
+                    ),
                 )
                 pred_id = cursor.lastrowid
 
                 cursor.execute(
                     "INSERT INTO actuals (buoy_id, observation_time, wave_height) VALUES (?, ?, ?)",
-                    ('51202', pred_time.timestamp(), actual)
+                    ("51202", pred_time.timestamp(), actual),
                 )
                 actual_id = cursor.lastrowid
 
@@ -133,8 +154,16 @@ def realistic_db():
                     """INSERT INTO validations (forecast_id, prediction_id, actual_id, validated_at,
                                                height_error, mae, rmse, category_match)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (forecast_id, pred_id, actual_id, pred_time.timestamp(),
-                     predicted - actual, error, error, False)  # Category mismatch
+                    (
+                        forecast_id,
+                        pred_id,
+                        actual_id,
+                        pred_time.timestamp(),
+                        predicted - actual,
+                        error,
+                        error,
+                        False,
+                    ),  # Category mismatch
                 )
 
             # West Shore: minimal data (only 1 validation per day)
@@ -145,13 +174,19 @@ def realistic_db():
             cursor.execute(
                 """INSERT INTO predictions (forecast_id, shore, forecast_time, valid_time, predicted_height)
                    VALUES (?, ?, ?, ?, ?)""",
-                (forecast_id, 'West Shore', pred_time.timestamp(), pred_time.timestamp(), predicted)
+                (
+                    forecast_id,
+                    "West Shore",
+                    pred_time.timestamp(),
+                    pred_time.timestamp(),
+                    predicted,
+                ),
             )
             pred_id = cursor.lastrowid
 
             cursor.execute(
                 "INSERT INTO actuals (buoy_id, observation_time, wave_height) VALUES (?, ?, ?)",
-                ('51203', pred_time.timestamp(), actual)
+                ("51203", pred_time.timestamp(), actual),
             )
             actual_id = cursor.lastrowid
 
@@ -160,8 +195,16 @@ def realistic_db():
                 """INSERT INTO validations (forecast_id, prediction_id, actual_id, validated_at,
                                            height_error, mae, rmse, category_match)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (forecast_id, pred_id, actual_id, pred_time.timestamp(),
-                 predicted - actual, error, error, True)
+                (
+                    forecast_id,
+                    pred_id,
+                    actual_id,
+                    pred_time.timestamp(),
+                    predicted - actual,
+                    error,
+                    error,
+                    True,
+                ),
             )
 
         conn.commit()
@@ -186,30 +229,30 @@ class TestRealisticValidationFeedback:
         # Should have 3 shores
         assert len(report.shore_performance) == 3
         shore_names = {sp.shore for sp in report.shore_performance}
-        assert 'North Shore' in shore_names
-        assert 'South Shore' in shore_names
-        assert 'West Shore' in shore_names
+        assert "North Shore" in shore_names
+        assert "South Shore" in shore_names
+        assert "West Shore" in shore_names
 
         # Total validations: 7 days * (3 North + 3 South + 1 West) = 49
         total_validations = sum(sp.validation_count for sp in report.shore_performance)
         assert total_validations == 49
 
         # Check North Shore performance (accurate, slight underprediction)
-        north = next(sp for sp in report.shore_performance if sp.shore == 'North Shore')
+        north = next(sp for sp in report.shore_performance if sp.shore == "North Shore")
         assert north.validation_count == 21  # 7 days * 3 per day
         assert north.avg_mae < 0.5  # Should be very accurate
         assert north.avg_bias < 0  # Underprediction (predicted < actual)
         assert north.categorical_accuracy == 1.0  # All categories matched
 
         # Check South Shore performance (overpredicting)
-        south = next(sp for sp in report.shore_performance if sp.shore == 'South Shore')
+        south = next(sp for sp in report.shore_performance if sp.shore == "South Shore")
         assert south.validation_count == 21
         assert south.avg_mae > 0.5  # Less accurate
         assert south.avg_bias > 0.5  # Significant overprediction
         assert south.categorical_accuracy == 0.0  # No categories matched
 
         # Check West Shore performance (minimal data, accurate)
-        west = next(sp for sp in report.shore_performance if sp.shore == 'West Shore')
+        west = next(sp for sp in report.shore_performance if sp.shore == "West Shore")
         assert west.validation_count == 7  # Only 1 per day
         assert west.avg_mae < 0.2  # Accurate
 
@@ -232,7 +275,7 @@ class TestRealisticValidationFeedback:
 
         # Should identify South Shore bias
         assert "South Shore" in context
-        assert ("overpredicting" in context.lower() or "overprediction" in context.lower())
+        assert "overpredicting" in context.lower() or "overprediction" in context.lower()
         assert "running high" in context
 
         # Should provide specific guidance
@@ -248,15 +291,15 @@ class TestRealisticValidationFeedback:
         assert len(guidance) >= 2
 
         # Should mention South Shore overprediction
-        south_guidance = [g for g in guidance if 'South Shore' in g and 'running high' in g]
+        south_guidance = [g for g in guidance if "South Shore" in g and "running high" in g]
         assert len(south_guidance) >= 1
-        assert any('conservative' in g.lower() for g in south_guidance)
+        assert any("conservative" in g.lower() for g in south_guidance)
 
         # Should mention North Shore accuracy (MAE < 1.5, bias < 0.3 triggers "good performance")
-        north_guidance = [g for g in guidance if 'North Shore' in g]
+        north_guidance = [g for g in guidance if "North Shore" in g]
         assert len(north_guidance) >= 1
         # Check that it mentions accuracy or maintaining approach
-        assert any('accurate' in g.lower() or 'maintain' in g.lower() for g in north_guidance)
+        assert any("accurate" in g.lower() or "maintain" in g.lower() for g in north_guidance)
 
     def test_different_lookback_windows(self, realistic_db):
         """Test that different lookback windows work correctly."""
@@ -292,19 +335,19 @@ class TestRealisticValidationFeedback:
         report = feedback.get_recent_performance()
 
         # North Shore: underprediction (negative bias)
-        north = next(sp for sp in report.shore_performance if sp.shore == 'North Shore')
+        north = next(sp for sp in report.shore_performance if sp.shore == "North Shore")
         assert north.avg_bias < 0
         north_desc = feedback._describe_bias(north.avg_bias)
         assert "underprediction" in north_desc.lower()
 
         # South Shore: overprediction (positive bias)
-        south = next(sp for sp in report.shore_performance if sp.shore == 'South Shore')
+        south = next(sp for sp in report.shore_performance if sp.shore == "South Shore")
         assert south.avg_bias > 0.5
         south_desc = feedback._describe_bias(south.avg_bias)
         assert "overpredicting" in south_desc.lower()
 
         # West Shore: minimal bias (well-calibrated)
-        west = next(sp for sp in report.shore_performance if sp.shore == 'West Shore')
+        west = next(sp for sp in report.shore_performance if sp.shore == "West Shore")
         assert abs(west.avg_bias) < 0.2
         west_desc = feedback._describe_bias(west.avg_bias)
         assert "well-calibrated" in west_desc.lower()
@@ -315,11 +358,11 @@ class TestRealisticValidationFeedback:
         report = feedback.get_recent_performance()
 
         # North Shore: perfect categorical accuracy
-        north = next(sp for sp in report.shore_performance if sp.shore == 'North Shore')
+        north = next(sp for sp in report.shore_performance if sp.shore == "North Shore")
         assert north.categorical_accuracy == 1.0
 
         # South Shore: zero categorical accuracy
-        south = next(sp for sp in report.shore_performance if sp.shore == 'South Shore')
+        south = next(sp for sp in report.shore_performance if sp.shore == "South Shore")
         assert south.categorical_accuracy == 0.0
 
         # Overall: should be weighted average
@@ -327,5 +370,5 @@ class TestRealisticValidationFeedback:
         assert 0.5 <= report.overall_categorical <= 0.6
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

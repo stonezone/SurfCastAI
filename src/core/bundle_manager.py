@@ -1,17 +1,15 @@
 """Bundle Manager for organizing and managing data bundles."""
 
 import json
-import os
-import shutil
 import logging
+import shutil
 import tempfile
 import zipfile
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Any
 
 from ..utils.exceptions import SecurityError
-
 
 # Security constants for archive extraction
 MAX_ARCHIVE_FILE_SIZE = 100 * 1024 * 1024  # 100MB per file
@@ -30,7 +28,7 @@ class BundleManager:
     - Supports operations on multiple bundles
     """
 
-    def __init__(self, data_dir: Union[str, Path]):
+    def __init__(self, data_dir: str | Path):
         """
         Initialize the bundle manager.
 
@@ -39,9 +37,9 @@ class BundleManager:
         """
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(exist_ok=True)
-        self.logger = logging.getLogger('bundle_manager')
+        self.logger = logging.getLogger("bundle_manager")
 
-    def _write_latest_bundle_atomic(self, bundle_id: Optional[str]) -> None:
+    def _write_latest_bundle_atomic(self, bundle_id: str | None) -> None:
         """
         Atomically update the latest bundle marker file.
 
@@ -65,11 +63,7 @@ class BundleManager:
         temp_path = None
         try:
             # Create temp file in same directory (required for atomic rename)
-            with tempfile.NamedTemporaryFile(
-                mode='w',
-                dir=latest_file.parent,
-                delete=False
-            ) as tf:
+            with tempfile.NamedTemporaryFile(mode="w", dir=latest_file.parent, delete=False) as tf:
                 tf.write(bundle_id)
                 temp_path = Path(tf.name)
 
@@ -85,11 +79,11 @@ class BundleManager:
                     pass  # Best effort cleanup
             raise
 
-    def set_latest_bundle(self, bundle_id: Optional[str]) -> None:
+    def set_latest_bundle(self, bundle_id: str | None) -> None:
         """Persist the provided bundle ID as the latest bundle reference."""
         self._write_latest_bundle_atomic(bundle_id)
 
-    def get_latest_bundle(self) -> Optional[str]:
+    def get_latest_bundle(self) -> str | None:
         """
         Get the ID of the latest bundle.
 
@@ -100,14 +94,17 @@ class BundleManager:
             # First check for the latest_bundle.txt file
             latest_file = self.data_dir / "latest_bundle.txt"
             if latest_file.exists():
-                with open(latest_file, 'r') as f:
+                with open(latest_file) as f:
                     bundle_id = f.read().strip()
                     if (self.data_dir / bundle_id).exists():
                         return bundle_id
 
             # Fall back to finding the most recent bundle directory
-            bundles = [d for d in self.data_dir.iterdir()
-                     if d.is_dir() and d.name != 'temp' and d.name != 'archive']
+            bundles = [
+                d
+                for d in self.data_dir.iterdir()
+                if d.is_dir() and d.name != "temp" and d.name != "archive"
+            ]
 
             if not bundles:
                 return None
@@ -120,7 +117,7 @@ class BundleManager:
             self.logger.error(f"Error getting latest bundle: {e}")
             return None
 
-    def get_bundle_path(self, bundle_id: Optional[str] = None) -> Optional[Path]:
+    def get_bundle_path(self, bundle_id: str | None = None) -> Path | None:
         """
         Get the path to a specific bundle.
 
@@ -143,7 +140,7 @@ class BundleManager:
 
         return None
 
-    def get_bundle_metadata(self, bundle_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    def get_bundle_metadata(self, bundle_id: str | None = None) -> dict[str, Any] | None:
         """
         Get metadata for a specific bundle.
 
@@ -161,7 +158,7 @@ class BundleManager:
         metadata_path = bundle_path / "bundle_metadata.json"
         if metadata_path.exists():
             try:
-                with open(metadata_path, 'r') as f:
+                with open(metadata_path) as f:
                     return json.load(f)
             except json.JSONDecodeError:
                 self.logger.error(f"Invalid JSON in bundle metadata: {metadata_path}")
@@ -169,10 +166,8 @@ class BundleManager:
         return None
 
     def list_bundles(
-        self,
-        limit: Optional[int] = None,
-        include_incomplete: bool = False
-    ) -> List[Dict[str, Any]]:
+        self, limit: int | None = None, include_incomplete: bool = False
+    ) -> list[dict[str, Any]]:
         """
         List all available bundles.
 
@@ -189,14 +184,14 @@ class BundleManager:
 
         # Find all bundle directories
         for item in self.data_dir.iterdir():
-            if item.is_dir() and item.name != 'temp' and item.name != 'archive':
-                processed_fused = item / 'processed' / 'fused_forecast.json'
+            if item.is_dir() and item.name != "temp" and item.name != "archive":
+                processed_fused = item / "processed" / "fused_forecast.json"
                 is_complete = processed_fused.exists()
                 if not include_incomplete and not is_complete:
                     self.logger.debug(
                         "Skipping incomplete bundle %s (missing %s)",
                         item.name,
-                        processed_fused.relative_to(item)
+                        processed_fused.relative_to(item),
                     )
                     continue
                 # Try to load metadata
@@ -204,41 +199,47 @@ class BundleManager:
 
                 if metadata_path.exists():
                     try:
-                        with open(metadata_path, 'r') as f:
+                        with open(metadata_path) as f:
                             metadata = json.load(f)
                             if isinstance(metadata, dict):
                                 metadata.setdefault("bundle_id", item.name)
-                                metadata['complete'] = is_complete
+                                metadata["complete"] = is_complete
                                 bundles.append(metadata)
                             else:
-                                bundles.append({
-                                    "bundle_id": item.name,
-                                    "timestamp": datetime.fromtimestamp(
-                                        item.stat().st_mtime, tz=timezone.utc
-                                    ).isoformat(),
-                                    "error": "Invalid metadata format",
-                                    "complete": is_complete,
-                                })
+                                bundles.append(
+                                    {
+                                        "bundle_id": item.name,
+                                        "timestamp": datetime.fromtimestamp(
+                                            item.stat().st_mtime, tz=UTC
+                                        ).isoformat(),
+                                        "error": "Invalid metadata format",
+                                        "complete": is_complete,
+                                    }
+                                )
                     except json.JSONDecodeError:
                         # Add basic info if metadata invalid
-                        bundles.append({
-                            "bundle_id": item.name,
-                            "timestamp": datetime.fromtimestamp(
-                                item.stat().st_mtime, tz=timezone.utc
-                            ).isoformat(),
-                            "error": "Invalid metadata file",
-                            "complete": is_complete,
-                        })
+                        bundles.append(
+                            {
+                                "bundle_id": item.name,
+                                "timestamp": datetime.fromtimestamp(
+                                    item.stat().st_mtime, tz=UTC
+                                ).isoformat(),
+                                "error": "Invalid metadata file",
+                                "complete": is_complete,
+                            }
+                        )
                 else:
                     # Add basic info if metadata not available
-                    bundles.append({
-                        "bundle_id": item.name,
-                        "timestamp": datetime.fromtimestamp(
-                            item.stat().st_mtime, tz=timezone.utc
-                        ).isoformat(),
-                        "error": "Missing metadata file",
-                        "complete": is_complete,
-                    })
+                    bundles.append(
+                        {
+                            "bundle_id": item.name,
+                            "timestamp": datetime.fromtimestamp(
+                                item.stat().st_mtime, tz=UTC
+                            ).isoformat(),
+                            "error": "Missing metadata file",
+                            "complete": is_complete,
+                        }
+                    )
 
         # Sort by timestamp (newest first)
         bundles.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
@@ -256,11 +257,11 @@ class BundleManager:
             return timedelta(0)
 
         try:
-            mtime = datetime.fromtimestamp(bundle_path.stat().st_mtime, tz=timezone.utc)
+            mtime = datetime.fromtimestamp(bundle_path.stat().st_mtime, tz=UTC)
         except FileNotFoundError:
             return timedelta(0)
 
-        return datetime.now(timezone.utc) - mtime
+        return datetime.now(UTC) - mtime
 
     def cleanup_old_bundles(self, days_to_keep: int = 7) -> int:
         """
@@ -272,7 +273,7 @@ class BundleManager:
         Returns:
             Number of bundles removed
         """
-        cutoff_time = datetime.now(timezone.utc) - timedelta(days=days_to_keep)
+        cutoff_time = datetime.now(UTC) - timedelta(days=days_to_keep)
         removed_count = 0
 
         # List all bundles, including incomplete ones for cleanup
@@ -294,9 +295,7 @@ class BundleManager:
                 if bundle_id:
                     bundle_path = self.data_dir / bundle_id
                     if bundle_path.exists():
-                        mtime = datetime.fromtimestamp(
-                            bundle_path.stat().st_mtime, tz=timezone.utc
-                        )
+                        mtime = datetime.fromtimestamp(bundle_path.stat().st_mtime, tz=UTC)
                         if mtime < cutoff_time:
                             self._remove_bundle(bundle_id)
                             removed_count += 1
@@ -304,7 +303,7 @@ class BundleManager:
         self.logger.info(f"Cleaned up {removed_count} old bundles")
         return removed_count
 
-    def cleanup_old_bundles_using_config(self, config) -> List[Dict[str, Any]]:
+    def cleanup_old_bundles_using_config(self, config) -> list[dict[str, Any]]:
         """Cleanup bundles using retention settings from configuration.
 
         Args:
@@ -313,28 +312,28 @@ class BundleManager:
         Returns:
             List of removed bundle metadata dicts
         """
-        retention_days = getattr(config, 'getint', None)
+        retention_days = getattr(config, "getint", None)
         if callable(retention_days):
-            days = config.getint('general', 'data_retention_days', 30)
+            days = config.getint("general", "data_retention_days", 30)
         else:
             days = 30
 
-        cutoff_time = datetime.now(timezone.utc) - timedelta(days=days)
-        removed: List[Dict[str, Any]] = []
+        cutoff_time = datetime.now(UTC) - timedelta(days=days)
+        removed: list[dict[str, Any]] = []
 
         bundles = self.list_bundles(include_incomplete=True)
 
         for bundle in bundles:
-            bundle_id = bundle.get('bundle_id')
+            bundle_id = bundle.get("bundle_id")
             if not bundle_id:
                 continue
 
-            complete = bundle.get('complete', False)
+            complete = bundle.get("complete", False)
             if not complete:
                 self.logger.debug("Skipping cleanup for incomplete bundle %s", bundle_id)
                 continue
 
-            timestamp = bundle.get('timestamp')
+            timestamp = bundle.get("timestamp")
             try:
                 bundle_time = datetime.fromisoformat(timestamp) if timestamp else None
             except (TypeError, ValueError):
@@ -343,7 +342,9 @@ class BundleManager:
             if bundle_time is None:
                 bundle_path = self.data_dir / bundle_id
                 if bundle_path.exists():
-                    bundle_time = datetime.fromtimestamp(bundle_path.stat().st_mtime, tz=timezone.utc)
+                    bundle_time = datetime.fromtimestamp(
+                        bundle_path.stat().st_mtime, tz=UTC
+                    )
 
             if bundle_time and bundle_time < cutoff_time:
                 if self._remove_bundle(bundle_id):
@@ -400,10 +401,10 @@ class BundleManager:
         try:
             # Create zip archive
             shutil.make_archive(
-                str(archive_file.with_suffix('')),  # Base name without extension
-                'zip',
+                str(archive_file.with_suffix("")),  # Base name without extension
+                "zip",
                 root_dir=self.data_dir,
-                base_dir=bundle_id
+                base_dir=bundle_id,
             )
 
             # Remove original bundle directory
@@ -442,7 +443,7 @@ class BundleManager:
 
         # Open and validate the archive
         try:
-            with zipfile.ZipFile(archive_path, 'r') as zf:
+            with zipfile.ZipFile(archive_path, "r") as zf:
                 # First pass: validate ALL members before extracting ANY
                 total_size = 0
 
@@ -459,14 +460,16 @@ class BundleManager:
                         if not member_path_resolved.is_relative_to(target_dir_resolved):
                             self.logger.error(
                                 "Path traversal attempt detected: %s resolves outside target directory",
-                                member.filename
+                                member.filename,
                             )
                             raise SecurityError(
                                 f"Path traversal detected: {member.filename} "
                                 f"would extract outside target directory"
                             )
                     except (ValueError, OSError) as e:
-                        self.logger.error("Invalid path in archive member: %s (%s)", member.filename, e)
+                        self.logger.error(
+                            "Invalid path in archive member: %s (%s)", member.filename, e
+                        )
                         raise SecurityError(f"Invalid path in archive: {member.filename}")
 
                     # 2. Individual File Size Check
@@ -475,7 +478,7 @@ class BundleManager:
                             "File too large in archive: %s (%d bytes, max %d bytes)",
                             member.filename,
                             member.file_size,
-                            MAX_ARCHIVE_FILE_SIZE
+                            MAX_ARCHIVE_FILE_SIZE,
                         )
                         raise SecurityError(
                             f"File too large: {member.filename} "
@@ -491,7 +494,7 @@ class BundleManager:
                                 "Zip bomb detected: %s has compression ratio %.1fx (max %dx)",
                                 member.filename,
                                 compression_ratio,
-                                MAX_COMPRESSION_RATIO
+                                MAX_COMPRESSION_RATIO,
                             )
                             raise SecurityError(
                                 f"Zip bomb detected: {member.filename} "
@@ -507,7 +510,7 @@ class BundleManager:
                     self.logger.error(
                         "Archive total size too large: %d bytes (max %d bytes)",
                         total_size,
-                        MAX_ARCHIVE_TOTAL_SIZE
+                        MAX_ARCHIVE_TOTAL_SIZE,
                     )
                     raise SecurityError(
                         f"Archive total size too large: {total_size} bytes "
@@ -518,7 +521,7 @@ class BundleManager:
                 self.logger.info(
                     "Archive validation passed: %d files, %d total bytes",
                     len([m for m in zf.infolist() if not m.is_dir()]),
-                    total_size
+                    total_size,
                 )
 
                 # Extract with explicit path for each member (safest approach)
@@ -572,7 +575,7 @@ class BundleManager:
             self.logger.error(f"Error extracting archive {bundle_id}: {e}")
             return False
 
-    def get_bundle_file_list(self, bundle_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_bundle_file_list(self, bundle_id: str | None = None) -> list[dict[str, Any]]:
         """
         Get list of all files in a bundle.
 
@@ -590,7 +593,7 @@ class BundleManager:
         metadata_path = bundle_path / "all_metadata.json"
         if metadata_path.exists():
             try:
-                with open(metadata_path, 'r') as f:
+                with open(metadata_path) as f:
                     return json.load(f)
             except json.JSONDecodeError:
                 self.logger.error(f"Invalid JSON in all_metadata.json: {metadata_path}")
@@ -601,21 +604,23 @@ class BundleManager:
             if agent_dir.is_dir():
                 agent_name = agent_dir.name
 
-                for file_path in agent_dir.rglob('*'):
+                for file_path in agent_dir.rglob("*"):
                     if file_path.is_file():
-                        files.append({
-                            "name": file_path.name,
-                            "path": str(file_path.relative_to(bundle_path)),
-                            "agent": agent_name,
-                            "size_bytes": file_path.stat().st_size,
-                            "mtime": datetime.fromtimestamp(
-                                file_path.stat().st_mtime, tz=timezone.utc
-                            ).isoformat()
-                        })
+                        files.append(
+                            {
+                                "name": file_path.name,
+                                "path": str(file_path.relative_to(bundle_path)),
+                                "agent": agent_name,
+                                "size_bytes": file_path.stat().st_size,
+                                "mtime": datetime.fromtimestamp(
+                                    file_path.stat().st_mtime, tz=UTC
+                                ).isoformat(),
+                            }
+                        )
 
         return files
 
-    def get_bundle_file(self, bundle_id: str, file_path: str) -> Optional[Path]:
+    def get_bundle_file(self, bundle_id: str, file_path: str) -> Path | None:
         """
         Get path to a specific file within a bundle.
 
@@ -631,7 +636,7 @@ class BundleManager:
             return None
 
         # Normalize file path
-        file_path = file_path.lstrip('/')
+        file_path = file_path.lstrip("/")
         full_path = bundle_path / file_path
 
         if full_path.exists() and full_path.is_file():

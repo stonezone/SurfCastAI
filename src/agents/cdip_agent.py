@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base_agent import BaseAgent
 
@@ -17,11 +17,11 @@ class NearshoreSource:
     station_id: str
     url: str
     format: str = "json"
-    description: Optional[str] = None
-    ndbc_fallback: Optional[str] = None
+    description: str | None = None
+    ndbc_fallback: str | None = None
 
     @classmethod
-    def from_dict(cls, raw: Dict[str, Any]) -> "NearshoreSource":
+    def from_dict(cls, raw: dict[str, Any]) -> NearshoreSource:
         if not isinstance(raw, dict):  # pragma: no cover - defensive guard
             raise ValueError("Nearshore source entries must be dictionaries")
 
@@ -41,7 +41,7 @@ class NearshoreSource:
             url=url,
             format=fmt,
             description=description,
-            ndbc_fallback=ndbc_fallback
+            ndbc_fallback=ndbc_fallback,
         )
 
 
@@ -50,7 +50,7 @@ class CDIPAgent(BaseAgent):
 
     SUPPORTED_FORMATS = {"json", "cdip_json", "cdip_netcdf", "csv", "text", "ndbc_text"}
 
-    async def collect(self, data_dir: Path) -> List[Dict[str, Any]]:
+    async def collect(self, data_dir: Path) -> list[dict[str, Any]]:
         """Fetch configured nearshore buoy feeds (netCDF primary, NDBC text fallback)."""
 
         config = self.config.get("data_sources", "nearshore_buoys", {})
@@ -58,7 +58,7 @@ class CDIPAgent(BaseAgent):
         if isinstance(config, dict):
             sources_cfg = config.get("sources", [])
 
-        sources: List[NearshoreSource] = []
+        sources: list[NearshoreSource] = []
         for entry in sources_cfg:
             try:
                 sources.append(NearshoreSource.from_dict(entry))
@@ -74,7 +74,7 @@ class CDIPAgent(BaseAgent):
         output_dir = data_dir / "nearshore_buoys"
         output_dir.mkdir(exist_ok=True)
 
-        metadata: List[Dict[str, Any]] = []
+        metadata: list[dict[str, Any]] = []
 
         for source in sources:
             if source.format not in self.SUPPORTED_FORMATS:
@@ -84,34 +84,42 @@ class CDIPAgent(BaseAgent):
                         description=f"Unsupported format '{source.format}' for nearshore source",
                         data_type="unknown",
                         source_url=source.url,
-                        error="unsupported_format"
+                        error="unsupported_format",
                     )
                 )
                 continue
 
             # Try primary URL first
             result_meta = await self._fetch_and_parse(source, output_dir, primary=True)
-            
+
             # If primary failed and we have a fallback, try it
-            if result_meta.get("error") and hasattr(source, "ndbc_fallback") and source.ndbc_fallback:
-                self.logger.warning(f"Primary source failed for {source.station_id}, trying NDBC fallback")
+            if (
+                result_meta.get("error")
+                and hasattr(source, "ndbc_fallback")
+                and source.ndbc_fallback
+            ):
+                self.logger.warning(
+                    f"Primary source failed for {source.station_id}, trying NDBC fallback"
+                )
                 fallback_source = NearshoreSource(
                     station_id=source.station_id,
                     url=source.ndbc_fallback,
                     format="ndbc_text",
-                    description=f"{source.description} (NDBC fallback)"
+                    description=f"{source.description} (NDBC fallback)",
                 )
-                result_meta = await self._fetch_and_parse(fallback_source, output_dir, primary=False)
-            
+                result_meta = await self._fetch_and_parse(
+                    fallback_source, output_dir, primary=False
+                )
+
             metadata.append(result_meta)
 
         return metadata
 
     async def _fetch_and_parse(
         self, source: NearshoreSource, output_dir: Path, primary: bool
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Fetch and parse a single nearshore source, returning metadata."""
-        
+
         result = await self.http_client.download(source.url, save_to_disk=False)
         if not result.success or result.content is None:
             return self.create_metadata(
@@ -121,7 +129,7 @@ class CDIPAgent(BaseAgent):
                 source_url=source.url,
                 error=result.error or "download_failed",
                 status_code=result.status_code,
-                fallback_used=not primary
+                fallback_used=not primary,
             )
 
         try:
@@ -145,32 +153,34 @@ class CDIPAgent(BaseAgent):
                 source_url=source.url,
                 content_type=result.content_type,
                 parsed_payload=parsed,
-                fallback_used=not primary
+                fallback_used=not primary,
             )
             return enriched_metadata
 
         except Exception as exc:
-            self.logger.error(f"Error processing nearshore source {source.station_id}: {exc}", exc_info=True)
+            self.logger.error(
+                f"Error processing nearshore source {source.station_id}: {exc}", exc_info=True
+            )
             return self.create_metadata(
                 name=source.station_id,
                 description=f"Failed to parse nearshore buoy content: {exc}",
                 data_type="unknown",
                 source_url=source.url,
                 error=str(exc),
-                fallback_used=not primary
+                fallback_used=not primary,
             )
 
     def _parse_content(
         self, content: bytes, source: NearshoreSource, output_dir: Path
     ) -> tuple[Any, str]:
         """Parse content based on source format (netCDF, JSON, NDBC text, CSV)."""
-        
+
         if source.format == "cdip_netcdf":
             return self._parse_netcdf(content, source, output_dir)
-        
+
         if source.format == "ndbc_text":
             return self._parse_ndbc_text(content, source)
-        
+
         text = content.decode("utf-8", errors="ignore")
 
         if source.format in {"json", "cdip_json"}:
@@ -186,31 +196,36 @@ class CDIPAgent(BaseAgent):
 
     def _parse_netcdf(
         self, content: bytes, source: NearshoreSource, output_dir: Path
-    ) -> tuple[Dict[str, Any], str]:
+    ) -> tuple[dict[str, Any], str]:
         """Parse CDIP THREDDS netCDF file using xarray."""
         try:
-            import xarray as xr
             import tempfile
-            
+
+            import xarray as xr
+
             # Write to temp file for xarray to open
             with tempfile.NamedTemporaryFile(delete=False, suffix=".nc") as tmp:
                 tmp.write(content)
                 tmp_path = tmp.name
-            
+
             try:
                 ds = xr.open_dataset(tmp_path)
-                
+
                 # Extract wave parameters (CDIP convention)
                 parsed = {
                     "source_format": "cdip_netcdf",
                     "station": {
                         "id": source.station_id,
                         "name": ds.attrs.get("station_name", source.station_id),
-                        "lat": float(ds.attrs.get("latitude", 0)) if "latitude" in ds.attrs else None,
-                        "lon": float(ds.attrs.get("longitude", 0)) if "longitude" in ds.attrs else None,
-                    }
+                        "lat": (
+                            float(ds.attrs.get("latitude", 0)) if "latitude" in ds.attrs else None
+                        ),
+                        "lon": (
+                            float(ds.attrs.get("longitude", 0)) if "longitude" in ds.attrs else None
+                        ),
+                    },
                 }
-                
+
                 # Extract latest wave summary
                 if "waveHs" in ds.variables:
                     hs_vals = ds["waveHs"].values
@@ -222,21 +237,29 @@ class CDIPAgent(BaseAgent):
                     parsed["wave_summary"] = {
                         "significant_height": float(hs_vals[-1]) if len(hs_vals) > 0 else None,
                     }
-                
+
                 if parsed.get("wave_summary") and "waveTp" in ds.variables:
                     tp_vals = ds["waveTp"].values
-                    parsed["wave_summary"]["peak_period"] = float(tp_vals[-1]) if len(tp_vals) > 0 else None
+                    parsed["wave_summary"]["peak_period"] = (
+                        float(tp_vals[-1]) if len(tp_vals) > 0 else None
+                    )
                 elif parsed.get("wave_summary") and "Tp" in ds.variables:
                     tp_vals = ds["Tp"].values
-                    parsed["wave_summary"]["peak_period"] = float(tp_vals[-1]) if len(tp_vals) > 0 else None
-                
+                    parsed["wave_summary"]["peak_period"] = (
+                        float(tp_vals[-1]) if len(tp_vals) > 0 else None
+                    )
+
                 if parsed.get("wave_summary") and "waveDp" in ds.variables:
                     dp_vals = ds["waveDp"].values
-                    parsed["wave_summary"]["peak_direction"] = float(dp_vals[-1]) if len(dp_vals) > 0 else None
+                    parsed["wave_summary"]["peak_direction"] = (
+                        float(dp_vals[-1]) if len(dp_vals) > 0 else None
+                    )
                 elif parsed.get("wave_summary") and "Dp" in ds.variables:
                     dp_vals = ds["Dp"].values
-                    parsed["wave_summary"]["peak_direction"] = float(dp_vals[-1]) if len(dp_vals) > 0 else None
-                
+                    parsed["wave_summary"]["peak_direction"] = (
+                        float(dp_vals[-1]) if len(dp_vals) > 0 else None
+                    )
+
                 # Extract time
                 if "waveTime" in ds.variables:
                     time_vals = ds["waveTime"].values
@@ -246,12 +269,12 @@ class CDIPAgent(BaseAgent):
                     time_vals = ds["time"].values
                     if len(time_vals) > 0:
                         parsed["wave_summary"]["timestamp"] = str(time_vals[-1])
-                
+
                 # Extract spectral data if available
                 if "waveFrequency" in ds.variables:
                     freqs = ds["waveFrequency"].values.tolist()
                     parsed["spectra"] = {"frequencies": freqs}
-                    
+
                     if "waveEnergyDensity" in ds.variables:
                         energy = ds["waveEnergyDensity"].values
                         if len(energy.shape) > 1:
@@ -259,25 +282,29 @@ class CDIPAgent(BaseAgent):
                             parsed["spectra"]["energies"] = energy[-1].tolist()
                         else:
                             parsed["spectra"]["energies"] = energy.tolist()
-                
+
                 # Quality flags
                 if "waveQuality" in ds.variables:
                     quality = ds["waveQuality"].values
-                    parsed["quality_flags"] = {"quality": int(quality[-1]) if len(quality) > 0 else None}
-                
+                    parsed["quality_flags"] = {
+                        "quality": int(quality[-1]) if len(quality) > 0 else None
+                    }
+
                 ds.close()
-                
+
                 # Copy netCDF to output directory
                 final_path = output_dir / f"{source.station_id}.nc"
                 import shutil
+
                 shutil.copy(tmp_path, final_path)
-                
+
                 return parsed, "nc"
-                
+
             finally:
                 import os
+
                 os.unlink(tmp_path)
-                
+
         except ImportError:
             raise RuntimeError("xarray or netCDF4 not installed - required for cdip_netcdf format")
         except Exception as exc:
@@ -287,16 +314,16 @@ class CDIPAgent(BaseAgent):
         """Parse NDBC standard meteorological text format as fallback."""
         text = content.decode("utf-8", errors="ignore")
         lines = [line.strip() for line in text.split("\n") if line.strip()]
-        
+
         if len(lines) < 3:
             raise ValueError("NDBC text format incomplete - less than 3 lines")
-        
+
         # NDBC format: line 0 = header comments, line 1 = column headers, line 2 = units, line 3+ = data
         # Example columns: #YY MM DD hh mm WDIR WSPD GST WVHT DPD APD MWD PRES ATMP WTMP DEWP VIS TIDE
-        
+
         header_line = None
         data_lines = []
-        
+
         for line in lines:
             if line.startswith("#"):
                 if "YY" in line or "WDIR" in line:
@@ -306,19 +333,21 @@ class CDIPAgent(BaseAgent):
                 if all(c in "mtsfhdegC-/" for c in line.replace(" ", "").replace(".", "")):
                     continue
                 data_lines.append(line)
-        
+
         if not header_line or not data_lines:
             raise ValueError("Could not parse NDBC text format - no valid data found")
-        
+
         headers = header_line.split()
         latest_data = data_lines[0].split()
-        
+
         if len(latest_data) < len(headers):
-            raise ValueError(f"NDBC data row has {len(latest_data)} fields but header has {len(headers)}")
-        
+            raise ValueError(
+                f"NDBC data row has {len(latest_data)} fields but header has {len(headers)}"
+            )
+
         # Build dictionary
-        data_dict = dict(zip(headers, latest_data))
-        
+        data_dict = dict(zip(headers, latest_data, strict=False))
+
         parsed = {
             "source_format": "ndbc_text",
             "station": {
@@ -329,21 +358,21 @@ class CDIPAgent(BaseAgent):
                 "significant_height": _safe_float(data_dict.get("WVHT")),
                 "peak_period": _safe_float(data_dict.get("DPD")),  # Dominant period
                 "peak_direction": _safe_float(data_dict.get("MWD")),  # Mean wave direction
-                "timestamp": f"{data_dict.get('YY', '')}-{data_dict.get('MM', '')}-{data_dict.get('DD', '')} {data_dict.get('hh', '')}:{data_dict.get('mm', '')}:00Z"
+                "timestamp": f"{data_dict.get('YY', '')}-{data_dict.get('MM', '')}-{data_dict.get('DD', '')} {data_dict.get('hh', '')}:{data_dict.get('mm', '')}:00Z",
             },
             "raw_data": data_dict,
-            "raw_text": text
+            "raw_text": text,
         }
-        
+
         # Return parsed dict (will be written as JSON) with json extension
         return parsed, "json"
 
-    def _normalise_cdip(self, payload: Any) -> Dict[str, Any]:
+    def _normalise_cdip(self, payload: Any) -> dict[str, Any]:
         """Extract a compact summary from CDIP JSON payloads."""
         if not isinstance(payload, dict):
             return {"raw": payload}
 
-        summary: Dict[str, Any] = {"raw": payload}
+        summary: dict[str, Any] = {"raw": payload}
 
         station_info = payload.get("station")
         if isinstance(station_info, dict):
@@ -381,10 +410,10 @@ class CDIPAgent(BaseAgent):
         source: NearshoreSource,
         data_type: str,
         source_url: str,
-        content_type: Optional[str],
+        content_type: str | None,
         parsed_payload: Any,
         fallback_used: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Compose success metadata with enriched CDIP/NDBC attributes."""
 
         metadata = self.create_metadata(
@@ -402,19 +431,21 @@ class CDIPAgent(BaseAgent):
 
         if isinstance(parsed_payload, dict):
             metadata["source_format"] = parsed_payload.get("source_format", source.format)
-            
+
             station = parsed_payload.get("station")
             if isinstance(station, dict):
-                metadata['station_name'] = station.get('name')
-                metadata['station_lat'] = station.get('lat')
-                metadata['station_lon'] = station.get('lon')
+                metadata["station_name"] = station.get("name")
+                metadata["station_lat"] = station.get("lat")
+                metadata["station_lon"] = station.get("lon")
 
             wave_summary = parsed_payload.get("wave_summary")
             if isinstance(wave_summary, dict):
-                metadata['significant_height_m'] = _safe_float(wave_summary.get('significant_height'))
-                metadata['peak_period_s'] = _safe_float(wave_summary.get('peak_period'))
-                metadata['peak_direction_deg'] = _safe_float(wave_summary.get('peak_direction'))
-                metadata['observation_timestamp'] = wave_summary.get('timestamp')
+                metadata["significant_height_m"] = _safe_float(
+                    wave_summary.get("significant_height")
+                )
+                metadata["peak_period_s"] = _safe_float(wave_summary.get("peak_period"))
+                metadata["peak_direction_deg"] = _safe_float(wave_summary.get("peak_direction"))
+                metadata["observation_timestamp"] = wave_summary.get("timestamp")
 
             spectra = parsed_payload.get("spectra")
             if isinstance(spectra, dict):
@@ -422,28 +453,30 @@ class CDIPAgent(BaseAgent):
                 if isinstance(frequencies, list) and len(frequencies) > 1:
                     spacing = _frequency_spacing(frequencies)
                     if spacing is not None:
-                        metadata['spectral_frequency_spacing'] = spacing
+                        metadata["spectral_frequency_spacing"] = spacing
                 if isinstance(frequencies, list):
-                    metadata['spectral_bins'] = len(frequencies)
+                    metadata["spectral_bins"] = len(frequencies)
 
             raw_payload = parsed_payload.get("raw")
             if isinstance(raw_payload, dict):
                 quality = raw_payload.get("wave", {}).get("quality")
                 if quality is not None:
-                    metadata['quality_flags'] = quality
+                    metadata["quality_flags"] = quality
                 meta_section = raw_payload.get("meta")
                 if isinstance(meta_section, dict):
-                    metadata['raw_last_updated'] = meta_section.get("last_update") or meta_section.get("last_observation")
-            
+                    metadata["raw_last_updated"] = meta_section.get(
+                        "last_update"
+                    ) or meta_section.get("last_observation")
+
             # Handle quality from netCDF
             quality_flags = parsed_payload.get("quality_flags")
             if quality_flags:
-                metadata['quality_flags'] = quality_flags
+                metadata["quality_flags"] = quality_flags
 
         return metadata
 
 
-def _safe_float(value: Any) -> Optional[float]:
+def _safe_float(value: Any) -> float | None:
     """Convert values to float where possible."""
     try:
         if value is None or value == "":
@@ -453,7 +486,7 @@ def _safe_float(value: Any) -> Optional[float]:
         return None
 
 
-def _frequency_spacing(frequencies: Any) -> Optional[float]:
+def _frequency_spacing(frequencies: Any) -> float | None:
     """Compute approximate spectral frequency spacing."""
     try:
         freqs = [float(f) for f in frequencies[:2]]  # type: ignore[index]

@@ -27,13 +27,13 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import prompt generation functions from test file
-from tests.test_prompts import generate_prompt_from_specialist, discover_test_cases
+from tests.test_prompts import discover_test_cases, generate_prompt_from_specialist
 
 
 def generate_golden_prompt(test_case_dir: Path, force_update: bool = False) -> bool:
@@ -61,12 +61,12 @@ def generate_golden_prompt(test_case_dir: Path, force_update: bool = False) -> b
     # Check if prompt.txt already exists
     if prompt_file.exists() and not force_update:
         print(f"⏭️  Skipping {specialist}/{case_name} (prompt.txt already exists)")
-        print(f"   Use --update to overwrite")
+        print("   Use --update to overwrite")
         return True
 
     try:
         # Load input data
-        with open(input_file, 'r') as f:
+        with open(input_file) as f:
             input_data = json.load(f)
 
         # Generate prompt
@@ -74,7 +74,7 @@ def generate_golden_prompt(test_case_dir: Path, force_update: bool = False) -> b
         prompt = generate_prompt_from_specialist(specialist, input_data)
 
         # Write prompt to file
-        with open(prompt_file, 'w') as f:
+        with open(prompt_file, "w") as f:
             f.write(prompt)
 
         print(f"✅ Generated {prompt_file}")
@@ -107,26 +107,20 @@ Examples:
 
   # Generate specific specialist
   python scripts/generate_golden_prompts.py --specialist senior_forecaster
-        """
+        """,
     )
 
     parser.add_argument(
-        '--update',
-        action='store_true',
-        help='Update existing prompt.txt files (overwrites)'
+        "--update", action="store_true", help="Update existing prompt.txt files (overwrites)"
     )
 
+    parser.add_argument("--case", type=str, help="Generate only for specific test case name")
+
     parser.add_argument(
-        '--case',
+        "--specialist",
         type=str,
-        help='Generate only for specific test case name'
-    )
-
-    parser.add_argument(
-        '--specialist',
-        type=str,
-        choices=['senior_forecaster', 'buoy_analyst', 'pressure_analyst'],
-        help='Generate only for specific specialist'
+        choices=["senior_forecaster", "buoy_analyst", "pressure_analyst"],
+        help="Generate only for specific specialist",
     )
 
     args = parser.parse_args()
@@ -188,5 +182,5 @@ Examples:
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

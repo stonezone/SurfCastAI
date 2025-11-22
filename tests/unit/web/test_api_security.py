@@ -52,8 +52,8 @@ def client(test_output_dir, monkeypatch):
     import sys
 
     # Remove module from cache if it exists to force reimport
-    if 'src.web.app' in sys.modules:
-        del sys.modules['src.web.app']
+    if "src.web.app" in sys.modules:
+        del sys.modules["src.web.app"]
 
     from src.web import app as app_module
 

@@ -7,7 +7,7 @@ This guide documents the composite index on `predictions(shore, valid_time)` and
 ## Index Definition
 
 ```sql
-CREATE INDEX IF NOT EXISTS idx_predictions_shore_time 
+CREATE INDEX IF NOT EXISTS idx_predictions_shore_time
 ON predictions(shore, valid_time);
 ```
 
@@ -184,11 +184,11 @@ sqlite3 data/validation.db "REINDEX idx_predictions_shore_time"
 # src/utils/validation_feedback.py
 def get_shore_performance(shore: str, days: int = 7) -> Dict[str, float]:
     """Get recent performance metrics for a specific shore.
-    
+
     This query uses idx_predictions_shore_time for efficient lookup.
     """
     cutoff_time = datetime.now() - timedelta(days=days)
-    
+
     query = """
         SELECT v.height_error, v.period_error, v.direction_error
         FROM predictions p
@@ -197,7 +197,7 @@ def get_shore_performance(shore: str, days: int = 7) -> Dict[str, float]:
           AND p.valid_time > ?     -- Uses composite index (valid_time column)
         ORDER BY p.valid_time DESC -- No additional sort needed (index is sorted)
     """
-    
+
     cursor.execute(query, (shore, cutoff_time))
     return calculate_metrics(cursor.fetchall())
 ```

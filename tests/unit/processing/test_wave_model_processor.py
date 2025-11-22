@@ -2,19 +2,19 @@
 Unit tests for the WaveModelProcessor.
 """
 
-import unittest
-from unittest.mock import MagicMock, patch
 import json
-from pathlib import Path
-import sys
 import os
+import sys
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 # Add src directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
 
-from src.processing.wave_model_processor import WaveModelProcessor
-from src.processing.models.wave_model import ModelData, ModelForecast, ModelPoint
 from src.core.config import Config
+from src.processing.models.wave_model import ModelData, ModelForecast, ModelPoint
+from src.processing.wave_model_processor import WaveModelProcessor
 
 
 class TestWaveModelProcessor(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestWaveModelProcessor(unittest.TestCase):
                 "model": "SWAN",
                 "region": "hawaii",
                 "run_time": "2023-01-01T00:00:00Z",
-                "forecast_hours": 72
+                "forecast_hours": 72,
             },
             "forecasts": [
                 {
@@ -42,50 +42,74 @@ class TestWaveModelProcessor(unittest.TestCase):
                     "timestamp": "2023-01-01T00:00:00Z",
                     "points": [
                         {
-                            "lat": 21.6, "lon": -158.1,
-                            "hs": 2.5, "tp": 12.0, "dir": 315,
-                            "wind_speed": 5.0, "wind_dir": 45
+                            "lat": 21.6,
+                            "lon": -158.1,
+                            "hs": 2.5,
+                            "tp": 12.0,
+                            "dir": 315,
+                            "wind_speed": 5.0,
+                            "wind_dir": 45,
                         },
                         {
-                            "lat": 21.5, "lon": -158.0,
-                            "hs": 2.3, "tp": 12.0, "dir": 310,
-                            "wind_speed": 5.0, "wind_dir": 50
-                        }
-                    ]
+                            "lat": 21.5,
+                            "lon": -158.0,
+                            "hs": 2.3,
+                            "tp": 12.0,
+                            "dir": 310,
+                            "wind_speed": 5.0,
+                            "wind_dir": 50,
+                        },
+                    ],
                 },
                 {
                     "hour": 6,
                     "timestamp": "2023-01-01T06:00:00Z",
                     "points": [
                         {
-                            "lat": 21.6, "lon": -158.1,
-                            "hs": 2.8, "tp": 13.0, "dir": 315,
-                            "wind_speed": 4.5, "wind_dir": 40
+                            "lat": 21.6,
+                            "lon": -158.1,
+                            "hs": 2.8,
+                            "tp": 13.0,
+                            "dir": 315,
+                            "wind_speed": 4.5,
+                            "wind_dir": 40,
                         },
                         {
-                            "lat": 21.5, "lon": -158.0,
-                            "hs": 2.6, "tp": 13.0, "dir": 310,
-                            "wind_speed": 4.5, "wind_dir": 45
-                        }
-                    ]
+                            "lat": 21.5,
+                            "lon": -158.0,
+                            "hs": 2.6,
+                            "tp": 13.0,
+                            "dir": 310,
+                            "wind_speed": 4.5,
+                            "wind_dir": 45,
+                        },
+                    ],
                 },
                 {
                     "hour": 12,
                     "timestamp": "2023-01-01T12:00:00Z",
                     "points": [
                         {
-                            "lat": 21.6, "lon": -158.1,
-                            "hs": 3.0, "tp": 14.0, "dir": 320,
-                            "wind_speed": 4.0, "wind_dir": 35
+                            "lat": 21.6,
+                            "lon": -158.1,
+                            "hs": 3.0,
+                            "tp": 14.0,
+                            "dir": 320,
+                            "wind_speed": 4.0,
+                            "wind_dir": 35,
                         },
                         {
-                            "lat": 21.5, "lon": -158.0,
-                            "hs": 2.8, "tp": 14.0, "dir": 315,
-                            "wind_speed": 4.0, "wind_dir": 40
-                        }
-                    ]
-                }
-            ]
+                            "lat": 21.5,
+                            "lon": -158.0,
+                            "hs": 2.8,
+                            "tp": 14.0,
+                            "dir": 315,
+                            "wind_speed": 4.0,
+                            "wind_dir": 40,
+                        },
+                    ],
+                },
+            ],
         }
 
         # Sample WW3 model data
@@ -93,7 +117,7 @@ class TestWaveModelProcessor(unittest.TestCase):
             "header": {
                 "model": "WaveWatch III",
                 "refTime": "2023-01-01T00:00:00Z",
-                "area": "north_pacific"
+                "area": "north_pacific",
             },
             "data": [
                 {
@@ -101,34 +125,50 @@ class TestWaveModelProcessor(unittest.TestCase):
                     "forecastHour": 0,
                     "grid": [
                         {
-                            "lat": 21.6, "lon": -158.1,
-                            "hs": 2.5, "tp": 12.0, "dir": 315,
-                            "ws": 5.0, "wd": 45
+                            "lat": 21.6,
+                            "lon": -158.1,
+                            "hs": 2.5,
+                            "tp": 12.0,
+                            "dir": 315,
+                            "ws": 5.0,
+                            "wd": 45,
                         },
                         {
-                            "lat": 21.5, "lon": -158.0,
-                            "hs": 2.3, "tp": 12.0, "dir": 310,
-                            "ws": 5.0, "wd": 50
-                        }
-                    ]
+                            "lat": 21.5,
+                            "lon": -158.0,
+                            "hs": 2.3,
+                            "tp": 12.0,
+                            "dir": 310,
+                            "ws": 5.0,
+                            "wd": 50,
+                        },
+                    ],
                 },
                 {
                     "timestamp": "2023-01-01T06:00:00Z",
                     "forecastHour": 6,
                     "grid": [
                         {
-                            "lat": 21.6, "lon": -158.1,
-                            "hs": 2.8, "tp": 13.0, "dir": 315,
-                            "ws": 4.5, "wd": 40
+                            "lat": 21.6,
+                            "lon": -158.1,
+                            "hs": 2.8,
+                            "tp": 13.0,
+                            "dir": 315,
+                            "ws": 4.5,
+                            "wd": 40,
                         },
                         {
-                            "lat": 21.5, "lon": -158.0,
-                            "hs": 2.6, "tp": 13.0, "dir": 310,
-                            "ws": 4.5, "wd": 45
-                        }
-                    ]
-                }
-            ]
+                            "lat": 21.5,
+                            "lon": -158.0,
+                            "hs": 2.6,
+                            "tp": 13.0,
+                            "dir": 310,
+                            "ws": 4.5,
+                            "wd": 45,
+                        },
+                    ],
+                },
+            ],
         }
 
     def test_validate_valid_swan_data(self):
@@ -166,14 +206,14 @@ class TestWaveModelProcessor(unittest.TestCase):
 
         # Check basic properties
         model_data = result.data
-        self.assertEqual(model_data.model_id, 'swan', "Model ID should be 'swan'")
-        self.assertEqual(model_data.region, 'hawaii', "Region should be 'hawaii'")
+        self.assertEqual(model_data.model_id, "swan", "Model ID should be 'swan'")
+        self.assertEqual(model_data.region, "hawaii", "Region should be 'hawaii'")
         self.assertEqual(len(model_data.forecasts), 3, "Should have 3 forecasts")
 
         # Check metadata
-        self.assertIn('analysis', model_data.metadata, "Should have analysis metadata")
-        self.assertIn('shore_analysis', model_data.metadata, "Should have shore analysis metadata")
-        self.assertIn('swell_events', model_data.metadata, "Should have swell events metadata")
+        self.assertIn("analysis", model_data.metadata, "Should have analysis metadata")
+        self.assertIn("shore_analysis", model_data.metadata, "Should have shore analysis metadata")
+        self.assertIn("swell_events", model_data.metadata, "Should have swell events metadata")
 
     def test_process_ww3_data(self):
         """Test processing with WW3 data."""
@@ -187,8 +227,8 @@ class TestWaveModelProcessor(unittest.TestCase):
 
         # Check basic properties
         model_data = result.data
-        self.assertEqual(model_data.model_id, 'ww3', "Model ID should be 'ww3'")
-        self.assertEqual(model_data.region, 'north_pacific', "Region should be 'north_pacific'")
+        self.assertEqual(model_data.model_id, "ww3", "Model ID should be 'ww3'")
+        self.assertEqual(model_data.region, "north_pacific", "Region should be 'north_pacific'")
         self.assertEqual(len(model_data.forecasts), 2, "Should have 2 forecasts")
 
     def test_clean_forecasts(self):
@@ -200,17 +240,18 @@ class TestWaveModelProcessor(unittest.TestCase):
                 forecast_hour=0,
                 points=[
                     ModelPoint(latitude=21.6, longitude=-158.1, wave_height=2.5, wave_period=12.0),
-                    ModelPoint(latitude=21.5, longitude=-158.0, wave_height=-1.0, wave_period=12.0),  # Invalid height
-                    ModelPoint(latitude=21.4, longitude=-157.9, wave_height=2.3, wave_period=-5.0)   # Invalid period
-                ]
+                    ModelPoint(
+                        latitude=21.5, longitude=-158.0, wave_height=-1.0, wave_period=12.0
+                    ),  # Invalid height
+                    ModelPoint(
+                        latitude=21.4, longitude=-157.9, wave_height=2.3, wave_period=-5.0
+                    ),  # Invalid period
+                ],
             )
         ]
 
         model_data = ModelData(
-            model_id="test",
-            run_time="2023-01-01T00:00:00Z",
-            region="test",
-            forecasts=forecasts
+            model_id="test", run_time="2023-01-01T00:00:00Z", region="test", forecasts=forecasts
         )
 
         # Clean forecasts
@@ -251,17 +292,14 @@ class TestWaveModelProcessor(unittest.TestCase):
                             longitude=-158.1,
                             wave_height=wave_height,
                             wave_period=12.0,
-                            wave_direction=315
+                            wave_direction=315,
                         )
-                    ]
+                    ],
                 )
             )
 
         model_data = ModelData(
-            model_id="test",
-            run_time="2023-01-01T00:00:00Z",
-            region="test",
-            forecasts=forecasts
+            model_id="test", run_time="2023-01-01T00:00:00Z", region="test", forecasts=forecasts
         )
 
         # Detect swell events
@@ -272,23 +310,29 @@ class TestWaveModelProcessor(unittest.TestCase):
 
         # Check peak time
         peak_event = events[0]
-        self.assertEqual(peak_event['peak_hour'], 18, "Peak should be at hour 18")
-        self.assertAlmostEqual(peak_event['peak_height'], 3.0, places=1, msg="Peak height should be about 3.0")
+        self.assertEqual(peak_event["peak_hour"], 18, "Peak should be at hour 18")
+        self.assertAlmostEqual(
+            peak_event["peak_height"], 3.0, places=1, msg="Peak height should be about 3.0"
+        )
 
     def test_hawaii_scale_conversion(self):
         """Test Hawaiian scale conversion."""
         # Test various wave heights
         test_cases = [
-            (1.0, 6.56),   # 1m ≈ 6.56ft face
+            (1.0, 6.56),  # 1m ≈ 6.56ft face
             (2.0, 13.12),  # 2m ≈ 13.12ft face
-            (3.0, 19.68)   # 3m ≈ 19.68ft face
+            (3.0, 19.68),  # 3m ≈ 19.68ft face
         ]
 
         for meters, expected_feet in test_cases:
             result = self.processor.get_hawaii_scale(meters)
-            self.assertAlmostEqual(result, expected_feet, places=1,
-                msg=f"{meters}m should convert to ~{expected_feet}ft in Hawaiian scale")
+            self.assertAlmostEqual(
+                result,
+                expected_feet,
+                places=1,
+                msg=f"{meters}m should convert to ~{expected_feet}ft in Hawaiian scale",
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

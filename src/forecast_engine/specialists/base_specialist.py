@@ -8,8 +8,8 @@ that analyze specific data types and provide structured insights.
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any
 
 
 @dataclass
@@ -23,10 +23,11 @@ class SpecialistOutput:
         narrative: Natural language narrative of findings (500-1000 words)
         metadata: Additional metadata about the analysis
     """
+
     confidence: float
-    data: Dict[str, Any]
+    data: dict[str, Any]
     narrative: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate output after initialization."""
@@ -40,16 +41,16 @@ class SpecialistOutput:
             raise ValueError(f"Narrative must be a string, got {type(self.narrative)}")
 
         # Add timestamp to metadata if not present
-        if 'timestamp' not in self.metadata:
-            self.metadata['timestamp'] = datetime.now().isoformat()
+        if "timestamp" not in self.metadata:
+            self.metadata["timestamp"] = datetime.now().isoformat()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return {
-            'confidence': self.confidence,
-            'data': self.data,
-            'narrative': self.narrative,
-            'metadata': self.metadata
+            "confidence": self.confidence,
+            "data": self.data,
+            "narrative": self.narrative,
+            "metadata": self.metadata,
         }
 
 
@@ -67,7 +68,12 @@ class BaseSpecialist(ABC):
     4. Include proper error handling and logging
     """
 
-    def __init__(self, config: Optional[Any] = None, model_name: Optional[str] = None, engine: Optional[Any] = None):
+    def __init__(
+        self,
+        config: Any | None = None,
+        model_name: str | None = None,
+        engine: Any | None = None,
+    ):
         """
         Initialize the specialist.
 
@@ -89,11 +95,11 @@ class BaseSpecialist(ABC):
         self.config = config
         self.model_name = model_name
         self.engine = engine
-        self.logger = logging.getLogger(f'specialist.{self.__class__.__name__.lower()}')
+        self.logger = logging.getLogger(f"specialist.{self.__class__.__name__.lower()}")
         self.logger.info(f"Initialized with model: {self.model_name}")
 
     @abstractmethod
-    async def analyze(self, data: Dict[str, Any]) -> SpecialistOutput:
+    async def analyze(self, data: dict[str, Any]) -> SpecialistOutput:
         """
         Analyze data and return structured insights.
 
@@ -111,7 +117,7 @@ class BaseSpecialist(ABC):
         """
         pass
 
-    def _validate_input(self, data: Dict[str, Any], required_keys: list) -> None:
+    def _validate_input(self, data: dict[str, Any], required_keys: list) -> None:
         """
         Validate input data has required keys.
 
@@ -137,10 +143,7 @@ class BaseSpecialist(ABC):
         )
 
     def _calculate_confidence(
-        self,
-        data_completeness: float,
-        data_consistency: float,
-        data_quality: float
+        self, data_completeness: float, data_consistency: float, data_quality: float
     ) -> float:
         """
         Calculate overall confidence score from component scores.
@@ -154,16 +157,12 @@ class BaseSpecialist(ABC):
             Overall confidence score (0.0-1.0)
         """
         # Weighted average: quality is most important, then consistency, then completeness
-        weights = {
-            'quality': 0.5,
-            'consistency': 0.3,
-            'completeness': 0.2
-        }
+        weights = {"quality": 0.5, "consistency": 0.3, "completeness": 0.2}
 
         confidence = (
-            data_quality * weights['quality'] +
-            data_consistency * weights['consistency'] +
-            data_completeness * weights['completeness']
+            data_quality * weights["quality"]
+            + data_consistency * weights["consistency"]
+            + data_completeness * weights["completeness"]
         )
 
         return max(0.0, min(1.0, confidence))

@@ -13,12 +13,11 @@ with extensibility for raw spectral analysis if needed.
 """
 
 import logging
-from typing import List, Optional, Dict, Any
-from pathlib import Path
 from datetime import datetime
-from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
 from pydantic import BaseModel, Field, field_validator
-import re
 
 
 class SpectralPeak(BaseModel):
@@ -35,6 +34,7 @@ class SpectralPeak(BaseModel):
         confidence: Confidence score (0.0-1.0)
         component_type: Type of component ('swell' or 'wind_wave')
     """
+
     frequency_hz: float = Field(gt=0, description="Peak frequency in Hz")
     period_seconds: float = Field(ge=4.0, le=30.0, description="Wave period in seconds")
     direction_degrees: float = Field(ge=0, le=360, description="Peak direction")
@@ -44,7 +44,7 @@ class SpectralPeak(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0, description="Confidence score")
     component_type: str = Field(default="swell", description="'swell' or 'wind_wave'")
 
-    @field_validator('direction_degrees', mode='before')
+    @field_validator("direction_degrees", mode="before")
     @classmethod
     def normalize_direction(cls, v: float) -> float:
         """Normalize direction to [0, 360)."""
@@ -63,16 +63,17 @@ class SpectralAnalysisResult(BaseModel):
         dominant_peak: Primary spectral component
         metadata: Additional metadata about the analysis
     """
+
     buoy_id: str = Field(min_length=1, description="Buoy station ID")
     timestamp: str = Field(description="ISO 8601 timestamp")
-    peaks: List[SpectralPeak] = Field(default_factory=list, description="Identified peaks")
+    peaks: list[SpectralPeak] = Field(default_factory=list, description="Identified peaks")
     total_energy: float = Field(ge=0, description="Total wave energy")
-    dominant_peak: Optional[SpectralPeak] = Field(default=None, description="Primary component")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    dominant_peak: SpectralPeak | None = Field(default=None, description="Primary component")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
-    @field_validator('peaks')
+    @field_validator("peaks")
     @classmethod
-    def sort_peaks_by_energy(cls, v: List[SpectralPeak]) -> List[SpectralPeak]:
+    def sort_peaks_by_energy(cls, v: list[SpectralPeak]) -> list[SpectralPeak]:
         """Ensure peaks are sorted by energy (highest first)."""
         return sorted(v, key=lambda p: p.energy_density, reverse=True)
 
@@ -90,11 +91,23 @@ class SpectralAnalyzer:
 
     # Directional mapping (NDBC uses compass directions)
     DIRECTION_MAP = {
-        'N': 0, 'NNE': 22.5, 'NE': 45, 'ENE': 67.5,
-        'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5,
-        'S': 180, 'SSW': 202.5, 'SW': 225, 'WSW': 247.5,
-        'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5,
-        'MM': None  # Missing data
+        "N": 0,
+        "NNE": 22.5,
+        "NE": 45,
+        "ENE": 67.5,
+        "E": 90,
+        "ESE": 112.5,
+        "SE": 135,
+        "SSE": 157.5,
+        "S": 180,
+        "SSW": 202.5,
+        "SW": 225,
+        "WSW": 247.5,
+        "W": 270,
+        "WNW": 292.5,
+        "NW": 315,
+        "NNW": 337.5,
+        "MM": None,  # Missing data
     }
 
     def __init__(
@@ -104,7 +117,7 @@ class SpectralAnalyzer:
         min_separation_period: float = 3.0,  # seconds between peaks
         min_separation_direction: float = 30.0,  # degrees between peaks
         energy_threshold: float = 0.1,  # 10% of dominant peak
-        max_components: int = 5
+        max_components: int = 5,
     ):
         """
         Initialize spectral analyzer with detection parameters.
@@ -125,7 +138,7 @@ class SpectralAnalyzer:
         self.max_components = max_components
         self.logger = logging.getLogger(__name__)
 
-    def parse_spec_file(self, file_path: str) -> Optional[SpectralAnalysisResult]:
+    def parse_spec_file(self, file_path: str) -> SpectralAnalysisResult | None:
         """
         Parse NDBC .spec file and extract swell components.
 
@@ -156,7 +169,7 @@ class SpectralAnalyzer:
             buoy_id = path.stem
 
             # Read and parse the file
-            with open(path, 'r') as f:
+            with open(path) as f:
                 lines = f.readlines()
 
             if len(lines) < 3:
@@ -176,7 +189,7 @@ class SpectralAnalyzer:
             self.logger.error(f"Error parsing spec file {file_path}: {e}", exc_info=True)
             return None
 
-    def _parse_observation_line(self, line: str, buoy_id: str) -> Optional[SpectralAnalysisResult]:
+    def _parse_observation_line(self, line: str, buoy_id: str) -> SpectralAnalysisResult | None:
         """
         Parse a single observation line from .spec file.
 
@@ -194,12 +207,14 @@ class SpectralAnalyzer:
             parts = line.split()
 
             if len(parts) < 15:
-                self.logger.warning(f"Insufficient fields in observation line (expected 15+, got {len(parts)}): {line.strip()}")
+                self.logger.warning(
+                    f"Insufficient fields in observation line (expected 15+, got {len(parts)}): {line.strip()}"
+                )
                 return None
 
             # Parse timestamp
             year, month, day, hour, minute = map(int, parts[0:5])
-            timestamp = datetime(year, month, day, hour, minute).isoformat() + 'Z'
+            timestamp = datetime(year, month, day, hour, minute).isoformat() + "Z"
 
             # Parse wave parameters
             wvht = self._safe_float(parts[5])  # Total significant wave height
@@ -218,36 +233,47 @@ class SpectralAnalyzer:
             ww_dir = self._parse_direction(ww_dir_str)
 
             # Build list of spectral peaks
-            peaks: List[SpectralPeak] = []
+            peaks: list[SpectralPeak] = []
 
             # Add swell component if valid
-            if (sw_height is not None and sw_height > 0 and
-                sw_period is not None and self.min_period <= sw_period <= self.max_period and
-                sw_dir is not None):
+            if (
+                sw_height is not None
+                and sw_height > 0
+                and sw_period is not None
+                and self.min_period <= sw_period <= self.max_period
+                and sw_dir is not None
+            ):
 
                 swell_peak = self._create_spectral_peak(
-                    height=sw_height,
-                    period=sw_period,
-                    direction=sw_dir,
-                    component_type='swell'
+                    height=sw_height, period=sw_period, direction=sw_dir, component_type="swell"
                 )
                 peaks.append(swell_peak)
 
             # Add wind wave component if valid and sufficiently different
-            if (ww_height is not None and ww_height > 0 and
-                ww_period is not None and self.min_period <= ww_period <= self.max_period and
-                ww_dir is not None):
+            if (
+                ww_height is not None
+                and ww_height > 0
+                and ww_period is not None
+                and self.min_period <= ww_period <= self.max_period
+                and ww_dir is not None
+            ):
 
                 # Check if wind wave is sufficiently different from swell
                 add_wind_wave = True
 
                 if peaks:  # If we have swell component
-                    period_diff = abs(sw_period - ww_period) if sw_period else float('inf')
-                    dir_diff = self._directional_difference(sw_dir, ww_dir) if (sw_dir and ww_dir) else float('inf')
+                    period_diff = abs(sw_period - ww_period) if sw_period else float("inf")
+                    dir_diff = (
+                        self._directional_difference(sw_dir, ww_dir)
+                        if (sw_dir and ww_dir)
+                        else float("inf")
+                    )
 
                     # Don't add if too similar to swell component
-                    if (period_diff < self.min_separation_period or
-                        dir_diff < self.min_separation_direction):
+                    if (
+                        period_diff < self.min_separation_period
+                        or dir_diff < self.min_separation_direction
+                    ):
                         add_wind_wave = False
 
                 if add_wind_wave:
@@ -255,7 +281,7 @@ class SpectralAnalyzer:
                         height=ww_height,
                         period=ww_period,
                         direction=ww_dir,
-                        component_type='wind_wave'
+                        component_type="wind_wave",
                     )
                     peaks.append(wind_peak)
 
@@ -263,7 +289,7 @@ class SpectralAnalyzer:
             peaks = sorted(peaks, key=lambda p: p.energy_density, reverse=True)
 
             # Limit to max_components
-            peaks = peaks[:self.max_components]
+            peaks = peaks[: self.max_components]
 
             # Calculate total energy
             total_energy = sum(p.energy_density for p in peaks)
@@ -273,11 +299,11 @@ class SpectralAnalyzer:
 
             # Build metadata
             metadata = {
-                'total_wave_height': wvht,
-                'average_period': apd,
-                'mean_direction': mwd,
-                'num_components': len(peaks),
-                'source': 'ndbc_spec_summary'
+                "total_wave_height": wvht,
+                "average_period": apd,
+                "mean_direction": mwd,
+                "num_components": len(peaks),
+                "source": "ndbc_spec_summary",
             }
 
             return SpectralAnalysisResult(
@@ -286,7 +312,7 @@ class SpectralAnalyzer:
                 peaks=peaks,
                 total_energy=total_energy,
                 dominant_peak=dominant_peak,
-                metadata=metadata
+                metadata=metadata,
             )
 
         except Exception as e:
@@ -294,11 +320,7 @@ class SpectralAnalyzer:
             return None
 
     def _create_spectral_peak(
-        self,
-        height: float,
-        period: float,
-        direction: float,
-        component_type: str
+        self, height: float, period: float, direction: float, component_type: str
     ) -> SpectralPeak:
         """
         Create a SpectralPeak from wave parameters.
@@ -319,11 +341,11 @@ class SpectralAnalyzer:
         # E ≈ (H_s^2) / (16 * bandwidth)
         # For typical spectral bandwidth ~0.03 Hz
         bandwidth = 0.03
-        energy_density = (height ** 2) / (16 * bandwidth)
+        energy_density = (height**2) / (16 * bandwidth)
 
         # Estimate directional spread
         # Swell typically has narrower spread than wind waves
-        if component_type == 'swell':
+        if component_type == "swell":
             directional_spread = 30.0  # degrees (narrower)
             confidence = 0.85
         else:
@@ -338,10 +360,10 @@ class SpectralAnalyzer:
             height_meters=height,
             directional_spread=directional_spread,
             confidence=confidence,
-            component_type=component_type
+            component_type=component_type,
         )
 
-    def _parse_direction(self, dir_str: str) -> Optional[float]:
+    def _parse_direction(self, dir_str: str) -> float | None:
         """
         Parse compass direction string to degrees.
 
@@ -354,7 +376,7 @@ class SpectralAnalyzer:
         dir_str = dir_str.strip().upper()
         return self.DIRECTION_MAP.get(dir_str)
 
-    def _safe_float(self, value: str) -> Optional[float]:
+    def _safe_float(self, value: str) -> float | None:
         """
         Safely convert string to float.
 
@@ -391,7 +413,7 @@ class SpectralAnalyzer:
 
 
 # Convenience function for integration
-def analyze_spec_file(file_path: str, **kwargs) -> Optional[SpectralAnalysisResult]:
+def analyze_spec_file(file_path: str, **kwargs) -> SpectralAnalysisResult | None:
     """
     Convenience function to analyze a .spec file with default parameters.
 

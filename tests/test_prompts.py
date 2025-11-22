@@ -73,27 +73,27 @@ class PromptTestCase:
         if not self.prompt_file.exists():
             raise FileNotFoundError(f"Missing prompt.txt in {test_dir}")
 
-    def load_input(self) -> Dict[str, Any]:
+    def load_input(self) -> dict[str, Any]:
         """Load test input data."""
-        with open(self.input_file, 'r') as f:
+        with open(self.input_file) as f:
             return json.load(f)
 
     def load_expected_prompt(self) -> str:
         """Load expected prompt text."""
-        with open(self.prompt_file, 'r') as f:
+        with open(self.prompt_file) as f:
             return f.read()
 
-    def load_golden_output(self) -> Optional[str]:
+    def load_golden_output(self) -> str | None:
         """Load golden output (if exists)."""
         if self.golden_file.exists():
-            with open(self.golden_file, 'r') as f:
+            with open(self.golden_file) as f:
                 return f.read()
         return None
 
-    def load_metadata(self) -> Dict[str, Any]:
+    def load_metadata(self) -> dict[str, Any]:
         """Load test case metadata."""
         if self.metadata_file.exists():
-            with open(self.metadata_file, 'r') as f:
+            with open(self.metadata_file) as f:
                 return json.load(f)
         return {}
 
@@ -101,7 +101,7 @@ class PromptTestCase:
         return f"PromptTestCase({self.specialist}/{self.case_name})"
 
 
-def discover_test_cases() -> List[PromptTestCase]:
+def discover_test_cases() -> list[PromptTestCase]:
     """
     Discover all prompt test cases in tests/prompt_tests/.
 
@@ -135,7 +135,7 @@ def discover_test_cases() -> List[PromptTestCase]:
     return test_cases
 
 
-def generate_prompt_from_specialist(specialist: str, input_data: Dict[str, Any]) -> str:
+def generate_prompt_from_specialist(specialist: str, input_data: dict[str, Any]) -> str:
     """
     Generate a prompt using the actual specialist logic.
 
@@ -159,7 +159,7 @@ def generate_prompt_from_specialist(specialist: str, input_data: Dict[str, Any])
         raise ValueError(f"Unknown specialist: {specialist}")
 
 
-def _generate_senior_forecaster_prompt(input_data: Dict[str, Any]) -> str:
+def _generate_senior_forecaster_prompt(input_data: dict[str, Any]) -> str:
     """
     Generate SeniorForecaster prompt from input data.
 
@@ -174,63 +174,64 @@ def _generate_senior_forecaster_prompt(input_data: Dict[str, Any]) -> str:
     """
     from datetime import datetime
 
-    forecast_date = input_data.get('metadata', {}).get('forecast_date', datetime.now().strftime('%Y-%m-%d'))
-    valid_period = input_data.get('metadata', {}).get('valid_period', '48hr')
-    season = input_data.get('seasonal_context', {}).get('season', 'winter')
+    forecast_date = input_data.get("metadata", {}).get(
+        "forecast_date", datetime.now().strftime("%Y-%m-%d")
+    )
+    valid_period = input_data.get("metadata", {}).get("valid_period", "48hr")
+    season = input_data.get("seasonal_context", {}).get("season", "winter")
 
     # Build specialist outputs where available
-    buoy_analysis = input_data.get('buoy_analysis')
-    pressure_analysis = input_data.get('pressure_analysis')
+    buoy_analysis = input_data.get("buoy_analysis")
+    pressure_analysis = input_data.get("pressure_analysis")
 
     buoy_output = SpecialistOutput(**buoy_analysis) if isinstance(buoy_analysis, dict) else None
-    pressure_output = SpecialistOutput(**pressure_analysis) if isinstance(pressure_analysis, dict) else None
+    pressure_output = (
+        SpecialistOutput(**pressure_analysis) if isinstance(pressure_analysis, dict) else None
+    )
 
     # Generate shore forecasts and swell breakdown using production helpers
     class _PromptStubEngine:
         def __init__(self):
             self.openai_client = None
 
-    specialist = SeniorForecaster(config=None, model_name='gpt-5-nano', engine=_PromptStubEngine())
+    specialist = SeniorForecaster(config=None, model_name="gpt-5-nano", engine=_PromptStubEngine())
 
-    input_shore_forecasts = input_data.get('shore_forecasts')
+    input_shore_forecasts = input_data.get("shore_forecasts")
     if input_shore_forecasts is not None:
         shore_forecasts = input_shore_forecasts
     else:
         shore_forecasts = specialist._generate_shore_forecasts(
             buoy_output,
             pressure_output,
-            input_data.get('shore_data', {}),
-            input_data.get('seasonal_context', {})
+            input_data.get("shore_data", {}),
+            input_data.get("seasonal_context", {}),
         )
 
-    input_swell_breakdown = input_data.get('swell_breakdown')
+    input_swell_breakdown = input_data.get("swell_breakdown")
     if input_swell_breakdown is not None:
         swell_breakdown = input_swell_breakdown
     else:
-        swell_breakdown = specialist._generate_swell_breakdown(
-            buoy_output,
-            pressure_output
-        )
+        swell_breakdown = specialist._generate_swell_breakdown(buoy_output, pressure_output)
 
     buoy_conf = buoy_output.confidence if buoy_output else 0.0
     pressure_conf = pressure_output.confidence if pressure_output else 0.0
 
-    contradictions = input_data.get('contradictions', []) or []
-    key_findings = input_data.get('key_findings')
+    contradictions = input_data.get("contradictions", []) or []
+    key_findings = input_data.get("key_findings")
     if not key_findings:
         key_findings = specialist._extract_key_findings(
-            buoy_output,
-            pressure_output,
-            input_data.get('swell_events', []) or []
+            buoy_output, pressure_output, input_data.get("swell_events", []) or []
         )
 
     # Older golden files omit system prompt; use heuristic to match legacy cases
     include_system_prompt = input_shore_forecasts is None
 
     # Filter out automatically generated swell-event findings to match stored goldens
-    key_findings = [finding for finding in key_findings if not finding.startswith('Swell event detected')]
+    key_findings = [
+        finding for finding in key_findings if not finding.startswith("Swell event detected")
+    ]
 
-    separator = '=' * 60
+    separator = "=" * 60
 
     system_prompt = """You are Pat Caldwell, Hawaii's legendary surf forecaster with 40+ years experience.
 
@@ -325,7 +326,7 @@ technical detail but need actionable guidance."""
     return prompt.strip()
 
 
-def _generate_buoy_analyst_prompt(input_data: Dict[str, Any]) -> str:
+def _generate_buoy_analyst_prompt(input_data: dict[str, Any]) -> str:
     """
     Generate BuoyAnalyst prompt from input data.
 
@@ -340,7 +341,7 @@ def _generate_buoy_analyst_prompt(input_data: Dict[str, Any]) -> str:
     raise NotImplementedError("BuoyAnalyst prompt generation not yet implemented")
 
 
-def _generate_pressure_analyst_prompt(input_data: Dict[str, Any]) -> str:
+def _generate_pressure_analyst_prompt(input_data: dict[str, Any]) -> str:
     """
     Generate PressureAnalyst prompt from input data.
 
@@ -391,13 +392,16 @@ def test_prompt_matches_golden(test_case: PromptTestCase):
     if expected_normalized != generated_normalized:
         # Show diff for debugging
         from difflib import unified_diff
-        diff = '\n'.join(unified_diff(
-            expected_normalized.splitlines(),
-            generated_normalized.splitlines(),
-            fromfile='expected (prompt.txt)',
-            tofile='generated (current logic)',
-            lineterm=''
-        ))
+
+        diff = "\n".join(
+            unified_diff(
+                expected_normalized.splitlines(),
+                generated_normalized.splitlines(),
+                fromfile="expected (prompt.txt)",
+                tofile="generated (current logic)",
+                lineterm="",
+            )
+        )
 
         pytest.fail(
             f"Generated prompt doesn't match golden file for {test_case}\n"
@@ -432,21 +436,24 @@ def test_prompt_structure_valid(test_case: PromptTestCase):
             "BUOY ANALYST REPORT",
             "PRESSURE ANALYST REPORT",
             "CROSS-VALIDATION FINDINGS:",
-            "YOUR TASK:"
+            "YOUR TASK:",
         ]
 
         for section in required_sections:
-            assert section in generated_prompt, \
-                f"Missing required section '{section}' in prompt for {test_case}"
+            assert (
+                section in generated_prompt
+            ), f"Missing required section '{section}' in prompt for {test_case}"
 
     # Check minimum length (prompts should be substantial)
-    assert len(generated_prompt) > 500, \
-        f"Prompt too short ({len(generated_prompt)} chars) for {test_case}"
+    assert (
+        len(generated_prompt) > 500
+    ), f"Prompt too short ({len(generated_prompt)} chars) for {test_case}"
 
 
 # =============================================================================
 # SUMMARY REPORTING
 # =============================================================================
+
 
 def pytest_collection_modifyitems(config, items):
     """Add custom markers and reporting."""
@@ -457,11 +464,14 @@ def pytest_collection_modifyitems(config, items):
 
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     """Print summary of prompt tests."""
-    if hasattr(config, 'workerinput'):
+    if hasattr(config, "workerinput"):
         return  # Don't print in xdist workers
 
-    prompt_tests = [item for item in terminalreporter.stats.get('passed', [])
-                    if 'test_prompts.py' in str(item.nodeid)]
+    prompt_tests = [
+        item
+        for item in terminalreporter.stats.get("passed", [])
+        if "test_prompts.py" in str(item.nodeid)
+    ]
 
     if prompt_tests:
         terminalreporter.write_sep("=", "Prompt Test Summary")

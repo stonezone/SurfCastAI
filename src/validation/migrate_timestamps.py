@@ -6,19 +6,17 @@ ISO 8601 format (YYYY-MM-DD HH:MM:SS).
 
 Run this script once to migrate existing data before deploying the new schema.
 """
+
+import logging
 import sqlite3
 import sys
-import logging
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
+TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def backup_database(db_path: Path) -> Path:
@@ -30,8 +28,9 @@ def backup_database(db_path: Path) -> Path:
     Returns:
         Path to the backup file
     """
-    backup_path = db_path.with_suffix('.db.backup')
+    backup_path = db_path.with_suffix(".db.backup")
     import shutil
+
     shutil.copy2(db_path, backup_path)
     logger.info(f"Created backup: {backup_path}")
     return backup_path
@@ -61,7 +60,7 @@ def convert_timestamp(value: str) -> str:
     # Try parsing as ISO 8601 string (with T, Z, or microseconds)
     try:
         # Remove T separator, Z suffix, and microseconds
-        clean_str = str(value).replace('T', ' ').replace('Z', '').split('.')[0]
+        clean_str = str(value).replace("T", " ").replace("Z", "").split(".")[0]
 
         # Check if already in correct format
         dt = datetime.strptime(clean_str, TIMESTAMP_FORMAT)
@@ -101,7 +100,7 @@ def migrate_table(conn: sqlite3.Connection, table: str, columns: list) -> int:
         # Check if any values changed
         if old_values != tuple(new_values):
             # Build UPDATE query
-            set_clause = ', '.join([f"{col} = ?" for col in columns])
+            set_clause = ", ".join([f"{col} = ?" for col in columns])
             query = f"UPDATE {table} SET {set_clause} WHERE id = ?"
             cursor.execute(query, (*new_values, row_id))
             updated += 1
@@ -163,10 +162,10 @@ def migrate_database(db_path: str, skip_backup: bool = False) -> bool:
     try:
         # Migrate each table with timestamp columns
         tables_to_migrate = {
-            'forecasts': ['created_at'],
-            'predictions': ['forecast_time', 'valid_time'],
-            'actuals': ['observation_time'],
-            'validations': ['validated_at']
+            "forecasts": ["created_at"],
+            "predictions": ["forecast_time", "valid_time"],
+            "actuals": ["observation_time"],
+            "validations": ["validated_at"],
         }
 
         total_updated = 0
@@ -209,15 +208,13 @@ def main():
         description="Migrate validation database timestamps to ISO 8601 format"
     )
     parser.add_argument(
-        '--db-path',
+        "--db-path",
         type=str,
-        default='data/validation.db',
-        help='Path to validation database (default: data/validation.db)'
+        default="data/validation.db",
+        help="Path to validation database (default: data/validation.db)",
     )
     parser.add_argument(
-        '--skip-backup',
-        action='store_true',
-        help='Skip creating backup (for testing only)'
+        "--skip-backup", action="store_true", help="Skip creating backup (for testing only)"
     )
 
     args = parser.parse_args()
@@ -226,7 +223,7 @@ def main():
     logger.info("Validation Database Timestamp Migration")
     logger.info("=" * 60)
     logger.info(f"Database: {args.db_path}")
-    logger.info(f"Target format: ISO 8601 (YYYY-MM-DD HH:MM:SS)")
+    logger.info("Target format: ISO 8601 (YYYY-MM-DD HH:MM:SS)")
     logger.info("")
 
     if migrate_database(args.db_path, skip_backup=args.skip_backup):

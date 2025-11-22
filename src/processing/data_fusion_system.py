@@ -5,34 +5,31 @@ This module integrates data from multiple sources (buoys, weather forecasts, wav
 to create a unified view of current and forecasted surf conditions.
 """
 
-import logging
-from typing import Dict, List, Any, Optional, Union, Tuple
-from pathlib import Path
 import json
-from datetime import datetime, timedelta, timezone
+import logging
 import math
-from statistics import mean, median, stdev
-from collections import defaultdict
+from datetime import UTC, datetime
+from statistics import mean, stdev
+from typing import Any
 
-from .data_processor import DataProcessor, ProcessingResult
-from .models.buoy_data import BuoyData, BuoyObservation
-from .models.weather_data import WeatherData, WeatherPeriod
-from .models.wave_model import ModelData, ModelForecast, ModelPoint
-from .models.swell_event import SwellEvent, SwellComponent, SwellForecast, ForecastLocation
-from .models.confidence import ConfidenceReport
-from .hawaii_context import HawaiiContext
-from .source_scorer import SourceScorer
-from .confidence_scorer import ConfidenceScorer
-from .storm_detector import StormDetector
-from .spectral_analyzer import SpectralAnalyzer, analyze_spec_file
 from ..core.config import Config
 from ..utils.swell_propagation import SwellPropagationCalculator
+from .confidence_scorer import ConfidenceScorer
+from .data_processor import DataProcessor, ProcessingResult
+from .hawaii_context import HawaiiContext
+from .models.buoy_data import BuoyData, BuoyObservation
+from .models.swell_event import SwellComponent, SwellEvent, SwellForecast
+from .models.wave_model import ModelData
+from .models.weather_data import WeatherData
+from .source_scorer import SourceScorer
+from .spectral_analyzer import SpectralAnalyzer
+from .storm_detector import StormDetector
 
 # Phantom swell filtering threshold
 MIN_SWELL_PERIOD = 4.0  # seconds
 
 
-class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
+class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
     """
     System for fusing data from multiple sources into a unified surf forecast.
 
@@ -52,7 +49,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             config: Application configuration
         """
         super().__init__(config)
-        self.logger = logging.getLogger('processor.data_fusion')
+        self.logger = logging.getLogger("processor.data_fusion")
         self.hawaii_context = HawaiiContext()
         self.source_scorer = SourceScorer()
         self.confidence_scorer = ConfidenceScorer()
@@ -60,7 +57,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         self.propagation_calc = SwellPropagationCalculator()
         self.spectral_analyzer = SpectralAnalyzer()
 
-    def validate(self, data: Dict[str, Any]) -> List[str]:
+    def validate(self, data: dict[str, Any]) -> list[str]:
         """
         Validate input data for fusion.
 
@@ -73,18 +70,18 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         errors = []
 
         # Check for required sections
-        required_keys = ['metadata']
+        required_keys = ["metadata"]
         for key in required_keys:
             if key not in data:
                 errors.append(f"Missing {key} section in input data")
 
         # Check that at least one data source is provided
-        if not any(k in data for k in ['buoy_data', 'weather_data', 'model_data']):
+        if not any(k in data for k in ["buoy_data", "weather_data", "model_data"]):
             errors.append("No data sources provided for fusion")
 
         return errors
 
-    def process(self, data: Dict[str, Any]) -> ProcessingResult:
+    def process(self, data: dict[str, Any]) -> ProcessingResult:
         """
         Process and fuse data from multiple sources.
 
@@ -96,13 +93,15 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         """
         try:
             # Extract metadata
-            metadata = data.get('metadata', {})
+            metadata = data.get("metadata", {})
 
             # Create forecast object
             forecast = SwellForecast(
-                forecast_id=metadata.get('forecast_id', f"forecast_{datetime.now().strftime('%Y%m%d_%H%M%S')}"),
+                forecast_id=metadata.get(
+                    "forecast_id", f"forecast_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                ),
                 generated_time=datetime.now().isoformat(),
-                metadata=metadata
+                metadata=metadata,
             )
 
             # Add Hawaii locations
@@ -112,35 +111,33 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             buoy_data = self._extract_buoy_data(data)
             weather_data = self._extract_weather_data(data)
             model_data = self._extract_model_data(data)
-            metar_data = data.get('metar_data', [])
-            tide_data = data.get('tide_data', [])
-            tropical_data = data.get('tropical_data', [])
-            chart_data = data.get('chart_data', [])
-            altimetry_data = data.get('altimetry_data', [])
-            nearshore_data = data.get('nearshore_data', [])
-            upper_air_data = data.get('upper_air_data', [])
-            climatology_data = data.get('climatology_data', [])
+            metar_data = data.get("metar_data", [])
+            tide_data = data.get("tide_data", [])
+            tropical_data = data.get("tropical_data", [])
+            chart_data = data.get("chart_data", [])
+            altimetry_data = data.get("altimetry_data", [])
+            nearshore_data = data.get("nearshore_data", [])
+            upper_air_data = data.get("upper_air_data", [])
+            climatology_data = data.get("climatology_data", [])
 
             # Score all data sources for reliability weighting
             self.logger.info("Scoring data sources for reliability weighting")
-            source_scores = self.source_scorer.score_sources({
-                'buoy_data': buoy_data,
-                'weather_data': weather_data,
-                'model_data': model_data
-            })
+            source_scores = self.source_scorer.score_sources(
+                {"buoy_data": buoy_data, "weather_data": weather_data, "model_data": model_data}
+            )
 
             # Attach reliability scores and weights to data items
             self._attach_source_scores(buoy_data, weather_data, model_data, source_scores)
 
             # Store source scores in forecast metadata
-            forecast.metadata['source_scores'] = {
+            forecast.metadata["source_scores"] = {
                 source_id: {
-                    'overall_score': score.overall_score,
-                    'tier': score.tier.name,
-                    'tier_score': score.tier_score,
-                    'freshness_score': score.freshness_score,
-                    'completeness_score': score.completeness_score,
-                    'accuracy_score': score.accuracy_score
+                    "overall_score": score.overall_score,
+                    "tier": score.tier.name,
+                    "tier_score": score.tier_score,
+                    "freshness_score": score.freshness_score,
+                    "completeness_score": score.completeness_score,
+                    "accuracy_score": score.accuracy_score,
                 }
                 for source_id, score in source_scores.items()
             }
@@ -171,34 +168,25 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             # Calculate confidence scores using ConfidenceScorer
             self.logger.info("Calculating confidence scores")
             warnings, confidence_metadata = self._calculate_confidence_scores(
-                forecast,
-                buoy_data,
-                weather_data,
-                model_data
+                forecast, buoy_data, weather_data, model_data
             )
 
             # Attach confidence metadata to forecast
-            forecast.metadata['confidence'] = confidence_metadata['confidence']
-            forecast.metadata['confidence_report'] = confidence_metadata['confidence_report']
+            forecast.metadata["confidence"] = confidence_metadata["confidence"]
+            forecast.metadata["confidence_report"] = confidence_metadata["confidence_report"]
 
             # Prepare metadata for result
             metadata = confidence_metadata
 
             return ProcessingResult(
-                success=True,
-                data=forecast,
-                warnings=warnings,
-                metadata=metadata
+                success=True, data=forecast, warnings=warnings, metadata=metadata
             )
 
         except Exception as e:
             self.logger.error(f"Error in data fusion: {e}", exc_info=True)
-            return ProcessingResult(
-                success=False,
-                error=f"Data fusion error: {str(e)}"
-            )
+            return ProcessingResult(success=False, error=f"Data fusion error: {str(e)}")
 
-    def _extract_buoy_data(self, data: Dict[str, Any]) -> List[BuoyData]:
+    def _extract_buoy_data(self, data: dict[str, Any]) -> list[BuoyData]:
         """
         Extract BuoyData objects from input data.
 
@@ -211,7 +199,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         buoy_data_list = []
 
         # Extract buoy data
-        buoy_data_raw = data.get('buoy_data', [])
+        buoy_data_raw = data.get("buoy_data", [])
 
         # Convert to BuoyData objects if not already
         for buoy_item in buoy_data_raw:
@@ -222,6 +210,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                 # Use from_json which handles both raw NDBC and normalized formats
                 try:
                     import json
+
                     buoy = BuoyData.from_json(json.dumps(buoy_item))
                     buoy_data_list.append(buoy)
                 except Exception as e:
@@ -229,7 +218,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
 
         return buoy_data_list
 
-    def _extract_weather_data(self, data: Dict[str, Any]) -> List[WeatherData]:
+    def _extract_weather_data(self, data: dict[str, Any]) -> list[WeatherData]:
         """
         Extract WeatherData objects from input data.
 
@@ -242,7 +231,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         weather_data_list = []
 
         # Extract weather data
-        weather_data_raw = data.get('weather_data', [])
+        weather_data_raw = data.get("weather_data", [])
 
         # Convert to WeatherData objects if not already
         for weather_item in weather_data_raw:
@@ -251,11 +240,11 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             elif isinstance(weather_item, dict):
                 # Try to create WeatherData from dictionary
                 try:
-                    if 'properties' in weather_item:
+                    if "properties" in weather_item:
                         # NWS format
                         weather = WeatherData.from_nws_json(weather_item)
                         weather_data_list.append(weather)
-                    elif 'provider' in weather_item:
+                    elif "provider" in weather_item:
                         # Already in our format
                         weather = WeatherData.from_json(json.dumps(weather_item))
                         weather_data_list.append(weather)
@@ -264,7 +253,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
 
         return weather_data_list
 
-    def _extract_model_data(self, data: Dict[str, Any]) -> List[ModelData]:
+    def _extract_model_data(self, data: dict[str, Any]) -> list[ModelData]:
         """
         Extract ModelData objects from input data.
 
@@ -277,7 +266,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         model_data_list = []
 
         # Extract model data
-        model_data_raw = data.get('model_data', [])
+        model_data_raw = data.get("model_data", [])
 
         # Convert to ModelData objects if not already
         for model_item in model_data_raw:
@@ -286,15 +275,15 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             elif isinstance(model_item, dict):
                 # Try to create ModelData from dictionary
                 try:
-                    if 'metadata' in model_item and 'forecasts' in model_item:
+                    if "metadata" in model_item and "forecasts" in model_item:
                         # SWAN format
                         model = ModelData.from_swan_json(model_item)
                         model_data_list.append(model)
-                    elif 'header' in model_item and 'data' in model_item:
+                    elif "header" in model_item and "data" in model_item:
                         # WW3 format
                         model = ModelData.from_ww3_json(model_item)
                         model_data_list.append(model)
-                    elif 'model_id' in model_item:
+                    elif "model_id" in model_item:
                         # Already in our format
                         model = ModelData.from_json(json.dumps(model_item))
                         model_data_list.append(model)
@@ -311,7 +300,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             forecast: Swell forecast to modify
         """
         # Add main Hawaiian shores
-        shore_names = ['north_shore', 'south_shore', 'west_shore', 'east_shore']
+        shore_names = ["north_shore", "south_shore", "west_shore", "east_shore"]
 
         # Add all shores
         for shore_name in shore_names:
@@ -319,8 +308,9 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             if location:
                 forecast.locations.append(location)
 
-    def _identify_swell_events(self, buoy_data_list: List[BuoyData],
-                              model_data_list: List[ModelData]) -> List[SwellEvent]:
+    def _identify_swell_events(
+        self, buoy_data_list: list[BuoyData], model_data_list: list[ModelData]
+    ) -> list[SwellEvent]:
         """
         Identify swell events from multiple data sources.
 
@@ -345,14 +335,13 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         swell_events.extend(model_events)
 
         # Sort events by time and significance
-        swell_events.sort(key=lambda e: (
-            e.start_time if e.start_time else e.peak_time,
-            -e.significance
-        ))
+        swell_events.sort(
+            key=lambda e: (e.start_time if e.start_time else e.peak_time, -e.significance)
+        )
 
         return swell_events
 
-    def _extract_buoy_events(self, buoy_data_list: List[BuoyData]) -> List[SwellEvent]:
+    def _extract_buoy_events(self, buoy_data_list: list[BuoyData]) -> list[SwellEvent]:
         """
         Extract swell events from buoy data.
 
@@ -365,7 +354,9 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         events = []
 
         # Get minimum period threshold from config (fallback to 8s if missing/invalid)
-        min_period = self.config.get_nested('processing', 'model', 'swell_detection', 'min_period', default=8.0)
+        min_period = self.config.get_nested(
+            "processing", "model", "swell_detection", "min_period", default=8.0
+        )
         try:
             min_period = float(min_period)
         except (TypeError, ValueError):
@@ -388,11 +379,11 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                 continue
 
             # DATA AGE VALIDATION: Check how old the observation is
-            quality_override: Optional[str] = None
+            quality_override: str | None = None
             if latest.timestamp:
                 try:
-                    obs_time = datetime.fromisoformat(latest.timestamp.replace('Z', '+00:00'))
-                    current_time = datetime.now(timezone.utc)
+                    obs_time = datetime.fromisoformat(latest.timestamp.replace("Z", "+00:00"))
+                    current_time = datetime.now(UTC)
                     age_hours = (current_time - obs_time).total_seconds() / 3600
 
                     # Error if data is more than 24 hours old
@@ -401,7 +392,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                             f"Buoy {buoy_data.station_id} data is {age_hours:.1f} hours old - marking as STALE "
                             f"(observation from {latest.timestamp})"
                         )
-                        quality_override = 'suspect'
+                        quality_override = "suspect"
 
                     # Warning if data is more than 6 hours old
                     if age_hours > 6:
@@ -414,9 +405,11 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
 
             # Try spectral analysis for multi-component separation
             spectral_result = None
-            if hasattr(buoy_data, 'spec_file_path') and buoy_data.spec_file_path:
+            if hasattr(buoy_data, "spec_file_path") and buoy_data.spec_file_path:
                 try:
-                    spectral_result = self.spectral_analyzer.parse_spec_file(buoy_data.spec_file_path)
+                    spectral_result = self.spectral_analyzer.parse_spec_file(
+                        buoy_data.spec_file_path
+                    )
                     if spectral_result and spectral_result.peaks:
                         self.logger.info(
                             f"Spectral analysis for {buoy_data.station_id}: "
@@ -438,7 +431,9 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                         start_time=latest.timestamp,
                         peak_time=latest.timestamp,
                         primary_direction=peak.direction_degrees,
-                        significance=self._calculate_significance(peak.height_meters, peak.period_seconds),
+                        significance=self._calculate_significance(
+                            peak.height_meters, peak.period_seconds
+                        ),
                         hawaii_scale=self._convert_to_hawaii_scale(peak.height_meters),
                         source="buoy_spectral",
                         quality_flag="valid",
@@ -453,20 +448,22 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                                 "buoy_id": buoy_data.station_id,
                                 "observation_time": latest.timestamp,
                                 "data_quality": "excellent",
-                                "source_type": "NDBC spectral"
-                            }
-                        }
+                                "source_type": "NDBC spectral",
+                            },
+                        },
                     )
 
                     # Add component
-                    event.primary_components.append(SwellComponent(
-                        height=peak.height_meters,
-                        period=peak.period_seconds,
-                        direction=peak.direction_degrees,
-                        confidence=peak.confidence,
-                        source="buoy_spectral",
-                        quality_flag="valid"
-                    ))
+                    event.primary_components.append(
+                        SwellComponent(
+                            height=peak.height_meters,
+                            period=peak.period_seconds,
+                            direction=peak.direction_degrees,
+                            confidence=peak.confidence,
+                            source="buoy_spectral",
+                            quality_flag="valid",
+                        )
+                    )
 
                     events.append(event)
 
@@ -478,9 +475,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             # Validate period before creating event
             # Skip buoy readings with invalid or missing periods to prevent phantom swells
             if latest.dominant_period is None:
-                self.logger.debug(
-                    "Skipping buoy %s: dominant period missing", buoy_data.station_id
-                )
+                self.logger.debug("Skipping buoy %s: dominant period missing", buoy_data.station_id)
                 continue
 
             try:
@@ -501,10 +496,12 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                 continue
 
             # Assess data quality
-            quality_flag = self._assess_buoy_quality(buoy_data, latest, dominant_period, buoy_data_list)
+            quality_flag = self._assess_buoy_quality(
+                buoy_data, latest, dominant_period, buoy_data_list
+            )
 
-            if quality_override == 'suspect' and quality_flag != 'excluded':
-                quality_flag = 'suspect'
+            if quality_override == "suspect" and quality_flag != "excluded":
+                quality_flag = "suspect"
 
             # Log warnings for excluded data
             if quality_flag == "excluded":
@@ -519,7 +516,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                 )
 
             # Skip excluded data
-            if quality_flag == 'excluded':
+            if quality_flag == "excluded":
                 self.logger.debug(
                     f"Skipping excluded buoy data from {buoy_data.station_id}: "
                     f"quality flag = {quality_flag}"
@@ -544,21 +541,25 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                     "source_details": {
                         "buoy_id": buoy_data.station_id,
                         "observation_time": latest.timestamp,
-                        "data_quality": "excellent" if latest.wave_height and latest.dominant_period else "good",
-                        "source_type": "NDBC realtime"
-                    }
-                }
+                        "data_quality": (
+                            "excellent" if latest.wave_height and latest.dominant_period else "good"
+                        ),
+                        "source_type": "NDBC realtime",
+                    },
+                },
             )
 
             # Add primary component (period is now guaranteed to be valid)
-            event.primary_components.append(SwellComponent(
-                height=latest.wave_height,
-                period=dominant_period,
-                direction=latest.wave_direction or 0.0,
-                confidence=0.9,
-                source="buoy",
-                quality_flag=quality_flag  # Set quality flag on component
-            ))
+            event.primary_components.append(
+                SwellComponent(
+                    height=latest.wave_height,
+                    period=dominant_period,
+                    direction=latest.wave_direction or 0.0,
+                    confidence=0.9,
+                    source="buoy",
+                    quality_flag=quality_flag,  # Set quality flag on component
+                )
+            )
 
             events.append(event)
 
@@ -569,7 +570,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         buoy_data: BuoyData,
         latest: BuoyObservation,
         dominant_period: float,
-        all_buoy_data: List[BuoyData]
+        all_buoy_data: list[BuoyData],
     ) -> str:
         """
         Assess quality of buoy data reading.
@@ -627,7 +628,9 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                                 )
                                 return "suspect"
                     except Exception as e:
-                        self.logger.debug(f"Z-score calculation failed for buoy {buoy_data.station_id}: {e}")
+                        self.logger.debug(
+                            f"Z-score calculation failed for buoy {buoy_data.station_id}: {e}"
+                        )
 
         # Period-height relationship validation
         # Unusually large waves with short periods are suspect
@@ -661,7 +664,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         # If no issues detected, mark as valid
         return "valid"
 
-    def _extract_model_events(self, model_data_list: List[ModelData]) -> List[SwellEvent]:
+    def _extract_model_events(self, model_data_list: list[ModelData]) -> list[SwellEvent]:
         """
         Extract swell events from model data.
 
@@ -679,38 +682,42 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                 continue
 
             # Extract events from model metadata if available
-            if 'swell_events' in model_data.metadata:
-                model_events = model_data.metadata['swell_events']
+            if "swell_events" in model_data.metadata:
+                model_events = model_data.metadata["swell_events"]
 
                 for event_data in model_events:
                     event = SwellEvent(
-                        event_id=event_data.get('event_id', f"model_{model_data.model_id}_{len(events)}"),
-                        start_time=event_data.get('start_time'),
-                        peak_time=event_data.get('peak_time'),
-                        end_time=event_data.get('end_time'),
-                        primary_direction=event_data.get('peak_direction'),
-                        significance=event_data.get('significance', 0.5),
-                        hawaii_scale=event_data.get('hawaii_scale'),
+                        event_id=event_data.get(
+                            "event_id", f"model_{model_data.model_id}_{len(events)}"
+                        ),
+                        start_time=event_data.get("start_time"),
+                        peak_time=event_data.get("peak_time"),
+                        end_time=event_data.get("end_time"),
+                        primary_direction=event_data.get("peak_direction"),
+                        significance=event_data.get("significance", 0.5),
+                        hawaii_scale=event_data.get("hawaii_scale"),
                         source="model",
                         metadata={
                             "model_id": model_data.model_id,
                             "model_region": model_data.region,
                             "confidence": 0.7,  # Medium confidence as this is model data
                             "type": "forecast",
-                            "peak_hour": event_data.get('peak_hour'),
-                            "duration_hours": event_data.get('duration_hours')
-                        }
+                            "peak_hour": event_data.get("peak_hour"),
+                            "duration_hours": event_data.get("duration_hours"),
+                        },
                     )
 
                     # Add primary component
-                    if event_data.get('peak_height') is not None:
-                        event.primary_components.append(SwellComponent(
-                            height=event_data.get('peak_height'),
-                            period=event_data.get('peak_period'),
-                            direction=event_data.get('peak_direction'),
-                            confidence=0.7,
-                            source="model"
-                        ))
+                    if event_data.get("peak_height") is not None:
+                        event.primary_components.append(
+                            SwellComponent(
+                                height=event_data.get("peak_height"),
+                                period=event_data.get("peak_period"),
+                                direction=event_data.get("peak_direction"),
+                                confidence=0.7,
+                                source="model",
+                            )
+                        )
 
                     events.append(event)
 
@@ -733,7 +740,9 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                         event_id=f"model_{model_data.model_id}_{datetime.now().strftime('%Y%m%d')}",
                         peak_time=max_forecast.timestamp,
                         primary_direction=max_point.wave_direction,
-                        significance=self._calculate_significance(max_point.wave_height, max_point.wave_period),
+                        significance=self._calculate_significance(
+                            max_point.wave_height, max_point.wave_period
+                        ),
                         hawaii_scale=self._convert_to_hawaii_scale(max_point.wave_height),
                         source="model",
                         metadata={
@@ -741,24 +750,26 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                             "model_region": model_data.region,
                             "confidence": 0.6,  # Lower confidence for simple extraction
                             "type": "forecast",
-                            "forecast_hour": max_forecast.forecast_hour
-                        }
+                            "forecast_hour": max_forecast.forecast_hour,
+                        },
                     )
 
                     # Add primary component
-                    event.primary_components.append(SwellComponent(
-                        height=max_point.wave_height,
-                        period=max_point.wave_period,
-                        direction=max_point.wave_direction,
-                        confidence=0.6,
-                        source="model"
-                    ))
+                    event.primary_components.append(
+                        SwellComponent(
+                            height=max_point.wave_height,
+                            period=max_point.wave_period,
+                            direction=max_point.wave_direction,
+                            confidence=0.6,
+                            source="model",
+                        )
+                    )
 
                     events.append(event)
 
         return events
 
-    def _merge_similar_events(self, events: List[SwellEvent]) -> List[SwellEvent]:
+    def _merge_similar_events(self, events: list[SwellEvent]) -> list[SwellEvent]:
         """
         Merge similar swell events.
 
@@ -781,21 +792,31 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             next_event = events[i]
 
             # Check if events are from the same source and close in time
-            if (current_event.source == next_event.source and
-                current_event.peak_time and next_event.peak_time):
+            if (
+                current_event.source == next_event.source
+                and current_event.peak_time
+                and next_event.peak_time
+            ):
 
                 # Convert peak times to datetime
                 try:
-                    current_peak = datetime.fromisoformat(current_event.peak_time.replace('Z', '+00:00'))
-                    next_peak = datetime.fromisoformat(next_event.peak_time.replace('Z', '+00:00'))
+                    current_peak = datetime.fromisoformat(
+                        current_event.peak_time.replace("Z", "+00:00")
+                    )
+                    next_peak = datetime.fromisoformat(next_event.peak_time.replace("Z", "+00:00"))
 
                     # Check if peaks are within 24 hours
                     time_diff = abs((next_peak - current_peak).total_seconds()) / 3600
 
                     # Check if directions are similar (within 45 degrees)
                     dir_diff = True
-                    if current_event.primary_direction is not None and next_event.primary_direction is not None:
-                        dir_diff = abs(current_event.primary_direction - next_event.primary_direction)
+                    if (
+                        current_event.primary_direction is not None
+                        and next_event.primary_direction is not None
+                    ):
+                        dir_diff = abs(
+                            current_event.primary_direction - next_event.primary_direction
+                        )
                         if dir_diff > 180:
                             dir_diff = 360 - dir_diff
                         dir_diff = dir_diff <= 45
@@ -818,14 +839,14 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
 
         return merged_events
 
-    def _integrate_metar_data(self, forecast: SwellForecast, metar_entries: List[Dict[str, Any]]):
+    def _integrate_metar_data(self, forecast: SwellForecast, metar_entries: list[dict[str, Any]]):
         """Populate forecast metadata with latest METAR observations."""
         if not metar_entries:
             return
         latest = None
         latest_time = None
         for entry in metar_entries:
-            issued = self._safe_parse_iso(entry.get('issued'))
+            issued = self._safe_parse_iso(entry.get("issued"))
             if issued is None:
                 continue
             if latest_time is None or issued > latest_time:
@@ -833,179 +854,199 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
                 latest_time = issued
         if not latest:
             return
-        weather_meta = forecast.metadata.setdefault('weather', {})
-        weather_meta['metar_station'] = latest.get('station')
-        weather_meta['metar_issued'] = latest.get('issued')
-        if latest.get('wind_direction_deg') is not None:
-            weather_meta['wind_direction'] = latest['wind_direction_deg']
-        if latest.get('wind_speed_ms') is not None:
-            weather_meta['wind_speed_ms'] = latest['wind_speed_ms']
-        if latest.get('wind_gust_ms') is not None:
-            weather_meta['wind_gust_ms'] = latest['wind_gust_ms']
-        if latest.get('temperature_c') is not None:
-            weather_meta['temperature'] = latest['temperature_c']
-        if latest.get('pressure_hpa') is not None:
-            weather_meta['pressure_hpa'] = latest['pressure_hpa']
-        weather_meta['metar'] = latest
+        weather_meta = forecast.metadata.setdefault("weather", {})
+        weather_meta["metar_station"] = latest.get("station")
+        weather_meta["metar_issued"] = latest.get("issued")
+        if latest.get("wind_direction_deg") is not None:
+            weather_meta["wind_direction"] = latest["wind_direction_deg"]
+        if latest.get("wind_speed_ms") is not None:
+            weather_meta["wind_speed_ms"] = latest["wind_speed_ms"]
+        if latest.get("wind_gust_ms") is not None:
+            weather_meta["wind_gust_ms"] = latest["wind_gust_ms"]
+        if latest.get("temperature_c") is not None:
+            weather_meta["temperature"] = latest["temperature_c"]
+        if latest.get("pressure_hpa") is not None:
+            weather_meta["pressure_hpa"] = latest["pressure_hpa"]
+        weather_meta["metar"] = latest
 
-    def _integrate_tide_data(self, forecast: SwellForecast, tide_entries: List[Dict[str, Any]]):
+    def _integrate_tide_data(self, forecast: SwellForecast, tide_entries: list[dict[str, Any]]):
         """Build tide summary including upcoming highs/lows and latest observations."""
         if not tide_entries:
             return
-        predictions = [entry for entry in tide_entries if entry.get('product') == 'predictions']
-        water_levels = [entry for entry in tide_entries if entry.get('product') != 'predictions']
-        tide_metadata: Dict[str, Any] = {}
+        predictions = [entry for entry in tide_entries if entry.get("product") == "predictions"]
+        water_levels = [entry for entry in tide_entries if entry.get("product") != "predictions"]
+        tide_metadata: dict[str, Any] = {}
         if predictions:
             record = predictions[0]
-            units = record.get('units', 'metric')
-            highs, lows = self._extract_tide_extrema(record.get('records', []), units)
+            units = record.get("units", "metric")
+            highs, lows = self._extract_tide_extrema(record.get("records", []), units)
             if highs:
-                tide_metadata['high_tide'] = highs
+                tide_metadata["high_tide"] = highs
             if lows:
-                tide_metadata['low_tide'] = lows
-            tide_metadata['station'] = record.get('station')
+                tide_metadata["low_tide"] = lows
+            tide_metadata["station"] = record.get("station")
         if water_levels:
-            latest_obs = self._select_latest_tide_observation(water_levels[0].get('records', []))
+            latest_obs = self._select_latest_tide_observation(water_levels[0].get("records", []))
             if latest_obs:
-                tide_metadata['latest_water_level'] = latest_obs
+                tide_metadata["latest_water_level"] = latest_obs
         if tide_metadata:
-            forecast.metadata['tides'] = tide_metadata
+            forecast.metadata["tides"] = tide_metadata
 
-    def _integrate_tropical_data(self, forecast: SwellForecast, tropical_entries: List[Dict[str, Any]]):
+    def _integrate_tropical_data(
+        self, forecast: SwellForecast, tropical_entries: list[dict[str, Any]]
+    ):
         """Attach tropical outlook headline and entries."""
         if not tropical_entries:
             return
         outlook = tropical_entries[0]
-        forecast.metadata['tropical'] = {
-            'headline': outlook.get('headline'),
-            'entries': outlook.get('entries', [])
+        forecast.metadata["tropical"] = {
+            "headline": outlook.get("headline"),
+            "entries": outlook.get("entries", []),
         }
 
-    def _integrate_chart_data(self, forecast: SwellForecast, chart_entries: List[Dict[str, Any]]):
+    def _integrate_chart_data(self, forecast: SwellForecast, chart_entries: list[dict[str, Any]]):
         """Reference downloaded analysis charts for downstream consumers."""
         charts = []
         for entry in chart_entries:
-            file_path = entry.get('file_path') or entry.get('manifest_path')
+            file_path = entry.get("file_path") or entry.get("manifest_path")
             if not file_path:
                 continue
-            charts.append({
-                'type': entry.get('chart_type'),
-                'file_path': file_path,
-                'source_url': entry.get('source_url')
-            })
+            charts.append(
+                {
+                    "type": entry.get("chart_type"),
+                    "file_path": file_path,
+                    "source_url": entry.get("source_url"),
+                }
+            )
         if charts:
-            forecast.metadata['charts'] = charts
+            forecast.metadata["charts"] = charts
 
-    def _integrate_altimetry_data(self, forecast: SwellForecast, altimetry_entries: List[Dict[str, Any]]):
+    def _integrate_altimetry_data(
+        self, forecast: SwellForecast, altimetry_entries: list[dict[str, Any]]
+    ):
         """Attach satellite altimetry manifests to forecast metadata."""
         if not altimetry_entries:
             return
 
-        products: List[Dict[str, Any]] = []
+        products: list[dict[str, Any]] = []
         for entry in altimetry_entries:
-            file_path = entry.get('file_path') or entry.get('extracted_file')
+            file_path = entry.get("file_path") or entry.get("extracted_file")
             if not file_path:
                 continue
-            products.append({
-                'description': entry.get('description'),
-                'file_path': file_path,
-                'source_url': entry.get('source_url'),
-                'type': entry.get('type'),
-                'analysis_level': entry.get('analysis_level'),
-                'netcdf_summary': entry.get('netcdf_summary'),
-                'netcdf_dimensions': entry.get('netcdf_dimensions')
-            })
+            products.append(
+                {
+                    "description": entry.get("description"),
+                    "file_path": file_path,
+                    "source_url": entry.get("source_url"),
+                    "type": entry.get("type"),
+                    "analysis_level": entry.get("analysis_level"),
+                    "netcdf_summary": entry.get("netcdf_summary"),
+                    "netcdf_dimensions": entry.get("netcdf_dimensions"),
+                }
+            )
         if products:
-            forecast.metadata['altimetry'] = products
+            forecast.metadata["altimetry"] = products
 
-    def _integrate_nearshore_data(self, forecast: SwellForecast, nearshore_entries: List[Dict[str, Any]]):
+    def _integrate_nearshore_data(
+        self, forecast: SwellForecast, nearshore_entries: list[dict[str, Any]]
+    ):
         """Surface nearshore buoy summaries for shoreline contextualisation."""
         if not nearshore_entries:
             return
 
         stations = []
         for entry in nearshore_entries:
-            station_id = entry.get('station_id') or entry.get('name')
+            station_id = entry.get("station_id") or entry.get("name")
             if not station_id:
                 continue
-            stations.append({
-                'station_id': station_id,
-                'station_name': entry.get('station_name'),
-                'significant_height_m': entry.get('significant_height_m'),
-                'peak_period_s': entry.get('peak_period_s'),
-                'peak_direction_deg': entry.get('peak_direction_deg'),
-                'observation_timestamp': entry.get('observation_timestamp'),
-                'quality_flags': entry.get('quality_flags'),
-                'spectral_bins': entry.get('spectral_bins'),
-                'spectral_frequency_spacing': entry.get('spectral_frequency_spacing'),
-                'file_path': entry.get('file_path')
-            })
+            stations.append(
+                {
+                    "station_id": station_id,
+                    "station_name": entry.get("station_name"),
+                    "significant_height_m": entry.get("significant_height_m"),
+                    "peak_period_s": entry.get("peak_period_s"),
+                    "peak_direction_deg": entry.get("peak_direction_deg"),
+                    "observation_timestamp": entry.get("observation_timestamp"),
+                    "quality_flags": entry.get("quality_flags"),
+                    "spectral_bins": entry.get("spectral_bins"),
+                    "spectral_frequency_spacing": entry.get("spectral_frequency_spacing"),
+                    "file_path": entry.get("file_path"),
+                }
+            )
         if stations:
-            forecast.metadata['nearshore_buoys'] = stations
+            forecast.metadata["nearshore_buoys"] = stations
 
-    def _integrate_upper_air_data(self, forecast: SwellForecast, upper_air_entries: List[Dict[str, Any]]):
+    def _integrate_upper_air_data(
+        self, forecast: SwellForecast, upper_air_entries: list[dict[str, Any]]
+    ):
         """Summarise upper-air diagnostics for synoptic context."""
         if not upper_air_entries:
             return
 
         summary = self.storm_detector.summarise_upper_air(upper_air_entries)
-        forecast.metadata['upper_air'] = upper_air_entries
+        forecast.metadata["upper_air"] = upper_air_entries
         if summary:
-            forecast.metadata['upper_air_summary'] = summary
+            forecast.metadata["upper_air_summary"] = summary
 
-    def _integrate_climatology_data(self, forecast: SwellForecast, climatology_entries: List[Dict[str, Any]]):
+    def _integrate_climatology_data(
+        self, forecast: SwellForecast, climatology_entries: list[dict[str, Any]]
+    ):
         """Attach climatology references for prompt enrichment."""
         if not climatology_entries:
             return
 
         summary = self.storm_detector.summarise_climatology(climatology_entries)
-        forecast.metadata['climatology'] = climatology_entries
+        forecast.metadata["climatology"] = climatology_entries
         if summary:
-            forecast.metadata['climatology_summary'] = summary
+            forecast.metadata["climatology_summary"] = summary
 
     def _calculate_confidence_scores(
         self,
         forecast: SwellForecast,
-        buoy_data: List[BuoyData],
-        weather_data: List[WeatherData],
-        model_data: List[ModelData]
-    ) -> Tuple[List[str], Dict[str, Any]]:
+        buoy_data: list[BuoyData],
+        weather_data: list[WeatherData],
+        model_data: list[ModelData],
+    ) -> tuple[list[str], dict[str, Any]]:
         """Calculate confidence information and warnings for a forecast."""
 
         confidence_report = self.confidence_scorer.calculate_confidence(
             fusion_data={
-                'swell_events': forecast.swell_events,
-                'locations': forecast.locations,
-                'metadata': forecast.metadata,
-                'buoy_data': buoy_data,
-                'weather_data': weather_data,
-                'model_data': model_data
+                "swell_events": forecast.swell_events,
+                "locations": forecast.locations,
+                "metadata": forecast.metadata,
+                "buoy_data": buoy_data,
+                "weather_data": weather_data,
+                "model_data": model_data,
             },
-            forecast_horizon_days=2
+            forecast_horizon_days=2,
         )
 
         metadata = {
-            'confidence_report': confidence_report.model_dump(),
-            'confidence': {
-                'overall_score': confidence_report.overall_score,
-                'category': confidence_report.category,
-                'factors': confidence_report.factors,
-                'breakdown': confidence_report.breakdown,
-                'warnings': confidence_report.warnings
-            }
+            "confidence_report": confidence_report.model_dump(),
+            "confidence": {
+                "overall_score": confidence_report.overall_score,
+                "category": confidence_report.category,
+                "factors": confidence_report.factors,
+                "breakdown": confidence_report.breakdown,
+                "warnings": confidence_report.warnings,
+            },
         }
 
         return confidence_report.warnings.copy(), metadata
 
-    def _extract_tide_extrema(self, records: List[Dict[str, Any]], units: str) -> Tuple[List[Tuple[str, float]], List[Tuple[str, float]]]:
-        points: List[Tuple[str, float]] = []
+    def _extract_tide_extrema(
+        self, records: list[dict[str, Any]], units: str
+    ) -> tuple[list[tuple[str, float]], list[tuple[str, float]]]:
+        points: list[tuple[str, float]] = []
         for row in records:
-            value = row.get('Prediction') or row.get('Water Level') or row.get('WaterLevel')
-            time_str = row.get('Date Time') or row.get('Time') or row.get('Time (GMT)') or row.get('t')
+            value = row.get("Prediction") or row.get("Water Level") or row.get("WaterLevel")
+            time_str = (
+                row.get("Date Time") or row.get("Time") or row.get("Time (GMT)") or row.get("t")
+            )
             height = self._safe_float(value)
             if height is None or time_str is None:
                 continue
-            height_ft = round(height * 3.28084, 2) if units == 'metric' else round(height, 2)
+            height_ft = round(height * 3.28084, 2) if units == "metric" else round(height, 2)
             iso = self._parse_time_guess(time_str)
             points.append((iso, height_ft))
         if not points:
@@ -1014,12 +1055,14 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         lows_sorted = sorted(points, key=lambda item: item[1])[:3]
         return highs_sorted, lows_sorted
 
-    def _select_latest_tide_observation(self, records: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    def _select_latest_tide_observation(
+        self, records: list[dict[str, Any]]
+    ) -> dict[str, Any] | None:
         latest = None
         latest_time = None
         for row in records:
-            time_str = row.get('Date Time') or row.get('Time') or row.get('t')
-            value = row.get('Water Level') or row.get('WaterLevel') or row.get('Observation')
+            time_str = row.get("Date Time") or row.get("Time") or row.get("t")
+            value = row.get("Water Level") or row.get("WaterLevel") or row.get("Observation")
             height = self._safe_float(value)
             if time_str is None or height is None:
                 continue
@@ -1028,43 +1071,41 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             if dt is None:
                 continue
             if latest is None or dt > latest_time:
-                latest = {
-                    'time': iso,
-                    'height_ft': round(height * 3.28084, 2)
-                }
+                latest = {"time": iso, "height_ft": round(height * 3.28084, 2)}
                 latest_time = dt
         return latest
 
-    def _safe_parse_iso(self, value: Optional[str]) -> Optional[datetime]:
+    def _safe_parse_iso(self, value: str | None) -> datetime | None:
         if not value:
             return None
         try:
-            if value.endswith('Z'):
-                value = value.replace('Z', '+00:00')
+            if value.endswith("Z"):
+                value = value.replace("Z", "+00:00")
             return datetime.fromisoformat(value)
         except Exception:
             return None
 
     def _parse_time_guess(self, value: str) -> str:
-        patterns = ['%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %H:%M']
+        patterns = ["%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M"]
         for pattern in patterns:
             try:
                 dt = datetime.strptime(value, pattern)
                 if not dt.tzinfo:
-                    dt = dt.replace(tzinfo=timezone.utc)
-                return dt.isoformat().replace('+00:00', 'Z')
+                    dt = dt.replace(tzinfo=UTC)
+                return dt.isoformat().replace("+00:00", "Z")
             except ValueError:
                 continue
         return value
 
-    def _safe_float(self, value: Any) -> Optional[float]:
+    def _safe_float(self, value: Any) -> float | None:
         try:
             return float(value)
         except (TypeError, ValueError):
             return None
 
-    def _calculate_shore_impacts(self, forecast: SwellForecast,
-                                weather_data: List[WeatherData]) -> None:
+    def _calculate_shore_impacts(
+        self, forecast: SwellForecast, weather_data: list[WeatherData]
+    ) -> None:
         """
         Calculate shore-specific impacts of swell events.
 
@@ -1074,7 +1115,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         """
         # For each location, calculate which swell events affect it
         for location in forecast.locations:
-            shore_name = location.shore.lower().replace(' ', '_')
+            shore_name = location.shore.lower().replace(" ", "_")
 
             # Clear existing swell events
             location.swell_events = []
@@ -1099,22 +1140,24 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
 
                     # Add exposure factor to event metadata for this location
                     event_metadata = event.metadata.copy()
-                    event_metadata[f'exposure_{shore_name}'] = exposure_factor
+                    event_metadata[f"exposure_{shore_name}"] = exposure_factor
                     event.metadata = event_metadata
 
             # Calculate wind impact if weather data available
             wind_factor = self._calculate_wind_factor(shore_name, weather_data)
 
             # Set location metadata
-            location.metadata.update({
-                'seasonal_factor': seasonal_factor,
-                'wind_factor': wind_factor,
-                'overall_quality': self._calculate_overall_quality(
-                    shore_name, seasonal_factor, wind_factor, location.swell_events
-                )
-            })
+            location.metadata.update(
+                {
+                    "seasonal_factor": seasonal_factor,
+                    "wind_factor": wind_factor,
+                    "overall_quality": self._calculate_overall_quality(
+                        shore_name, seasonal_factor, wind_factor, location.swell_events
+                    ),
+                }
+            )
 
-    def _calculate_wind_factor(self, shore_name: str, weather_data: List[WeatherData]) -> float:
+    def _calculate_wind_factor(self, shore_name: str, weather_data: list[WeatherData]) -> float:
         """
         Calculate wind impact factor for a specific shore.
 
@@ -1134,14 +1177,13 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             return 0.5
 
         # Calculate minimum distance to weather location
-        min_distance = float('inf')
+        min_distance = float("inf")
         best_weather = None
 
         for weather in weather_data:
             if weather.latitude is not None and weather.longitude is not None:
                 distance = self._haversine_distance(
-                    shore.latitude, shore.longitude,
-                    weather.latitude, weather.longitude
+                    shore.latitude, shore.longitude, weather.latitude, weather.longitude
                 )
 
                 if distance < min_distance:
@@ -1153,17 +1195,18 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             return 0.5
 
         # Check if wind analysis is available
-        wind_analysis = best_weather.metadata.get('wind_analysis', {})
-        shore_impacts = wind_analysis.get('shore_impacts', {})
+        wind_analysis = best_weather.metadata.get("wind_analysis", {})
+        shore_impacts = wind_analysis.get("shore_impacts", {})
 
         # Get shore-specific impact
         shore_impact = shore_impacts.get(shore_name, {})
-        overall_rating = shore_impact.get('overall_rating', 0.5)
+        overall_rating = shore_impact.get("overall_rating", 0.5)
 
         return overall_rating
 
-    def _calculate_overall_quality(self, shore_name: str, seasonal_factor: float,
-                                  wind_factor: float, events: List[SwellEvent]) -> float:
+    def _calculate_overall_quality(
+        self, shore_name: str, seasonal_factor: float, wind_factor: float, events: list[SwellEvent]
+    ) -> float:
         """
         Calculate overall surf quality for a specific shore.
 
@@ -1188,7 +1231,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             max_event = max(events, key=lambda e: e.significance)
 
             # Get exposure factor for this shore
-            exposure_factor = max_event.metadata.get(f'exposure_{shore_name}', 0.5)
+            exposure_factor = max_event.metadata.get(f"exposure_{shore_name}", 0.5)
 
             # Calculate swell factor
             swell_factor = max_event.significance * exposure_factor
@@ -1197,7 +1240,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         # Ensure result is between 0 and 1
         return max(0.0, min(1.0, quality))
 
-    def _calculate_significance(self, height: Optional[float], period: Optional[float]) -> float:
+    def _calculate_significance(self, height: float | None, period: float | None) -> float:
         """
         Calculate significance score for a swell.
 
@@ -1223,7 +1266,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         # Ensure result is between 0 and 1
         return min(1.0, significance)
 
-    def _convert_to_hawaii_scale(self, meters: Optional[float]) -> Optional[float]:
+    def _convert_to_hawaii_scale(self, meters: float | None) -> float | None:
         """
         Convert wave height from meters to Hawaiian scale.
 
@@ -1245,10 +1288,10 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
 
     def _attach_source_scores(
         self,
-        buoy_data: List[BuoyData],
-        weather_data: List[WeatherData],
-        model_data: List[ModelData],
-        source_scores: Dict[str, Any]
+        buoy_data: list[BuoyData],
+        weather_data: list[WeatherData],
+        model_data: list[ModelData],
+        source_scores: dict[str, Any],
     ) -> None:
         """
         Attach reliability scores and weights to data items.
@@ -1264,33 +1307,33 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         """
         # Attach scores to buoy data
         for buoy in buoy_data:
-            source_id = self._get_source_id_from_data(buoy, 'buoy')
+            source_id = self._get_source_id_from_data(buoy, "buoy")
             if source_id in source_scores:
                 score = source_scores[source_id]
                 buoy.metadata = buoy.metadata or {}
-                buoy.metadata['reliability_score'] = score.overall_score
-                buoy.metadata['source_tier'] = score.tier.name
-                buoy.metadata['weight'] = score.overall_score  # Weight for fusion
+                buoy.metadata["reliability_score"] = score.overall_score
+                buoy.metadata["source_tier"] = score.tier.name
+                buoy.metadata["weight"] = score.overall_score  # Weight for fusion
 
         # Attach scores to weather data
         for weather in weather_data:
-            source_id = self._get_source_id_from_data(weather, 'weather')
+            source_id = self._get_source_id_from_data(weather, "weather")
             if source_id in source_scores:
                 score = source_scores[source_id]
                 weather.metadata = weather.metadata or {}
-                weather.metadata['reliability_score'] = score.overall_score
-                weather.metadata['source_tier'] = score.tier.name
-                weather.metadata['weight'] = score.overall_score
+                weather.metadata["reliability_score"] = score.overall_score
+                weather.metadata["source_tier"] = score.tier.name
+                weather.metadata["weight"] = score.overall_score
 
         # Attach scores to model data
         for model in model_data:
-            source_id = self._get_source_id_from_data(model, 'model')
+            source_id = self._get_source_id_from_data(model, "model")
             if source_id in source_scores:
                 score = source_scores[source_id]
                 model.metadata = model.metadata or {}
-                model.metadata['reliability_score'] = score.overall_score
-                model.metadata['source_tier'] = score.tier.name
-                model.metadata['weight'] = score.overall_score
+                model.metadata["reliability_score"] = score.overall_score
+                model.metadata["source_tier"] = score.tier.name
+                model.metadata["weight"] = score.overall_score
 
         self.logger.info(
             f"Attached reliability scores to {len(buoy_data)} buoy, "
@@ -1309,8 +1352,15 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
             Source identifier string
         """
         # Try common source identifier fields
-        for field in ['source', 'source_name', 'provider', 'station_id',
-                     'model_id', 'buoy_id', 'name']:
+        for field in [
+            "source",
+            "source_name",
+            "provider",
+            "station_id",
+            "model_id",
+            "buoy_id",
+            "name",
+        ]:
             if hasattr(data, field):
                 value = getattr(data, field)
                 if value:
@@ -1395,7 +1445,7 @@ class DataFusionSystem(DataProcessor[Dict[str, Any], SwellForecast]):
         # Haversine formula
         dlon = lon2 - lon1
         dlat = lat2 - lat1
-        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+        a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
         c = 2 * math.asin(math.sqrt(a))
         r = 6371  # Radius of Earth in kilometers
 

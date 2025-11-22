@@ -4,25 +4,26 @@ Script to run the full SurfCastAI pipeline and analyze results with GPT-4.1.
 """
 
 import asyncio
+import json
 import logging
 import os
 import sys
-import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 import dotenv
 
 # Load environment variables
 dotenv.load_dotenv()
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from src.core import Config, load_config
-from src.main import run_pipeline, setup_logging
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import OpenAI for analysis
 from openai import AsyncOpenAI
+
+from src.core import Config, load_config
+from src.main import run_pipeline, setup_logging
 
 
 async def analyze_with_gpt41(forecast_path, logger):
@@ -39,14 +40,14 @@ async def analyze_with_gpt41(forecast_path, logger):
     logger.info(f"Analyzing forecast with GPT-4.1: {forecast_path}")
 
     # Check if API key exists
-    api_key = os.environ.get('OPENAI_API_KEY')
+    api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         logger.error("No OpenAI API key found in environment variables")
         return {"error": "No OpenAI API key found"}
 
     # Read forecast data
     try:
-        with open(forecast_path, 'r') as f:
+        with open(forecast_path) as f:
             forecast_data = json.load(f)
     except Exception as e:
         logger.error(f"Error reading forecast data: {e}")
@@ -56,10 +57,10 @@ async def analyze_with_gpt41(forecast_path, logger):
     client = AsyncOpenAI(api_key=api_key)
 
     # Extract forecast text
-    main_forecast = forecast_data.get('main_forecast', '')
-    north_shore = forecast_data.get('north_shore', '')
-    south_shore = forecast_data.get('south_shore', '')
-    daily = forecast_data.get('daily', '')
+    main_forecast = forecast_data.get("main_forecast", "")
+    north_shore = forecast_data.get("north_shore", "")
+    south_shore = forecast_data.get("south_shore", "")
+    daily = forecast_data.get("daily", "")
 
     # Create analysis prompt
     prompt = f"""
@@ -95,11 +96,14 @@ Also highlight any particularly strong sections or areas that need enhancement.
         response = await client.chat.completions.create(
             model="gpt-4o",  # Updated to current model
             messages=[
-                {"role": "system", "content": "You are an expert Hawaiian surf forecaster with decades of experience, similar to Pat Caldwell. You deeply understand ocean dynamics, swell patterns, and local surf breaks. Analyze the forecast with technical precision and insider knowledge."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are an expert Hawaiian surf forecaster with decades of experience, similar to Pat Caldwell. You deeply understand ocean dynamics, swell patterns, and local surf breaks. Analyze the forecast with technical precision and insider knowledge.",
+                },
+                {"role": "user", "content": prompt},
             ],
             temperature=0.7,
-            max_tokens=2000
+            max_tokens=2000,
         )
 
         # Extract and return analysis
@@ -108,14 +112,10 @@ Also highlight any particularly strong sections or areas that need enhancement.
 
         # Save analysis to file
         analysis_path = Path(forecast_path).parent / "gpt41_analysis.txt"
-        with open(analysis_path, 'w') as f:
+        with open(analysis_path, "w") as f:
             f.write(analysis)
 
-        return {
-            "status": "success",
-            "analysis": analysis,
-            "analysis_path": str(analysis_path)
-        }
+        return {"status": "success", "analysis": analysis, "analysis_path": str(analysis_path)}
 
     except Exception as e:
         logger.error(f"Error calling GPT-4.1 API: {e}")
@@ -141,24 +141,24 @@ async def run_full_pipeline():
         logger.info(f"Using existing bundle: {bundle_id}")
 
         # Run only the forecast part
-        results = await run_pipeline(config, logger, 'forecast', bundle_id)
+        results = await run_pipeline(config, logger, "forecast", bundle_id)
 
-        if 'forecast' in results and results['forecast']['status'] == 'success':
+        if "forecast" in results and results["forecast"]["status"] == "success":
             # Get the JSON data path
-            if 'json' in results['forecast']:
-                json_path = results['forecast']['json']
+            if "json" in results["forecast"]:
+                json_path = results["forecast"]["json"]
 
                 # Analyze with GPT-4.1
                 analysis_results = await analyze_with_gpt41(json_path, logger)
 
-                if 'error' in analysis_results:
+                if "error" in analysis_results:
                     logger.error(f"Analysis failed: {analysis_results['error']}")
                 else:
                     logger.info(f"Analysis saved to: {analysis_results['analysis_path']}")
                     logger.info("Process completed successfully!")
 
                     # Print output locations for user
-                    output_paths = {k: v for k, v in results['forecast'].items() if k != 'status'}
+                    output_paths = {k: v for k, v in results["forecast"].items() if k != "status"}
 
                     print("\nForecast Generation Completed Successfully!")
                     print("\nOutput Files:")
@@ -170,8 +170,10 @@ async def run_full_pipeline():
             else:
                 logger.error("No JSON output found in forecast results")
         else:
-            if 'forecast' in results and 'status' in results['forecast']:
-                logger.error(f"Forecast generation failed: {results['forecast'].get('message', 'Unknown error')}")
+            if "forecast" in results and "status" in results["forecast"]:
+                logger.error(
+                    f"Forecast generation failed: {results['forecast'].get('message', 'Unknown error')}"
+                )
             else:
                 logger.error("Forecast generation failed with unknown error")
 

@@ -3,16 +3,14 @@ Weather data processor for SurfCastAI.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Union
-from pathlib import Path
-import json
-from datetime import datetime, timedelta
 import re
+from datetime import datetime
+from typing import Any
 
-from .data_processor import DataProcessor, ProcessingResult
-from .models.weather_data import WeatherData, WeatherPeriod
-from .hawaii_context import HawaiiContext
 from ..core.config import Config
+from .data_processor import DataProcessor, ProcessingResult
+from .hawaii_context import HawaiiContext
+from .models.weather_data import WeatherData
 
 
 class WindCondition:
@@ -26,13 +24,9 @@ class WindCondition:
         max_speed: Maximum wind speed (m/s)
         surf_impact: Impact on surf quality (-1.0 to 1.0)
     """
+
     def __init__(
-        self,
-        name: str,
-        description: str,
-        min_speed: float,
-        max_speed: float,
-        surf_impact: float
+        self, name: str, description: str, min_speed: float, max_speed: float, surf_impact: float
     ):
         self.name = name
         self.description = description
@@ -41,7 +35,7 @@ class WindCondition:
         self.surf_impact = surf_impact
 
 
-class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
+class WeatherProcessor(DataProcessor[dict[str, Any], WeatherData]):
     """
     Processor for weather data.
 
@@ -60,21 +54,29 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
             config: Application configuration
         """
         super().__init__(config)
-        self.logger = logging.getLogger('processor.weather')
+        self.logger = logging.getLogger("processor.weather")
         self.hawaii_context = HawaiiContext()
 
         # Define wind conditions and their impact on surf
         self.wind_conditions = [
             WindCondition("Calm", "Calm or very light winds", 0.0, 2.5, 1.0),
             WindCondition("Light Offshore", "Light offshore winds, ideal for surf", 2.5, 5.0, 0.9),
-            WindCondition("Moderate Offshore", "Moderate offshore winds, good for surf", 5.0, 7.5, 0.7),
-            WindCondition("Strong Offshore", "Strong offshore winds, can blow spray", 7.5, 12.5, 0.4),
+            WindCondition(
+                "Moderate Offshore", "Moderate offshore winds, good for surf", 5.0, 7.5, 0.7
+            ),
+            WindCondition(
+                "Strong Offshore", "Strong offshore winds, can blow spray", 7.5, 12.5, 0.4
+            ),
             WindCondition("Light Onshore", "Light onshore winds, slight texture", 2.5, 5.0, -0.3),
-            WindCondition("Moderate Onshore", "Moderate onshore winds, choppy conditions", 5.0, 10.0, -0.6),
-            WindCondition("Strong Onshore", "Strong onshore winds, poor conditions", 10.0, float('inf'), -0.9),
+            WindCondition(
+                "Moderate Onshore", "Moderate onshore winds, choppy conditions", 5.0, 10.0, -0.6
+            ),
+            WindCondition(
+                "Strong Onshore", "Strong onshore winds, poor conditions", 10.0, float("inf"), -0.9
+            ),
         ]
 
-    def validate(self, data: Dict[str, Any]) -> List[str]:
+    def validate(self, data: dict[str, Any]) -> list[str]:
         """
         Validate weather data.
 
@@ -87,18 +89,18 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
         errors = []
 
         # Check for required fields
-        if 'properties' not in data:
+        if "properties" not in data:
             errors.append("Missing properties field in weather data")
 
         # Check for forecast periods
-        properties = data.get('properties', {})
-        periods = properties.get('periods', [])
+        properties = data.get("properties", {})
+        periods = properties.get("periods", [])
         if not periods:
             errors.append("No forecast periods in weather data")
 
         return errors
 
-    def process(self, data: Dict[str, Any]) -> ProcessingResult:
+    def process(self, data: dict[str, Any]) -> ProcessingResult:
         """
         Process weather data.
 
@@ -117,7 +119,7 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
                 return ProcessingResult(
                     success=False,
                     error="No forecast periods found in weather data",
-                    data=weather_data
+                    data=weather_data,
                 )
 
             # Standardize units if needed
@@ -136,18 +138,12 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
             weather_data.metadata.update(metadata)
 
             return ProcessingResult(
-                success=True,
-                data=weather_data,
-                warnings=warnings,
-                metadata=metadata
+                success=True, data=weather_data, warnings=warnings, metadata=metadata
             )
 
         except Exception as e:
             self.logger.error(f"Error processing weather data: {e}")
-            return ProcessingResult(
-                success=False,
-                error=f"Processing error: {str(e)}"
-            )
+            return ProcessingResult(success=False, error=f"Processing error: {str(e)}")
 
     def _standardize_units(self, weather_data: WeatherData) -> WeatherData:
         """
@@ -161,21 +157,21 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
         """
         for period in weather_data.periods:
             # Convert temperature to Celsius if in Fahrenheit
-            if period.temperature is not None and period.temperature_unit.upper() == 'F':
+            if period.temperature is not None and period.temperature_unit.upper() == "F":
                 period.temperature = (period.temperature - 32) * 5 / 9
-                period.temperature_unit = 'C'
+                period.temperature_unit = "C"
 
             # Convert wind speed to m/s if in other units
             if period.wind_speed is not None:
-                if period.wind_speed_unit.lower() == 'mph':
+                if period.wind_speed_unit.lower() == "mph":
                     period.wind_speed = period.wind_speed * 0.44704
-                    period.wind_speed_unit = 'm/s'
-                elif period.wind_speed_unit.lower() == 'knots':
+                    period.wind_speed_unit = "m/s"
+                elif period.wind_speed_unit.lower() == "knots":
                     period.wind_speed = period.wind_speed * 0.51444
-                    period.wind_speed_unit = 'm/s'
-                elif period.wind_speed_unit.lower() == 'km/h':
+                    period.wind_speed_unit = "m/s"
+                elif period.wind_speed_unit.lower() == "km/h":
                     period.wind_speed = period.wind_speed * 0.27778
-                    period.wind_speed_unit = 'm/s'
+                    period.wind_speed_unit = "m/s"
 
         return weather_data
 
@@ -190,22 +186,18 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
             Weather data with added wind analysis
         """
         # Prepare wind analysis metadata
-        wind_analysis = {
-            'wind_trends': {},
-            'shore_impacts': {},
-            'by_period': []
-        }
+        wind_analysis = {"wind_trends": {}, "shore_impacts": {}, "by_period": []}
 
         # Get all shores
         shores = self.hawaii_context.get_all_shores()
 
         # Initialize shore impacts
         for shore in shores:
-            shore_name = shore.name.lower().replace(' ', '_')
-            wind_analysis['shore_impacts'][shore_name] = {
-                'favorable_periods': 0,
-                'unfavorable_periods': 0,
-                'overall_rating': 0.0
+            shore_name = shore.name.lower().replace(" ", "_")
+            wind_analysis["shore_impacts"][shore_name] = {
+                "favorable_periods": 0,
+                "unfavorable_periods": 0,
+                "overall_rating": 0.0,
             }
 
         # Track wind directions and speeds
@@ -214,11 +206,7 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
 
         # Analyze each period
         for period in weather_data.periods:
-            period_analysis = {
-                'timestamp': period.timestamp,
-                'conditions': {},
-                'shore_impacts': {}
-            }
+            period_analysis = {"timestamp": period.timestamp, "conditions": {}, "shore_impacts": {}}
 
             # Skip if no wind data
             if period.wind_speed is None or period.wind_direction is None:
@@ -230,13 +218,13 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
 
             # Classify wind condition
             condition = self._classify_wind_condition(period.wind_speed)
-            period_analysis['conditions']['classification'] = condition.name
-            period_analysis['conditions']['description'] = condition.description
-            period_analysis['conditions']['surf_impact'] = condition.surf_impact
+            period_analysis["conditions"]["classification"] = condition.name
+            period_analysis["conditions"]["description"] = condition.description
+            period_analysis["conditions"]["surf_impact"] = condition.surf_impact
 
             # Analyze impact on each shore
             for shore in shores:
-                shore_name = shore.name.lower().replace(' ', '_')
+                shore_name = shore.name.lower().replace(" ", "_")
 
                 # Calculate if wind is offshore or onshore
                 is_offshore = self._is_offshore_wind(shore.facing_direction, period.wind_direction)
@@ -249,48 +237,52 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
                     wind_factor = -wind_factor * 0.5  # Reduce negative impact for offshore
 
                 # Record impact
-                period_analysis['shore_impacts'][shore_name] = {
-                    'is_offshore': is_offshore,
-                    'impact_factor': wind_factor
+                period_analysis["shore_impacts"][shore_name] = {
+                    "is_offshore": is_offshore,
+                    "impact_factor": wind_factor,
                 }
 
                 # Update shore impact counters
                 if wind_factor > 0:
-                    wind_analysis['shore_impacts'][shore_name]['favorable_periods'] += 1
+                    wind_analysis["shore_impacts"][shore_name]["favorable_periods"] += 1
                 elif wind_factor < 0:
-                    wind_analysis['shore_impacts'][shore_name]['unfavorable_periods'] += 1
+                    wind_analysis["shore_impacts"][shore_name]["unfavorable_periods"] += 1
 
             # Add period analysis
-            wind_analysis['by_period'].append(period_analysis)
+            wind_analysis["by_period"].append(period_analysis)
 
         # Calculate overall trends
         if wind_directions:
-            wind_analysis['wind_trends']['avg_direction'] = sum(wind_directions) / len(wind_directions)
-            wind_analysis['wind_trends']['direction_variability'] = max(wind_directions) - min(wind_directions)
+            wind_analysis["wind_trends"]["avg_direction"] = sum(wind_directions) / len(
+                wind_directions
+            )
+            wind_analysis["wind_trends"]["direction_variability"] = max(wind_directions) - min(
+                wind_directions
+            )
 
         if wind_speeds:
-            wind_analysis['wind_trends']['avg_speed'] = sum(wind_speeds) / len(wind_speeds)
-            wind_analysis['wind_trends']['max_speed'] = max(wind_speeds)
-            wind_analysis['wind_trends']['min_speed'] = min(wind_speeds)
-            wind_analysis['wind_trends']['speed_variability'] = max(wind_speeds) - min(wind_speeds)
+            wind_analysis["wind_trends"]["avg_speed"] = sum(wind_speeds) / len(wind_speeds)
+            wind_analysis["wind_trends"]["max_speed"] = max(wind_speeds)
+            wind_analysis["wind_trends"]["min_speed"] = min(wind_speeds)
+            wind_analysis["wind_trends"]["speed_variability"] = max(wind_speeds) - min(wind_speeds)
 
         # Calculate overall shore ratings
-        total_periods = len(wind_analysis['by_period'])
+        total_periods = len(wind_analysis["by_period"])
         if total_periods > 0:
-            for shore_name in wind_analysis['shore_impacts']:
-                shore_impact = wind_analysis['shore_impacts'][shore_name]
-                favorable = shore_impact['favorable_periods']
-                unfavorable = shore_impact['unfavorable_periods']
+            for shore_name in wind_analysis["shore_impacts"]:
+                shore_impact = wind_analysis["shore_impacts"][shore_name]
+                favorable = shore_impact["favorable_periods"]
+                unfavorable = shore_impact["unfavorable_periods"]
 
                 # Calculate weighted score
                 if favorable + unfavorable > 0:
                     overall_rating = (favorable - unfavorable) / (favorable + unfavorable)
                     # Scale from -1...1 to 0...1
                     overall_rating = (overall_rating + 1) / 2
-                    shore_impact['overall_rating'] = overall_rating
+                    shore_impact["overall_rating"] = overall_rating
 
         # Add wind analysis to metadata
-        weather_data.metadata['wind_analysis'] = wind_analysis
+        weather_data.metadata["wind_analysis"] = wind_analysis
 
         return weather_data
 
@@ -306,29 +298,29 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
         """
         # Initialize text extraction results
         text_extraction = {
-            'mentions': {
-                'rain': 0,
-                'shower': 0,
-                'thunder': 0,
-                'storm': 0,
-                'sunny': 0,
-                'clear': 0,
-                'cloudy': 0,
-                'humid': 0,
-                'dry': 0,
-                'hot': 0,
-                'cool': 0
+            "mentions": {
+                "rain": 0,
+                "shower": 0,
+                "thunder": 0,
+                "storm": 0,
+                "sunny": 0,
+                "clear": 0,
+                "cloudy": 0,
+                "humid": 0,
+                "dry": 0,
+                "hot": 0,
+                "cool": 0,
             },
-            'rain_probability': {},
-            'weather_type': {}
+            "rain_probability": {},
+            "weather_type": {},
         }
 
         # Define patterns
-        rain_pattern = re.compile(r'(\d+)% chance of (rain|showers|precipitation)', re.IGNORECASE)
+        rain_pattern = re.compile(r"(\d+)% chance of (rain|showers|precipitation)", re.IGNORECASE)
 
         # Process each period
         for i, period in enumerate(weather_data.periods):
-            period_key = f'period_{i+1}'
+            period_key = f"period_{i+1}"
 
             # Skip if no forecast text
             if not period.detailed_forecast and not period.short_forecast:
@@ -342,39 +334,41 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
                 text += period.short_forecast.lower()
 
             # Count mentions
-            for key in text_extraction['mentions']:
+            for key in text_extraction["mentions"]:
                 if key.lower() in text:
-                    text_extraction['mentions'][key] += 1
+                    text_extraction["mentions"][key] += 1
 
             # Extract rain probability
             rain_match = rain_pattern.search(text)
             if rain_match:
                 try:
                     probability = int(rain_match.group(1))
-                    text_extraction['rain_probability'][period_key] = probability
+                    text_extraction["rain_probability"][period_key] = probability
                 except (ValueError, IndexError):
                     pass
 
             # Determine primary weather type
-            if 'thunder' in text or 'lightning' in text:
-                text_extraction['weather_type'][period_key] = 'thunderstorm'
-            elif 'rain' in text or 'shower' in text:
-                text_extraction['weather_type'][period_key] = 'rain'
-            elif 'cloudy' in text or 'overcast' in text:
-                text_extraction['weather_type'][period_key] = 'cloudy'
-            elif 'partly cloudy' in text or 'partly sunny' in text:
-                text_extraction['weather_type'][period_key] = 'partly_cloudy'
-            elif 'sunny' in text or 'clear' in text:
-                text_extraction['weather_type'][period_key] = 'sunny'
+            if "thunder" in text or "lightning" in text:
+                text_extraction["weather_type"][period_key] = "thunderstorm"
+            elif "rain" in text or "shower" in text:
+                text_extraction["weather_type"][period_key] = "rain"
+            elif "cloudy" in text or "overcast" in text:
+                text_extraction["weather_type"][period_key] = "cloudy"
+            elif "partly cloudy" in text or "partly sunny" in text:
+                text_extraction["weather_type"][period_key] = "partly_cloudy"
+            elif "sunny" in text or "clear" in text:
+                text_extraction["weather_type"][period_key] = "sunny"
             else:
-                text_extraction['weather_type'][period_key] = 'unknown'
+                text_extraction["weather_type"][period_key] = "unknown"
 
         # Add text extraction to metadata
-        weather_data.metadata['text_extraction'] = text_extraction
+        weather_data.metadata["text_extraction"] = text_extraction
 
         return weather_data
 
-    def _classify_weather_patterns(self, weather_data: WeatherData) -> tuple[List[str], Dict[str, Any]]:
+    def _classify_weather_patterns(
+        self, weather_data: WeatherData
+    ) -> tuple[list[str], dict[str, Any]]:
         """
         Classify weather patterns relevant to surf conditions.
 
@@ -386,11 +380,11 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
         """
         warnings = []
         metadata = {
-            'surf_weather': {
-                'patterns': [],
-                'quality_score': 1.0,
-                'favorable_conditions': [],
-                'unfavorable_conditions': []
+            "surf_weather": {
+                "patterns": [],
+                "quality_score": 1.0,
+                "favorable_conditions": [],
+                "unfavorable_conditions": [],
             }
         }
 
@@ -399,65 +393,65 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
             try:
                 # Get timestamp of first period
                 timestamp = weather_data.periods[0].timestamp
-                forecast_time = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                forecast_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
                 now = datetime.now(forecast_time.tzinfo)
                 hours_old = (now - forecast_time).total_seconds() / 3600
 
-                metadata['surf_weather']['hours_since_update'] = hours_old
+                metadata["surf_weather"]["hours_since_update"] = hours_old
 
                 if hours_old > 12:
                     warnings.append(f"Weather forecast is {hours_old:.1f} hours old")
-                    metadata['surf_weather']['quality_score'] -= min(0.5, hours_old / 48)
+                    metadata["surf_weather"]["quality_score"] -= min(0.5, hours_old / 48)
             except (ValueError, TypeError):
                 warnings.append("Could not parse forecast timestamp")
 
         # Get wind analysis
-        wind_analysis = weather_data.metadata.get('wind_analysis', {})
-        wind_trends = wind_analysis.get('wind_trends', {})
+        wind_analysis = weather_data.metadata.get("wind_analysis", {})
+        wind_trends = wind_analysis.get("wind_trends", {})
 
         # Check for wind patterns
-        if 'avg_speed' in wind_trends:
-            avg_speed = wind_trends['avg_speed']
+        if "avg_speed" in wind_trends:
+            avg_speed = wind_trends["avg_speed"]
             if avg_speed < 2.5:
-                metadata['surf_weather']['patterns'].append('calm_winds')
-                metadata['surf_weather']['favorable_conditions'].append('Calm winds')
+                metadata["surf_weather"]["patterns"].append("calm_winds")
+                metadata["surf_weather"]["favorable_conditions"].append("Calm winds")
             elif avg_speed > 10.0:
-                metadata['surf_weather']['patterns'].append('strong_winds')
-                metadata['surf_weather']['unfavorable_conditions'].append('Strong winds')
+                metadata["surf_weather"]["patterns"].append("strong_winds")
+                metadata["surf_weather"]["unfavorable_conditions"].append("Strong winds")
 
-            if 'speed_variability' in wind_trends and wind_trends['speed_variability'] > 5.0:
-                metadata['surf_weather']['patterns'].append('variable_winds')
+            if "speed_variability" in wind_trends and wind_trends["speed_variability"] > 5.0:
+                metadata["surf_weather"]["patterns"].append("variable_winds")
 
         # Check for weather patterns from text extraction
-        text_extraction = weather_data.metadata.get('text_extraction', {})
-        mentions = text_extraction.get('mentions', {})
+        text_extraction = weather_data.metadata.get("text_extraction", {})
+        mentions = text_extraction.get("mentions", {})
 
-        if mentions.get('thunder', 0) > 0 or mentions.get('storm', 0) > 0:
-            metadata['surf_weather']['patterns'].append('thunderstorms')
-            metadata['surf_weather']['unfavorable_conditions'].append('Thunderstorms')
-            metadata['surf_weather']['quality_score'] -= 0.3
+        if mentions.get("thunder", 0) > 0 or mentions.get("storm", 0) > 0:
+            metadata["surf_weather"]["patterns"].append("thunderstorms")
+            metadata["surf_weather"]["unfavorable_conditions"].append("Thunderstorms")
+            metadata["surf_weather"]["quality_score"] -= 0.3
 
-        if mentions.get('rain', 0) > 2 or mentions.get('shower', 0) > 2:
-            metadata['surf_weather']['patterns'].append('rainy')
-            metadata['surf_weather']['unfavorable_conditions'].append('Rainy conditions')
-            metadata['surf_weather']['quality_score'] -= 0.1
+        if mentions.get("rain", 0) > 2 or mentions.get("shower", 0) > 2:
+            metadata["surf_weather"]["patterns"].append("rainy")
+            metadata["surf_weather"]["unfavorable_conditions"].append("Rainy conditions")
+            metadata["surf_weather"]["quality_score"] -= 0.1
 
-        if mentions.get('sunny', 0) > 2 or mentions.get('clear', 0) > 2:
-            metadata['surf_weather']['patterns'].append('sunny')
-            metadata['surf_weather']['favorable_conditions'].append('Sunny conditions')
+        if mentions.get("sunny", 0) > 2 or mentions.get("clear", 0) > 2:
+            metadata["surf_weather"]["patterns"].append("sunny")
+            metadata["surf_weather"]["favorable_conditions"].append("Sunny conditions")
 
         # Get overall shore ratings
-        shore_impacts = wind_analysis.get('shore_impacts', {})
+        shore_impacts = wind_analysis.get("shore_impacts", {})
         for shore_name, impact in shore_impacts.items():
-            rating = impact.get('overall_rating', 0.5)
-            shore_display = shore_name.replace('_', ' ').title()
+            rating = impact.get("overall_rating", 0.5)
+            shore_display = shore_name.replace("_", " ").title()
 
             if rating > 0.7:
-                metadata['surf_weather']['favorable_conditions'].append(
+                metadata["surf_weather"]["favorable_conditions"].append(
                     f"Favorable winds for {shore_display}"
                 )
             elif rating < 0.3:
-                metadata['surf_weather']['unfavorable_conditions'].append(
+                metadata["surf_weather"]["unfavorable_conditions"].append(
                     f"Unfavorable winds for {shore_display}"
                 )
 
@@ -519,27 +513,27 @@ class WeatherProcessor(DataProcessor[Dict[str, Any], WeatherData]):
         quality = 0.5
 
         # Get wind analysis
-        wind_analysis = weather_data.metadata.get('wind_analysis', {})
-        shore_impacts = wind_analysis.get('shore_impacts', {})
+        wind_analysis = weather_data.metadata.get("wind_analysis", {})
+        shore_impacts = wind_analysis.get("shore_impacts", {})
 
         # Get specific shore impact
-        shore_name_normalized = shore_name.lower().replace(' ', '_')
+        shore_name_normalized = shore_name.lower().replace(" ", "_")
         shore_impact = shore_impacts.get(shore_name_normalized, {})
-        overall_rating = shore_impact.get('overall_rating', 0.5)
+        overall_rating = shore_impact.get("overall_rating", 0.5)
 
         # Wind impact has high weight
         quality = overall_rating * 0.7 + 0.15  # Scale from 0.15 to 0.85
 
         # Check for unfavorable weather conditions
-        surf_weather = weather_data.metadata.get('surf_weather', {})
-        patterns = surf_weather.get('patterns', [])
+        surf_weather = weather_data.metadata.get("surf_weather", {})
+        patterns = surf_weather.get("patterns", [])
 
-        if 'thunderstorms' in patterns:
+        if "thunderstorms" in patterns:
             quality -= 0.3
-        elif 'rainy' in patterns:
+        elif "rainy" in patterns:
             quality -= 0.1
 
-        if 'sunny' in patterns:
+        if "sunny" in patterns:
             quality += 0.1
 
         # Ensure result is between 0 and 1

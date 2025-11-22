@@ -7,8 +7,8 @@ it follows the same patterns as BuoyAnalyst.
 """
 
 import asyncio
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to path
@@ -46,7 +46,7 @@ async def test_pressure_analyst():
 
     try:
         # Empty images list
-        await analyst.analyze({'images': []})
+        await analyst.analyze({"images": []})
         print("FAIL: Should have raised ValueError for empty images list")
     except ValueError as e:
         print(f"PASS: Correctly raised ValueError: {e}")
@@ -57,14 +57,11 @@ async def test_pressure_analyst():
     print("-" * 70)
 
     # Test with non-existent files
-    invalid_paths = [
-        '/tmp/nonexistent1.png',
-        '/tmp/nonexistent2.jpg'
-    ]
+    invalid_paths = ["/tmp/nonexistent1.png", "/tmp/nonexistent2.jpg"]
     valid = analyst._validate_image_paths(invalid_paths)
     print(f"Input: {len(invalid_paths)} non-existent paths")
     print(f"Valid: {len(valid)} paths")
-    print(f"PASS: Correctly filtered invalid paths" if len(valid) == 0 else "FAIL")
+    print("PASS: Correctly filtered invalid paths" if len(valid) == 0 else "FAIL")
 
     # Test 3: Swell travel time calculation
     print("\n" + "-" * 70)
@@ -117,25 +114,25 @@ async def test_pressure_analyst():
 
     mock_systems = [
         {
-            'type': 'low_pressure',
-            'location': '45N 160W',
-            'pressure_mb': 985,
-            'fetch': {
-                'direction': 'NNE',
-                'distance_nm': 1200,
-                'duration_hrs': 48,
-                'quality': 'strong'
-            }
+            "type": "low_pressure",
+            "location": "45N 160W",
+            "pressure_mb": 985,
+            "fetch": {
+                "direction": "NNE",
+                "distance_nm": 1200,
+                "duration_hrs": 48,
+                "quality": "strong",
+            },
         }
     ]
 
     mock_swells = [
         {
-            'source_system': 'low_45N_160W',
-            'direction': 'NNE',
-            'estimated_height': '8-12ft',
-            'estimated_period': '14-16s',
-            'confidence': 0.8
+            "source_system": "low_45N_160W",
+            "direction": "NNE",
+            "estimated_height": "8-12ft",
+            "estimated_period": "14-16s",
+            "confidence": 0.8,
         }
     ]
 
@@ -143,17 +140,14 @@ async def test_pressure_analyst():
 
     print(f"Original swells: {len(mock_swells)}")
     print(f"Enhanced swells: {len(enhanced)}")
-    print(f"Enhanced swell data:")
+    print("Enhanced swell data:")
     for swell in enhanced:
         print(f"  - Travel time: {swell.get('travel_time_hrs', 'N/A')} hrs")
         print(f"  - Distance: {swell.get('distance_nm', 'N/A')} nm")
         print(f"  - Fetch quality: {swell.get('fetch_quality', 'N/A')}")
 
-    has_enhancements = (
-        'travel_time_hrs' in enhanced[0] and
-        'fetch_quality' in enhanced[0]
-    )
-    print(f"PASS: Swell successfully enhanced" if has_enhancements else "FAIL")
+    has_enhancements = "travel_time_hrs" in enhanced[0] and "fetch_quality" in enhanced[0]
+    print("PASS: Swell successfully enhanced" if has_enhancements else "FAIL")
 
     # Test 6: Confidence calculation
     print("\n" + "-" * 70)
@@ -162,17 +156,17 @@ async def test_pressure_analyst():
 
     # Test various scenarios
     scenarios = [
-        (8, mock_systems, enhanced, ['2025-10-07T00:00Z'] * 8),  # Ideal
-        (4, mock_systems, enhanced, ['2025-10-07T00:00Z'] * 4),  # Good
-        (2, [], [], ['2025-10-07T00:00Z'] * 2),  # Poor
+        (8, mock_systems, enhanced, ["2025-10-07T00:00Z"] * 8),  # Ideal
+        (4, mock_systems, enhanced, ["2025-10-07T00:00Z"] * 4),  # Good
+        (2, [], [], ["2025-10-07T00:00Z"] * 2),  # Poor
     ]
 
     for idx, (num_images, systems, swells, times) in enumerate(scenarios):
-        confidence = analyst._calculate_analysis_confidence(
-            num_images, systems, swells, times
+        confidence = analyst._calculate_analysis_confidence(num_images, systems, swells, times)
+        print(
+            f"Scenario {idx + 1}: {num_images} images, "
+            f"{len(systems)} systems, {len(swells)} swells"
         )
-        print(f"Scenario {idx + 1}: {num_images} images, "
-              f"{len(systems)} systems, {len(swells)} swells")
         print(f"  Confidence: {confidence:.3f}")
 
     print("\nPASS: Confidence calculation completed")
@@ -184,11 +178,11 @@ async def test_pressure_analyst():
 
     # Create test data with invalid image paths (will be filtered out)
     test_data = {
-        'images': ['/tmp/test1.png', '/tmp/test2.png'],
-        'metadata': {
-            'chart_times': ['2025-10-07T00:00Z', '2025-10-07T06:00Z'],
-            'region': 'North Pacific'
-        }
+        "images": ["/tmp/test1.png", "/tmp/test2.png"],
+        "metadata": {
+            "chart_times": ["2025-10-07T00:00Z", "2025-10-07T06:00Z"],
+            "region": "North Pacific",
+        },
     }
 
     print("Test data prepared:")
@@ -216,6 +210,6 @@ async def test_pressure_analyst():
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     success = asyncio.run(test_pressure_analyst())
     sys.exit(0 if success else 1)

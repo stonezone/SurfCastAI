@@ -12,52 +12,52 @@ Follows test pattern from tests/unit/processing/test_bounds_validation.py
 using unittest framework.
 """
 
-import unittest
 import json
+import unittest
 from datetime import datetime
+
 from pydantic import ValidationError
 
 from src.forecast_engine.specialists.schemas import (
-    # Enums
-    TrendType,
-    SeverityLevel,
-    QualityFlag,
     AgreementLevel,
-    SystemType,
-    FrontType,
-    FetchQuality,
-    IntensificationTrend,
-    ImpactLevel,
-    ShoreConditions,
-    # BuoyAnalyst Models
-    BuoyTrend,
-    BuoyAnomaly,
-    CrossValidation,
-    SummaryStats,
+    AnalysisSummary,
     BuoyAnalystData,
     BuoyAnalystOutput,
-    # PressureAnalyst Models
-    FetchWindow,
-    WeatherSystem,
-    PredictedSwell,
-    FrontalBoundary,
-    AnalysisSummary,
-    PressureAnalystData,
-    PressureAnalystOutput,
+    BuoyAnomaly,
+    # BuoyAnalyst Models
+    BuoyTrend,
     # SeniorForecaster Models
     Contradiction,
-    Synthesis,
-    ShoreForecast,
-    SwellBreakdown,
+    CrossValidation,
+    FetchQuality,
+    # PressureAnalyst Models
+    FetchWindow,
+    FrontalBoundary,
+    FrontType,
+    ImpactLevel,
+    IntensificationTrend,
+    PredictedSwell,
+    PressureAnalystData,
+    PressureAnalystOutput,
+    QualityFlag,
     SeniorForecasterData,
     SeniorForecasterInput,
     SeniorForecasterOutput,
+    SeverityLevel,
+    ShoreConditions,
+    ShoreForecast,
+    SummaryStats,
+    SwellBreakdown,
+    Synthesis,
+    SystemType,
+    # Enums
+    TrendType,
+    WeatherSystem,
     # Utility functions
     validate_buoy_output,
     validate_pressure_output,
     validate_senior_output,
 )
-
 
 # =============================================================================
 # ENUM TESTS
@@ -156,7 +156,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
             period_current=12.5,
             direction_trend=TrendType.DECREASING_SLIGHT,
             direction_current=270.0,
-            observations_count=24
+            observations_count=24,
         )
         self.assertEqual(trend.buoy_id, "51001")
         self.assertEqual(trend.buoy_name, "NW Hawaii")
@@ -175,7 +175,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
             period_trend=TrendType.STEADY,
             period_slope=0.987654321,
             direction_trend=TrendType.STEADY,
-            observations_count=10
+            observations_count=10,
         )
         self.assertEqual(trend.height_slope, 0.1235)  # Rounded to 4 decimals
         self.assertEqual(trend.period_slope, 0.9877)  # Rounded to 4 decimals
@@ -192,7 +192,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
             period_slope=0.0,
             period_current=12.7777,
             direction_trend=TrendType.STEADY,
-            observations_count=10
+            observations_count=10,
         )
         self.assertEqual(trend.height_current, 5.56)  # Rounded to 2 decimals
         self.assertEqual(trend.period_current, 12.78)  # Rounded to 2 decimals
@@ -208,7 +208,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
             period_slope=0.0,
             direction_trend=TrendType.STEADY,
             direction_current=270.0,
-            observations_count=10
+            observations_count=10,
         )
         self.assertEqual(trend.direction_current, 270.0)
 
@@ -224,7 +224,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
                 period_slope=0.0,
                 direction_trend=TrendType.STEADY,
                 direction_current=400.0,
-                observations_count=10
+                observations_count=10,
             )
         self.assertIn("Direction must be between 0 and 360", str(context.exception))
 
@@ -240,7 +240,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
                 period_slope=0.0,
                 direction_trend=TrendType.STEADY,
                 direction_current=-10.0,
-                observations_count=10
+                observations_count=10,
             )
         self.assertIn("Direction must be between 0 and 360", str(context.exception))
 
@@ -254,7 +254,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
             period_trend="increasing_moderate",  # String
             period_slope=0.0,
             direction_trend="decreasing_strong",  # String
-            observations_count=10
+            observations_count=10,
         )
         self.assertEqual(trend.height_trend, TrendType.STEADY)
         self.assertIsInstance(trend.height_trend, TrendType)
@@ -274,7 +274,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
             period_current=None,  # Optional
             direction_trend=TrendType.STEADY,
             direction_current=None,  # Optional
-            observations_count=10
+            observations_count=10,
         )
         self.assertIsNone(trend.height_current)
         self.assertIsNone(trend.period_current)
@@ -290,12 +290,12 @@ class TestBuoyTrendSchema(unittest.TestCase):
             period_trend=TrendType.STEADY,
             period_slope=0.0012,
             direction_trend=TrendType.STEADY,
-            observations_count=10
+            observations_count=10,
         )
         data_dict = trend.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertEqual(data_dict['buoy_id'], "51001")
-        self.assertEqual(data_dict['height_trend'], "steady")
+        self.assertEqual(data_dict["buoy_id"], "51001")
+        self.assertEqual(data_dict["height_trend"], "steady")
 
     def test_serialization_to_json(self):
         """Test BuoyTrend can serialize to JSON string."""
@@ -307,12 +307,12 @@ class TestBuoyTrendSchema(unittest.TestCase):
             period_trend=TrendType.STEADY,
             period_slope=0.0012,
             direction_trend=TrendType.STEADY,
-            observations_count=10
+            observations_count=10,
         )
         json_str = trend.model_dump_json()
         self.assertIsInstance(json_str, str)
         parsed = json.loads(json_str)
-        self.assertEqual(parsed['buoy_id'], "51001")
+        self.assertEqual(parsed["buoy_id"], "51001")
 
     def test_invalid_enum_string_rejected(self):
         """Test invalid enum string raises ValidationError."""
@@ -325,7 +325,7 @@ class TestBuoyTrendSchema(unittest.TestCase):
                 period_trend=TrendType.STEADY,
                 period_slope=0.0,
                 direction_trend=TrendType.STEADY,
-                observations_count=10
+                observations_count=10,
             )
 
 
@@ -340,7 +340,7 @@ class TestBuoyAnomalySchema(unittest.TestCase):
             issue="wave_height_anomaly",
             severity=SeverityLevel.HIGH,
             details="Wave height spike detected",
-            z_score=3.5
+            z_score=3.5,
         )
         self.assertEqual(anomaly.buoy_id, "51001")
         self.assertEqual(anomaly.severity, SeverityLevel.HIGH)
@@ -354,7 +354,7 @@ class TestBuoyAnomalySchema(unittest.TestCase):
             issue="wave_height_anomaly",
             severity=SeverityLevel.HIGH,
             details="Test",
-            z_score=3.123456
+            z_score=3.123456,
         )
         self.assertEqual(anomaly.z_score, 3.12)  # Rounded to 2 decimals
 
@@ -366,7 +366,7 @@ class TestBuoyAnomalySchema(unittest.TestCase):
             issue="test",
             severity="moderate",  # String instead of enum
             details="Test",
-            z_score=2.5
+            z_score=2.5,
         )
         self.assertEqual(anomaly.severity, SeverityLevel.MODERATE)
         self.assertIsInstance(anomaly.severity, SeverityLevel)
@@ -379,12 +379,12 @@ class TestBuoyAnomalySchema(unittest.TestCase):
             issue="wave_height_anomaly",
             severity=SeverityLevel.MODERATE,
             details="Test anomaly",
-            z_score=2.5
+            z_score=2.5,
         )
         data_dict = anomaly.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertIn('severity', data_dict)
-        self.assertEqual(data_dict['severity'], "moderate")
+        self.assertIn("severity", data_dict)
+        self.assertEqual(data_dict["severity"], "moderate")
 
 
 class TestCrossValidationSchema(unittest.TestCase):
@@ -397,7 +397,7 @@ class TestCrossValidationSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=5,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         self.assertEqual(cv.agreement_score, 0.85)
         self.assertEqual(cv.height_agreement, 0.90)
@@ -410,7 +410,7 @@ class TestCrossValidationSchema(unittest.TestCase):
             height_agreement=0.9012345,
             period_agreement=0.7987654,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         self.assertEqual(cv.agreement_score, 0.856)  # Rounded to 3 decimals
         self.assertEqual(cv.height_agreement, 0.901)
@@ -423,7 +423,7 @@ class TestCrossValidationSchema(unittest.TestCase):
             height_agreement=0.0,
             period_agreement=1.0,
             num_buoys_compared=2,
-            interpretation=AgreementLevel.MODERATE_AGREEMENT
+            interpretation=AgreementLevel.MODERATE_AGREEMENT,
         )
         self.assertEqual(cv.agreement_score, 0.5)
         self.assertEqual(cv.height_agreement, 0.0)
@@ -437,7 +437,7 @@ class TestCrossValidationSchema(unittest.TestCase):
                 height_agreement=0.9,
                 period_agreement=0.8,
                 num_buoys_compared=2,
-                interpretation=AgreementLevel.GOOD_AGREEMENT
+                interpretation=AgreementLevel.GOOD_AGREEMENT,
             )
 
     def test_score_range_rejects_negative(self):
@@ -448,7 +448,7 @@ class TestCrossValidationSchema(unittest.TestCase):
                 height_agreement=0.9,
                 period_agreement=0.8,
                 num_buoys_compared=2,
-                interpretation=AgreementLevel.POOR_AGREEMENT
+                interpretation=AgreementLevel.POOR_AGREEMENT,
             )
 
     def test_serialization_to_dict(self):
@@ -458,11 +458,11 @@ class TestCrossValidationSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=5,
-            interpretation=AgreementLevel.EXCELLENT_AGREEMENT
+            interpretation=AgreementLevel.EXCELLENT_AGREEMENT,
         )
         data_dict = cv.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertEqual(data_dict['interpretation'], "excellent_agreement")
+        self.assertEqual(data_dict["interpretation"], "excellent_agreement")
 
 
 class TestSummaryStatsSchema(unittest.TestCase):
@@ -476,7 +476,7 @@ class TestSummaryStatsSchema(unittest.TestCase):
             min_wave_height=3.1,
             avg_period=12.5,
             max_period=15.0,
-            min_period=10.0
+            min_period=10.0,
         )
         self.assertEqual(stats.avg_wave_height, 5.5)
         self.assertEqual(stats.max_period, 15.0)
@@ -489,7 +489,7 @@ class TestSummaryStatsSchema(unittest.TestCase):
             min_wave_height=3.1111,
             avg_period=12.5555,
             max_period=15.0123,
-            min_period=10.0987
+            min_period=10.0987,
         )
         self.assertEqual(stats.avg_wave_height, 5.56)
         self.assertEqual(stats.max_wave_height, 8.22)
@@ -506,18 +506,14 @@ class TestSummaryStatsSchema(unittest.TestCase):
             min_wave_height=None,
             avg_period=None,
             max_period=None,
-            min_period=None
+            min_period=None,
         )
         self.assertIsNone(stats.avg_wave_height)
         self.assertIsNone(stats.avg_period)
 
     def test_partial_none_values(self):
         """Test SummaryStats with some None, some values."""
-        stats = SummaryStats(
-            avg_wave_height=5.5,
-            max_wave_height=None,
-            min_wave_height=3.1
-        )
+        stats = SummaryStats(avg_wave_height=5.5, max_wave_height=None, min_wave_height=3.1)
         self.assertEqual(stats.avg_wave_height, 5.5)
         self.assertIsNone(stats.max_wave_height)
 
@@ -535,14 +531,14 @@ class TestBuoyAnalystDataSchema(unittest.TestCase):
             period_trend=TrendType.STEADY,
             period_slope=0.0,
             direction_trend=TrendType.STEADY,
-            observations_count=10
+            observations_count=10,
         )
         cv = CrossValidation(
             agreement_score=0.85,
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats(avg_wave_height=5.5)
 
@@ -550,7 +546,7 @@ class TestBuoyAnalystDataSchema(unittest.TestCase):
             trends=[trend],
             cross_validation=cv,
             summary_stats=stats,
-            quality_flags={"51001": QualityFlag.VALID}
+            quality_flags={"51001": QualityFlag.VALID},
         )
         self.assertEqual(len(data.trends), 1)
         self.assertEqual(data.trends[0].buoy_id, "51001")
@@ -564,14 +560,11 @@ class TestBuoyAnalystDataSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats()
 
-        data = BuoyAnalystData(
-            cross_validation=cv,
-            summary_stats=stats
-        )
+        data = BuoyAnalystData(cross_validation=cv, summary_stats=stats)
         self.assertEqual(len(data.trends), 0)
         self.assertEqual(len(data.anomalies), 0)
         self.assertEqual(len(data.quality_flags), 0)
@@ -583,18 +576,15 @@ class TestBuoyAnalystDataSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats(avg_wave_height=5.5)
 
-        data = BuoyAnalystData(
-            cross_validation=cv,
-            summary_stats=stats
-        )
+        data = BuoyAnalystData(cross_validation=cv, summary_stats=stats)
         data_dict = data.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertIn('cross_validation', data_dict)
-        self.assertIn('summary_stats', data_dict)
+        self.assertIn("cross_validation", data_dict)
+        self.assertIn("summary_stats", data_dict)
 
 
 class TestBuoyAnalystOutputSchema(unittest.TestCase):
@@ -607,18 +597,13 @@ class TestBuoyAnalystOutputSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats(avg_wave_height=5.5)
-        data = BuoyAnalystData(
-            cross_validation=cv,
-            summary_stats=stats
-        )
+        data = BuoyAnalystData(cross_validation=cv, summary_stats=stats)
 
         output = BuoyAnalystOutput(
-            confidence=0.85,
-            data=data,
-            narrative="Test narrative content here."
+            confidence=0.85, data=data, narrative="Test narrative content here."
         )
         self.assertEqual(output.confidence, 0.85)
         self.assertIsInstance(output.data, BuoyAnalystData)
@@ -631,16 +616,12 @@ class TestBuoyAnalystOutputSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats()
         data = BuoyAnalystData(cross_validation=cv, summary_stats=stats)
 
-        output = BuoyAnalystOutput(
-            confidence=0.8555555,
-            data=data,
-            narrative="Test"
-        )
+        output = BuoyAnalystOutput(confidence=0.8555555, data=data, narrative="Test")
         self.assertEqual(output.confidence, 0.856)  # Rounded to 3 decimals
 
     def test_confidence_range_rejects_over_1(self):
@@ -650,17 +631,13 @@ class TestBuoyAnalystOutputSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats()
         data = BuoyAnalystData(cross_validation=cv, summary_stats=stats)
 
         with self.assertRaises(ValidationError):
-            BuoyAnalystOutput(
-                confidence=1.5,
-                data=data,
-                narrative="Test"
-            )
+            BuoyAnalystOutput(confidence=1.5, data=data, narrative="Test")
 
     def test_narrative_min_length_rejects_empty(self):
         """Test narrative must have min_length=1."""
@@ -669,17 +646,13 @@ class TestBuoyAnalystOutputSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats()
         data = BuoyAnalystData(cross_validation=cv, summary_stats=stats)
 
         with self.assertRaises(ValidationError):
-            BuoyAnalystOutput(
-                confidence=0.85,
-                data=data,
-                narrative=""
-            )
+            BuoyAnalystOutput(confidence=0.85, data=data, narrative="")
 
     def test_serialization_to_dict_and_json(self):
         """Test BuoyAnalystOutput can serialize to dict and JSON."""
@@ -688,29 +661,25 @@ class TestBuoyAnalystOutputSchema(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats(avg_wave_height=5.5)
         data = BuoyAnalystData(cross_validation=cv, summary_stats=stats)
 
-        output = BuoyAnalystOutput(
-            confidence=0.85,
-            data=data,
-            narrative="Test narrative"
-        )
+        output = BuoyAnalystOutput(confidence=0.85, data=data, narrative="Test narrative")
 
         # Test model_dump
         data_dict = output.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertIn('confidence', data_dict)
-        self.assertIn('data', data_dict)
-        self.assertIn('narrative', data_dict)
+        self.assertIn("confidence", data_dict)
+        self.assertIn("data", data_dict)
+        self.assertIn("narrative", data_dict)
 
         # Test model_dump_json
         json_str = output.model_dump_json()
         self.assertIsInstance(json_str, str)
         parsed = json.loads(json_str)
-        self.assertEqual(parsed['confidence'], 0.85)
+        self.assertEqual(parsed["confidence"], 0.85)
 
 
 # =============================================================================
@@ -728,7 +697,7 @@ class TestFetchWindowSchema(unittest.TestCase):
             distance_nm=1500.5,
             duration_hrs=24.0,
             fetch_length_nm=800.25,
-            quality=FetchQuality.STRONG
+            quality=FetchQuality.STRONG,
         )
         self.assertEqual(fetch.direction, "NNE")
         self.assertEqual(fetch.distance_nm, 1500.5)
@@ -741,7 +710,7 @@ class TestFetchWindowSchema(unittest.TestCase):
             distance_nm=1500.5555,
             duration_hrs=24.7777,
             fetch_length_nm=800.2222,
-            quality=FetchQuality.MODERATE
+            quality=FetchQuality.MODERATE,
         )
         self.assertEqual(fetch.distance_nm, 1500.6)  # Rounded to 1 decimal
         self.assertEqual(fetch.duration_hrs, 24.8)
@@ -755,7 +724,7 @@ class TestFetchWindowSchema(unittest.TestCase):
                 distance_nm=-100.0,  # Invalid: negative
                 duration_hrs=24.0,
                 fetch_length_nm=800.0,
-                quality=FetchQuality.STRONG
+                quality=FetchQuality.STRONG,
             )
 
     def test_serialization_to_dict(self):
@@ -765,11 +734,11 @@ class TestFetchWindowSchema(unittest.TestCase):
             distance_nm=1500.5,
             duration_hrs=24.0,
             fetch_length_nm=800.0,
-            quality=FetchQuality.STRONG
+            quality=FetchQuality.STRONG,
         )
         data_dict = fetch.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertEqual(data_dict['quality'], "strong")
+        self.assertEqual(data_dict["quality"], "strong")
 
 
 class TestWeatherSystemSchema(unittest.TestCase):
@@ -785,7 +754,7 @@ class TestWeatherSystemSchema(unittest.TestCase):
             pressure_mb=995,
             wind_speed_kt=35,
             movement="SE at 25kt",
-            intensification=IntensificationTrend.STRENGTHENING
+            intensification=IntensificationTrend.STRENGTHENING,
         )
         self.assertEqual(system.type, SystemType.LOW_PRESSURE)
         self.assertEqual(system.location_lat, 45.0)
@@ -798,7 +767,7 @@ class TestWeatherSystemSchema(unittest.TestCase):
             distance_nm=1500.0,
             duration_hrs=24.0,
             fetch_length_nm=800.0,
-            quality=FetchQuality.STRONG
+            quality=FetchQuality.STRONG,
         )
         system = WeatherSystem(
             type=SystemType.LOW_PRESSURE,
@@ -807,7 +776,7 @@ class TestWeatherSystemSchema(unittest.TestCase):
             location_lon=-160.0,
             movement="SE at 25kt",
             intensification=IntensificationTrend.STRENGTHENING,
-            fetch=fetch
+            fetch=fetch,
         )
         self.assertIsInstance(system.fetch, FetchWindow)
         self.assertEqual(system.fetch.direction, "NNE")
@@ -821,7 +790,7 @@ class TestWeatherSystemSchema(unittest.TestCase):
             location_lat=45.0,
             location_lon=-160.0,
             movement="SE at 25kt",
-            intensification=IntensificationTrend.STEADY
+            intensification=IntensificationTrend.STEADY,
         )
         self.assertEqual(system.location_lat, 45.0)
 
@@ -833,7 +802,7 @@ class TestWeatherSystemSchema(unittest.TestCase):
                 location_lat=100.0,
                 location_lon=-160.0,
                 movement="SE at 25kt",
-                intensification=IntensificationTrend.STEADY
+                intensification=IntensificationTrend.STEADY,
             )
 
     def test_longitude_range_validation(self):
@@ -846,7 +815,7 @@ class TestWeatherSystemSchema(unittest.TestCase):
                 location_lat=45.0,
                 location_lon=-200.0,
                 movement="SE at 25kt",
-                intensification=IntensificationTrend.STEADY
+                intensification=IntensificationTrend.STEADY,
             )
 
     def test_timestamp_validation_valid_iso(self):
@@ -858,7 +827,7 @@ class TestWeatherSystemSchema(unittest.TestCase):
             location_lon=-160.0,
             movement="SE at 25kt",
             intensification=IntensificationTrend.STEADY,
-            generation_time="2025-10-09T12:00:00Z"
+            generation_time="2025-10-09T12:00:00Z",
         )
         self.assertEqual(system.generation_time, "2025-10-09T12:00:00Z")
 
@@ -872,7 +841,7 @@ class TestWeatherSystemSchema(unittest.TestCase):
                 location_lon=-160.0,
                 movement="SE at 25kt",
                 intensification=IntensificationTrend.STEADY,
-                generation_time="not-a-timestamp"
+                generation_time="not-a-timestamp",
             )
 
     def test_serialization_to_dict(self):
@@ -883,12 +852,12 @@ class TestWeatherSystemSchema(unittest.TestCase):
             location_lat=45.0,
             location_lon=-160.0,
             movement="SE at 25kt",
-            intensification=IntensificationTrend.WEAKENING
+            intensification=IntensificationTrend.WEAKENING,
         )
         data_dict = system.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertEqual(data_dict['type'], "high_pressure")
-        self.assertEqual(data_dict['intensification'], "weakening")
+        self.assertEqual(data_dict["type"], "high_pressure")
+        self.assertEqual(data_dict["intensification"], "weakening")
 
 
 class TestPredictedSwellSchema(unittest.TestCase):
@@ -905,7 +874,7 @@ class TestPredictedSwellSchema(unittest.TestCase):
             arrival_time="Thu-Fri",
             estimated_height="7-9ft",
             estimated_period="13-15s",
-            confidence=0.85
+            confidence=0.85,
         )
         self.assertEqual(swell.source_system, "low_45N_160W")
         self.assertEqual(swell.direction_degrees, 315)
@@ -921,7 +890,7 @@ class TestPredictedSwellSchema(unittest.TestCase):
             arrival_time="Thu-Fri",
             estimated_height="7-9ft",
             estimated_period="13-15s",
-            confidence=0.8555555
+            confidence=0.8555555,
         )
         self.assertEqual(swell.confidence, 0.86)  # Rounded to 2 decimals
 
@@ -940,7 +909,7 @@ class TestPredictedSwellSchema(unittest.TestCase):
             distance_nm=1200.5555,
             group_velocity_knots=25.3333,
             fetch_duration_hrs=24.8888,
-            fetch_length_nm=800.1234
+            fetch_length_nm=800.1234,
         )
         self.assertEqual(swell.travel_time_hrs, 48.8)
         self.assertEqual(swell.distance_nm, 1200.6)
@@ -960,7 +929,7 @@ class TestPredictedSwellSchema(unittest.TestCase):
             arrival_time="Thu-Fri",
             estimated_height="7-9ft",
             estimated_period="13-15s",
-            confidence=0.85
+            confidence=0.85,
         )
         self.assertEqual(swell.direction_degrees, 315)
 
@@ -975,7 +944,7 @@ class TestPredictedSwellSchema(unittest.TestCase):
                 arrival_time="Thu-Fri",
                 estimated_height="7-9ft",
                 estimated_period="13-15s",
-                confidence=0.85
+                confidence=0.85,
             )
 
     def test_serialization_to_dict(self):
@@ -989,11 +958,11 @@ class TestPredictedSwellSchema(unittest.TestCase):
             estimated_height="7-9ft",
             estimated_period="13-15s",
             confidence=0.85,
-            fetch_quality=FetchQuality.STRONG
+            fetch_quality=FetchQuality.STRONG,
         )
         data_dict = swell.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertEqual(data_dict['fetch_quality'], "strong")
+        self.assertEqual(data_dict["fetch_quality"], "strong")
 
 
 class TestFrontalBoundarySchema(unittest.TestCase):
@@ -1002,9 +971,7 @@ class TestFrontalBoundarySchema(unittest.TestCase):
     def test_creation_with_valid_data(self):
         """Test FrontalBoundary creation with valid data."""
         front = FrontalBoundary(
-            type=FrontType.COLD_FRONT,
-            location="approaching from NW",
-            timing="2025-10-10T06:00:00Z"
+            type=FrontType.COLD_FRONT, location="approaching from NW", timing="2025-10-10T06:00:00Z"
         )
         self.assertEqual(front.type, FrontType.COLD_FRONT)
         self.assertEqual(front.location, "approaching from NW")
@@ -1012,13 +979,11 @@ class TestFrontalBoundarySchema(unittest.TestCase):
     def test_serialization_to_dict(self):
         """Test FrontalBoundary serialization."""
         front = FrontalBoundary(
-            type=FrontType.WARM_FRONT,
-            location="passing to the north",
-            timing="Friday morning"
+            type=FrontType.WARM_FRONT, location="passing to the north", timing="Friday morning"
         )
         data_dict = front.model_dump()
         self.assertIsInstance(data_dict, dict)
-        self.assertEqual(data_dict['type'], "warm_front")
+        self.assertEqual(data_dict["type"], "warm_front")
 
 
 class TestAnalysisSummarySchema(unittest.TestCase):
@@ -1027,10 +992,7 @@ class TestAnalysisSummarySchema(unittest.TestCase):
     def test_creation_with_valid_data(self):
         """Test AnalysisSummary creation with valid data."""
         summary = AnalysisSummary(
-            num_low_pressure=3,
-            num_high_pressure=2,
-            num_predicted_swells=4,
-            region="North Pacific"
+            num_low_pressure=3, num_high_pressure=2, num_predicted_swells=4, region="North Pacific"
         )
         self.assertEqual(summary.num_low_pressure, 3)
         self.assertEqual(summary.region, "North Pacific")
@@ -1042,7 +1004,7 @@ class TestAnalysisSummarySchema(unittest.TestCase):
                 num_low_pressure=-1,
                 num_high_pressure=2,
                 num_predicted_swells=4,
-                region="North Pacific"
+                region="North Pacific",
             )
 
 
@@ -1057,7 +1019,7 @@ class TestPressureAnalystDataSchema(unittest.TestCase):
             location_lat=45.0,
             location_lon=-160.0,
             movement="SE at 25kt",
-            intensification=IntensificationTrend.STRENGTHENING
+            intensification=IntensificationTrend.STRENGTHENING,
         )
         swell = PredictedSwell(
             source_system="low_45N_160W",
@@ -1067,19 +1029,14 @@ class TestPressureAnalystDataSchema(unittest.TestCase):
             arrival_time="Thu-Fri",
             estimated_height="7-9ft",
             estimated_period="13-15s",
-            confidence=0.85
+            confidence=0.85,
         )
         summary = AnalysisSummary(
-            num_low_pressure=1,
-            num_high_pressure=0,
-            num_predicted_swells=1,
-            region="North Pacific"
+            num_low_pressure=1, num_high_pressure=0, num_predicted_swells=1, region="North Pacific"
         )
 
         data = PressureAnalystData(
-            systems=[system],
-            predicted_swells=[swell],
-            analysis_summary=summary
+            systems=[system], predicted_swells=[swell], analysis_summary=summary
         )
         self.assertEqual(len(data.systems), 1)
         self.assertEqual(len(data.predicted_swells), 1)
@@ -1088,10 +1045,7 @@ class TestPressureAnalystDataSchema(unittest.TestCase):
     def test_default_empty_lists(self):
         """Test PressureAnalystData uses default empty lists."""
         summary = AnalysisSummary(
-            num_low_pressure=0,
-            num_high_pressure=0,
-            num_predicted_swells=0,
-            region="North Pacific"
+            num_low_pressure=0, num_high_pressure=0, num_predicted_swells=0, region="North Pacific"
         )
 
         data = PressureAnalystData(analysis_summary=summary)
@@ -1106,17 +1060,12 @@ class TestPressureAnalystOutputSchema(unittest.TestCase):
     def test_creation_with_valid_data(self):
         """Test PressureAnalystOutput creation with valid data."""
         summary = AnalysisSummary(
-            num_low_pressure=1,
-            num_high_pressure=0,
-            num_predicted_swells=1,
-            region="North Pacific"
+            num_low_pressure=1, num_high_pressure=0, num_predicted_swells=1, region="North Pacific"
         )
         data = PressureAnalystData(analysis_summary=summary)
 
         output = PressureAnalystOutput(
-            confidence=0.85,
-            data=data,
-            narrative="Test narrative content here."
+            confidence=0.85, data=data, narrative="Test narrative content here."
         )
         self.assertEqual(output.confidence, 0.85)
         self.assertIsInstance(output.data, PressureAnalystData)
@@ -1124,18 +1073,11 @@ class TestPressureAnalystOutputSchema(unittest.TestCase):
     def test_confidence_rounding_to_3_decimals(self):
         """Test confidence rounds to 3 decimal places."""
         summary = AnalysisSummary(
-            num_low_pressure=0,
-            num_high_pressure=0,
-            num_predicted_swells=0,
-            region="North Pacific"
+            num_low_pressure=0, num_high_pressure=0, num_predicted_swells=0, region="North Pacific"
         )
         data = PressureAnalystData(analysis_summary=summary)
 
-        output = PressureAnalystOutput(
-            confidence=0.8555555,
-            data=data,
-            narrative="Test"
-        )
+        output = PressureAnalystOutput(confidence=0.8555555, data=data, narrative="Test")
         self.assertEqual(output.confidence, 0.856)
 
 
@@ -1154,7 +1096,7 @@ class TestContradictionSchema(unittest.TestCase):
             resolution="Buoy may be in shadow zone; trust pressure prediction",
             impact=ImpactLevel.HIGH,
             buoy_confidence=0.75,
-            pressure_confidence=0.90
+            pressure_confidence=0.90,
         )
         self.assertEqual(contra.impact, ImpactLevel.HIGH)
         self.assertEqual(contra.buoy_confidence, 0.75)
@@ -1167,7 +1109,7 @@ class TestContradictionSchema(unittest.TestCase):
             impact=ImpactLevel.MEDIUM,
             buoy_confidence=0.755555,
             pressure_confidence=0.911111,
-            swell_confidence=0.833333
+            swell_confidence=0.833333,
         )
         self.assertEqual(contra.buoy_confidence, 0.76)
         self.assertEqual(contra.pressure_confidence, 0.91)
@@ -1177,10 +1119,7 @@ class TestContradictionSchema(unittest.TestCase):
         """Test confidence values must be 0.0-1.0."""
         with self.assertRaises(ValidationError):
             Contradiction(
-                issue="Test",
-                resolution="Test",
-                impact=ImpactLevel.HIGH,
-                buoy_confidence=1.5
+                issue="Test", resolution="Test", impact=ImpactLevel.HIGH, buoy_confidence=1.5
             )
 
     def test_optional_fields_accept_none(self):
@@ -1192,7 +1131,7 @@ class TestContradictionSchema(unittest.TestCase):
             buoy_confidence=None,
             pressure_confidence=None,
             swell_confidence=None,
-            timing=None
+            timing=None,
         )
         self.assertIsNone(contra.buoy_confidence)
         self.assertIsNone(contra.timing)
@@ -1203,15 +1142,11 @@ class TestSynthesisSchema(unittest.TestCase):
 
     def test_creation_with_valid_data(self):
         """Test Synthesis creation with valid data."""
-        contra = Contradiction(
-            issue="Test",
-            resolution="Test",
-            impact=ImpactLevel.LOW
-        )
+        contra = Contradiction(issue="Test", resolution="Test", impact=ImpactLevel.LOW)
         synth = Synthesis(
             specialist_agreement=0.85,
             contradictions=[contra],
-            key_findings=["Finding 1", "Finding 2"]
+            key_findings=["Finding 1", "Finding 2"],
         )
         self.assertEqual(synth.specialist_agreement, 0.85)
         self.assertEqual(len(synth.contradictions), 1)
@@ -1219,21 +1154,13 @@ class TestSynthesisSchema(unittest.TestCase):
 
     def test_agreement_rounding_to_3_decimals(self):
         """Test specialist_agreement rounds to 3 decimal places."""
-        synth = Synthesis(
-            specialist_agreement=0.8555555,
-            contradictions=[],
-            key_findings=[]
-        )
+        synth = Synthesis(specialist_agreement=0.8555555, contradictions=[], key_findings=[])
         self.assertEqual(synth.specialist_agreement, 0.856)
 
     def test_agreement_range_validation(self):
         """Test specialist_agreement must be 0.0-1.0."""
         with self.assertRaises(ValidationError):
-            Synthesis(
-                specialist_agreement=1.5,
-                contradictions=[],
-                key_findings=[]
-            )
+            Synthesis(specialist_agreement=1.5, contradictions=[], key_findings=[])
 
     def test_default_empty_lists(self):
         """Test Synthesis uses default empty lists."""
@@ -1251,7 +1178,7 @@ class TestShoreForecastSchema(unittest.TestCase):
             size_range="6-8ft",
             conditions="clean",
             timing="building Thursday afternoon",
-            confidence=0.85
+            confidence=0.85,
         )
         self.assertEqual(forecast.size_range, "6-8ft")
         self.assertEqual(forecast.conditions, "clean")
@@ -1260,22 +1187,14 @@ class TestShoreForecastSchema(unittest.TestCase):
     def test_confidence_rounding_to_2_decimals(self):
         """Test confidence rounds to 2 decimal places."""
         forecast = ShoreForecast(
-            size_range="6-8ft",
-            conditions="clean",
-            timing="Thursday",
-            confidence=0.8555555
+            size_range="6-8ft", conditions="clean", timing="Thursday", confidence=0.8555555
         )
         self.assertEqual(forecast.confidence, 0.86)
 
     def test_confidence_range_validation(self):
         """Test confidence must be 0.0-1.0."""
         with self.assertRaises(ValidationError):
-            ShoreForecast(
-                size_range="6-8ft",
-                conditions="clean",
-                timing="Thursday",
-                confidence=1.5
-            )
+            ShoreForecast(size_range="6-8ft", conditions="clean", timing="Thursday", confidence=1.5)
 
 
 class TestSwellBreakdownSchema(unittest.TestCase):
@@ -1293,7 +1212,7 @@ class TestSwellBreakdownSchema(unittest.TestCase):
             has_pressure_support=True,
             has_buoy_confirmation=True,
             buoy_height="2.5m",
-            buoy_period="14s"
+            buoy_period="14s",
         )
         self.assertEqual(swell.direction, "NNE")
         self.assertEqual(swell.confidence, 0.85)
@@ -1310,7 +1229,7 @@ class TestSwellBreakdownSchema(unittest.TestCase):
             confidence=0.8555555,
             source="low_45N_160W",
             has_pressure_support=True,
-            has_buoy_confirmation=False
+            has_buoy_confirmation=False,
         )
         self.assertEqual(swell.confidence, 0.86)
 
@@ -1326,7 +1245,7 @@ class TestSwellBreakdownSchema(unittest.TestCase):
             has_pressure_support=True,
             has_buoy_confirmation=False,
             buoy_height=None,
-            buoy_period=None
+            buoy_period=None,
         )
         self.assertIsNone(swell.buoy_height)
         self.assertIsNone(swell.buoy_period)
@@ -1339,10 +1258,7 @@ class TestSeniorForecasterDataSchema(unittest.TestCase):
         """Test SeniorForecasterData creation with valid nested models."""
         synth = Synthesis(specialist_agreement=0.85)
         shore_forecast = ShoreForecast(
-            size_range="6-8ft",
-            conditions="clean",
-            timing="Thursday",
-            confidence=0.85
+            size_range="6-8ft", conditions="clean", timing="Thursday", confidence=0.85
         )
         swell = SwellBreakdown(
             direction="NNE",
@@ -1352,13 +1268,13 @@ class TestSeniorForecasterDataSchema(unittest.TestCase):
             confidence=0.85,
             source="low_45N_160W",
             has_pressure_support=True,
-            has_buoy_confirmation=True
+            has_buoy_confirmation=True,
         )
 
         data = SeniorForecasterData(
             synthesis=synth,
             shore_forecasts={"north_shore": shore_forecast},
-            swell_breakdown=[swell]
+            swell_breakdown=[swell],
         )
         self.assertIsInstance(data.synthesis, Synthesis)
         self.assertEqual(len(data.shore_forecasts), 1)
@@ -1384,7 +1300,7 @@ class TestSeniorForecasterInputSchema(unittest.TestCase):
             swell_events=[],
             shore_data={},
             seasonal_context={"season": "winter"},
-            metadata={"forecast_date": "2025-10-09"}
+            metadata={"forecast_date": "2025-10-09"},
         )
         self.assertIsNone(input_data.buoy_analysis)
         self.assertEqual(input_data.seasonal_context["season"], "winter")
@@ -1406,9 +1322,7 @@ class TestSeniorForecasterOutputSchema(unittest.TestCase):
         data = SeniorForecasterData(synthesis=synth)
 
         output = SeniorForecasterOutput(
-            confidence=0.85,
-            data=data,
-            narrative="Test narrative in Pat Caldwell style."
+            confidence=0.85, data=data, narrative="Test narrative in Pat Caldwell style."
         )
         self.assertEqual(output.confidence, 0.85)
         self.assertIsInstance(output.data, SeniorForecasterData)
@@ -1418,11 +1332,7 @@ class TestSeniorForecasterOutputSchema(unittest.TestCase):
         synth = Synthesis(specialist_agreement=0.85)
         data = SeniorForecasterData(synthesis=synth)
 
-        output = SeniorForecasterOutput(
-            confidence=0.8555555,
-            data=data,
-            narrative="Test"
-        )
+        output = SeniorForecasterOutput(confidence=0.8555555, data=data, narrative="Test")
         self.assertEqual(output.confidence, 0.856)
 
     def test_confidence_range_validation(self):
@@ -1431,11 +1341,7 @@ class TestSeniorForecasterOutputSchema(unittest.TestCase):
         data = SeniorForecasterData(synthesis=synth)
 
         with self.assertRaises(ValidationError):
-            SeniorForecasterOutput(
-                confidence=1.5,
-                data=data,
-                narrative="Test"
-            )
+            SeniorForecasterOutput(confidence=1.5, data=data, narrative="Test")
 
     def test_narrative_min_length_validation(self):
         """Test narrative must have min_length=1."""
@@ -1443,11 +1349,7 @@ class TestSeniorForecasterOutputSchema(unittest.TestCase):
         data = SeniorForecasterData(synthesis=synth)
 
         with self.assertRaises(ValidationError):
-            SeniorForecasterOutput(
-                confidence=0.85,
-                data=data,
-                narrative=""
-            )
+            SeniorForecasterOutput(confidence=0.85, data=data, narrative="")
 
 
 # =============================================================================
@@ -1465,7 +1367,7 @@ class TestUtilityFunctions(unittest.TestCase):
             height_agreement=0.90,
             period_agreement=0.80,
             num_buoys_compared=3,
-            interpretation=AgreementLevel.GOOD_AGREEMENT
+            interpretation=AgreementLevel.GOOD_AGREEMENT,
         )
         stats = SummaryStats()
         data = BuoyAnalystData(cross_validation=cv, summary_stats=stats)
@@ -1474,7 +1376,7 @@ class TestUtilityFunctions(unittest.TestCase):
             "confidence": 0.85,
             "data": data.model_dump(),
             "narrative": "Test narrative",
-            "metadata": {}
+            "metadata": {},
         }
 
         result = validate_buoy_output(output_dict)
@@ -1483,11 +1385,7 @@ class TestUtilityFunctions(unittest.TestCase):
 
     def test_validate_buoy_output_invalid(self):
         """Test validate_buoy_output with invalid data raises ValidationError."""
-        invalid_dict = {
-            "confidence": 1.5,  # Invalid: > 1.0
-            "data": {},
-            "narrative": "Test"
-        }
+        invalid_dict = {"confidence": 1.5, "data": {}, "narrative": "Test"}  # Invalid: > 1.0
 
         with self.assertRaises(ValidationError):
             validate_buoy_output(invalid_dict)
@@ -1495,10 +1393,7 @@ class TestUtilityFunctions(unittest.TestCase):
     def test_validate_pressure_output_valid(self):
         """Test validate_pressure_output with valid data."""
         summary = AnalysisSummary(
-            num_low_pressure=0,
-            num_high_pressure=0,
-            num_predicted_swells=0,
-            region="North Pacific"
+            num_low_pressure=0, num_high_pressure=0, num_predicted_swells=0, region="North Pacific"
         )
         data = PressureAnalystData(analysis_summary=summary)
 
@@ -1506,7 +1401,7 @@ class TestUtilityFunctions(unittest.TestCase):
             "confidence": 0.85,
             "data": data.model_dump(),
             "narrative": "Test narrative",
-            "metadata": {}
+            "metadata": {},
         }
 
         result = validate_pressure_output(output_dict)
@@ -1515,11 +1410,7 @@ class TestUtilityFunctions(unittest.TestCase):
 
     def test_validate_pressure_output_invalid(self):
         """Test validate_pressure_output with invalid data raises ValidationError."""
-        invalid_dict = {
-            "confidence": -0.5,  # Invalid: < 0.0
-            "data": {},
-            "narrative": "Test"
-        }
+        invalid_dict = {"confidence": -0.5, "data": {}, "narrative": "Test"}  # Invalid: < 0.0
 
         with self.assertRaises(ValidationError):
             validate_pressure_output(invalid_dict)
@@ -1533,7 +1424,7 @@ class TestUtilityFunctions(unittest.TestCase):
             "confidence": 0.85,
             "data": data.model_dump(),
             "narrative": "Test narrative",
-            "metadata": {}
+            "metadata": {},
         }
 
         result = validate_senior_output(output_dict)
@@ -1545,12 +1436,12 @@ class TestUtilityFunctions(unittest.TestCase):
         invalid_dict = {
             "confidence": 0.85,
             "data": {},
-            "narrative": ""  # Invalid: empty string with min_length=1
+            "narrative": "",  # Invalid: empty string with min_length=1
         }
 
         with self.assertRaises(ValidationError):
             validate_senior_output(invalid_dict)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

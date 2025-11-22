@@ -3,9 +3,9 @@
 import os
 import subprocess
 import sys
+import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import unittest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -23,7 +23,7 @@ class TestValidateConfigCLI(unittest.TestCase):
     def test_validate_config_exits_nonzero_on_errors(self) -> None:
         with TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            config_path = root / 'config.yaml'
+            config_path = root / "config.yaml"
             config_path.write_text(
                 """
 general:
@@ -42,13 +42,13 @@ openai:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                env={**os.environ, 'OPENAI_API_KEY': ''},
+                env={**os.environ, "OPENAI_API_KEY": ""},
             )
 
             self.assertNotEqual(result.returncode, 0)
             combined = (result.stdout + result.stderr).lower()
-            self.assertIn('validation', combined)
+            self.assertIn("validation", combined)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

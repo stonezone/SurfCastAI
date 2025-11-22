@@ -16,24 +16,24 @@ Test Structure:
 - Isolated tests (no interdependencies)
 """
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from src.forecast_engine.specialists.buoy_analyst import BuoyAnalyst
 from src.forecast_engine.specialists.schemas import (
+    AgreementLevel,
     BuoyAnalystOutput,
-    BuoyTrend,
     BuoyAnomaly,
+    BuoyTrend,
     CrossValidation,
-    TrendType,
-    SeverityLevel,
     QualityFlag,
-    AgreementLevel
+    SeverityLevel,
+    TrendType,
 )
 from src.processing.models.buoy_data import BuoyData, BuoyObservation
-
 
 # =============================================================================
 # FIXTURES
@@ -44,7 +44,7 @@ from src.processing.models.buoy_data import BuoyData, BuoyObservation
 def mock_config():
     """Create a mock configuration object."""
     config = Mock()
-    config.get.return_value = 'fake-api-key'
+    config.get.return_value = "fake-api-key"
     config.getint.return_value = 2000
     return config
 
@@ -61,18 +61,13 @@ def mock_engine():
 @pytest.fixture
 def buoy_analyst(mock_config, mock_engine):
     """Create a BuoyAnalyst instance with mocked dependencies."""
-    return BuoyAnalyst(config=mock_config, model_name='gpt-4o-mini', engine=mock_engine)
+    return BuoyAnalyst(config=mock_config, model_name="gpt-4o-mini", engine=mock_engine)
 
 
 @pytest.fixture
 def sample_buoy_data():
     """Create sample BuoyData object with observations."""
-    buoy = BuoyData(
-        station_id='51001',
-        name='NW Hawaii',
-        latitude=23.5,
-        longitude=-162.2
-    )
+    buoy = BuoyData(station_id="51001", name="NW Hawaii", latitude=23.5, longitude=-162.2)
 
     # Add 10 observations with increasing trend
     base_time = datetime.now()
@@ -85,7 +80,7 @@ def sample_buoy_data():
             wind_speed=10.0,
             wind_direction=45.0,
             water_temperature=25.0,
-            pressure=1013.0
+            pressure=1013.0,
         )
         buoy.observations.insert(0, obs)  # Insert at front to maintain chronological order
 
@@ -95,12 +90,7 @@ def sample_buoy_data():
 @pytest.fixture
 def sample_buoy_data_steady():
     """Create sample BuoyData with steady conditions."""
-    buoy = BuoyData(
-        station_id='51002',
-        name='South Hawaii',
-        latitude=17.2,
-        longitude=-157.8
-    )
+    buoy = BuoyData(station_id="51002", name="South Hawaii", latitude=17.2, longitude=-157.8)
 
     base_time = datetime.now()
     for i in range(10):
@@ -118,12 +108,7 @@ def sample_buoy_data_steady():
 @pytest.fixture
 def sample_buoy_data_anomaly():
     """Create sample BuoyData with anomalous observation."""
-    buoy = BuoyData(
-        station_id='51003',
-        name='Anomaly Buoy',
-        latitude=20.0,
-        longitude=-160.0
-    )
+    buoy = BuoyData(station_id="51003", name="Anomaly Buoy", latitude=20.0, longitude=-160.0)
 
     base_time = datetime.now()
     # Normal observations
@@ -149,12 +134,7 @@ def sample_buoy_data_anomaly():
 @pytest.fixture
 def sample_buoy_data_single_scan():
     """Create sample BuoyData with single observation (spike)."""
-    buoy = BuoyData(
-        station_id='51004',
-        name='Single Scan Buoy',
-        latitude=22.0,
-        longitude=-159.0
-    )
+    buoy = BuoyData(station_id="51004", name="Single Scan Buoy", latitude=22.0, longitude=-159.0)
 
     # Only 1 observation
     obs = BuoyObservation(
@@ -184,9 +164,9 @@ class TestBuoyAnalystTrendAnalysis:
         result = buoy_analyst._calculate_trend(values)
 
         # Assert
-        assert result['description'] == 'increasing_strong'
-        assert result['slope'] > 0.1
-        assert result['slope'] == pytest.approx(0.15, abs=0.001)
+        assert result["description"] == "increasing_strong"
+        assert result["slope"] > 0.1
+        assert result["slope"] == pytest.approx(0.15, abs=0.001)
 
     def test_calculate_trend_increasing_moderate(self, buoy_analyst):
         """Test moderate increasing trend detection (0.05 < slope <= 0.1)."""
@@ -197,8 +177,8 @@ class TestBuoyAnalystTrendAnalysis:
         result = buoy_analyst._calculate_trend(values)
 
         # Assert
-        assert result['description'] == 'increasing_moderate'
-        assert 0.05 < result['slope'] <= 0.1
+        assert result["description"] == "increasing_moderate"
+        assert 0.05 < result["slope"] <= 0.1
 
     def test_calculate_trend_increasing_slight(self, buoy_analyst):
         """Test slight increasing trend detection (0 < slope <= 0.05)."""
@@ -209,8 +189,8 @@ class TestBuoyAnalystTrendAnalysis:
         result = buoy_analyst._calculate_trend(values)
 
         # Assert
-        assert result['description'] == 'increasing_slight'
-        assert 0 < result['slope'] <= 0.05
+        assert result["description"] == "increasing_slight"
+        assert 0 < result["slope"] <= 0.05
 
     def test_calculate_trend_decreasing_strong(self, buoy_analyst):
         """Test strong decreasing trend detection (slope < -0.1)."""
@@ -221,9 +201,9 @@ class TestBuoyAnalystTrendAnalysis:
         result = buoy_analyst._calculate_trend(values)
 
         # Assert
-        assert result['description'] == 'decreasing_strong'
-        assert result['slope'] < -0.1
-        assert result['slope'] == pytest.approx(-0.2, abs=0.001)
+        assert result["description"] == "decreasing_strong"
+        assert result["slope"] < -0.1
+        assert result["slope"] == pytest.approx(-0.2, abs=0.001)
 
     def test_calculate_trend_decreasing_moderate(self, buoy_analyst):
         """Test moderate decreasing trend detection (-0.1 <= slope < -0.05)."""
@@ -234,8 +214,8 @@ class TestBuoyAnalystTrendAnalysis:
         result = buoy_analyst._calculate_trend(values)
 
         # Assert
-        assert result['description'] == 'decreasing_moderate'
-        assert -0.1 <= result['slope'] < -0.05
+        assert result["description"] == "decreasing_moderate"
+        assert -0.1 <= result["slope"] < -0.05
 
     def test_calculate_trend_steady(self, buoy_analyst):
         """Test steady trend detection (abs(slope) < 0.01)."""
@@ -246,8 +226,8 @@ class TestBuoyAnalystTrendAnalysis:
         result = buoy_analyst._calculate_trend(values)
 
         # Assert
-        assert result['description'] == 'steady'
-        assert abs(result['slope']) < 0.01
+        assert result["description"] == "steady"
+        assert abs(result["slope"]) < 0.01
 
     def test_calculate_trend_single_value(self, buoy_analyst):
         """Test trend calculation with single value (insufficient data)."""
@@ -258,8 +238,8 @@ class TestBuoyAnalystTrendAnalysis:
         result = buoy_analyst._calculate_trend(values)
 
         # Assert
-        assert result['description'] == 'insufficient_data'
-        assert result['slope'] == 0.0
+        assert result["description"] == "insufficient_data"
+        assert result["slope"] == 0.0
 
     def test_calculate_trend_empty_list(self, buoy_analyst):
         """Test trend calculation with empty list (edge case)."""
@@ -270,8 +250,8 @@ class TestBuoyAnalystTrendAnalysis:
         result = buoy_analyst._calculate_trend(values)
 
         # Assert
-        assert result['description'] == 'insufficient_data'
-        assert result['slope'] == 0.0
+        assert result["description"] == "insufficient_data"
+        assert result["slope"] == 0.0
 
 
 # =============================================================================
@@ -282,7 +262,9 @@ class TestBuoyAnalystTrendAnalysis:
 class TestBuoyAnalystAnomalyDetection:
     """Tests for anomaly detection functionality."""
 
-    def test_detect_anomalies_high_severity_zscore_above_3(self, buoy_analyst, sample_buoy_data_anomaly, sample_buoy_data_steady):
+    def test_detect_anomalies_high_severity_zscore_above_3(
+        self, buoy_analyst, sample_buoy_data_anomaly, sample_buoy_data_steady
+    ):
         """Test high severity anomaly detection with Z-score > 3.0."""
         # Arrange: buoy_data_anomaly has extreme outlier (15.0m vs normal 2.0m)
         # Add steady buoy to provide baseline for statistics
@@ -293,33 +275,31 @@ class TestBuoyAnalystAnomalyDetection:
 
         # Assert
         assert len(anomalies) >= 1
-        height_anomaly = next((a for a in anomalies if 'wave_height' in a['issue']), None)
+        height_anomaly = next((a for a in anomalies if "wave_height" in a["issue"]), None)
         assert height_anomaly is not None
-        assert height_anomaly['severity'] == 'high'
-        assert height_anomaly['z_score'] > 3.0
-        assert height_anomaly['buoy_id'] == '51003'
+        assert height_anomaly["severity"] == "high"
+        assert height_anomaly["z_score"] > 3.0
+        assert height_anomaly["buoy_id"] == "51003"
 
     def test_detect_anomalies_moderate_severity_zscore_2_to_3(self, buoy_analyst):
         """Test moderate severity anomaly detection with 2.0 < Z-score <= 3.0."""
         # Arrange: Create buoy with moderate outlier
-        buoy = BuoyData(station_id='test', name='Test')
+        buoy = BuoyData(station_id="test", name="Test")
         base_time = datetime.now()
 
         # 9 normal observations around 2.0m
         for i in range(9):
             obs = BuoyObservation(
-                timestamp=(base_time - timedelta(hours=i+1)).isoformat(),
+                timestamp=(base_time - timedelta(hours=i + 1)).isoformat(),
                 wave_height=2.0 + (i * 0.1 - 0.4),  # 1.6-2.4m range
-                dominant_period=12.0
+                dominant_period=12.0,
             )
             buoy.observations.insert(0, obs)
 
         # Latest observation is moderate outlier (4.5m)
         # With mean ~2.0 and std ~0.3, Z-score ~2.5
         outlier_obs = BuoyObservation(
-            timestamp=base_time.isoformat(),
-            wave_height=4.5,
-            dominant_period=12.0
+            timestamp=base_time.isoformat(), wave_height=4.5, dominant_period=12.0
         )
         buoy.observations.append(outlier_obs)
 
@@ -328,12 +308,14 @@ class TestBuoyAnalystAnomalyDetection:
 
         # Assert
         if anomalies:  # May or may not trigger depending on exact Z-score
-            height_anomaly = next((a for a in anomalies if 'wave_height' in a['issue']), None)
+            height_anomaly = next((a for a in anomalies if "wave_height" in a["issue"]), None)
             if height_anomaly:
-                assert height_anomaly['severity'] in ['moderate', 'high']
-                assert height_anomaly['z_score'] >= 2.0
+                assert height_anomaly["severity"] in ["moderate", "high"]
+                assert height_anomaly["z_score"] >= 2.0
 
-    def test_detect_anomalies_no_anomalies_normal_distribution(self, buoy_analyst, sample_buoy_data_steady):
+    def test_detect_anomalies_no_anomalies_normal_distribution(
+        self, buoy_analyst, sample_buoy_data_steady
+    ):
         """Test that no anomalies are detected in normal distribution."""
         # Arrange: Steady buoy data with consistent values
         buoy_list = [sample_buoy_data_steady]
@@ -347,15 +329,15 @@ class TestBuoyAnalystAnomalyDetection:
     def test_detect_anomalies_multiple_concurrent(self, buoy_analyst, sample_buoy_data_steady):
         """Test detection of multiple anomalies in same buoy."""
         # Arrange: Buoy with both height and period anomalies
-        buoy = BuoyData(station_id='multi', name='Multi Anomaly')
+        buoy = BuoyData(station_id="multi", name="Multi Anomaly")
         base_time = datetime.now()
 
         # Normal observations
         for i in range(9):
             obs = BuoyObservation(
-                timestamp=(base_time - timedelta(hours=i+1)).isoformat(),
+                timestamp=(base_time - timedelta(hours=i + 1)).isoformat(),
                 wave_height=2.0,
-                dominant_period=12.0
+                dominant_period=12.0,
             )
             buoy.observations.insert(0, obs)
 
@@ -363,7 +345,7 @@ class TestBuoyAnalystAnomalyDetection:
         anomaly_obs = BuoyObservation(
             timestamp=base_time.isoformat(),
             wave_height=10.0,  # Extreme outlier
-            dominant_period=25.0  # Extreme outlier
+            dominant_period=25.0,  # Extreme outlier
         )
         buoy.observations.insert(0, anomaly_obs)  # Insert at front (latest observation)
 
@@ -375,16 +357,20 @@ class TestBuoyAnalystAnomalyDetection:
 
         # Assert: Both height and period anomalies detected
         assert len(anomalies) >= 2
-        assert any('wave_height' in a['issue'] for a in anomalies)
-        assert any('period' in a['issue'] for a in anomalies)
+        assert any("wave_height" in a["issue"] for a in anomalies)
+        assert any("period" in a["issue"] for a in anomalies)
 
     def test_detect_anomalies_insufficient_data(self, buoy_analyst):
         """Test that anomaly detection requires minimum data points."""
         # Arrange: Buoy with only 2 observations (insufficient for statistics)
-        buoy = BuoyData(station_id='minimal', name='Minimal Data')
+        buoy = BuoyData(station_id="minimal", name="Minimal Data")
         buoy.observations = [
-            BuoyObservation(timestamp=datetime.now().isoformat(), wave_height=2.0, dominant_period=12.0),
-            BuoyObservation(timestamp=datetime.now().isoformat(), wave_height=3.0, dominant_period=13.0)
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(), wave_height=2.0, dominant_period=12.0
+            ),
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(), wave_height=3.0, dominant_period=13.0
+            ),
         ]
 
         # Act
@@ -396,14 +382,14 @@ class TestBuoyAnalystAnomalyDetection:
     def test_detect_anomalies_all_values_identical(self, buoy_analyst):
         """Test edge case where all values are identical (std = 0)."""
         # Arrange: All observations have identical values
-        buoy = BuoyData(station_id='identical', name='Identical Values')
+        buoy = BuoyData(station_id="identical", name="Identical Values")
         base_time = datetime.now()
 
         for i in range(10):
             obs = BuoyObservation(
                 timestamp=(base_time - timedelta(hours=i)).isoformat(),
                 wave_height=3.0,  # All identical
-                dominant_period=14.0  # All identical
+                dominant_period=14.0,  # All identical
             )
             buoy.observations.insert(0, obs)
 
@@ -427,119 +413,126 @@ class TestBuoyAnalystQualityFlags:
         # Arrange
         buoy_list = [sample_buoy_data_steady]
         anomalies = []  # No anomalies
-        trends = [{'buoy_id': '51002', 'height_trend': 'steady'}]
+        trends = [{"buoy_id": "51002", "height_trend": "steady"}]
 
         # Act
         quality_flags = buoy_analyst._assign_quality_flags(buoy_list, anomalies, trends)
 
         # Assert
-        assert quality_flags['51002'] == 'valid'
+        assert quality_flags["51002"] == "valid"
 
-    def test_assign_quality_flags_excluded_high_severity(self, buoy_analyst, sample_buoy_data_anomaly):
+    def test_assign_quality_flags_excluded_high_severity(
+        self, buoy_analyst, sample_buoy_data_anomaly
+    ):
         """Test excluded quality flag for high severity anomaly."""
         # Arrange
         buoy_list = [sample_buoy_data_anomaly]
-        anomalies = [{
-            'buoy_id': '51003',
-            'buoy_name': 'Anomaly Buoy',
-            'issue': 'wave_height_anomaly',
-            'severity': 'high',
-            'details': 'Height 15.0m is 5.0 std devs from mean',
-            'z_score': 5.0
-        }]
-        trends = [{'buoy_id': '51003', 'height_trend': 'steady'}]
+        anomalies = [
+            {
+                "buoy_id": "51003",
+                "buoy_name": "Anomaly Buoy",
+                "issue": "wave_height_anomaly",
+                "severity": "high",
+                "details": "Height 15.0m is 5.0 std devs from mean",
+                "z_score": 5.0,
+            }
+        ]
+        trends = [{"buoy_id": "51003", "height_trend": "steady"}]
 
         # Act
         quality_flags = buoy_analyst._assign_quality_flags(buoy_list, anomalies, trends)
 
         # Assert
-        assert quality_flags['51003'] == 'excluded'
+        assert quality_flags["51003"] == "excluded"
 
-    def test_assign_quality_flags_excluded_single_scan_spike(self, buoy_analyst, sample_buoy_data_single_scan):
+    def test_assign_quality_flags_excluded_single_scan_spike(
+        self, buoy_analyst, sample_buoy_data_single_scan
+    ):
         """Test excluded quality flag for single-scan spike (1-2 observations + anomaly)."""
         # Arrange
         buoy_list = [sample_buoy_data_single_scan]
-        anomalies = [{
-            'buoy_id': '51004',
-            'buoy_name': 'Single Scan Buoy',
-            'issue': 'wave_height_anomaly',
-            'severity': 'moderate',
-            'details': 'Height 8.0m is 2.5 std devs from mean',
-            'z_score': 2.5
-        }]
-        trends = [{'buoy_id': '51004', 'height_trend': 'steady'}]
+        anomalies = [
+            {
+                "buoy_id": "51004",
+                "buoy_name": "Single Scan Buoy",
+                "issue": "wave_height_anomaly",
+                "severity": "moderate",
+                "details": "Height 8.0m is 2.5 std devs from mean",
+                "z_score": 2.5,
+            }
+        ]
+        trends = [{"buoy_id": "51004", "height_trend": "steady"}]
 
         # Act
         quality_flags = buoy_analyst._assign_quality_flags(buoy_list, anomalies, trends)
 
         # Assert: Single observation with anomaly = excluded
-        assert quality_flags['51004'] == 'excluded'
+        assert quality_flags["51004"] == "excluded"
 
     def test_assign_quality_flags_excluded_moderate_declining(self, buoy_analyst):
         """Test excluded flag for moderate anomaly on strongly declining trend."""
         # Arrange: Buoy with declining trend
-        buoy = BuoyData(station_id='declining', name='Declining Buoy')
+        buoy = BuoyData(station_id="declining", name="Declining Buoy")
         for i in range(10):
             obs = BuoyObservation(
                 timestamp=datetime.now().isoformat(),
                 wave_height=5.0 - (i * 0.3),  # Declining
-                dominant_period=14.0
+                dominant_period=14.0,
             )
             buoy.observations.append(obs)
 
         buoy_list = [buoy]
-        anomalies = [{
-            'buoy_id': 'declining',
-            'buoy_name': 'Declining Buoy',
-            'issue': 'wave_height_anomaly',
-            'severity': 'moderate',
-            'details': 'Anomaly on declining trend',
-            'z_score': 2.2
-        }]
-        trends = [{
-            'buoy_id': 'declining',
-            'height_trend': 'decreasing_strong'
-        }]
+        anomalies = [
+            {
+                "buoy_id": "declining",
+                "buoy_name": "Declining Buoy",
+                "issue": "wave_height_anomaly",
+                "severity": "moderate",
+                "details": "Anomaly on declining trend",
+                "z_score": 2.2,
+            }
+        ]
+        trends = [{"buoy_id": "declining", "height_trend": "decreasing_strong"}]
 
         # Act
         quality_flags = buoy_analyst._assign_quality_flags(buoy_list, anomalies, trends)
 
         # Assert: Moderate anomaly + declining = excluded
-        assert quality_flags['declining'] == 'excluded'
+        assert quality_flags["declining"] == "excluded"
 
     def test_assign_quality_flags_suspect_moderate_anomaly(self, buoy_analyst):
         """Test suspect quality flag for moderate anomaly without declining trend."""
         # Arrange
-        buoy = BuoyData(station_id='moderate', name='Moderate Anomaly')
+        buoy = BuoyData(station_id="moderate", name="Moderate Anomaly")
         for i in range(10):
             obs = BuoyObservation(
-                timestamp=datetime.now().isoformat(),
-                wave_height=2.0,
-                dominant_period=12.0
+                timestamp=datetime.now().isoformat(), wave_height=2.0, dominant_period=12.0
             )
             buoy.observations.append(obs)
 
         buoy_list = [buoy]
-        anomalies = [{
-            'buoy_id': 'moderate',
-            'buoy_name': 'Moderate Anomaly',
-            'issue': 'wave_height_anomaly',
-            'severity': 'moderate',
-            'details': 'Moderate anomaly',
-            'z_score': 2.3
-        }]
-        trends = [{'buoy_id': 'moderate', 'height_trend': 'steady'}]
+        anomalies = [
+            {
+                "buoy_id": "moderate",
+                "buoy_name": "Moderate Anomaly",
+                "issue": "wave_height_anomaly",
+                "severity": "moderate",
+                "details": "Moderate anomaly",
+                "z_score": 2.3,
+            }
+        ]
+        trends = [{"buoy_id": "moderate", "height_trend": "steady"}]
 
         # Act
         quality_flags = buoy_analyst._assign_quality_flags(buoy_list, anomalies, trends)
 
         # Assert
-        assert quality_flags['moderate'] == 'suspect'
+        assert quality_flags["moderate"] == "suspect"
 
     def test_assign_quality_flags_no_observations(self, buoy_analyst):
         """Test quality flag assignment with no observations."""
         # Arrange: Buoy with no observations
-        buoy = BuoyData(station_id='empty', name='Empty Buoy')
+        buoy = BuoyData(station_id="empty", name="Empty Buoy")
         buoy_list = [buoy]
         anomalies = []
         trends = []
@@ -548,7 +541,7 @@ class TestBuoyAnalystQualityFlags:
         quality_flags = buoy_analyst._assign_quality_flags(buoy_list, anomalies, trends)
 
         # Assert: No quality flag assigned (no observations to analyze)
-        assert 'empty' not in quality_flags or quality_flags.get('empty') == 'valid'
+        assert "empty" not in quality_flags or quality_flags.get("empty") == "valid"
 
 
 # =============================================================================
@@ -562,19 +555,21 @@ class TestBuoyAnalystCrossValidation:
     def test_calculate_cross_validation_excellent_agreement(self, buoy_analyst):
         """Test excellent agreement (agreement score >= 0.9)."""
         # Arrange: Two buoys with very similar values
-        buoy1 = BuoyData(station_id='b1', name='Buoy 1')
-        buoy1.observations = [BuoyObservation(
-            timestamp=datetime.now().isoformat(),
-            wave_height=2.0,
-            dominant_period=12.0
-        )]
+        buoy1 = BuoyData(station_id="b1", name="Buoy 1")
+        buoy1.observations = [
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(), wave_height=2.0, dominant_period=12.0
+            )
+        ]
 
-        buoy2 = BuoyData(station_id='b2', name='Buoy 2')
-        buoy2.observations = [BuoyObservation(
-            timestamp=datetime.now().isoformat(),
-            wave_height=2.05,  # Very close to buoy1
-            dominant_period=12.1
-        )]
+        buoy2 = BuoyData(station_id="b2", name="Buoy 2")
+        buoy2.observations = [
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(),
+                wave_height=2.05,  # Very close to buoy1
+                dominant_period=12.1,
+            )
+        ]
 
         buoy_list = [buoy1, buoy2]
 
@@ -582,33 +577,37 @@ class TestBuoyAnalystCrossValidation:
         cross_val = buoy_analyst._calculate_cross_validation(buoy_list)
 
         # Assert
-        assert cross_val['agreement_score'] >= 0.9
-        assert cross_val['interpretation'] == 'excellent_agreement'
-        assert cross_val['num_buoys_compared'] == 2
+        assert cross_val["agreement_score"] >= 0.9
+        assert cross_val["interpretation"] == "excellent_agreement"
+        assert cross_val["num_buoys_compared"] == 2
 
     def test_calculate_cross_validation_poor_agreement(self, buoy_analyst):
         """Test poor agreement (large variance between buoys)."""
         # Arrange: Three buoys with very different values
-        buoy1 = BuoyData(station_id='b1', name='Buoy 1')
-        buoy1.observations = [BuoyObservation(
-            timestamp=datetime.now().isoformat(),
-            wave_height=1.0,
-            dominant_period=8.0
-        )]
+        buoy1 = BuoyData(station_id="b1", name="Buoy 1")
+        buoy1.observations = [
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(), wave_height=1.0, dominant_period=8.0
+            )
+        ]
 
-        buoy2 = BuoyData(station_id='b2', name='Buoy 2')
-        buoy2.observations = [BuoyObservation(
-            timestamp=datetime.now().isoformat(),
-            wave_height=5.0,  # Very different
-            dominant_period=16.0
-        )]
+        buoy2 = BuoyData(station_id="b2", name="Buoy 2")
+        buoy2.observations = [
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(),
+                wave_height=5.0,  # Very different
+                dominant_period=16.0,
+            )
+        ]
 
-        buoy3 = BuoyData(station_id='b3', name='Buoy 3')
-        buoy3.observations = [BuoyObservation(
-            timestamp=datetime.now().isoformat(),
-            wave_height=10.0,  # Very different
-            dominant_period=20.0
-        )]
+        buoy3 = BuoyData(station_id="b3", name="Buoy 3")
+        buoy3.observations = [
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(),
+                wave_height=10.0,  # Very different
+                dominant_period=20.0,
+            )
+        ]
 
         buoy_list = [buoy1, buoy2, buoy3]
 
@@ -616,8 +615,12 @@ class TestBuoyAnalystCrossValidation:
         cross_val = buoy_analyst._calculate_cross_validation(buoy_list)
 
         # Assert
-        assert cross_val['agreement_score'] < 0.75
-        assert cross_val['interpretation'] in ['poor_agreement', 'very_poor_agreement', 'moderate_agreement']
+        assert cross_val["agreement_score"] < 0.75
+        assert cross_val["interpretation"] in [
+            "poor_agreement",
+            "very_poor_agreement",
+            "moderate_agreement",
+        ]
 
     def test_calculate_cross_validation_single_buoy(self, buoy_analyst, sample_buoy_data):
         """Test cross-validation with single buoy (no comparison possible)."""
@@ -628,27 +631,29 @@ class TestBuoyAnalystCrossValidation:
         cross_val = buoy_analyst._calculate_cross_validation(buoy_list)
 
         # Assert: Single buoy returns low agreement (can't compare)
-        assert cross_val['num_buoys_compared'] == 1
-        assert 0.0 <= cross_val['agreement_score'] <= 1.0
+        assert cross_val["num_buoys_compared"] == 1
+        assert 0.0 <= cross_val["agreement_score"] <= 1.0
 
     def test_calculate_cross_validation_mixed_missing_data(self, buoy_analyst):
         """Test cross-validation with some buoys missing data."""
         # Arrange: Mix of buoys with complete and incomplete data
-        buoy1 = BuoyData(station_id='complete', name='Complete')
-        buoy1.observations = [BuoyObservation(
-            timestamp=datetime.now().isoformat(),
-            wave_height=2.0,
-            dominant_period=12.0
-        )]
+        buoy1 = BuoyData(station_id="complete", name="Complete")
+        buoy1.observations = [
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(), wave_height=2.0, dominant_period=12.0
+            )
+        ]
 
-        buoy2 = BuoyData(station_id='partial', name='Partial')
-        buoy2.observations = [BuoyObservation(
-            timestamp=datetime.now().isoformat(),
-            wave_height=None,  # Missing height
-            dominant_period=12.5
-        )]
+        buoy2 = BuoyData(station_id="partial", name="Partial")
+        buoy2.observations = [
+            BuoyObservation(
+                timestamp=datetime.now().isoformat(),
+                wave_height=None,  # Missing height
+                dominant_period=12.5,
+            )
+        ]
 
-        buoy3 = BuoyData(station_id='empty', name='Empty')
+        buoy3 = BuoyData(station_id="empty", name="Empty")
         # No observations
 
         buoy_list = [buoy1, buoy2, buoy3]
@@ -657,8 +662,8 @@ class TestBuoyAnalystCrossValidation:
         cross_val = buoy_analyst._calculate_cross_validation(buoy_list)
 
         # Assert: Calculation proceeds with available data
-        assert cross_val['num_buoys_compared'] == 3
-        assert 0.0 <= cross_val['agreement_score'] <= 1.0
+        assert cross_val["num_buoys_compared"] == 3
+        assert 0.0 <= cross_val["agreement_score"] <= 1.0
 
 
 # =============================================================================
@@ -680,25 +685,25 @@ class TestBuoyAnalystNormalization:
         # Assert: Returns same objects unchanged
         assert len(normalized) == 1
         assert isinstance(normalized[0], BuoyData)
-        assert normalized[0].station_id == '51001'
+        assert normalized[0].station_id == "51001"
 
     def test_normalize_buoy_data_all_dicts(self, buoy_analyst):
         """Test normalization when all inputs are dicts (full conversion)."""
         # Arrange: List of dict format buoy data
         dict_data = [
             {
-                'station_id': '51201',
-                'name': 'Test Buoy',
-                'latitude': 21.5,
-                'longitude': -158.1,
-                'observations': [
+                "station_id": "51201",
+                "name": "Test Buoy",
+                "latitude": 21.5,
+                "longitude": -158.1,
+                "observations": [
                     {
-                        'timestamp': datetime.now().isoformat(),
-                        'wave_height': 2.5,
-                        'dominant_period': 13.0,
-                        'wave_direction': 315.0
+                        "timestamp": datetime.now().isoformat(),
+                        "wave_height": 2.5,
+                        "dominant_period": 13.0,
+                        "wave_direction": 315.0,
                     }
-                ]
+                ],
             }
         ]
 
@@ -708,7 +713,7 @@ class TestBuoyAnalystNormalization:
         # Assert: Converted to BuoyData objects
         assert len(normalized) == 1
         assert isinstance(normalized[0], BuoyData)
-        assert normalized[0].station_id == '51201'
+        assert normalized[0].station_id == "51201"
         assert len(normalized[0].observations) == 1
         assert normalized[0].observations[0].wave_height == 2.5
 
@@ -718,16 +723,16 @@ class TestBuoyAnalystNormalization:
         mixed_list = [
             sample_buoy_data,  # BuoyData object
             {
-                'station_id': '51202',
-                'name': 'Dict Buoy',
-                'observations': [
+                "station_id": "51202",
+                "name": "Dict Buoy",
+                "observations": [
                     {
-                        'timestamp': datetime.now().isoformat(),
-                        'wave_height': 3.0,
-                        'dominant_period': 14.0
+                        "timestamp": datetime.now().isoformat(),
+                        "wave_height": 3.0,
+                        "dominant_period": 14.0,
                     }
-                ]
-            }
+                ],
+            },
         ]
 
         # Act
@@ -736,8 +741,8 @@ class TestBuoyAnalystNormalization:
         # Assert: All converted to BuoyData objects
         assert len(normalized) == 2
         assert all(isinstance(b, BuoyData) for b in normalized)
-        assert normalized[0].station_id == '51001'
-        assert normalized[1].station_id == '51202'
+        assert normalized[0].station_id == "51001"
+        assert normalized[1].station_id == "51202"
 
 
 # =============================================================================
@@ -748,19 +753,18 @@ class TestBuoyAnalystNormalization:
 class TestBuoyAnalystConfidence:
     """Tests for confidence calculation functionality."""
 
-    def test_calculate_confidence_high_quality(self, buoy_analyst, sample_buoy_data, sample_buoy_data_steady):
+    def test_calculate_confidence_high_quality(
+        self, buoy_analyst, sample_buoy_data, sample_buoy_data_steady
+    ):
         """Test high confidence scenario (complete data, good agreement, no anomalies)."""
         # Arrange: Multiple buoys with complete data, no anomalies
         buoy_list = [sample_buoy_data, sample_buoy_data_steady]
-        trends = [
-            {'buoy_id': '51001'},
-            {'buoy_id': '51002'}
-        ]
+        trends = [{"buoy_id": "51001"}, {"buoy_id": "51002"}]
         anomalies = []  # No anomalies
         cross_validation = {
-            'agreement_score': 0.95,
-            'height_agreement': 0.95,
-            'period_agreement': 0.95
+            "agreement_score": 0.95,
+            "height_agreement": 0.95,
+            "period_agreement": 0.95,
         }
 
         # Act
@@ -776,15 +780,15 @@ class TestBuoyAnalystConfidence:
         """Test low confidence scenario (anomalies, poor agreement)."""
         # Arrange: Single buoy with anomaly
         buoy_list = [sample_buoy_data_anomaly]
-        trends = [{'buoy_id': '51003'}]
+        trends = [{"buoy_id": "51003"}]
         anomalies = [
-            {'buoy_id': '51003', 'severity': 'high'},
-            {'buoy_id': '51003', 'severity': 'moderate'}
+            {"buoy_id": "51003", "severity": "high"},
+            {"buoy_id": "51003", "severity": "moderate"},
         ]
         cross_validation = {
-            'agreement_score': 0.3,  # Poor agreement
-            'height_agreement': 0.3,
-            'period_agreement': 0.3
+            "agreement_score": 0.3,  # Poor agreement
+            "height_agreement": 0.3,
+            "period_agreement": 0.3,
         }
 
         # Act
@@ -803,9 +807,9 @@ class TestBuoyAnalystConfidence:
         trends = []
         anomalies = []
         cross_validation = {
-            'agreement_score': 0.5,
-            'height_agreement': 0.5,
-            'period_agreement': 0.5
+            "agreement_score": 0.5,
+            "height_agreement": 0.5,
+            "period_agreement": 0.5,
         }
 
         # Act
@@ -826,12 +830,12 @@ class TestBuoyAnalystIntegration:
     """Integration tests for complete analyze() workflow."""
 
     @pytest.mark.asyncio
-    async def test_analyze_complete_workflow(self, buoy_analyst, sample_buoy_data, sample_buoy_data_steady):
+    async def test_analyze_complete_workflow(
+        self, buoy_analyst, sample_buoy_data, sample_buoy_data_steady
+    ):
         """Test complete analyze workflow with valid data."""
         # Arrange
-        data = {
-            'buoy_data': [sample_buoy_data, sample_buoy_data_steady]
-        }
+        data = {"buoy_data": [sample_buoy_data, sample_buoy_data_steady]}
 
         # Act
         result = await buoy_analyst.analyze(data)
@@ -842,13 +846,13 @@ class TestBuoyAnalystIntegration:
         assert len(result.data.trends) == 2
         assert result.narrative is not None
         assert len(result.narrative) > 0
-        assert 'num_buoys' in result.metadata
+        assert "num_buoys" in result.metadata
 
     @pytest.mark.asyncio
     async def test_analyze_missing_required_key(self, buoy_analyst):
         """Test analyze raises ValueError for missing required key."""
         # Arrange: Missing 'buoy_data' key
-        data = {'wrong_key': []}
+        data = {"wrong_key": []}
 
         # Act & Assert
         with pytest.raises(ValueError, match="Missing required keys"):
@@ -858,7 +862,7 @@ class TestBuoyAnalystIntegration:
     async def test_analyze_empty_buoy_list(self, buoy_analyst):
         """Test analyze raises ValueError for empty buoy list."""
         # Arrange: Empty buoy_data list
-        data = {'buoy_data': []}
+        data = {"buoy_data": []}
 
         # Act & Assert
         with pytest.raises(ValueError, match="must be a non-empty list"):
@@ -877,14 +881,14 @@ class TestBuoyAnalystInitialization:
         """Test that BuoyAnalyst requires engine parameter."""
         # Act & Assert: Missing engine raises ValueError
         with pytest.raises(ValueError, match="requires engine parameter"):
-            BuoyAnalyst(config=mock_config, model_name='gpt-4o-mini', engine=None)
+            BuoyAnalyst(config=mock_config, model_name="gpt-4o-mini", engine=None)
 
     def test_initialization_success(self, mock_config, mock_engine):
         """Test successful initialization with all required parameters."""
         # Act
-        analyst = BuoyAnalyst(config=mock_config, model_name='gpt-4o-mini', engine=mock_engine)
+        analyst = BuoyAnalyst(config=mock_config, model_name="gpt-4o-mini", engine=mock_engine)
 
         # Assert
-        assert analyst.model_name == 'gpt-4o-mini'
+        assert analyst.model_name == "gpt-4o-mini"
         assert analyst.engine == mock_engine
         assert analyst.anomaly_threshold == 2.0

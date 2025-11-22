@@ -20,11 +20,12 @@ Example:
     - Overall MAE: 1.15ft
     ...
 """
-import sqlite3
+
 import logging
+import sqlite3
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +57,8 @@ class PerformanceAnalyzer:
             logger.warning(f"Validation database not found: {db_path}")
 
     def get_recent_performance(
-        self,
-        days: int = 7,
-        min_samples: int = 10,
-        outlier_threshold: float = 10.0
-    ) -> Dict[str, Any]:
+        self, days: int = 7, min_samples: int = 10, outlier_threshold: float = 10.0
+    ) -> dict[str, Any]:
         """Fetch recent forecast performance metrics.
 
         Executes 3 optimized queries:
@@ -116,7 +114,7 @@ class PerformanceAnalyzer:
             overall = self._query_overall_performance(days, outlier_threshold)
 
             # Check for sufficient data
-            if overall['total_validations'] < min_samples:
+            if overall["total_validations"] < min_samples:
                 logger.warning(
                     f"Insufficient validation data: {overall['total_validations']} < {min_samples} "
                     f"(window={days} days)"
@@ -129,12 +127,11 @@ class PerformanceAnalyzer:
                     return self.get_recent_performance(
                         days=expanded_days,
                         min_samples=min_samples,
-                        outlier_threshold=outlier_threshold
+                        outlier_threshold=outlier_threshold,
                     )
 
                 return self._empty_result(
-                    days,
-                    f"Insufficient samples ({overall['total_validations']} < {min_samples})"
+                    days, f"Insufficient samples ({overall['total_validations']} < {min_samples})"
                 )
 
             # Fetch detailed metrics
@@ -142,27 +139,23 @@ class PerformanceAnalyzer:
             bias_alerts = self._query_bias_detection(days, outlier_threshold)
 
             return {
-                'has_data': True,
-                'overall': overall,
-                'by_shore': by_shore,
-                'bias_alerts': bias_alerts,
-                'metadata': {
-                    'query_timestamp': datetime.now().isoformat(),
-                    'window_days': days,
-                    'min_samples_threshold': min_samples,
-                    'outlier_threshold_ft': outlier_threshold
-                }
+                "has_data": True,
+                "overall": overall,
+                "by_shore": by_shore,
+                "bias_alerts": bias_alerts,
+                "metadata": {
+                    "query_timestamp": datetime.now().isoformat(),
+                    "window_days": days,
+                    "min_samples_threshold": min_samples,
+                    "outlier_threshold_ft": outlier_threshold,
+                },
             }
 
         except Exception as e:
             logger.error(f"Performance query failed: {e}", exc_info=True)
             return self._empty_result(days, f"Query error: {str(e)}")
 
-    def _query_overall_performance(
-        self,
-        days: int,
-        outlier_threshold: float
-    ) -> Dict[str, Any]:
+    def _query_overall_performance(self, days: int, outlier_threshold: float) -> dict[str, Any]:
         """Execute Query 2: Overall system performance.
 
         SQL: Aggregates MAE/RMSE/bias across all shores for time window.
@@ -181,7 +174,8 @@ class PerformanceAnalyzer:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     COUNT(*) as total_validations,
                     ROUND(AVG(mae), 2) as overall_mae,
@@ -191,16 +185,16 @@ class PerformanceAnalyzer:
                 FROM validations
                 WHERE validated_at >= datetime('now', '-' || ? || ' days')
                   AND ABS(height_error) < ?
-            """, (days, outlier_threshold))
+            """,
+                (days, outlier_threshold),
+            )
 
             row = cursor.fetchone()
             return dict(row) if row else {}
 
     def _query_shore_performance(
-        self,
-        days: int,
-        outlier_threshold: float
-    ) -> Dict[str, Dict[str, Any]]:
+        self, days: int, outlier_threshold: float
+    ) -> dict[str, dict[str, Any]]:
         """Execute Query 1: Shore-level performance metrics.
 
         SQL: Groups by shore, calculates MAE/RMSE/bias for each.
@@ -233,7 +227,8 @@ class PerformanceAnalyzer:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     p.shore,
                     COUNT(*) as validation_count,
@@ -247,26 +242,24 @@ class PerformanceAnalyzer:
                   AND ABS(v.height_error) < ?
                 GROUP BY p.shore
                 ORDER BY p.shore
-            """, (days, outlier_threshold))
+            """,
+                (days, outlier_threshold),
+            )
 
             results = cursor.fetchall()
 
             # Normalize to ensure all Oahu shores present (None if no data)
-            OAHU_SHORES = ['North Shore', 'South Shore', 'West Shore', 'East Shore']
+            OAHU_SHORES = ["North Shore", "South Shore", "West Shore", "East Shore"]
             by_shore = {shore: None for shore in OAHU_SHORES}
 
             for row in results:
-                by_shore[row['shore']] = dict(row)
+                by_shore[row["shore"]] = dict(row)
 
             return by_shore
 
     def _query_bias_detection(
-        self,
-        days: int,
-        outlier_threshold: float,
-        min_samples: int = 3,
-        bias_threshold: float = 1.0
-    ) -> List[Dict[str, Any]]:
+        self, days: int, outlier_threshold: float, min_samples: int = 3, bias_threshold: float = 1.0
+    ) -> list[dict[str, Any]]:
         """Execute Query 3: Bias detection with significance filtering.
 
         SQL: Identifies shores with systematic over/underprediction.
@@ -306,7 +299,8 @@ class PerformanceAnalyzer:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     p.shore,
                     ROUND(AVG(v.height_error), 2) as avg_bias,
@@ -323,14 +317,16 @@ class PerformanceAnalyzer:
                 GROUP BY p.shore
                 HAVING COUNT(*) >= ?
                 ORDER BY ABS(AVG(v.height_error)) DESC
-            """, (bias_threshold, bias_threshold, days, outlier_threshold, min_samples))
+            """,
+                (bias_threshold, bias_threshold, days, outlier_threshold, min_samples),
+            )
 
             results = cursor.fetchall()
 
             # Filter out BALANCED shores (only return alerts)
-            return [dict(row) for row in results if row['bias_category'] != 'BALANCED']
+            return [dict(row) for row in results if row["bias_category"] != "BALANCED"]
 
-    def _empty_result(self, days: int, reason: str) -> Dict[str, Any]:
+    def _empty_result(self, days: int, reason: str) -> dict[str, Any]:
         """Return empty result structure with metadata.
 
         Used when insufficient data or database error occurs.
@@ -344,24 +340,24 @@ class PerformanceAnalyzer:
         """
         logger.info(f"Returning empty performance result: {reason}")
         return {
-            'has_data': False,
-            'overall': {
-                'total_validations': 0,
-                'overall_mae': None,
-                'overall_rmse': None,
-                'overall_categorical': None,
-                'avg_bias': 0.0
+            "has_data": False,
+            "overall": {
+                "total_validations": 0,
+                "overall_mae": None,
+                "overall_rmse": None,
+                "overall_categorical": None,
+                "avg_bias": 0.0,
             },
-            'by_shore': {},
-            'bias_alerts': [],
-            'metadata': {
-                'query_timestamp': datetime.now().isoformat(),
-                'window_days': days,
-                'reason': reason
-            }
+            "by_shore": {},
+            "bias_alerts": [],
+            "metadata": {
+                "query_timestamp": datetime.now().isoformat(),
+                "window_days": days,
+                "reason": reason,
+            },
         }
 
-    def build_performance_context(self, perf_data: Dict[str, Any]) -> str:
+    def build_performance_context(self, perf_data: dict[str, Any]) -> str:
         """Generate human-readable performance context for prompt injection.
 
         Converts structured performance metrics into formatted text suitable
@@ -393,33 +389,33 @@ class PerformanceAnalyzer:
             - South Shore: MAE=0.98ft, Bias=-0.12ft, Samples=9
             ...
         """
-        if not perf_data['has_data']:
+        if not perf_data["has_data"]:
             return ""
 
-        overall = perf_data['overall']
-        bias_alerts = perf_data['bias_alerts']
-        days = perf_data['metadata']['window_days']
+        overall = perf_data["overall"]
+        bias_alerts = perf_data["bias_alerts"]
+        days = perf_data["metadata"]["window_days"]
 
         context_lines = [
             "## Recent Forecast Performance",
             f"Based on {overall['total_validations']} validations over the last {days} days:",
             f"- Overall MAE: {overall['overall_mae']}ft",
             f"- Overall RMSE: {overall['overall_rmse']}ft",
-            f"- Categorical accuracy: {overall['overall_categorical']*100:.1f}%"
+            f"- Categorical accuracy: {overall['overall_categorical']*100:.1f}%",
         ]
 
         # Add bias alerts if present
         if bias_alerts:
             context_lines.append("\n### Systematic Bias Detected:")
             for alert in bias_alerts:
-                direction = "high" if alert['avg_bias'] > 0 else "low"
+                direction = "high" if alert["avg_bias"] > 0 else "low"
                 context_lines.append(
                     f"- {alert['shore']}: Recent forecasts trending {direction} by "
                     f"{abs(alert['avg_bias'])}ft ({alert['sample_size']} samples)"
                 )
 
         # Add shore-specific performance
-        by_shore = perf_data['by_shore']
+        by_shore = perf_data["by_shore"]
         context_lines.append("\n### Performance by Shore:")
         for shore, metrics in by_shore.items():
             if metrics is None:
@@ -435,10 +431,7 @@ class PerformanceAnalyzer:
 
 
 # Convenience functions for direct imports
-def get_recent_performance(
-    db_path: str = "data/validation.db",
-    days: int = 7
-) -> Dict[str, Any]:
+def get_recent_performance(db_path: str = "data/validation.db", days: int = 7) -> dict[str, Any]:
     """Quick accessor for recent performance metrics.
 
     Example:
@@ -451,10 +444,7 @@ def get_recent_performance(
     return analyzer.get_recent_performance(days=days)
 
 
-def build_performance_context(
-    db_path: str = "data/validation.db",
-    days: int = 7
-) -> str:
+def build_performance_context(db_path: str = "data/validation.db", days: int = 7) -> str:
     """Quick accessor for prompt injection context.
 
     Example:

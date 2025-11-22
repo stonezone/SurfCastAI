@@ -2,9 +2,8 @@
 Surf observation data model for ground truth validation.
 """
 
-from datetime import datetime
-from typing import Optional
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
@@ -24,34 +23,35 @@ class SurfObservation:
         confidence: Observer confidence (0-1, based on experience)
         notes: Additional notes
     """
+
     location: str
     time: datetime
     hawaiian_scale: float
-    face_height: Optional[float] = None
-    period: Optional[float] = None
-    direction: Optional[str] = None
-    conditions: Optional[str] = None
+    face_height: float | None = None
+    period: float | None = None
+    direction: str | None = None
+    conditions: str | None = None
     observer: str = "unknown"
     confidence: float = 0.8
-    notes: Optional[str] = None
+    notes: str | None = None
 
     def to_dict(self):
         """Convert to dictionary."""
         return {
-            'location': self.location,
-            'time': self.time.isoformat(),
-            'hawaiian_scale': self.hawaiian_scale,
-            'face_height': self.face_height,
-            'period': self.period,
-            'direction': self.direction,
-            'conditions': self.conditions,
-            'observer': self.observer,
-            'confidence': self.confidence,
-            'notes': self.notes
+            "location": self.location,
+            "time": self.time.isoformat(),
+            "hawaiian_scale": self.hawaiian_scale,
+            "face_height": self.face_height,
+            "period": self.period,
+            "direction": self.direction,
+            "conditions": self.conditions,
+            "observer": self.observer,
+            "confidence": self.confidence,
+            "notes": self.notes,
         }
 
     @classmethod
     def from_dict(cls, data: dict):
         """Create from dictionary."""
-        data['time'] = datetime.fromisoformat(data['time'])
+        data["time"] = datetime.fromisoformat(data["time"])
         return cls(**data)

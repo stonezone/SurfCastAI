@@ -5,23 +5,21 @@ Enhanced version combining features from both url_downloader and urlGrabber.
 
 import asyncio
 import time
-from dataclasses import dataclass, field
-from typing import Dict, Optional, Any
+from dataclasses import dataclass
+from typing import Any
 from urllib.parse import urlparse
 
 
 @dataclass
 class RateLimitConfig:
     """Configuration for token bucket rate limiter."""
+
     requests_per_second: float = 1.0
     burst_size: int = 5
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
-        return {
-            "requests_per_second": self.requests_per_second,
-            "burst_size": self.burst_size
-        }
+        return {"requests_per_second": self.requests_per_second, "burst_size": self.burst_size}
 
 
 class TokenBucket:
@@ -120,13 +118,13 @@ class TokenBucket:
         self.last_refill = time.time()
         self.blocked_until = 0
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get bucket statistics."""
         return {
             "available_tokens": self.tokens,
             "blocked_until": self.blocked_until,
             "is_blocked": self.is_blocked,
-            "config": self.config.to_dict()
+            "config": self.config.to_dict(),
         }
 
 
@@ -136,7 +134,7 @@ class RateLimiter:
     Each domain gets its own token bucket with configurable limits.
     """
 
-    def __init__(self, default_config: Optional[RateLimitConfig] = None):
+    def __init__(self, default_config: RateLimitConfig | None = None):
         """
         Initialize rate limiter.
 
@@ -144,8 +142,8 @@ class RateLimiter:
             default_config: Default configuration for domains without specific limits
         """
         self.default_config = default_config or RateLimitConfig()
-        self.domain_limiters: Dict[str, TokenBucket] = {}
-        self.domain_configs: Dict[str, RateLimitConfig] = {}
+        self.domain_limiters: dict[str, TokenBucket] = {}
+        self.domain_configs: dict[str, RateLimitConfig] = {}
         self._lock = asyncio.Lock()
 
     def set_domain_limit(self, domain: str, config: RateLimitConfig):
@@ -161,7 +159,7 @@ class RateLimiter:
         if domain in self.domain_limiters:
             self.domain_limiters[domain].config = config
 
-    def set_domain_limits(self, limits: Dict[str, RateLimitConfig]):
+    def set_domain_limits(self, limits: dict[str, RateLimitConfig]):
         """
         Set rate limit configurations for multiple domains.
 
@@ -199,7 +197,7 @@ class RateLimiter:
             float: Wait time in seconds
         """
         # Extract domain from URL if needed
-        if '://' in url_or_domain:
+        if "://" in url_or_domain:
             domain = urlparse(url_or_domain).netloc
         else:
             domain = url_or_domain
@@ -218,7 +216,7 @@ class RateLimiter:
         if domain in self.domain_limiters:
             self.domain_limiters[domain].block_until(until_timestamp)
 
-    def get_stats(self) -> Dict[str, Dict]:
+    def get_stats(self) -> dict[str, dict]:
         """
         Get statistics for all domains.
 

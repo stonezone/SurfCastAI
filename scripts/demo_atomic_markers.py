@@ -66,7 +66,7 @@ def demo_concurrent_updates():
             try:
                 manager.set_latest_bundle(bundle_id)
                 return bundle_id, True
-            except Exception as e:
+            except Exception:
                 return bundle_id, False
 
         print("\nExecuting 100 concurrent marker updates...")
@@ -82,7 +82,7 @@ def demo_concurrent_updates():
         successes = sum(1 for _, success in results if success)
         failures = len(results) - successes
 
-        print(f"\nResults:")
+        print("\nResults:")
         print(f"  Total updates:  {len(results)}")
         print(f"  Successful:     {successes}")
         print(f"  Failed:         {failures}")
@@ -93,7 +93,7 @@ def demo_concurrent_updates():
         if marker_file.exists():
             content = marker_file.read_text()
             is_valid = content in bundle_ids
-            print(f"\nMarker integrity check:")
+            print("\nMarker integrity check:")
             print(f"  Final content:  {content}")
             print(f"  Is valid ID:    {is_valid}")
             print(f"  Not corrupted:  {content.count('bundle-') == 1}")
@@ -141,13 +141,9 @@ def demo_concurrent_read_write():
 
         with ThreadPoolExecutor(max_workers=30) as executor:
             # Submit writer tasks
-            writer_futures = [
-                executor.submit(writer_task, bid) for bid in bundle_ids
-            ]
+            writer_futures = [executor.submit(writer_task, bid) for bid in bundle_ids]
             # Submit reader tasks
-            reader_futures = [
-                executor.submit(reader_task) for _ in range(10)
-            ]
+            reader_futures = [executor.submit(reader_task) for _ in range(10)]
 
             # Wait for completion
             all_futures = writer_futures + reader_futures
@@ -157,7 +153,7 @@ def demo_concurrent_read_write():
 
         elapsed = time.time() - start_time
 
-        print(f"\nResults:")
+        print("\nResults:")
         print(f"  Total reads:       {total_reads}")
         print(f"  Partial reads:     {len(partial_reads)}")
         print(f"  Corruption rate:   {len(partial_reads) / total_reads * 100:.2f}%")
@@ -189,8 +185,8 @@ def demo_no_temp_file_leaks():
         temp_files = list(tmpdir_path.glob("tmp*"))
         temp_files.extend(tmpdir_path.glob("*.tmp"))
 
-        print(f"\nResults:")
-        print(f"  Updates completed: 100")
+        print("\nResults:")
+        print("  Updates completed: 100")
         print(f"  Temp files found:  {len(temp_files)}")
 
         if len(temp_files) == 0:
@@ -229,6 +225,7 @@ def main():
     except Exception as e:
         print(f"\n✗ DEMO FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

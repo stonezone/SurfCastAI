@@ -57,9 +57,9 @@ python scripts/generate_golden_prompts.py --update
 
 ## What Tests Check
 
-✅ **Prompt Stability:** Prompts don't change unexpectedly  
-✅ **Structure Validity:** Required sections present  
-✅ **Format Consistency:** Prompts follow template  
+✅ **Prompt Stability:** Prompts don't change unexpectedly
+✅ **Structure Validity:** Required sections present
+✅ **Format Consistency:** Prompts follow template
 ✅ **Version Control:** Changes tracked in git
 
 ---

@@ -9,10 +9,9 @@ Reference: CONSOLIDATION_EXECUTION_PLAN.md Phase 3, Task 3.2 (lines 1128-1247)
 """
 
 import logging
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from statistics import mean, stdev
+from typing import Any
 
 from .models.confidence import ConfidenceReport
 
@@ -20,10 +19,11 @@ from .models.confidence import ConfidenceReport
 @dataclass
 class ConfidenceWeights:
     """Weights for different confidence factors."""
-    model_consensus: float = 0.30      # Agreement between different models
-    source_reliability: float = 0.25   # Weighted average of source scores
-    data_completeness: float = 0.20    # Percentage of expected data received
-    forecast_horizon: float = 0.15     # Confidence decreases with time
+
+    model_consensus: float = 0.30  # Agreement between different models
+    source_reliability: float = 0.25  # Weighted average of source scores
+    data_completeness: float = 0.20  # Percentage of expected data received
+    forecast_horizon: float = 0.15  # Confidence decreases with time
     historical_accuracy: float = 0.10  # Recent validation performance
 
 
@@ -44,12 +44,10 @@ class ConfidenceScorer:
     """
 
     # Expected data sources for completeness calculation
-    EXPECTED_SOURCES = ['buoys', 'models', 'charts', 'satellite']
+    EXPECTED_SOURCES = ["buoys", "models", "charts", "satellite"]
 
     def __init__(
-        self,
-        weights: Optional[ConfidenceWeights] = None,
-        validation_db: Optional[Any] = None
+        self, weights: ConfidenceWeights | None = None, validation_db: Any | None = None
     ):
         """
         Initialize the confidence scorer.
@@ -58,7 +56,7 @@ class ConfidenceScorer:
             weights: Optional custom confidence weights
             validation_db: Optional validation database for historical accuracy
         """
-        self.logger = logging.getLogger('processing.confidence_scorer')
+        self.logger = logging.getLogger("processing.confidence_scorer")
         self.weights = weights or ConfidenceWeights()
         self.validation_db = validation_db
 
@@ -72,9 +70,7 @@ class ConfidenceScorer:
         )
 
     def calculate_confidence(
-        self,
-        fusion_data: Dict[str, Any],
-        forecast_horizon_days: int = 2
+        self, fusion_data: dict[str, Any], forecast_horizon_days: int = 2
     ) -> ConfidenceReport:
         """
         Calculate overall confidence score for a forecast.
@@ -102,20 +98,20 @@ class ConfidenceScorer:
 
         # Store individual factor scores
         factors = {
-            'model_consensus': consensus_score,
-            'source_reliability': reliability_score,
-            'data_completeness': completeness_score,
-            'forecast_horizon': horizon_score,
-            'historical_accuracy': accuracy_score
+            "model_consensus": consensus_score,
+            "source_reliability": reliability_score,
+            "data_completeness": completeness_score,
+            "forecast_horizon": horizon_score,
+            "historical_accuracy": accuracy_score,
         }
 
         # Calculate weighted overall score
         overall_score = (
-            consensus_score * self.weights.model_consensus +
-            reliability_score * self.weights.source_reliability +
-            completeness_score * self.weights.data_completeness +
-            horizon_score * self.weights.forecast_horizon +
-            accuracy_score * self.weights.historical_accuracy
+            consensus_score * self.weights.model_consensus
+            + reliability_score * self.weights.source_reliability
+            + completeness_score * self.weights.data_completeness
+            + horizon_score * self.weights.forecast_horizon
+            + accuracy_score * self.weights.historical_accuracy
         )
 
         # Determine confidence category using ConfidenceReport's static method
@@ -126,10 +122,7 @@ class ConfidenceScorer:
 
         # Collect warnings based on confidence factors
         warnings = self._collect_warnings(
-            overall_score,
-            factors,
-            fusion_data,
-            forecast_horizon_days
+            overall_score, factors, fusion_data, forecast_horizon_days
         )
 
         # Create ConfidenceReport
@@ -138,7 +131,7 @@ class ConfidenceScorer:
             category=category,
             factors=factors,
             breakdown=breakdown,
-            warnings=warnings
+            warnings=warnings,
         )
 
         # Log using the report's built-in summary method
@@ -146,7 +139,7 @@ class ConfidenceScorer:
 
         return report
 
-    def calculate_model_consensus(self, fusion_data: Dict[str, Any]) -> float:
+    def calculate_model_consensus(self, fusion_data: dict[str, Any]) -> float:
         """
         Calculate model consensus score based on agreement between models.
 
@@ -161,14 +154,14 @@ class ConfidenceScorer:
         """
         try:
             # Extract swell events from different model sources
-            swell_events = fusion_data.get('swell_events', [])
+            swell_events = fusion_data.get("swell_events", [])
 
             if not swell_events:
                 self.logger.debug("No swell events for consensus calculation")
                 return 0.5  # Neutral if no events
 
             # Group events by source
-            model_events = [e for e in swell_events if e.source == 'model']
+            model_events = [e for e in swell_events if e.source == "model"]
 
             if len(model_events) < 2:
                 self.logger.debug("Need at least 2 model events for consensus")
@@ -206,7 +199,7 @@ class ConfidenceScorer:
             self.logger.warning(f"Error calculating model consensus: {e}")
             return 0.5  # Neutral on error
 
-    def calculate_source_reliability(self, fusion_data: Dict[str, Any]) -> float:
+    def calculate_source_reliability(self, fusion_data: dict[str, Any]) -> float:
         """
         Calculate weighted average of source reliability scores.
 
@@ -220,15 +213,15 @@ class ConfidenceScorer:
         """
         try:
             # Extract source scores from metadata
-            metadata = fusion_data.get('metadata', {})
-            source_scores = metadata.get('source_scores', {})
+            metadata = fusion_data.get("metadata", {})
+            source_scores = metadata.get("source_scores", {})
 
             if not source_scores:
                 self.logger.debug("No source scores available")
                 return 0.5  # Neutral if no scores
 
             # Calculate weighted average of overall scores
-            scores = [score['overall_score'] for score in source_scores.values()]
+            scores = [score["overall_score"] for score in source_scores.values()]
 
             if not scores:
                 return 0.5
@@ -236,8 +229,7 @@ class ConfidenceScorer:
             reliability = sum(scores) / len(scores)
 
             self.logger.debug(
-                f"Source reliability: {len(scores)} sources, "
-                f"average={reliability:.3f}"
+                f"Source reliability: {len(scores)} sources, " f"average={reliability:.3f}"
             )
 
             return min(1.0, max(0.0, reliability))
@@ -246,7 +238,7 @@ class ConfidenceScorer:
             self.logger.warning(f"Error calculating source reliability: {e}")
             return 0.5
 
-    def calculate_data_completeness(self, fusion_data: Dict[str, Any]) -> float:
+    def calculate_data_completeness(self, fusion_data: dict[str, Any]) -> float:
         """
         Calculate data completeness based on expected vs received data sources.
 
@@ -263,25 +255,25 @@ class ConfidenceScorer:
             received_sources = []
 
             # Check for buoy data
-            if fusion_data.get('buoy_data') or any(
-                e.source == 'buoy' for e in fusion_data.get('swell_events', [])
+            if fusion_data.get("buoy_data") or any(
+                e.source == "buoy" for e in fusion_data.get("swell_events", [])
             ):
-                received_sources.append('buoys')
+                received_sources.append("buoys")
 
             # Check for model data
-            if fusion_data.get('model_data') or any(
-                e.source == 'model' for e in fusion_data.get('swell_events', [])
+            if fusion_data.get("model_data") or any(
+                e.source == "model" for e in fusion_data.get("swell_events", [])
             ):
-                received_sources.append('models')
+                received_sources.append("models")
 
             # Check for chart data
-            metadata = fusion_data.get('metadata', {})
-            if metadata.get('charts'):
-                received_sources.append('charts')
+            metadata = fusion_data.get("metadata", {})
+            if metadata.get("charts"):
+                received_sources.append("charts")
 
             # Check for satellite data
-            if metadata.get('satellite'):
-                received_sources.append('satellite')
+            if metadata.get("satellite"):
+                received_sources.append("satellite")
 
             # Calculate completeness ratio
             completeness = len(received_sources) / len(self.EXPECTED_SOURCES)
@@ -314,13 +306,11 @@ class ConfidenceScorer:
         # Linear decay with floor at 0.5
         horizon_score = max(0.5, 1.0 - (days_ahead * 0.1))
 
-        self.logger.debug(
-            f"Forecast horizon: {days_ahead} days, score={horizon_score:.3f}"
-        )
+        self.logger.debug(f"Forecast horizon: {days_ahead} days, score={horizon_score:.3f}")
 
         return horizon_score
 
-    def calculate_historical_accuracy(self, fusion_data: Dict[str, Any]) -> float:
+    def calculate_historical_accuracy(self, fusion_data: dict[str, Any]) -> float:
         """
         Calculate confidence based on recent validation performance.
 
@@ -343,9 +333,9 @@ class ConfidenceScorer:
                 pass
 
             # Check fusion metadata for validation info
-            metadata = fusion_data.get('metadata', {})
-            validation = metadata.get('validation', {})
-            recent_mae = validation.get('recent_mae')
+            metadata = fusion_data.get("metadata", {})
+            validation = metadata.get("validation", {})
+            recent_mae = validation.get("recent_mae")
 
             if recent_mae is not None:
                 # Convert MAE to accuracy score
@@ -366,7 +356,7 @@ class ConfidenceScorer:
             self.logger.warning(f"Error calculating historical accuracy: {e}")
             return 0.7
 
-    def _build_source_breakdown(self, fusion_data: Dict[str, Any]) -> Dict[str, float]:
+    def _build_source_breakdown(self, fusion_data: dict[str, Any]) -> dict[str, float]:
         """
         Build source-level confidence breakdown (e.g., buoy, pressure, model).
 
@@ -379,45 +369,47 @@ class ConfidenceScorer:
         breakdown = {}
 
         # Extract metadata
-        metadata = fusion_data.get('metadata', {})
-        source_scores = metadata.get('source_scores', {})
+        metadata = fusion_data.get("metadata", {})
+        source_scores = metadata.get("source_scores", {})
 
         # Calculate buoy confidence (average of buoy source scores)
         buoy_scores = [
-            score['overall_score']
+            score["overall_score"]
             for source_id, score in source_scores.items()
-            if 'buoy' in source_id.lower() or 'ndbc' in source_id.lower()
+            if "buoy" in source_id.lower() or "ndbc" in source_id.lower()
         ]
         if buoy_scores:
-            breakdown['buoy_confidence'] = sum(buoy_scores) / len(buoy_scores)
+            breakdown["buoy_confidence"] = sum(buoy_scores) / len(buoy_scores)
 
         # Calculate model confidence (average of model source scores)
         model_scores = [
-            score['overall_score']
+            score["overall_score"]
             for source_id, score in source_scores.items()
-            if 'model' in source_id.lower() or 'swan' in source_id.lower() or 'ww3' in source_id.lower()
+            if "model" in source_id.lower()
+            or "swan" in source_id.lower()
+            or "ww3" in source_id.lower()
         ]
         if model_scores:
-            breakdown['model_confidence'] = sum(model_scores) / len(model_scores)
+            breakdown["model_confidence"] = sum(model_scores) / len(model_scores)
 
         # Calculate pressure/weather confidence (average of weather source scores)
         weather_scores = [
-            score['overall_score']
+            score["overall_score"]
             for source_id, score in source_scores.items()
-            if 'weather' in source_id.lower() or 'nws' in source_id.lower()
+            if "weather" in source_id.lower() or "nws" in source_id.lower()
         ]
         if weather_scores:
-            breakdown['pressure_confidence'] = sum(weather_scores) / len(weather_scores)
+            breakdown["pressure_confidence"] = sum(weather_scores) / len(weather_scores)
 
         return breakdown
 
     def _collect_warnings(
         self,
         overall_score: float,
-        factors: Dict[str, float],
-        fusion_data: Dict[str, Any],
-        forecast_horizon_days: int
-    ) -> List[str]:
+        factors: dict[str, float],
+        fusion_data: dict[str, Any],
+        forecast_horizon_days: int,
+    ) -> list[str]:
         """
         Collect quality warnings based on confidence factors.
 
@@ -434,27 +426,29 @@ class ConfidenceScorer:
 
         # Overall confidence warnings
         if overall_score < 0.4:
-            warnings.append("Very low forecast confidence due to poor data quality or high uncertainty")
+            warnings.append(
+                "Very low forecast confidence due to poor data quality or high uncertainty"
+            )
         elif overall_score < 0.6:
             warnings.append("Low forecast confidence - limited data or model disagreement present")
 
         # Factor-specific warnings
-        if factors['model_consensus'] < 0.5:
+        if factors["model_consensus"] < 0.5:
             warnings.append("Significant disagreement between model predictions")
 
-        if factors['data_completeness'] < 0.5:
+        if factors["data_completeness"] < 0.5:
             warnings.append("Limited data sources available - missing expected data types")
 
-        if factors['source_reliability'] < 0.6:
+        if factors["source_reliability"] < 0.6:
             warnings.append("Some data sources have low reliability scores")
 
-        if factors['historical_accuracy'] < 0.5:
+        if factors["historical_accuracy"] < 0.5:
             warnings.append("Recent forecasts have shown lower accuracy")
 
         # Check for missing buoy data
-        metadata = fusion_data.get('metadata', {})
-        source_scores = metadata.get('source_scores', {})
-        buoy_count = sum(1 for s in source_scores if 'buoy' in s.lower() or 'ndbc' in s.lower())
+        metadata = fusion_data.get("metadata", {})
+        source_scores = metadata.get("source_scores", {})
+        buoy_count = sum(1 for s in source_scores if "buoy" in s.lower() or "ndbc" in s.lower())
 
         if buoy_count == 0:
             warnings.append("No buoy data available")
@@ -462,8 +456,8 @@ class ConfidenceScorer:
             warnings.append("Limited buoy data (only 1 buoy)")
 
         # Check for model disagreement
-        swell_events = fusion_data.get('swell_events', [])
-        model_events = [e for e in swell_events if e.source == 'model']
+        swell_events = fusion_data.get("swell_events", [])
+        model_events = [e for e in swell_events if e.source == "model"]
 
         if len(model_events) == 0:
             warnings.append("No model data available")
@@ -472,7 +466,9 @@ class ConfidenceScorer:
 
         # Long forecast horizon warning
         if forecast_horizon_days > 5:
-            warnings.append(f"Long forecast horizon ({forecast_horizon_days} days) - reduced confidence")
+            warnings.append(
+                f"Long forecast horizon ({forecast_horizon_days} days) - reduced confidence"
+            )
 
         return warnings
 
@@ -490,16 +486,16 @@ def format_confidence_for_display(report: ConfidenceReport) -> str:
     lines = [
         f"**Forecast Confidence: {report.category.upper()}** ({report.overall_score:.2f})",
         "",
-        "**Confidence Factors:**"
+        "**Confidence Factors:**",
     ]
 
     # Add each factor with its score
     factor_names = {
-        'model_consensus': 'Model Consensus',
-        'source_reliability': 'Source Reliability',
-        'data_completeness': 'Data Completeness',
-        'forecast_horizon': 'Forecast Horizon',
-        'historical_accuracy': 'Historical Accuracy'
+        "model_consensus": "Model Consensus",
+        "source_reliability": "Source Reliability",
+        "data_completeness": "Data Completeness",
+        "forecast_horizon": "Forecast Horizon",
+        "historical_accuracy": "Historical Accuracy",
     }
 
     for factor_key, factor_name in factor_names.items():
@@ -512,7 +508,7 @@ def format_confidence_for_display(report: ConfidenceReport) -> str:
         lines.append("**Source Breakdown:**")
         for source_key, source_score in sorted(report.breakdown.items()):
             # Convert snake_case to Title Case for display
-            source_name = source_key.replace('_', ' ').title()
+            source_name = source_key.replace("_", " ").title()
             lines.append(f"- {source_name}: {source_score:.2f}")
 
     # Add warnings if any

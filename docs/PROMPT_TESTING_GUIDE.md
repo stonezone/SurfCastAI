@@ -1,7 +1,7 @@
 # Prompt Testing Guide
 
-**Date:** October 12, 2025  
-**Status:** Production-Ready  
+**Date:** October 12, 2025
+**Status:** Production-Ready
 **Framework:** pytest-based with golden file validation
 
 ---
@@ -112,8 +112,8 @@ tests/prompt_tests/
 ### Senior Forecaster (4 Test Cases)
 
 #### case_01_high_confidence
-**Scenario:** Clean NW swell from well-tracked North Pacific storm  
-**Confidence:** Buoy 0.92, Pressure 0.88  
+**Scenario:** Clean NW swell from well-tracked North Pacific storm
+**Confidence:** Buoy 0.92, Pressure 0.88
 **Key Features:**
 - Strong specialist agreement
 - Single dominant swell component
@@ -129,8 +129,8 @@ tests/prompt_tests/
 ---
 
 #### case_02_low_confidence
-**Scenario:** Summer flatspell with uncertain Southern Hemisphere swell  
-**Confidence:** Buoy 0.45, Pressure 0.52  
+**Scenario:** Summer flatspell with uncertain Southern Hemisphere swell
+**Confidence:** Buoy 0.45, Pressure 0.52
 **Key Features:**
 - Sparse buoy data (offline sensors)
 - Weak fetch window
@@ -146,8 +146,8 @@ tests/prompt_tests/
 ---
 
 #### case_03_large_swells
-**Scenario:** XXL North Shore surf from historic storm complex  
-**Confidence:** Buoy 0.87, Pressure 0.90  
+**Scenario:** XXL North Shore surf from historic storm complex
+**Confidence:** Buoy 0.87, Pressure 0.90
 **Key Features:**
 - Multiple overlapping swell systems
 - Extreme wave heights (20-40ft faces)
@@ -163,8 +163,8 @@ tests/prompt_tests/
 ---
 
 #### case_04_flat_conditions
-**Scenario:** Summer flatspell with no significant swell activity  
-**Confidence:** Buoy 0.78, Pressure 0.75  
+**Scenario:** Summer flatspell with no significant swell activity
+**Confidence:** Buoy 0.78, Pressure 0.75
 **Key Features:**
 - High confidence in flatness
 - High pressure blocking patterns
@@ -385,10 +385,10 @@ def test_senior_forecaster_mentions_source_storms(test_case):
     """Test that SeniorForecaster mentions source storms."""
     if test_case.specialist != "senior_forecaster":
         pytest.skip()
-    
+
     input_data = test_case.load_input()
     prompt = generate_prompt_from_specialist(test_case.specialist, input_data)
-    
+
     # Check for source storm mentions
     predicted_swells = input_data.get('pressure_analysis', {}).get('data', {}).get('predicted_swells', [])
     for swell in predicted_swells:
@@ -438,6 +438,6 @@ def test_senior_forecaster_mentions_source_storms(test_case):
 
 ---
 
-**Guide Version:** 1.0  
-**Last Updated:** October 12, 2025  
+**Guide Version:** 1.0
+**Last Updated:** October 12, 2025
 **Maintainer:** SurfCastAI Team

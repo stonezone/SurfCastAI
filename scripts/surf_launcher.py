@@ -8,24 +8,29 @@ Because predicting waves should be as gnarly as riding them!
 """
 
 import os
-import sys
 import subprocess
-import yaml
-from pathlib import Path
-from typing import Optional, Dict, Any, List
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import yaml
 
 try:
-    from colorama import init, Fore, Back, Style
+    from colorama import Back, Fore, Style, init
+
     init(autoreset=True)
     HAS_COLOR = True
 except ImportError:
     HAS_COLOR = False
+
     # Fallback no-op color codes
     class _Fore:
-        GREEN = CYAN = YELLOW = RED = MAGENTA = BLUE = WHITE = ''
+        GREEN = CYAN = YELLOW = RED = MAGENTA = BLUE = WHITE = ""
+
     class _Style:
-        BRIGHT = RESET_ALL = ''
+        BRIGHT = RESET_ALL = ""
+
     Fore = _Fore()
     Style = _Style()
 
@@ -60,14 +65,45 @@ SURFBOARD = f"""{Fore.YELLOW}
 
 # 80s Slang Dictionary
 SLANG = {
-    'success': ['Totally radical!', 'Gnarly!', 'Tubular!', 'Cowabunga!', 'Most excellent!',
-                'Bodacious!', 'Righteous!', 'Awesome sauce!', 'Rad to the max!', 'Stellar!'],
-    'error': ['Bummer, dude!', 'Bogus!', 'Weak sauce!', 'Major wipeout!', 'Grody to the max!',
-              'That\'s so lame!', 'Totally uncool!', 'Barf me out!', 'Gag me with a spoon!'],
-    'thinking': ['Hang loose...', 'Shredding data...', 'Carving the numbers...',
-                 'Catching some waves...', 'Paddling out...', 'Getting stoked...'],
-    'greeting': ['Welcome back, dude!', 'Ready to shred?', 'Surf\'s up!', 'Let\'s get radical!',
-                 'Time to catch some waves!', 'Stoked to see you!']
+    "success": [
+        "Totally radical!",
+        "Gnarly!",
+        "Tubular!",
+        "Cowabunga!",
+        "Most excellent!",
+        "Bodacious!",
+        "Righteous!",
+        "Awesome sauce!",
+        "Rad to the max!",
+        "Stellar!",
+    ],
+    "error": [
+        "Bummer, dude!",
+        "Bogus!",
+        "Weak sauce!",
+        "Major wipeout!",
+        "Grody to the max!",
+        "That's so lame!",
+        "Totally uncool!",
+        "Barf me out!",
+        "Gag me with a spoon!",
+    ],
+    "thinking": [
+        "Hang loose...",
+        "Shredding data...",
+        "Carving the numbers...",
+        "Catching some waves...",
+        "Paddling out...",
+        "Getting stoked...",
+    ],
+    "greeting": [
+        "Welcome back, dude!",
+        "Ready to shred?",
+        "Surf's up!",
+        "Let's get radical!",
+        "Time to catch some waves!",
+        "Stoked to see you!",
+    ],
 }
 
 
@@ -79,9 +115,9 @@ class SurfLauncher:
         self.project_root = Path(__file__).parent.parent
         self.config_path = self.project_root / "config" / "config.yaml"
         self.main_script = self.project_root / "src" / "main.py"
-        self.config: Dict[str, Any] = {}
+        self.config: dict[str, Any] = {}
         self.specialist_enabled = bool(
-            self.config.get('forecast', {}).get('use_specialist_team', False)
+            self.config.get("forecast", {}).get("use_specialist_team", False)
         )
 
         # Load config
@@ -91,7 +127,7 @@ class SurfLauncher:
         """Load configuration from config.yaml."""
         try:
             if self.config_path.exists():
-                with open(self.config_path, 'r') as f:
+                with open(self.config_path) as f:
                     self.config = yaml.safe_load(f) or {}
         except Exception as e:
             self._print_error(f"Error loading config: {e}")
@@ -99,25 +135,27 @@ class SurfLauncher:
     def _save_config(self) -> None:
         """Save configuration to config.yaml."""
         try:
-            with open(self.config_path, 'w') as f:
+            with open(self.config_path, "w") as f:
                 yaml.dump(self.config, f, default_flow_style=False)
         except Exception as e:
             self._print_error(f"Error saving config: {e}")
 
     def _clear_screen(self) -> None:
         """Clear the terminal screen."""
-        os.system('cls' if os.name == 'nt' else 'clear')
+        os.system("cls" if os.name == "nt" else "clear")
 
     def _print_success(self, message: str) -> None:
         """Print a success message in green."""
         import random
-        slang = random.choice(SLANG['success'])
+
+        slang = random.choice(SLANG["success"])
         print(f"{Fore.GREEN}{Style.BRIGHT}{slang} {message}{Style.RESET_ALL}")
 
     def _print_error(self, message: str) -> None:
         """Print an error message in red."""
         import random
-        slang = random.choice(SLANG['error'])
+
+        slang = random.choice(SLANG["error"])
         print(f"{Fore.RED}{Style.BRIGHT}{slang} {message}{Style.RESET_ALL}")
 
     def _print_info(self, message: str) -> None:
@@ -130,17 +168,17 @@ class SurfLauncher:
 
     def _print_status_bar(self) -> None:
         """Print the current status bar."""
-        model = self.config.get('openai', {}).get('model', 'gpt-5-nano')
+        model = self.config.get("openai", {}).get("model", "gpt-5-nano")
         specialist_status = (
-            f"{Fore.GREEN}ON{Fore.CYAN}"
-            if self.specialist_enabled
-            else f"{Fore.RED}OFF{Fore.CYAN}"
+            f"{Fore.GREEN}ON{Fore.CYAN}" if self.specialist_enabled else f"{Fore.RED}OFF{Fore.CYAN}"
         )
         latest_bundle = self._get_latest_bundle_id()
 
         print(f"{Fore.CYAN}{Style.BRIGHT}")
         print(f"┌{'─' * 68}┐")
-        print(f"│ Status: Model: {Fore.YELLOW}{model:<15}{Fore.CYAN} │ Specialist Team: {specialist_status}{Fore.CYAN} │ Latest Bundle: {Fore.MAGENTA}{latest_bundle:<10}{Fore.CYAN}│")
+        print(
+            f"│ Status: Model: {Fore.YELLOW}{model:<15}{Fore.CYAN} │ Specialist Team: {specialist_status}{Fore.CYAN} │ Latest Bundle: {Fore.MAGENTA}{latest_bundle:<10}{Fore.CYAN}│"
+        )
         print(f"└{'─' * 68}┘{Style.RESET_ALL}")
 
     def _get_latest_bundle_id(self) -> str:
@@ -150,14 +188,14 @@ class SurfLauncher:
             return "None"
 
         # Find latest bundle directory
-        bundles = [d for d in data_dir.iterdir() if d.is_dir() and not d.name.startswith('.')]
+        bundles = [d for d in data_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
         if not bundles:
             return "None"
 
         latest = max(bundles, key=lambda d: d.stat().st_mtime)
         return latest.name[:10]  # Just first 10 chars
 
-    def _list_bundles(self) -> List[Dict[str, Any]]:
+    def _list_bundles(self) -> list[dict[str, Any]]:
         """List all available bundles."""
         data_dir = self.project_root / "data"
         if not data_dir.exists():
@@ -165,29 +203,28 @@ class SurfLauncher:
 
         bundles = []
         for bundle_dir in sorted(data_dir.iterdir(), key=lambda d: d.stat().st_mtime, reverse=True):
-            if bundle_dir.is_dir() and not bundle_dir.name.startswith('.'):
+            if bundle_dir.is_dir() and not bundle_dir.name.startswith("."):
                 metadata_file = bundle_dir / "metadata.json"
-                bundles.append({
-                    'id': bundle_dir.name,
-                    'path': bundle_dir,
-                    'time': datetime.fromtimestamp(bundle_dir.stat().st_mtime),
-                    'has_metadata': metadata_file.exists()
-                })
+                bundles.append(
+                    {
+                        "id": bundle_dir.name,
+                        "path": bundle_dir,
+                        "time": datetime.fromtimestamp(bundle_dir.stat().st_mtime),
+                        "has_metadata": metadata_file.exists(),
+                    }
+                )
 
         return bundles[:10]  # Just show last 10
 
-    def _run_command(self, args: List[str], description: str) -> bool:
+    def _run_command(self, args: list[str], description: str) -> bool:
         """Run a main.py command."""
         import random
+
         print(f"\n{Fore.MAGENTA}{Style.BRIGHT}{random.choice(SLANG['thinking'])}{Style.RESET_ALL}")
         print(f"{Fore.CYAN}Running: {' '.join(args)}{Style.RESET_ALL}\n")
 
         try:
-            result = subprocess.run(
-                [sys.executable] + args,
-                cwd=self.project_root,
-                check=False
-            )
+            result = subprocess.run([sys.executable] + args, cwd=self.project_root, check=False)
 
             if result.returncode == 0:
                 self._print_success(description)
@@ -207,7 +244,9 @@ class SurfLauncher:
         print(f"\n{WAVE_SEPARATOR}\n")
 
         print(f"{Fore.YELLOW}{Style.BRIGHT}MAIN MENU:{Style.RESET_ALL}\n")
-        print(f"  {Fore.CYAN}1.{Style.RESET_ALL} 🌊 Run Full Forecast (collect + process + forecast)")
+        print(
+            f"  {Fore.CYAN}1.{Style.RESET_ALL} 🌊 Run Full Forecast (collect + process + forecast)"
+        )
         print(f"  {Fore.CYAN}2.{Style.RESET_ALL} 📊 Collect Data Only")
         print(f"  {Fore.CYAN}3.{Style.RESET_ALL} 🤖 Generate Forecast (latest bundle)")
         print(f"  {Fore.CYAN}4.{Style.RESET_ALL} 🔍 Generate Forecast (select bundle)")
@@ -217,7 +256,9 @@ class SurfLauncher:
             if self.specialist_enabled
             else f"{Fore.RED}OFF{Style.RESET_ALL}"
         )
-        print(f"  {Fore.CYAN}6.{Style.RESET_ALL} 👥 Toggle Specialist Team (currently: {specialist_label})")
+        print(
+            f"  {Fore.CYAN}6.{Style.RESET_ALL} 👥 Toggle Specialist Team (currently: {specialist_label})"
+        )
         print(f"  {Fore.CYAN}7.{Style.RESET_ALL} 📁 View Recent Forecasts")
         print(f"  {Fore.CYAN}8.{Style.RESET_ALL} 📋 List Data Bundles")
         print(f"  {Fore.CYAN}9.{Style.RESET_ALL} ❓ Help/Info")
@@ -228,7 +269,7 @@ class SurfLauncher:
     def show_model_menu(self) -> None:
         """Display the model settings menu."""
         self._clear_screen()
-        current_model = self.config.get('openai', {}).get('model', 'gpt-5-nano')
+        current_model = self.config.get("openai", {}).get("model", "gpt-5-nano")
 
         print(f"{Fore.CYAN}{Style.BRIGHT}")
         print("╔════════════════════════════════════════════════════════════════════╗")
@@ -236,7 +277,9 @@ class SurfLauncher:
         print("╚════════════════════════════════════════════════════════════════════╝")
         print(Style.RESET_ALL)
 
-        print(f"\n{Fore.YELLOW}Current Model: {Fore.MAGENTA}{Style.BRIGHT}{current_model}{Style.RESET_ALL}\n")
+        print(
+            f"\n{Fore.YELLOW}Current Model: {Fore.MAGENTA}{Style.BRIGHT}{current_model}{Style.RESET_ALL}\n"
+        )
 
         print(f"{Fore.YELLOW}{Style.BRIGHT}CHOOSE YOUR AI SHREDDING POWER:{Style.RESET_ALL}\n")
 
@@ -245,21 +288,31 @@ class SurfLauncher:
         print(f"  {Fore.CYAN}1.{Style.RESET_ALL} [{Fore.GREEN}{check}{Style.RESET_ALL}] GPT-5-nano")
         print(f"      {Fore.CYAN}└─ Speed:    {Fore.GREEN}★★★★★{Style.RESET_ALL} (Lightning fast!)")
         print(f"      {Fore.CYAN}└─ Cost:     {Fore.GREEN}★★★★★{Style.RESET_ALL} (Super cheap!)")
-        print(f"      {Fore.CYAN}└─ Quality:  {Fore.YELLOW}★★★☆☆{Style.RESET_ALL} (Good for quick forecasts)")
+        print(
+            f"      {Fore.CYAN}└─ Quality:  {Fore.YELLOW}★★★☆☆{Style.RESET_ALL} (Good for quick forecasts)"
+        )
 
         # GPT-5-mini
         check = "✓" if current_model == "gpt-5-mini" else " "
-        print(f"\n  {Fore.CYAN}2.{Style.RESET_ALL} [{Fore.GREEN}{check}{Style.RESET_ALL}] GPT-5-mini")
+        print(
+            f"\n  {Fore.CYAN}2.{Style.RESET_ALL} [{Fore.GREEN}{check}{Style.RESET_ALL}] GPT-5-mini"
+        )
         print(f"      {Fore.CYAN}└─ Speed:    {Fore.GREEN}★★★★☆{Style.RESET_ALL} (Pretty fast!)")
         print(f"      {Fore.CYAN}└─ Cost:     {Fore.GREEN}★★★★☆{Style.RESET_ALL} (Reasonable)")
-        print(f"      {Fore.CYAN}└─ Quality:  {Fore.GREEN}★★★★☆{Style.RESET_ALL} (Balanced - recommended!)")
+        print(
+            f"      {Fore.CYAN}└─ Quality:  {Fore.GREEN}★★★★☆{Style.RESET_ALL} (Balanced - recommended!)"
+        )
 
         # GPT-5
         check = "✓" if current_model == "gpt-5" else " "
         print(f"\n  {Fore.CYAN}3.{Style.RESET_ALL} [{Fore.GREEN}{check}{Style.RESET_ALL}] GPT-5")
-        print(f"      {Fore.CYAN}└─ Speed:    {Fore.YELLOW}★★★☆☆{Style.RESET_ALL} (Slower, but worth it!)")
+        print(
+            f"      {Fore.CYAN}└─ Speed:    {Fore.YELLOW}★★★☆☆{Style.RESET_ALL} (Slower, but worth it!)"
+        )
         print(f"      {Fore.CYAN}└─ Cost:     {Fore.YELLOW}★★☆☆☆{Style.RESET_ALL} (More expensive)")
-        print(f"      {Fore.CYAN}└─ Quality:  {Fore.GREEN}★★★★★{Style.RESET_ALL} (Maximum accuracy!)")
+        print(
+            f"      {Fore.CYAN}└─ Quality:  {Fore.GREEN}★★★★★{Style.RESET_ALL} (Maximum accuracy!)"
+        )
 
         print(f"\n  {Fore.CYAN}4.{Style.RESET_ALL} View Full Config")
         print(f"  {Fore.CYAN}b.{Style.RESET_ALL} Back to Main Menu")
@@ -278,20 +331,20 @@ class SurfLauncher:
         print(f"\n{Fore.YELLOW}{Style.BRIGHT}WHAT EACH OPTION DOES:{Style.RESET_ALL}\n")
 
         print(f"{Fore.CYAN}1. Run Full Forecast{Style.RESET_ALL}")
-        print(f"   └─ Collects fresh data, processes it, and generates a complete forecast")
-        print(f"   └─ This is your all-in-one, totally radical option!")
+        print("   └─ Collects fresh data, processes it, and generates a complete forecast")
+        print("   └─ This is your all-in-one, totally radical option!")
 
         print(f"\n{Fore.CYAN}2. Collect Data Only{Style.RESET_ALL}")
-        print(f"   └─ Just grab the latest buoy, weather, and satellite data")
-        print(f"   └─ Use this if you want to collect data for later")
+        print("   └─ Just grab the latest buoy, weather, and satellite data")
+        print("   └─ Use this if you want to collect data for later")
 
         print(f"\n{Fore.CYAN}3. Generate Forecast (latest){Style.RESET_ALL}")
-        print(f"   └─ Use the most recent data bundle to create a forecast")
-        print(f"   └─ Perfect when you already collected data")
+        print("   └─ Use the most recent data bundle to create a forecast")
+        print("   └─ Perfect when you already collected data")
 
         print(f"\n{Fore.CYAN}4. Generate Forecast (select){Style.RESET_ALL}")
-        print(f"   └─ Pick a specific data bundle to forecast from")
-        print(f"   └─ Great for comparing forecasts from different times")
+        print("   └─ Pick a specific data bundle to forecast from")
+        print("   └─ Great for comparing forecasts from different times")
 
         print(f"\n{Fore.YELLOW}{Style.BRIGHT}MODEL COMPARISON:{Style.RESET_ALL}\n")
         print(f"  {Fore.GREEN}GPT-5-nano{Style.RESET_ALL}:  Fast & cheap - good for testing")
@@ -299,27 +352,27 @@ class SurfLauncher:
         print(f"  {Fore.GREEN}GPT-5{Style.RESET_ALL}:       Slowest but most accurate")
 
         print(f"\n{Fore.YELLOW}{Style.BRIGHT}SPECIALIST TEAM:{Style.RESET_ALL}\n")
-        print(f"  When enabled, uses multiple AI agents to analyze different aspects:")
-        print(f"  • Swell Expert - analyzes wave patterns")
-        print(f"  • Wind Specialist - checks wind conditions")
-        print(f"  • Weather Analyst - reviews weather patterns")
-        print(f"  • Tides Guru - evaluates tidal effects")
-        print(f"  → Results in more detailed (but slower) forecasts!")
+        print("  When enabled, uses multiple AI agents to analyze different aspects:")
+        print("  • Swell Expert - analyzes wave patterns")
+        print("  • Wind Specialist - checks wind conditions")
+        print("  • Weather Analyst - reviews weather patterns")
+        print("  • Tides Guru - evaluates tidal effects")
+        print("  → Results in more detailed (but slower) forecasts!")
 
         print(f"\n{Fore.YELLOW}{Style.BRIGHT}DATA BUNDLES:{Style.RESET_ALL}\n")
-        print(f"  Each data collection creates a 'bundle' - a timestamped collection of:")
-        print(f"  • Buoy observations")
-        print(f"  • Weather forecasts")
-        print(f"  • Satellite imagery")
-        print(f"  • Wave model data")
-        print(f"  → All organized by timestamp for easy tracking!")
+        print("  Each data collection creates a 'bundle' - a timestamped collection of:")
+        print("  • Buoy observations")
+        print("  • Weather forecasts")
+        print("  • Satellite imagery")
+        print("  • Wave model data")
+        print("  → All organized by timestamp for easy tracking!")
 
         print(f"\n{Fore.YELLOW}{Style.BRIGHT}SURF TIPS FROM THE 80s:{Style.RESET_ALL}\n")
-        print(f"  • Always check North Shore in winter (November-March)")
-        print(f"  • South Shore pumps in summer (May-September)")
-        print(f"  • Dawn patrol = best conditions (offshore winds, glassy water)")
-        print(f"  • When in doubt, paddle out!")
-        print(f"  • Never turn your back on the ocean, dude!")
+        print("  • Always check North Shore in winter (November-March)")
+        print("  • South Shore pumps in summer (May-September)")
+        print("  • Dawn patrol = best conditions (offshore winds, glassy water)")
+        print("  • When in doubt, paddle out!")
+        print("  • Never turn your back on the ocean, dude!")
 
         print(f"\n{WAVE_SEPARATOR}")
         input(f"\n{Fore.CYAN}Press ENTER to return to main menu...{Style.RESET_ALL}")
@@ -342,7 +395,7 @@ class SurfLauncher:
         forecasts = sorted(
             [d for d in output_dir.iterdir() if d.is_dir()],
             key=lambda d: d.stat().st_mtime,
-            reverse=True
+            reverse=True,
         )[:10]
 
         if not forecasts:
@@ -362,14 +415,19 @@ class SurfLauncher:
             has_pdf = (forecast_dir / "forecast.pdf").exists()
 
             formats = []
-            if has_md: formats.append("MD")
-            if has_html: formats.append("HTML")
-            if has_pdf: formats.append("PDF")
+            if has_md:
+                formats.append("MD")
+            if has_html:
+                formats.append("HTML")
+            if has_pdf:
+                formats.append("PDF")
 
             format_str = ", ".join(formats) if formats else "No outputs"
 
             print(f"  {Fore.CYAN}{i}.{Style.RESET_ALL} {forecast_dir.name}")
-            print(f"     {Fore.CYAN}└─{Style.RESET_ALL} {time_str} | Formats: {Fore.GREEN}{format_str}{Style.RESET_ALL}")
+            print(
+                f"     {Fore.CYAN}└─{Style.RESET_ALL} {time_str} | Formats: {Fore.GREEN}{format_str}{Style.RESET_ALL}"
+            )
 
         print(f"\n{Fore.CYAN}Forecast outputs are in: {Fore.YELLOW}{output_dir}{Style.RESET_ALL}")
         print(f"\n{WAVE_SEPARATOR}")
@@ -394,8 +452,12 @@ class SurfLauncher:
         print(f"\n{Fore.YELLOW}Available bundles (newest first):{Style.RESET_ALL}\n")
 
         for i, bundle in enumerate(bundles, 1):
-            time_str = bundle['time'].strftime("%Y-%m-%d %H:%M")
-            status = f"{Fore.GREEN}✓{Style.RESET_ALL}" if bundle['has_metadata'] else f"{Fore.YELLOW}?{Style.RESET_ALL}"
+            time_str = bundle["time"].strftime("%Y-%m-%d %H:%M")
+            status = (
+                f"{Fore.GREEN}✓{Style.RESET_ALL}"
+                if bundle["has_metadata"]
+                else f"{Fore.YELLOW}?{Style.RESET_ALL}"
+            )
 
             print(f"  {Fore.CYAN}{i}.{Style.RESET_ALL} {status} {bundle['id'][:36]}...")
             print(f"     {Fore.CYAN}└─{Style.RESET_ALL} {time_str}")
@@ -403,7 +465,7 @@ class SurfLauncher:
         print(f"\n{WAVE_SEPARATOR}")
         input(f"\n{Fore.CYAN}Press ENTER to continue...{Style.RESET_ALL}")
 
-    def select_bundle(self) -> Optional[str]:
+    def select_bundle(self) -> str | None:
         """Let user select a bundle."""
         bundles = self._list_bundles()
 
@@ -414,7 +476,7 @@ class SurfLauncher:
         print(f"\n{Fore.YELLOW}Select a bundle:{Style.RESET_ALL}\n")
 
         for i, bundle in enumerate(bundles, 1):
-            time_str = bundle['time'].strftime("%Y-%m-%d %H:%M")
+            time_str = bundle["time"].strftime("%Y-%m-%d %H:%M")
             print(f"  {Fore.CYAN}{i}.{Style.RESET_ALL} {bundle['id'][:36]}... ({time_str})")
 
         print(f"  {Fore.CYAN}0.{Style.RESET_ALL} Cancel")
@@ -422,13 +484,13 @@ class SurfLauncher:
         while True:
             choice = input(f"\n{Fore.CYAN}Enter number:{Style.RESET_ALL} ").strip()
 
-            if choice == '0':
+            if choice == "0":
                 return None
 
             try:
                 idx = int(choice) - 1
                 if 0 <= idx < len(bundles):
-                    return bundles[idx]['id']
+                    return bundles[idx]["id"]
                 else:
                     self._print_error("Invalid selection, try again!")
             except ValueError:
@@ -436,10 +498,10 @@ class SurfLauncher:
 
     def set_model(self, model: str) -> None:
         """Set the OpenAI model in config."""
-        if 'openai' not in self.config:
-            self.config['openai'] = {}
+        if "openai" not in self.config:
+            self.config["openai"] = {}
 
-        self.config['openai']['model'] = model
+        self.config["openai"]["model"] = model
         self._save_config()
         self._print_success(f"Model set to {model}!")
 
@@ -453,24 +515,32 @@ class SurfLauncher:
         print(Style.RESET_ALL)
 
         print(f"\n{Fore.YELLOW}OpenAI Settings:{Style.RESET_ALL}")
-        print(f"  Model: {Fore.GREEN}{self.config.get('openai', {}).get('model', 'gpt-5-nano')}{Style.RESET_ALL}")
+        print(
+            f"  Model: {Fore.GREEN}{self.config.get('openai', {}).get('model', 'gpt-5-nano')}{Style.RESET_ALL}"
+        )
 
-        api_key = self.config.get('openai', {}).get('api_key') or os.getenv('OPENAI_API_KEY')
+        api_key = self.config.get("openai", {}).get("api_key") or os.getenv("OPENAI_API_KEY")
         if api_key:
             print(f"  API Key: {Fore.GREEN}✓ Configured{Style.RESET_ALL}")
         else:
             print(f"  API Key: {Fore.RED}✗ Not configured{Style.RESET_ALL}")
 
         print(f"\n{Fore.YELLOW}Directories:{Style.RESET_ALL}")
-        print(f"  Data: {Fore.CYAN}{self.config.get('general', {}).get('data_directory', './data')}{Style.RESET_ALL}")
-        print(f"  Output: {Fore.CYAN}{self.config.get('general', {}).get('output_directory', './output')}{Style.RESET_ALL}")
+        print(
+            f"  Data: {Fore.CYAN}{self.config.get('general', {}).get('data_directory', './data')}{Style.RESET_ALL}"
+        )
+        print(
+            f"  Output: {Fore.CYAN}{self.config.get('general', {}).get('output_directory', './output')}{Style.RESET_ALL}"
+        )
 
         print(f"\n{Fore.YELLOW}Data Sources:{Style.RESET_ALL}")
-        sources = self.config.get('data_sources', {})
+        sources = self.config.get("data_sources", {})
         for source, config in sources.items():
-            enabled = config.get('enabled', False)
-            status = f"{Fore.GREEN}ON{Style.RESET_ALL}" if enabled else f"{Fore.RED}OFF{Style.RESET_ALL}"
-            url_count = len(config.get('urls', []))
+            enabled = config.get("enabled", False)
+            status = (
+                f"{Fore.GREEN}ON{Style.RESET_ALL}" if enabled else f"{Fore.RED}OFF{Style.RESET_ALL}"
+            )
+            url_count = len(config.get("urls", []))
             print(f"  {source}: {status} ({url_count} URLs)")
 
         print(f"\n{WAVE_SEPARATOR}")
@@ -486,20 +556,19 @@ class SurfLauncher:
         print(Style.RESET_ALL)
 
         print(f"\n{Fore.YELLOW}This will:{Style.RESET_ALL}")
-        print(f"  • Collect fresh data from all sources")
-        print(f"  • Process and analyze the data")
-        print(f"  • Generate a complete surf forecast")
-        print(f"  • Create output files (Markdown + HTML)")
+        print("  • Collect fresh data from all sources")
+        print("  • Process and analyze the data")
+        print("  • Generate a complete surf forecast")
+        print("  • Create output files (Markdown + HTML)")
 
         confirm = input(f"\n{Fore.CYAN}Ready to shred? (y/n):{Style.RESET_ALL} ").strip().lower()
 
-        if confirm != 'y':
+        if confirm != "y":
             self._print_info("Forecast cancelled. Catch you later!")
             return
 
         self._run_command(
-            [str(self.main_script), "run", "--mode", "full"],
-            "Full forecast completed!"
+            [str(self.main_script), "run", "--mode", "full"], "Full forecast completed!"
         )
 
         input(f"\n{Fore.CYAN}Press ENTER to continue...{Style.RESET_ALL}")
@@ -516,8 +585,7 @@ class SurfLauncher:
         print(f"\n{Fore.YELLOW}Collecting data from all sources...{Style.RESET_ALL}")
 
         self._run_command(
-            [str(self.main_script), "run", "--mode", "collect"],
-            "Data collection complete!"
+            [str(self.main_script), "run", "--mode", "collect"], "Data collection complete!"
         )
 
         input(f"\n{Fore.CYAN}Press ENTER to continue...{Style.RESET_ALL}")
@@ -535,8 +603,7 @@ class SurfLauncher:
         print(f"\n{Fore.YELLOW}Using bundle: {Fore.CYAN}{latest}{Style.RESET_ALL}")
 
         self._run_command(
-            [str(self.main_script), "run", "--mode", "forecast"],
-            "Forecast generation complete!"
+            [str(self.main_script), "run", "--mode", "forecast"], "Forecast generation complete!"
         )
 
         input(f"\n{Fore.CYAN}Press ENTER to continue...{Style.RESET_ALL}")
@@ -560,38 +627,38 @@ class SurfLauncher:
 
         self._run_command(
             [str(self.main_script), "run", "--mode", "forecast", "--bundle", bundle_id],
-            "Forecast generation complete!"
+            "Forecast generation complete!",
         )
 
         input(f"\n{Fore.CYAN}Press ENTER to continue...{Style.RESET_ALL}")
 
     def handle_main_menu(self, choice: str) -> bool:
         """Handle main menu selection. Returns False to exit."""
-        if choice == '1':
+        if choice == "1":
             self.run_full_forecast()
-        elif choice == '2':
+        elif choice == "2":
             self.collect_data_only()
-        elif choice == '3':
+        elif choice == "3":
             self.generate_forecast_latest()
-        elif choice == '4':
+        elif choice == "4":
             self.generate_forecast_select()
-        elif choice == '5':
+        elif choice == "5":
             self.model_settings_menu()
-        elif choice == '6':
+        elif choice == "6":
             self.specialist_enabled = not self.specialist_enabled
-            if 'forecast' not in self.config:
-                self.config['forecast'] = {}
-            self.config['forecast']['use_specialist_team'] = self.specialist_enabled
+            if "forecast" not in self.config:
+                self.config["forecast"] = {}
+            self.config["forecast"]["use_specialist_team"] = self.specialist_enabled
             self._save_config()
             status = "enabled" if self.specialist_enabled else "disabled"
             self._print_success(f"Specialist team {status}!")
-        elif choice == '7':
+        elif choice == "7":
             self.view_recent_forecasts()
-        elif choice == '8':
+        elif choice == "8":
             self.list_bundles()
-        elif choice == '9':
+        elif choice == "9":
             self.show_help()
-        elif choice == '0':
+        elif choice == "0":
             return False
         else:
             self._print_error("Invalid choice! Pick a number from the menu.")
@@ -604,15 +671,15 @@ class SurfLauncher:
             self.show_model_menu()
             choice = input(f"{Fore.CYAN}Enter your choice:{Style.RESET_ALL} ").strip()
 
-            if choice == '1':
-                self.set_model('gpt-5-nano')
-            elif choice == '2':
-                self.set_model('gpt-5-mini')
-            elif choice == '3':
-                self.set_model('gpt-5')
-            elif choice == '4':
+            if choice == "1":
+                self.set_model("gpt-5-nano")
+            elif choice == "2":
+                self.set_model("gpt-5-mini")
+            elif choice == "3":
+                self.set_model("gpt-5")
+            elif choice == "4":
                 self.view_config()
-            elif choice.lower() == 'b':
+            elif choice.lower() == "b":
                 break
             else:
                 self._print_error("Invalid choice!")

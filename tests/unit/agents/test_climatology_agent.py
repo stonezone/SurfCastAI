@@ -12,12 +12,12 @@ from src.agents.climatology_agent import ClimatologyAgent
 def test_climatology_agent_persists_text(tmp_path):
     config = MagicMock()
     config.get.return_value = {
-        'sources': [
+        "sources": [
             {
-                'id': 'snn_nsstat10',
-                'format': 'text',
-                'url': 'https://www.surfnewsnetwork.com/nsstat10.txt',
-                'description': 'SNN October stats'
+                "id": "snn_nsstat10",
+                "format": "text",
+                "url": "https://www.surfnewsnetwork.com/nsstat10.txt",
+                "description": "SNN October stats",
             }
         ]
     }
@@ -33,6 +33,6 @@ def test_climatology_agent_persists_text(tmp_path):
 
     assert metadata
     entry = metadata[0]
-    assert entry['format'] == 'text'
-    assert entry['line_count'] == 4
-    assert entry['source_id'] == 'snn_nsstat10'
+    assert entry["format"] == "text"
+    assert entry["line_count"] == 4
+    assert entry["source_id"] == "snn_nsstat10"

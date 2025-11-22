@@ -5,29 +5,23 @@ This module analyzes pressure chart images using GPT vision API to identify
 weather systems, fetch patterns, and predict swell generation.
 """
 
-import os
-import logging
-import base64
 import json
+import logging
 import math
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timedelta
+import os
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
-from .base_specialist import BaseSpecialist, SpecialistOutput
 from ...utils.swell_propagation import SwellPropagationCalculator
+from .base_specialist import BaseSpecialist
 from .schemas import (
-    PressureAnalystOutput,
-    PressureAnalystData,
-    WeatherSystem,
-    PredictedSwell,
-    FrontalBoundary,
     AnalysisSummary,
-    FetchWindow,
-    SystemType,
-    FrontType,
-    FetchQuality,
-    IntensificationTrend
+    FrontalBoundary,
+    PredictedSwell,
+    PressureAnalystData,
+    PressureAnalystOutput,
+    WeatherSystem,
 )
 
 
@@ -67,7 +61,12 @@ class PressureAnalyst(BaseSpecialist):
     GRAVITY = 9.81  # m/s²
     NAUTICAL_MILE_TO_METERS = 1852.0
 
-    def __init__(self, config: Optional[Any] = None, model_name: Optional[str] = None, engine: Optional[Any] = None):
+    def __init__(
+        self,
+        config: Any | None = None,
+        model_name: str | None = None,
+        engine: Any | None = None,
+    ):
         """
         Initialize the pressure analyst.
 
@@ -77,7 +76,7 @@ class PressureAnalyst(BaseSpecialist):
             engine: Reference to ForecastEngine for centralized API calls and cost tracking
         """
         super().__init__(config, model_name, engine)
-        self.logger = logging.getLogger('specialist.pressure_analyst')
+        self.logger = logging.getLogger("specialist.pressure_analyst")
 
         # Validate engine parameter is provided
         if engine is None:
@@ -90,10 +89,12 @@ class PressureAnalyst(BaseSpecialist):
         # Load OpenAI configuration
         # Note: model_name is now passed to __init__ from BaseSpecialist
         if config:
-            self.openai_api_key = config.get('openai', 'api_key') or os.environ.get('OPENAI_API_KEY')
-            self.max_tokens = config.getint('openai', 'max_tokens', 3000)
+            self.openai_api_key = config.get("openai", "api_key") or os.environ.get(
+                "OPENAI_API_KEY"
+            )
+            self.max_tokens = config.getint("openai", "max_tokens", 3000)
         else:
-            self.openai_api_key = os.environ.get('OPENAI_API_KEY')
+            self.openai_api_key = os.environ.get("OPENAI_API_KEY")
             self.max_tokens = 3000
 
         # Hawaii location for distance calculations (approximate center of islands)
@@ -103,7 +104,7 @@ class PressureAnalyst(BaseSpecialist):
         # Initialize swell propagation calculator
         self.swell_calculator = SwellPropagationCalculator()
 
-    async def analyze(self, data: Dict[str, Any]) -> PressureAnalystOutput:
+    async def analyze(self, data: dict[str, Any]) -> PressureAnalystOutput:
         """
         Analyze pressure chart images and return structured insights.
 
@@ -117,15 +118,15 @@ class PressureAnalyst(BaseSpecialist):
             ValueError: If input data is invalid
         """
         # Validate input
-        self._validate_input(data, ['images'])
+        self._validate_input(data, ["images"])
 
-        image_paths = data['images']
+        image_paths = data["images"]
         if not isinstance(image_paths, list) or len(image_paths) == 0:
             raise ValueError("images must be a non-empty list")
 
-        metadata = data.get('metadata', {})
-        chart_times = metadata.get('chart_times', [])
-        region = metadata.get('region', 'North Pacific')
+        metadata = data.get("metadata", {})
+        chart_times = metadata.get("chart_times", [])
+        region = metadata.get("region", "North Pacific")
 
         self._log_analysis_start(f"{len(image_paths)} pressure charts from {region}")
 
@@ -139,32 +140,33 @@ class PressureAnalyst(BaseSpecialist):
             vision_result = await self._analyze_with_vision(valid_images, chart_times, region)
 
             # Extract and enhance structured data
-            systems = vision_result.get('systems', [])
-            predicted_swells = vision_result.get('predicted_swells', [])
-            frontal_boundaries = vision_result.get('frontal_boundaries', [])
+            systems = vision_result.get("systems", [])
+            predicted_swells = vision_result.get("predicted_swells", [])
+            frontal_boundaries = vision_result.get("frontal_boundaries", [])
 
             # Enhance predictions with physics-based calculations
             enhanced_swells = self._enhance_swell_predictions(predicted_swells, systems)
 
             # Calculate confidence
             confidence = self._calculate_analysis_confidence(
-                len(valid_images),
-                systems,
-                enhanced_swells,
-                chart_times
+                len(valid_images), systems, enhanced_swells, chart_times
             )
 
             # Prepare structured data dictionaries
             structured_data_dict = {
-                'systems': systems,
-                'predicted_swells': enhanced_swells,
-                'frontal_boundaries': frontal_boundaries,
-                'analysis_summary': {
-                    'num_low_pressure': len([s for s in systems if s.get('type') == 'low_pressure']),
-                    'num_high_pressure': len([s for s in systems if s.get('type') == 'high_pressure']),
-                    'num_predicted_swells': len(enhanced_swells),
-                    'region': region
-                }
+                "systems": systems,
+                "predicted_swells": enhanced_swells,
+                "frontal_boundaries": frontal_boundaries,
+                "analysis_summary": {
+                    "num_low_pressure": len(
+                        [s for s in systems if s.get("type") == "low_pressure"]
+                    ),
+                    "num_high_pressure": len(
+                        [s for s in systems if s.get("type") == "high_pressure"]
+                    ),
+                    "num_predicted_swells": len(enhanced_swells),
+                    "region": region,
+                },
             }
 
             # Generate AI narrative (needs structured_data_dict for prompt building)
@@ -172,12 +174,12 @@ class PressureAnalyst(BaseSpecialist):
 
             # Create metadata
             analysis_metadata = {
-                'num_images': len(valid_images),
-                'analysis_method': 'gpt_vision',
-                'model': self.model_name,
-                'timestamp': datetime.now().isoformat(),
-                'region': region,
-                'chart_times': chart_times
+                "num_images": len(valid_images),
+                "analysis_method": "gpt_vision",
+                "model": self.model_name,
+                "timestamp": datetime.now().isoformat(),
+                "region": region,
+                "chart_times": chart_times,
             }
 
             self._log_analysis_complete(confidence, len(valid_images))
@@ -186,14 +188,14 @@ class PressureAnalyst(BaseSpecialist):
             weather_systems = [WeatherSystem(**system) for system in systems]
             predicted_swells = [PredictedSwell(**swell) for swell in enhanced_swells]
             frontal_boundaries = [FrontalBoundary(**front) for front in frontal_boundaries]
-            analysis_summary_obj = AnalysisSummary(**structured_data_dict['analysis_summary'])
+            analysis_summary_obj = AnalysisSummary(**structured_data_dict["analysis_summary"])
 
             # Create PressureAnalystData instance
             structured_data = PressureAnalystData(
                 systems=weather_systems,
                 predicted_swells=predicted_swells,
                 frontal_boundaries=frontal_boundaries,
-                analysis_summary=analysis_summary_obj
+                analysis_summary=analysis_summary_obj,
             )
 
             # Return Pydantic model
@@ -201,14 +203,14 @@ class PressureAnalyst(BaseSpecialist):
                 confidence=confidence,
                 data=structured_data,
                 narrative=narrative,
-                metadata=analysis_metadata
+                metadata=analysis_metadata,
             )
 
         except Exception as e:
             self.logger.error(f"Error in pressure chart analysis: {e}")
             raise
 
-    def _validate_image_paths(self, image_paths: List[str]) -> List[str]:
+    def _validate_image_paths(self, image_paths: list[str]) -> list[str]:
         """
         Validate that image files exist and are readable.
 
@@ -224,7 +226,7 @@ class PressureAnalyst(BaseSpecialist):
             path = Path(img_path)
             if path.exists() and path.is_file():
                 # Check if file is a valid image format
-                if path.suffix.lower() in ['.png', '.jpg', '.jpeg', '.gif', '.webp']:
+                if path.suffix.lower() in [".png", ".jpg", ".jpeg", ".gif", ".webp"]:
                     valid_paths.append(str(path))
                 else:
                     self.logger.warning(f"Skipping non-image file: {img_path}")
@@ -234,11 +236,8 @@ class PressureAnalyst(BaseSpecialist):
         return valid_paths
 
     async def _analyze_with_vision(
-        self,
-        image_paths: List[str],
-        chart_times: List[str],
-        region: str
-    ) -> Dict[str, Any]:
+        self, image_paths: list[str], chart_times: list[str], region: str
+    ) -> dict[str, Any]:
         """
         Analyze pressure charts using GPT vision API.
 
@@ -322,19 +321,21 @@ Return structured data in JSON format with NO markdown formatting or code blocks
 
             # Use engine's centralized OpenAI client for cost tracking
             # OpenAI client handles image encoding internally
-            self.logger.info(f"Calling {self.model_name} for pressure chart analysis ({len(image_paths)} images)...")
+            self.logger.info(
+                f"Calling {self.model_name} for pressure chart analysis ({len(image_paths)} images)..."
+            )
             content = await self.engine.openai_client.call_openai_api(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 image_urls=image_paths,  # Pass paths directly, client handles encoding
-                detail="high"  # High detail for meteorological analysis
+                detail="high",  # High detail for meteorological analysis
             )
 
             if content:
                 # Remove markdown code blocks if present
-                if content.startswith('```'):
-                    content = content.split('```')[1]
-                    if content.startswith('json'):
+                if content.startswith("```"):
+                    content = content.split("```")[1]
+                    if content.startswith("json"):
                         content = content[4:]
                     content = content.strip()
 
@@ -344,32 +345,18 @@ Return structured data in JSON format with NO markdown formatting or code blocks
                 return result
             else:
                 self.logger.warning("No content returned from vision API")
-                return {
-                    'systems': [],
-                    'predicted_swells': [],
-                    'frontal_boundaries': []
-                }
+                return {"systems": [], "predicted_swells": [], "frontal_boundaries": []}
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Failed to parse JSON from vision API: {e}")
-            return {
-                'systems': [],
-                'predicted_swells': [],
-                'frontal_boundaries': []
-            }
+            return {"systems": [], "predicted_swells": [], "frontal_boundaries": []}
         except Exception as e:
             self.logger.error(f"Error calling vision API: {e}")
-            return {
-                'systems': [],
-                'predicted_swells': [],
-                'frontal_boundaries': []
-            }
+            return {"systems": [], "predicted_swells": [], "frontal_boundaries": []}
 
     def _enhance_swell_predictions(
-        self,
-        swells: List[Dict[str, Any]],
-        systems: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, swells: list[dict[str, Any]], systems: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """
         Enhance swell predictions with physics-based calculations.
 
@@ -388,69 +375,80 @@ Return structured data in JSON format with NO markdown formatting or code blocks
             enhanced_swell = swell.copy()
 
             # Find source system for additional context
-            source_id = swell.get('source_system', '').lower()
+            source_id = swell.get("source_system", "").lower()
             source_system = None
             for system in systems:
                 # Try multiple matching strategies
-                system_type = system.get('type', '').lower()
-                system_loc = system.get('location', '').lower().replace(' ', '_')
+                system_type = system.get("type", "").lower()
+                system_loc = system.get("location", "").lower().replace(" ", "_")
                 system_id = f"{system_type}_{system_loc}"
 
                 # Match if either ID contains the other, or location matches
-                if (source_id and system_id and
-                    (source_id in system_id or system_id in source_id or
-                     system_loc in source_id or source_id in system_loc)):
+                if (
+                    source_id
+                    and system_id
+                    and (
+                        source_id in system_id
+                        or system_id in source_id
+                        or system_loc in source_id
+                        or source_id in system_loc
+                    )
+                ):
                     source_system = system
                     break
 
             # Try to get numeric coordinates from swell or system
-            source_lat = swell.get('source_lat')
-            source_lon = swell.get('source_lon')
+            source_lat = swell.get("source_lat")
+            source_lon = swell.get("source_lon")
 
             # If not in swell, try to get from source system
             if (source_lat is None or source_lon is None) and source_system:
-                source_lat = source_system.get('location_lat')
-                source_lon = source_system.get('location_lon')
+                source_lat = source_system.get("location_lat")
+                source_lon = source_system.get("location_lon")
 
             # Calculate physics-based arrival if we have coordinates
             if source_lat is not None and source_lon is not None:
                 try:
                     # Get period estimate
-                    period_str = swell.get('estimated_period', '13-15s')
-                    if '-' in period_str:
-                        periods = [float(p.replace('s', '')) for p in period_str.split('-')]
+                    period_str = swell.get("estimated_period", "13-15s")
+                    if "-" in period_str:
+                        periods = [float(p.replace("s", "")) for p in period_str.split("-")]
                         avg_period = sum(periods) / len(periods)
                     else:
-                        avg_period = float(period_str.replace('s', ''))
+                        avg_period = float(period_str.replace("s", ""))
 
                     # Get or estimate generation time
                     generation_time = None
-                    if source_system and source_system.get('generation_time'):
+                    if source_system and source_system.get("generation_time"):
                         try:
-                            gen_time_str = source_system['generation_time']
-                            generation_time = datetime.fromisoformat(gen_time_str.replace('Z', '+00:00'))
+                            gen_time_str = source_system["generation_time"]
+                            generation_time = datetime.fromisoformat(
+                                gen_time_str.replace("Z", "+00:00")
+                            )
                         except Exception as e:
                             self.logger.debug(f"Could not parse generation_time: {e}")
 
                     # If no generation time, use current time as fallback
                     if generation_time is None:
                         generation_time = datetime.now()
-                        self.logger.debug(f"Using current time as generation_time fallback")
+                        self.logger.debug("Using current time as generation_time fallback")
 
                     # Calculate arrival using physics
                     arrival_time, details = self.swell_calculator.calculate_arrival(
                         source_lat=source_lat,
                         source_lon=source_lon,
                         period_seconds=avg_period,
-                        generation_time=generation_time
+                        generation_time=generation_time,
                     )
 
                     # Add calculated data to swell
-                    enhanced_swell['calculated_arrival'] = arrival_time.isoformat()
-                    enhanced_swell['travel_time_hrs'] = round(details['travel_time_hours'], 1)
-                    enhanced_swell['distance_nm'] = round(details['distance_nm'], 0)
-                    enhanced_swell['group_velocity_knots'] = round(details['group_velocity_knots'], 1)
-                    enhanced_swell['propagation_method'] = 'physics_based'
+                    enhanced_swell["calculated_arrival"] = arrival_time.isoformat()
+                    enhanced_swell["travel_time_hrs"] = round(details["travel_time_hours"], 1)
+                    enhanced_swell["distance_nm"] = round(details["distance_nm"], 0)
+                    enhanced_swell["group_velocity_knots"] = round(
+                        details["group_velocity_knots"], 1
+                    )
+                    enhanced_swell["propagation_method"] = "physics_based"
 
                     self.logger.info(
                         f"Calculated swell arrival: {source_lat}°N {source_lon}°E → Hawaii, "
@@ -464,19 +462,19 @@ Return structured data in JSON format with NO markdown formatting or code blocks
 
             # Add fetch quality and other data from source system
             if source_system:
-                if 'fetch' in source_system:
-                    fetch = source_system['fetch']
-                    enhanced_swell['fetch_quality'] = fetch.get('quality', 'unknown')
-                    enhanced_swell['fetch_duration_hrs'] = fetch.get('duration_hrs')
-                    enhanced_swell['fetch_length_nm'] = fetch.get('fetch_length_nm')
+                if "fetch" in source_system:
+                    fetch = source_system["fetch"]
+                    enhanced_swell["fetch_quality"] = fetch.get("quality", "unknown")
+                    enhanced_swell["fetch_duration_hrs"] = fetch.get("duration_hrs")
+                    enhanced_swell["fetch_length_nm"] = fetch.get("fetch_length_nm")
 
                 # Add storm characteristics
-                if 'pressure_mb' in source_system:
-                    enhanced_swell['source_pressure_mb'] = source_system['pressure_mb']
-                if 'wind_speed_kt' in source_system:
-                    enhanced_swell['source_wind_speed_kt'] = source_system['wind_speed_kt']
-                if 'intensification' in source_system:
-                    enhanced_swell['source_trend'] = source_system['intensification']
+                if "pressure_mb" in source_system:
+                    enhanced_swell["source_pressure_mb"] = source_system["pressure_mb"]
+                if "wind_speed_kt" in source_system:
+                    enhanced_swell["source_wind_speed_kt"] = source_system["wind_speed_kt"]
+                if "intensification" in source_system:
+                    enhanced_swell["source_trend"] = source_system["intensification"]
 
             enhanced.append(enhanced_swell)
 
@@ -528,8 +526,10 @@ Return structured data in JSON format with NO markdown formatting or code blocks
         dlat = lat2_rad - lat1_rad
         dlon = lon2_rad - lon1_rad
 
-        a = (math.sin(dlat / 2) ** 2 +
-             math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2) ** 2)
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2) ** 2
+        )
         c = 2 * math.asin(math.sqrt(a))
 
         # Earth radius in nautical miles (approximately)
@@ -541,9 +541,9 @@ Return structured data in JSON format with NO markdown formatting or code blocks
     def _calculate_analysis_confidence(
         self,
         num_images: int,
-        systems: List[Dict[str, Any]],
-        swells: List[Dict[str, Any]],
-        chart_times: List[str]
+        systems: list[dict[str, Any]],
+        swells: list[dict[str, Any]],
+        chart_times: list[str],
     ) -> float:
         """
         Calculate overall confidence in the analysis.
@@ -572,11 +572,11 @@ Return structured data in JSON format with NO markdown formatting or code blocks
         if systems:
             fetch_qualities = []
             for system in systems:
-                if 'fetch' in system:
-                    quality = system['fetch'].get('quality', 'weak')
-                    if quality == 'strong':
+                if "fetch" in system:
+                    quality = system["fetch"].get("quality", "weak")
+                    if quality == "strong":
                         fetch_qualities.append(1.0)
-                    elif quality == 'moderate':
+                    elif quality == "moderate":
                         fetch_qualities.append(0.7)
                     else:
                         fetch_qualities.append(0.4)
@@ -591,7 +591,7 @@ Return structured data in JSON format with NO markdown formatting or code blocks
         # Data quality: based on swell predictions and temporal coverage
         if swells:
             # Check if swells have confidence scores
-            swell_confidences = [s.get('confidence', 0.5) for s in swells]
+            swell_confidences = [s.get("confidence", 0.5) for s in swells]
             quality = sum(swell_confidences) / len(swell_confidences)
         else:
             quality = 0.4
@@ -600,7 +600,7 @@ Return structured data in JSON format with NO markdown formatting or code blocks
         if chart_times and len(chart_times) >= num_images:
             try:
                 # Check time span coverage
-                times = [datetime.fromisoformat(t.replace('Z', '+00:00')) for t in chart_times]
+                times = [datetime.fromisoformat(t.replace("Z", "+00:00")) for t in chart_times]
                 time_span_hrs = (max(times) - min(times)).total_seconds() / 3600.0
                 if time_span_hrs >= 24:
                     quality = min(1.0, quality * 1.1)  # 10% bonus for good temporal coverage
@@ -610,10 +610,7 @@ Return structured data in JSON format with NO markdown formatting or code blocks
         return self._calculate_confidence(completeness, consistency, quality)
 
     async def _generate_narrative(
-        self,
-        structured_data: Dict[str, Any],
-        image_paths: List[str],
-        region: str
+        self, structured_data: dict[str, Any], image_paths: list[str], region: str
     ) -> str:
         """
         Generate AI narrative analysis using GPT.
@@ -647,8 +644,7 @@ Write a 500-1000 word narrative that is:
             # Use engine's centralized OpenAI client for cost tracking
             self.logger.info(f"Calling {self.model_name} for pressure analysis narrative...")
             narrative = await self.engine.openai_client.call_openai_api(
-                system_prompt=system_prompt,
-                user_prompt=prompt
+                system_prompt=system_prompt, user_prompt=prompt
             )
 
             if narrative and len(narrative) > 0:
@@ -662,12 +658,12 @@ Write a 500-1000 word narrative that is:
             self.logger.error(f"Error generating AI narrative: {e}")
             raise
 
-    def _build_narrative_prompt(self, structured_data: Dict[str, Any], region: str) -> str:
+    def _build_narrative_prompt(self, structured_data: dict[str, Any], region: str) -> str:
         """Build the narrative prompt for GPT."""
-        systems = structured_data.get('systems', [])
-        swells = structured_data.get('predicted_swells', [])
-        fronts = structured_data.get('frontal_boundaries', [])
-        summary = structured_data.get('analysis_summary', {})
+        systems = structured_data.get("systems", [])
+        swells = structured_data.get("predicted_swells", [])
+        fronts = structured_data.get("frontal_boundaries", [])
+        summary = structured_data.get("analysis_summary", {})
 
         prompt = f"""Provide a comprehensive narrative analysis of pressure patterns in the {region}.
 
@@ -684,8 +680,8 @@ SYSTEMS DETECTED: {summary.get('num_low_pressure', 0)} low pressure, {summary.ge
                 prompt += f"  - Movement: {system.get('movement', 'unknown')}\n"
                 prompt += f"  - Trend: {system.get('intensification', 'unknown')}\n"
 
-                if 'fetch' in system:
-                    fetch = system['fetch']
+                if "fetch" in system:
+                    fetch = system["fetch"]
                     prompt += f"  - Fetch: {fetch.get('direction', 'unknown')} direction, "
                     prompt += f"{fetch.get('distance_nm', 'N/A')} nm, "
                     prompt += f"{fetch.get('duration_hrs', 'N/A')} hrs, "
@@ -701,9 +697,9 @@ SYSTEMS DETECTED: {summary.get('num_low_pressure', 0)} low pressure, {summary.ge
                 prompt += f"  - Period: {swell.get('estimated_period', 'N/A')}\n"
                 prompt += f"  - Confidence: {swell.get('confidence', 'N/A')}\n"
 
-                if 'travel_time_hrs' in swell:
+                if "travel_time_hrs" in swell:
                     prompt += f"  - Travel time: {swell['travel_time_hrs']} hours\n"
-                if 'fetch_quality' in swell:
+                if "fetch_quality" in swell:
                     prompt += f"  - Fetch quality: {swell['fetch_quality']}\n"
 
         if fronts:
@@ -717,16 +713,12 @@ SYSTEMS DETECTED: {summary.get('num_low_pressure', 0)} low pressure, {summary.ge
 
         return prompt
 
-    def _generate_template_narrative(
-        self,
-        structured_data: Dict[str, Any],
-        region: str
-    ) -> str:
+    def _generate_template_narrative(self, structured_data: dict[str, Any], region: str) -> str:
         """Generate a template narrative when AI is unavailable."""
-        systems = structured_data.get('systems', [])
-        swells = structured_data.get('predicted_swells', [])
-        fronts = structured_data.get('frontal_boundaries', [])
-        summary = structured_data.get('analysis_summary', {})
+        systems = structured_data.get("systems", [])
+        swells = structured_data.get("predicted_swells", [])
+        fronts = structured_data.get("frontal_boundaries", [])
+        summary = structured_data.get("analysis_summary", {})
 
         narrative = f"""PRESSURE CHART ANALYSIS - {region}
 
@@ -744,8 +736,8 @@ and {summary.get('num_high_pressure', 0)} high-pressure systems currently active
                 narrative += f"moving {system.get('movement', 'unknown')}, "
                 narrative += f"{system.get('intensification', 'steady')}."
 
-                if 'fetch' in system:
-                    fetch = system['fetch']
+                if "fetch" in system:
+                    fetch = system["fetch"]
                     narrative += f"\nFetch: {fetch.get('quality', 'moderate')} quality, "
                     narrative += f"{fetch.get('direction', 'unknown')} direction, "
                     narrative += f"{fetch.get('distance_nm', 'N/A')} nm for "

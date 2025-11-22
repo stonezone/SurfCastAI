@@ -4,20 +4,21 @@ Combines best features from both urlGrabber and url_downloader libraries.
 """
 
 import asyncio
-import inspect
-import aiohttp
-import time
-import logging
-from datetime import datetime
-from typing import Dict, Optional, Tuple, Any, List
-from urllib.parse import urlparse
 import hashlib
+import inspect
+import logging
 import os
+import time
+from datetime import datetime
 from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
 
-from ..utils.security import validate_url, sanitize_filename
-from ..utils.exceptions import HTTPError, SecurityError, RateLimitError
-from .rate_limiter import RateLimiter, TokenBucket, RateLimitConfig
+import aiohttp
+
+from ..utils.exceptions import RateLimitError, SecurityError
+from ..utils.security import sanitize_filename, validate_url
+from .rate_limiter import RateLimitConfig, RateLimiter
 
 
 class DownloadResult:
@@ -26,20 +27,20 @@ class DownloadResult:
     def __init__(self, url: str, success: bool = False):
         self.url = url
         self.success = success
-        self.status_code: Optional[int] = None
-        self.content: Optional[bytes] = None
-        self.headers: Dict[str, str] = {}
-        self.error: Optional[str] = None
+        self.status_code: int | None = None
+        self.content: bytes | None = None
+        self.headers: dict[str, str] = {}
+        self.error: str | None = None
         self.download_time: float = 0
         self.wait_time: float = 0
         self.retry_count: int = 0
-        self.file_path: Optional[str] = None
-        self.size_bytes: Optional[int] = None
-        self.content_type: Optional[str] = None
+        self.file_path: str | None = None
+        self.size_bytes: int | None = None
+        self.content_type: str | None = None
         self.timestamp = datetime.now().isoformat()
         self.domain = urlparse(url).netloc
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "url": self.url,
@@ -53,11 +54,11 @@ class DownloadResult:
             "size_bytes": self.size_bytes,
             "content_type": self.content_type,
             "timestamp": self.timestamp,
-            "domain": self.domain
+            "domain": self.domain,
         }
 
     @classmethod
-    def from_error(cls, url: str, error: str) -> 'DownloadResult':
+    def from_error(cls, url: str, error: str) -> "DownloadResult":
         """Create a failed result with error message."""
         result = cls(url, success=False)
         result.error = error
@@ -79,13 +80,13 @@ class HTTPClient:
 
     def __init__(
         self,
-        rate_limiter: Optional[RateLimiter] = None,
+        rate_limiter: RateLimiter | None = None,
         timeout: int = 30,
         max_concurrent: int = 10,
         retry_attempts: int = 3,
         user_agent: str = "SurfCastAI/1.0",
-        output_dir: Optional[Path] = None,
-        logger: Optional[logging.Logger] = None
+        output_dir: Path | None = None,
+        logger: logging.Logger | None = None,
     ):
         """
         Initialize HTTP client.
@@ -108,18 +109,15 @@ class HTTPClient:
 
         # Create rate limiter if not provided
         self.rate_limiter = rate_limiter or RateLimiter(
-            default_config=RateLimitConfig(
-                requests_per_second=0.5,
-                burst_size=3
-            )
+            default_config=RateLimitConfig(requests_per_second=0.5, burst_size=3)
         )
 
         # Create output directory if it doesn't exist
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Session and connector
-        self._session: Optional[aiohttp.ClientSession] = None
-        self._connector: Optional[aiohttp.TCPConnector] = None
+        self._session: aiohttp.ClientSession | None = None
+        self._connector: aiohttp.TCPConnector | None = None
 
         # Statistics tracking
         self.stats = {
@@ -128,7 +126,7 @@ class HTTPClient:
             "wait_times": {},
             "total_downloads": 0,
             "total_errors": 0,
-            "total_wait_time": 0
+            "total_wait_time": 0,
         }
 
     async def __aenter__(self):
@@ -148,22 +146,18 @@ class HTTPClient:
                 limit=self.max_concurrent * 2,  # Total connections
                 limit_per_host=5,  # Per-host limit
                 ttl_dns_cache=300,  # DNS cache timeout
-                enable_cleanup_closed=True
+                enable_cleanup_closed=True,
             )
 
             # Create session with timeout and headers
             timeout = aiohttp.ClientTimeout(total=self.timeout)
-            headers = {
-                'User-Agent': self.user_agent
-            }
+            headers = {"User-Agent": self.user_agent}
 
             self._session = aiohttp.ClientSession(
-                connector=self._connector,
-                timeout=timeout,
-                headers=headers
+                connector=self._connector, timeout=timeout, headers=headers
             )
 
-    async def _resolve_response(self, request: Any) -> Tuple[Any, bool]:
+    async def _resolve_response(self, request: Any) -> tuple[Any, bool]:
         """Normalise aiohttp responses versus AsyncMock test doubles."""
         async_mock_type = None
         try:
@@ -176,26 +170,26 @@ class HTTPClient:
         if async_mock_type and isinstance(request, async_mock_type):
             return request, False
 
-        if hasattr(request, '__aenter__') and hasattr(request, '__aexit__'):
+        if hasattr(request, "__aenter__") and hasattr(request, "__aexit__"):
             return request, True
 
         if inspect.isawaitable(request):
             awaited = await request
             if async_mock_type and isinstance(awaited, async_mock_type):
                 return awaited, False
-            if hasattr(awaited, '__aenter__') and hasattr(awaited, '__aexit__'):
+            if hasattr(awaited, "__aenter__") and hasattr(awaited, "__aexit__"):
                 return awaited, True
             return awaited, False
 
         return request, False
 
-    def _coerce_headers(self, headers: Any) -> Dict[str, Any]:
+    def _coerce_headers(self, headers: Any) -> dict[str, Any]:
         """Safely convert headers object to a dictionary."""
         if headers is None:
             return {}
         if isinstance(headers, dict):
             return dict(headers)
-        if hasattr(headers, 'items'):
+        if hasattr(headers, "items"):
             try:
                 return {k: v for k, v in headers.items()}
             except TypeError:
@@ -207,7 +201,7 @@ class HTTPClient:
         if response is None:
             return
 
-        for attr in ('release', 'close'):
+        for attr in ("release", "close"):
             fn = getattr(response, attr, None)
             if callable(fn):
                 try:
@@ -219,9 +213,9 @@ class HTTPClient:
                 finally:
                     return
 
-    async def _consume_content(self, response: Any) -> Optional[bytes]:
+    async def _consume_content(self, response: Any) -> bytes | None:
         """Read response content handling coroutines/mocked methods."""
-        reader = getattr(response, 'read', None)
+        reader = getattr(response, "read", None)
         if not callable(reader):
             return None
 
@@ -241,15 +235,15 @@ class HTTPClient:
         url: str,
         domain: str,
         save_to_disk: bool,
-        custom_file_path: Optional[Path],
-        attempt: int
-    ) -> Dict[str, Any]:
+        custom_file_path: Path | None,
+        attempt: int,
+    ) -> dict[str, Any]:
         """Process a single HTTP response and decide next action."""
 
-        headers = self._coerce_headers(getattr(response, 'headers', {}))
-        status = getattr(response, 'status', None)
+        headers = self._coerce_headers(getattr(response, "headers", {}))
+        status = getattr(response, "status", None)
         result.status_code = status
-        result.content_type = headers.get('Content-Type', 'unknown')
+        result.content_type = headers.get("Content-Type", "unknown")
         result.headers = headers
 
         if status == 200:
@@ -258,13 +252,13 @@ class HTTPClient:
 
             if content is not None:
                 size_bytes = len(content)
-                if result.content_type and 'json' in result.content_type.lower():
+                if result.content_type and "json" in result.content_type.lower():
                     try:
                         import json
 
-                        text = content.decode('utf-8')
-                        compact = json.dumps(json.loads(text), separators=(',', ':'))
-                        size_bytes = len(compact.encode('utf-8'))
+                        text = content.decode("utf-8")
+                        compact = json.dumps(json.loads(text), separators=(",", ":"))
+                        size_bytes = len(compact.encode("utf-8"))
                     except Exception:
                         size_bytes = len(content)
                 result.size_bytes = size_bytes
@@ -275,7 +269,7 @@ class HTTPClient:
             if save_to_disk and content is not None:
                 file_path = custom_file_path or self._generate_file_path(url, result.content_type)
                 file_path.parent.mkdir(parents=True, exist_ok=True)
-                with open(file_path, 'wb') as f:
+                with open(file_path, "wb") as f:
                     f.write(content)
                 result.file_path = str(file_path)
                 self.logger.info(f"Saved {url} to {file_path} ({len(content)} bytes)")
@@ -289,7 +283,7 @@ class HTTPClient:
             return {"action": "success"}
 
         if status == 429:
-            retry_after = headers.get('Retry-After', '60')
+            retry_after = headers.get("Retry-After", "60")
             try:
                 wait_seconds = int(retry_after)
             except (TypeError, ValueError):
@@ -300,13 +294,9 @@ class HTTPClient:
             self.rate_limiter.block_domain(domain, time.time() + wait_seconds)
             self.logger.warning(f"Rate limited on {url}. Retry after {wait_seconds}s")
 
-            return {
-                "action": "retry",
-                "error": message,
-                "sleep": min(wait_seconds, 120)
-            }
+            return {"action": "retry", "error": message, "sleep": min(wait_seconds, 120)}
 
-        reason = getattr(response, 'reason', '') or ''
+        reason = getattr(response, "reason", "") or ""
         if status is None:
             message = "HTTP error"
         else:
@@ -315,10 +305,8 @@ class HTTPClient:
         result.error = message
 
         if status is not None and status >= 500:
-            backoff = min(2 ** attempt, 30)
-            self.logger.warning(
-                f"Server error {status} on {url}. Retrying in {backoff}s"
-            )
+            backoff = min(2**attempt, 30)
+            self.logger.warning(f"Server error {status} on {url}. Retrying in {backoff}s")
             return {"action": "retry", "error": message, "sleep": backoff}
 
         self.logger.warning(f"Failed to download {url}: {message}")
@@ -360,7 +348,7 @@ class HTTPClient:
 
         return url
 
-    def _generate_file_path(self, url: str, content_type: Optional[str] = None) -> Path:
+    def _generate_file_path(self, url: str, content_type: str | None = None) -> Path:
         """
         Generate file path for downloaded content.
 
@@ -374,32 +362,32 @@ class HTTPClient:
         parsed = urlparse(url)
 
         # Create domain subdirectory
-        domain = parsed.netloc.replace('.', '_')
+        domain = parsed.netloc.replace(".", "_")
         domain = sanitize_filename(domain)
         domain_dir = self.output_dir / domain
         domain_dir.mkdir(exist_ok=True)
 
         # Extract filename from URL path
-        path_parts = parsed.path.strip('/').split('/')
-        filename = path_parts[-1] if path_parts[-1] else 'index'
+        path_parts = parsed.path.strip("/").split("/")
+        filename = path_parts[-1] if path_parts[-1] else "index"
 
         # Add extension if not present
-        if '.' not in filename:
+        if "." not in filename:
             # Try to guess extension from content type
             if content_type:
-                if 'json' in content_type:
-                    filename += '.json'
-                elif 'html' in content_type:
-                    filename += '.html'
-                elif 'xml' in content_type:
-                    filename += '.xml'
-                elif 'image' in content_type:
-                    ext = content_type.split('/')[-1]
-                    filename += f'.{ext}'
+                if "json" in content_type:
+                    filename += ".json"
+                elif "html" in content_type:
+                    filename += ".html"
+                elif "xml" in content_type:
+                    filename += ".xml"
+                elif "image" in content_type:
+                    ext = content_type.split("/")[-1]
+                    filename += f".{ext}"
                 else:
-                    filename += '.txt'
+                    filename += ".txt"
             else:
-                filename += '.dat'
+                filename += ".dat"
 
         # Sanitize filename
         filename = sanitize_filename(filename)
@@ -407,16 +395,13 @@ class HTTPClient:
         # Handle dynamic URLs with query parameters
         if parsed.query:
             url_hash = hashlib.md5(url.encode()).hexdigest()[:8]
-            base_name, ext = filename.rsplit('.', 1) if '.' in filename else (filename, '')
+            base_name, ext = filename.rsplit(".", 1) if "." in filename else (filename, "")
             filename = f"{base_name}_{url_hash}.{ext}" if ext else f"{base_name}_{url_hash}"
 
         return domain_dir / filename
 
     async def download(
-        self,
-        url: str,
-        save_to_disk: bool = True,
-        custom_file_path: Optional[Path] = None
+        self, url: str, save_to_disk: bool = True, custom_file_path: Path | None = None
     ) -> DownloadResult:
         """
         Download a URL with comprehensive error handling and retry logic.
@@ -436,7 +421,7 @@ class HTTPClient:
         processed_url = self._process_url_placeholders(url)
 
         # Validate URL
-        preliminary_domain = urlparse(processed_url).netloc or 'invalid'
+        preliminary_domain = urlparse(processed_url).netloc or "invalid"
         result.domain = preliminary_domain
         try:
             validated_url = validate_url(processed_url)
@@ -444,7 +429,7 @@ class HTTPClient:
             result.domain = domain
         except SecurityError as e:
             result.error = f"Security validation failed: {e}"
-            error_domain = preliminary_domain or 'invalid'
+            error_domain = preliminary_domain or "invalid"
             if error_domain in self.stats["errors_per_domain"]:
                 self.stats["errors_per_domain"][error_domain] += 1
             else:
@@ -497,24 +482,12 @@ class HTTPClient:
                 if use_context:
                     async with response_obj as response:
                         outcome = await self._handle_http_response(
-                            response,
-                            result,
-                            url,
-                            domain,
-                            save_to_disk,
-                            custom_file_path,
-                            attempt
+                            response, result, url, domain, save_to_disk, custom_file_path, attempt
                         )
                 else:
                     response = response_obj
                     outcome = await self._handle_http_response(
-                        response,
-                        result,
-                        url,
-                        domain,
-                        save_to_disk,
-                        custom_file_path,
-                        attempt
+                        response, result, url, domain, save_to_disk, custom_file_path, attempt
                     )
                     await self._finalize_response(response)
 
@@ -533,10 +506,10 @@ class HTTPClient:
                 # Either non-retriable error or out of retries
                 break
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 last_error = f"Request timeout after {self.timeout}s"
                 if attempt < self.retry_attempts:
-                    backoff = min(2 ** attempt, 30)
+                    backoff = min(2**attempt, 30)
                     self.logger.warning(f"Timeout on {url}. Retrying in {backoff}s")
                     await asyncio.sleep(backoff)
                     continue
@@ -545,7 +518,7 @@ class HTTPClient:
             except aiohttp.ClientError as e:
                 last_error = f"HTTP client error: {str(e)}"
                 if attempt < self.retry_attempts:
-                    backoff = min(2 ** attempt, 30)
+                    backoff = min(2**attempt, 30)
                     self.logger.warning(f"Client error on {url}: {e}. Retrying in {backoff}s")
                     await asyncio.sleep(backoff)
                     continue
@@ -572,11 +545,8 @@ class HTTPClient:
         return result
 
     async def download_multiple(
-        self,
-        urls: List[str],
-        save_to_disk: bool = True,
-        max_concurrent: Optional[int] = None
-    ) -> Dict[str, DownloadResult]:
+        self, urls: list[str], save_to_disk: bool = True, max_concurrent: int | None = None
+    ) -> dict[str, DownloadResult]:
         """
         Download multiple URLs concurrently with rate limiting.
 
@@ -594,7 +564,7 @@ class HTTPClient:
         # Create semaphore to limit concurrency
         semaphore = asyncio.Semaphore(max_concurrent or self.max_concurrent)
 
-        async def download_with_semaphore(url: str) -> Tuple[str, DownloadResult]:
+        async def download_with_semaphore(url: str) -> tuple[str, DownloadResult]:
             """Download URL with semaphore for concurrency limiting."""
             async with semaphore:
                 result = await self.download(url, save_to_disk)
@@ -615,7 +585,7 @@ class HTTPClient:
 
         return results
 
-    async def head(self, url: str) -> Tuple[int, Dict[str, str]]:
+    async def head(self, url: str) -> tuple[int, dict[str, str]]:
         """
         Perform HEAD request to get headers without downloading content.
 
@@ -645,13 +615,13 @@ class HTTPClient:
             if use_context:
                 async with response_obj as response:
                     return (
-                        getattr(response, 'status', 0),
-                        self._coerce_headers(getattr(response, 'headers', {}))
+                        getattr(response, "status", 0),
+                        self._coerce_headers(getattr(response, "headers", {})),
                     )
 
             response = response_obj
-            headers = self._coerce_headers(getattr(response, 'headers', {}))
-            status = getattr(response, 'status', 0)
+            headers = self._coerce_headers(getattr(response, "headers", {}))
+            status = getattr(response, "status", 0)
             await self._finalize_response(response)
             return status, headers
 
@@ -670,7 +640,7 @@ class HTTPClient:
         self._session = None
         self._connector = None
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get comprehensive download statistics.
 
@@ -687,18 +657,27 @@ class HTTPClient:
                 "successful": count,
                 "errors": errors,
                 "total": count + errors,
-                "success_rate": round(count / (count + errors) * 100, 1) if (count + errors) > 0 else 0,
+                "success_rate": (
+                    round(count / (count + errors) * 100, 1) if (count + errors) > 0 else 0
+                ),
                 "avg_wait_time": sum(waits) / len(waits) if waits else 0,
                 "max_wait_time": max(waits) if waits else 0,
-                "total_wait_time": sum(waits) if waits else 0
+                "total_wait_time": sum(waits) if waits else 0,
             }
 
         return {
             "total_downloads": self.stats["total_downloads"],
             "total_errors": self.stats["total_errors"],
-            "success_rate": round(self.stats["total_downloads"] /
-                              (self.stats["total_downloads"] + self.stats["total_errors"]) * 100, 1)
-                        if (self.stats["total_downloads"] + self.stats["total_errors"]) > 0 else 0,
+            "success_rate": (
+                round(
+                    self.stats["total_downloads"]
+                    / (self.stats["total_downloads"] + self.stats["total_errors"])
+                    * 100,
+                    1,
+                )
+                if (self.stats["total_downloads"] + self.stats["total_errors"]) > 0
+                else 0
+            ),
             "total_wait_time": self.stats["total_wait_time"],
-            "domain_statistics": domain_stats
+            "domain_statistics": domain_stats,
         }

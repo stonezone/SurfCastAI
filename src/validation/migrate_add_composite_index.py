@@ -17,12 +17,13 @@ Performance improvement:
 Usage:
     python src/validation/migrate_add_composite_index.py
 """
-import sqlite3
-from pathlib import Path
-import logging
-import sys
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+import logging
+import sqlite3
+import sys
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -47,10 +48,12 @@ def add_composite_index(db_path: str) -> None:
     try:
         # Check if index already exists
         logger.info("Checking if composite index already exists...")
-        result = conn.execute("""
+        result = conn.execute(
+            """
             SELECT name FROM sqlite_master
             WHERE type='index' AND name='idx_predictions_shore_time'
-        """).fetchone()
+        """
+        ).fetchone()
 
         if result:
             logger.info("✓ Composite index 'idx_predictions_shore_time' already exists")
@@ -59,34 +62,40 @@ def add_composite_index(db_path: str) -> None:
 
         # Create composite index
         logger.info("Creating composite index on (shore, valid_time)...")
-        conn.execute("""
+        conn.execute(
+            """
             CREATE INDEX idx_predictions_shore_time
             ON predictions(shore, valid_time)
-        """)
+        """
+        )
         conn.commit()
         logger.info("✓ Index creation committed")
 
         # Verify index was created
         logger.info("Verifying index creation...")
-        result = conn.execute("""
+        result = conn.execute(
+            """
             SELECT name FROM sqlite_master
             WHERE type='index' AND name='idx_predictions_shore_time'
-        """).fetchone()
+        """
+        ).fetchone()
 
         if result:
             logger.info("✓ Composite index 'idx_predictions_shore_time' created successfully")
 
             # Show all indexes on predictions table
             logger.info("\nAll indexes on predictions table:")
-            indexes = conn.execute("""
+            indexes = conn.execute(
+                """
                 SELECT name, sql FROM sqlite_master
                 WHERE type='index' AND tbl_name='predictions'
                 ORDER BY name
-            """).fetchall()
+            """
+            ).fetchall()
 
             for idx_name, idx_sql in indexes:
                 # Skip auto-generated indexes (sqlite_autoindex_*)
-                if not idx_name.startswith('sqlite_'):
+                if not idx_name.startswith("sqlite_"):
                     logger.info(f"  - {idx_name}")
                     if idx_sql:
                         logger.info(f"    {idx_sql}")
@@ -99,7 +108,7 @@ def add_composite_index(db_path: str) -> None:
         raise
     finally:
         conn.close()
-        logger.info(f"\nDatabase connection closed")
+        logger.info("\nDatabase connection closed")
 
 
 if __name__ == "__main__":
@@ -111,7 +120,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--db-path",
         default="data/validation.db",
-        help="Path to validation database (default: data/validation.db)"
+        help="Path to validation database (default: data/validation.db)",
     )
 
     args = parser.parse_args()
@@ -125,7 +134,7 @@ if __name__ == "__main__":
         logger.info("\n" + "=" * 70)
         logger.info("Migration completed successfully!")
         logger.info("=" * 70)
-    except Exception as e:
+    except Exception:
         logger.error("\n" + "=" * 70)
         logger.error("Migration failed!")
         logger.error("=" * 70)

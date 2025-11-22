@@ -11,13 +11,14 @@ Tests security validations against:
 import tempfile
 import zipfile
 from pathlib import Path
+
 import pytest
 
 from src.core.bundle_manager import (
-    BundleManager,
     MAX_ARCHIVE_FILE_SIZE,
     MAX_ARCHIVE_TOTAL_SIZE,
-    MAX_COMPRESSION_RATIO
+    MAX_COMPRESSION_RATIO,
+    BundleManager,
 )
 from src.utils.exceptions import SecurityError
 
@@ -40,7 +41,7 @@ class TestSecureArchiveExtraction:
         """Test that valid archives extract successfully."""
         # Create a valid test archive
         archive_path = temp_dir / "valid.zip"
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             zf.writestr("test.txt", "Hello, World!")
             zf.writestr("subdir/file.txt", "Test content")
 
@@ -57,7 +58,7 @@ class TestSecureArchiveExtraction:
         """Test rejection of absolute paths in archive."""
         # Create archive with absolute path
         archive_path = temp_dir / "malicious.zip"
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             # Try to write to an absolute path
             zf.writestr("/etc/passwd", "malicious content")
 
@@ -70,7 +71,7 @@ class TestSecureArchiveExtraction:
         """Test rejection of parent directory traversal."""
         # Create archive with parent directory traversal
         archive_path = temp_dir / "malicious.zip"
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             # Try to escape the extraction directory
             zf.writestr("../../../etc/passwd", "malicious content")
 
@@ -84,7 +85,7 @@ class TestSecureArchiveExtraction:
         # Create archive with dot segments in path
         archive_path = temp_dir / "malicious.zip"
 
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             # Try to escape using current/parent directory references
             zf.writestr("./../../etc/passwd", "malicious content")
 
@@ -101,7 +102,7 @@ class TestSecureArchiveExtraction:
         # Create a file larger than the limit
         large_content = "X" * (MAX_ARCHIVE_FILE_SIZE + 1)
 
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             zf.writestr("large.txt", large_content)
 
         # Should raise SecurityError
@@ -121,7 +122,7 @@ class TestSecureArchiveExtraction:
         num_files = (MAX_ARCHIVE_TOTAL_SIZE // file_size) + 1  # Enough to exceed limit
         content = "X" * file_size
 
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             for i in range(num_files):
                 zf.writestr(f"file{i}.txt", content)
 
@@ -139,12 +140,12 @@ class TestSecureArchiveExtraction:
         # This will compress to a very small size but expand to a large size
         content = "0" * 10000000  # 10MB of zeros - compresses very well
 
-        with zipfile.ZipFile(archive_path, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+        with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
             # Write with maximum compression
             zf.writestr("bomb.txt", content, compress_type=zipfile.ZIP_DEFLATED)
 
         # Check if compression ratio exceeds limit
-        with zipfile.ZipFile(archive_path, 'r') as zf:
+        with zipfile.ZipFile(archive_path, "r") as zf:
             info = zf.infolist()[0]
             actual_ratio = info.file_size / info.compress_size
 
@@ -166,7 +167,7 @@ class TestSecureArchiveExtraction:
         bundle_id = "malicious-bundle"
         archive_path = archive_dir / f"{bundle_id}.zip"
 
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             # Add file with path traversal
             zf.writestr("../../../etc/passwd", "malicious")
 
@@ -199,7 +200,7 @@ class TestSecureArchiveExtraction:
         # Create archive with multiple files, all under limits
         archive_path = temp_dir / "multi.zip"
 
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             for i in range(10):
                 zf.writestr(f"file{i}.txt", f"Content {i}")
 
@@ -215,7 +216,7 @@ class TestSecureArchiveExtraction:
         """Test handling of empty archives."""
         # Create empty archive
         archive_path = temp_dir / "empty.zip"
-        with zipfile.ZipFile(archive_path, 'w'):
+        with zipfile.ZipFile(archive_path, "w"):
             pass
 
         # Should extract successfully (no files to validate)
@@ -227,7 +228,7 @@ class TestSecureArchiveExtraction:
         # Create archive with only directory entries
         archive_path = temp_dir / "dirs.zip"
 
-        with zipfile.ZipFile(archive_path, 'w') as zf:
+        with zipfile.ZipFile(archive_path, "w") as zf:
             zf.writestr("dir1/", "")
             zf.writestr("dir1/dir2/", "")
 

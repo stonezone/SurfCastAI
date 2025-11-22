@@ -9,14 +9,15 @@ Reference: CONSOLIDATION_EXECUTION_PLAN.md Phase 3, Task 3.1
 """
 
 import logging
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 
 
 class SourceTier(Enum):
     """Source reliability tiers based on data quality and authority."""
+
     TIER_1 = 1.0  # Official NOAA/Government
     TIER_2 = 0.9  # Research/Academic
     TIER_3 = 0.7  # International Government
@@ -27,15 +28,17 @@ class SourceTier(Enum):
 @dataclass
 class ScoringWeights:
     """Weights for different scoring factors."""
-    source_tier: float = 0.50      # Base reliability from tier
-    data_freshness: float = 0.20   # Recency of data
-    completeness: float = 0.20     # Fields present vs expected
+
+    source_tier: float = 0.50  # Base reliability from tier
+    data_freshness: float = 0.20  # Recency of data
+    completeness: float = 0.20  # Fields present vs expected
     historical_accuracy: float = 0.10  # From validation results
 
 
 @dataclass
 class SourceScore:
     """Complete scoring information for a data source."""
+
     source_name: str
     overall_score: float
     tier_score: float
@@ -43,7 +46,7 @@ class SourceScore:
     completeness_score: float
     accuracy_score: float
     tier: SourceTier
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class SourceScorer:
@@ -62,90 +65,87 @@ class SourceScorer:
     """
 
     # Source tier mapping: source_name -> SourceTier
-    SOURCE_TIER_MAP: Dict[str, SourceTier] = {
+    SOURCE_TIER_MAP: dict[str, SourceTier] = {
         # Tier 1 (1.0) - Official NOAA/Government
-        'ndbc': SourceTier.TIER_1,
-        'ndbc_buoy': SourceTier.TIER_1,
-        'noaa_buoy': SourceTier.TIER_1,
-        
+        "ndbc": SourceTier.TIER_1,
+        "ndbc_buoy": SourceTier.TIER_1,
+        "noaa_buoy": SourceTier.TIER_1,
         # Specific NDBC Hawaii buoy stations (Tier 1 - Government/Scientific)
-        '51001': SourceTier.TIER_1,  # NW Hawaii (24.4N 162.3W)
-        '51002': SourceTier.TIER_1,  # SW Hawaii (17.2N 157.8W)
-        '51003': SourceTier.TIER_1,  # West Hawaii (19.2N 160.7W)
-        '51004': SourceTier.TIER_1,  # SE Hawaii (17.5N 152.4W)
-        '51101': SourceTier.TIER_1,  # Hanalei, Kauai (22.1N 159.4W)
-        '51201': SourceTier.TIER_1,  # Waimea Bay, Oahu (21.7N 158.1W)
-        '51202': SourceTier.TIER_1,  # Mokapu Point, Oahu (21.4N 157.8W)
-        '51207': SourceTier.TIER_1,  # Kauai (22.0N 160.2W)
-        '51211': SourceTier.TIER_1,  # Hilo, Hawaii (19.7N 154.9W)
-        '51212': SourceTier.TIER_1,  # Kaneohe, Oahu (21.5N 157.8W)
-        
-        'tgftp': SourceTier.TIER_1,
-        'nws': SourceTier.TIER_1,
-        'opc': SourceTier.TIER_1,
-        'ocean_prediction_center': SourceTier.TIER_1,
-        'nhc': SourceTier.TIER_1,
-        'national_hurricane_center': SourceTier.TIER_1,
-        'noaa': SourceTier.TIER_1,
-
+        "51001": SourceTier.TIER_1,  # NW Hawaii (24.4N 162.3W)
+        "51002": SourceTier.TIER_1,  # SW Hawaii (17.2N 157.8W)
+        "51003": SourceTier.TIER_1,  # West Hawaii (19.2N 160.7W)
+        "51004": SourceTier.TIER_1,  # SE Hawaii (17.5N 152.4W)
+        "51101": SourceTier.TIER_1,  # Hanalei, Kauai (22.1N 159.4W)
+        "51201": SourceTier.TIER_1,  # Waimea Bay, Oahu (21.7N 158.1W)
+        "51202": SourceTier.TIER_1,  # Mokapu Point, Oahu (21.4N 157.8W)
+        "51207": SourceTier.TIER_1,  # Kauai (22.0N 160.2W)
+        "51211": SourceTier.TIER_1,  # Hilo, Hawaii (19.7N 154.9W)
+        "51212": SourceTier.TIER_1,  # Kaneohe, Oahu (21.5N 157.8W)
+        "tgftp": SourceTier.TIER_1,
+        "nws": SourceTier.TIER_1,
+        "opc": SourceTier.TIER_1,
+        "ocean_prediction_center": SourceTier.TIER_1,
+        "nhc": SourceTier.TIER_1,
+        "national_hurricane_center": SourceTier.TIER_1,
+        "noaa": SourceTier.TIER_1,
         # Tier 2 (0.9) - Research/Academic
-        'pacioos': SourceTier.TIER_2,
-        'cdip': SourceTier.TIER_2,
-        'cdip_buoy': SourceTier.TIER_2,
-        'swan': SourceTier.TIER_2,
-        'wavewatch3': SourceTier.TIER_2,
-        'ww3': SourceTier.TIER_2,
-
+        "pacioos": SourceTier.TIER_2,
+        "cdip": SourceTier.TIER_2,
+        "cdip_buoy": SourceTier.TIER_2,
+        "swan": SourceTier.TIER_2,
+        "wavewatch3": SourceTier.TIER_2,
+        "ww3": SourceTier.TIER_2,
         # Tier 3 (0.7) - International Government
-        'ecmwf': SourceTier.TIER_3,
-        'bom': SourceTier.TIER_3,
-        'bureau_of_meteorology': SourceTier.TIER_3,
-        'ukmo': SourceTier.TIER_3,
-        'jma': SourceTier.TIER_3,
-
+        "ecmwf": SourceTier.TIER_3,
+        "bom": SourceTier.TIER_3,
+        "bureau_of_meteorology": SourceTier.TIER_3,
+        "ukmo": SourceTier.TIER_3,
+        "jma": SourceTier.TIER_3,
         # Tier 4 (0.5) - Commercial APIs
-        'stormglass': SourceTier.TIER_4,
-        'windy': SourceTier.TIER_4,
-        'open_meteo': SourceTier.TIER_4,
-        'openmeteo': SourceTier.TIER_4,
-        'weatherapi': SourceTier.TIER_4,
-
+        "stormglass": SourceTier.TIER_4,
+        "windy": SourceTier.TIER_4,
+        "open_meteo": SourceTier.TIER_4,
+        "openmeteo": SourceTier.TIER_4,
+        "weatherapi": SourceTier.TIER_4,
         # Tier 5 (0.3) - Surf Forecasting Sites
-        'surfline': SourceTier.TIER_5,
-        'magicseaweed': SourceTier.TIER_5,
-        'swellnet': SourceTier.TIER_5,
-        'windfinder': SourceTier.TIER_5,
+        "surfline": SourceTier.TIER_5,
+        "magicseaweed": SourceTier.TIER_5,
+        "swellnet": SourceTier.TIER_5,
+        "windfinder": SourceTier.TIER_5,
     }
 
     # Expected fields by data type for completeness scoring
-    EXPECTED_FIELDS: Dict[str, List[str]] = {
-        'buoy': [
-            'wave_height', 'dominant_period', 'wave_direction',
-            'wind_speed', 'wind_direction', 'timestamp'
+    EXPECTED_FIELDS: dict[str, list[str]] = {
+        "buoy": [
+            "wave_height",
+            "dominant_period",
+            "wave_direction",
+            "wind_speed",
+            "wind_direction",
+            "timestamp",
         ],
-        'weather': [
-            'temperature', 'wind_speed', 'wind_direction',
-            'forecast_periods', 'timestamp'
+        "weather": ["temperature", "wind_speed", "wind_direction", "forecast_periods", "timestamp"],
+        "model": [
+            "wave_height",
+            "wave_period",
+            "wave_direction",
+            "run_time",
+            "forecast_hour",
+            "points",
         ],
-        'model': [
-            'wave_height', 'wave_period', 'wave_direction',
-            'run_time', 'forecast_hour', 'points'
-        ],
-        'default': [
-            'timestamp', 'latitude', 'longitude'
-        ]
+        "default": ["timestamp", "latitude", "longitude"],
     }
 
-    def __init__(self, weights: Optional[ScoringWeights] = None):
+    def __init__(self, weights: ScoringWeights | None = None):
         """
         Initialize the source scorer.
 
         Args:
             weights: Optional custom scoring weights
         """
-        self.logger = logging.getLogger('processing.source_scorer')
+        self.logger = logging.getLogger("processing.source_scorer")
         self.weights = weights or ScoringWeights()
-        self._validation_cache: Dict[str, float] = {}
+        self._validation_cache: dict[str, float] = {}
 
         self.logger.info(
             f"SourceScorer initialized with weights: "
@@ -155,7 +155,7 @@ class SourceScorer:
             f"accuracy={self.weights.historical_accuracy}"
         )
 
-    def score_sources(self, fusion_data: Dict[str, Any]) -> Dict[str, SourceScore]:
+    def score_sources(self, fusion_data: dict[str, Any]) -> dict[str, SourceScore]:
         """
         Score all data sources in fusion input.
 
@@ -168,9 +168,9 @@ class SourceScorer:
         scores = {}
 
         # Score buoy data sources
-        for buoy_data in fusion_data.get('buoy_data', []):
-            source_id = self._extract_source_id(buoy_data, 'buoy')
-            score = self.score_single_source(source_id, buoy_data, 'buoy')
+        for buoy_data in fusion_data.get("buoy_data", []):
+            source_id = self._extract_source_id(buoy_data, "buoy")
+            score = self.score_single_source(source_id, buoy_data, "buoy")
             scores[source_id] = score
             self.logger.info(
                 f"Buoy source '{source_id}': {score.overall_score:.3f} "
@@ -179,9 +179,9 @@ class SourceScorer:
             )
 
         # Score weather data sources
-        for weather_data in fusion_data.get('weather_data', []):
-            source_id = self._extract_source_id(weather_data, 'weather')
-            score = self.score_single_source(source_id, weather_data, 'weather')
+        for weather_data in fusion_data.get("weather_data", []):
+            source_id = self._extract_source_id(weather_data, "weather")
+            score = self.score_single_source(source_id, weather_data, "weather")
             scores[source_id] = score
             self.logger.info(
                 f"Weather source '{source_id}': {score.overall_score:.3f} "
@@ -190,9 +190,9 @@ class SourceScorer:
             )
 
         # Score model data sources
-        for model_data in fusion_data.get('model_data', []):
-            source_id = self._extract_source_id(model_data, 'model')
-            score = self.score_single_source(source_id, model_data, 'model')
+        for model_data in fusion_data.get("model_data", []):
+            source_id = self._extract_source_id(model_data, "model")
+            score = self.score_single_source(source_id, model_data, "model")
             scores[source_id] = score
             self.logger.info(
                 f"Model source '{source_id}': {score.overall_score:.3f} "
@@ -204,10 +204,7 @@ class SourceScorer:
         return scores
 
     def score_single_source(
-        self,
-        source_name: str,
-        data: Any,
-        data_type: str = 'default'
+        self, source_name: str, data: Any, data_type: str = "default"
     ) -> SourceScore:
         """
         Calculate reliability score for a single data source.
@@ -228,10 +225,10 @@ class SourceScorer:
 
         # Calculate weighted overall score
         overall_score = (
-            tier_score * self.weights.source_tier +
-            freshness_score * self.weights.data_freshness +
-            completeness_score * self.weights.completeness +
-            accuracy_score * self.weights.historical_accuracy
+            tier_score * self.weights.source_tier
+            + freshness_score * self.weights.data_freshness
+            + completeness_score * self.weights.completeness
+            + accuracy_score * self.weights.historical_accuracy
         )
 
         # Determine tier
@@ -246,14 +243,14 @@ class SourceScorer:
             accuracy_score=accuracy_score,
             tier=tier,
             metadata={
-                'data_type': data_type,
-                'weights': {
-                    'tier': self.weights.source_tier,
-                    'freshness': self.weights.data_freshness,
-                    'completeness': self.weights.completeness,
-                    'accuracy': self.weights.historical_accuracy
-                }
-            }
+                "data_type": data_type,
+                "weights": {
+                    "tier": self.weights.source_tier,
+                    "freshness": self.weights.data_freshness,
+                    "completeness": self.weights.completeness,
+                    "accuracy": self.weights.historical_accuracy,
+                },
+            },
         )
 
     def get_tier_score(self, source_name: str) -> float:
@@ -280,7 +277,7 @@ class SourceScorer:
             SourceTier enum value
         """
         # Normalize source name for matching
-        normalized = source_name.lower().replace('-', '_').replace(' ', '_')
+        normalized = source_name.lower().replace("-", "_").replace(" ", "_")
 
         # Check for exact match
         if normalized in self.SOURCE_TIER_MAP:
@@ -292,9 +289,7 @@ class SourceScorer:
                 return tier
 
         # Default to mid-tier if unknown
-        self.logger.warning(
-            f"Unknown source '{source_name}', defaulting to Tier 4 (Commercial)"
-        )
+        self.logger.warning(f"Unknown source '{source_name}', defaulting to Tier 4 (Commercial)")
         return SourceTier.TIER_4
 
     def calculate_freshness(self, data: Any) -> float:
@@ -323,8 +318,8 @@ class SourceScorer:
             # Parse timestamp
             if isinstance(timestamp, str):
                 # Handle various timestamp formats
-                if timestamp.endswith('Z'):
-                    timestamp = timestamp.replace('Z', '+00:00')
+                if timestamp.endswith("Z"):
+                    timestamp = timestamp.replace("Z", "+00:00")
                 dt = datetime.fromisoformat(timestamp)
             elif isinstance(timestamp, datetime):
                 dt = timestamp
@@ -334,18 +329,16 @@ class SourceScorer:
 
             # Ensure timezone awareness
             if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
+                dt = dt.replace(tzinfo=UTC)
 
             # Calculate age in hours
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             age_hours = (now - dt).total_seconds() / 3600
 
             # Calculate freshness score (1.0 for recent, 0.0 after 24 hours)
             freshness = max(0.0, min(1.0, 1.0 - (age_hours / 24.0)))
 
-            self.logger.debug(
-                f"Data age: {age_hours:.1f}h, freshness: {freshness:.3f}"
-            )
+            self.logger.debug(f"Data age: {age_hours:.1f}h, freshness: {freshness:.3f}")
 
             return freshness
 
@@ -353,7 +346,7 @@ class SourceScorer:
             self.logger.warning(f"Error calculating freshness: {e}")
             return 0.5  # Neutral score on error
 
-    def calculate_completeness(self, data: Any, data_type: str = 'default') -> float:
+    def calculate_completeness(self, data: Any, data_type: str = "default") -> float:
         """
         Calculate data completeness score.
 
@@ -368,10 +361,7 @@ class SourceScorer:
         """
         try:
             # Get expected fields for this data type
-            expected_fields = self.EXPECTED_FIELDS.get(
-                data_type,
-                self.EXPECTED_FIELDS['default']
-            )
+            expected_fields = self.EXPECTED_FIELDS.get(data_type, self.EXPECTED_FIELDS["default"])
 
             # Extract fields from data
             present_fields = self._extract_fields(data)
@@ -418,8 +408,7 @@ class SourceScorer:
         default_accuracy = 0.7
 
         self.logger.debug(
-            f"No historical accuracy data for '{source_name}', "
-            f"using default {default_accuracy}"
+            f"No historical accuracy data for '{source_name}', " f"using default {default_accuracy}"
         )
 
         return default_accuracy
@@ -445,15 +434,29 @@ class SourceScorer:
         """Extract source identifier from data object."""
         if isinstance(data, dict):
             # Try common source identifier fields
-            for field in ['source', 'source_name', 'provider', 'station_id',
-                         'model_id', 'buoy_id', 'name']:
+            for field in [
+                "source",
+                "source_name",
+                "provider",
+                "station_id",
+                "model_id",
+                "buoy_id",
+                "name",
+            ]:
                 if field in data and data[field]:
                     return str(data[field])
             return f"{data_type}_unknown"
 
         # Try object attributes
-        for attr in ['source', 'source_name', 'provider', 'station_id',
-                    'model_id', 'buoy_id', 'name']:
+        for attr in [
+            "source",
+            "source_name",
+            "provider",
+            "station_id",
+            "model_id",
+            "buoy_id",
+            "name",
+        ]:
             if hasattr(data, attr):
                 value = getattr(data, attr)
                 if value:
@@ -461,50 +464,66 @@ class SourceScorer:
 
         return f"{data_type}_unknown"
 
-    def _extract_timestamp(self, data: Any) -> Optional[str]:
+    def _extract_timestamp(self, data: Any) -> str | None:
         """Extract timestamp from data object or dictionary."""
         if isinstance(data, dict):
             # Try common timestamp fields
-            for field in ['timestamp', 'time', 'date', 'issued', 'run_time',
-                         'observation_time', 'forecast_time', 'generated_time']:
+            for field in [
+                "timestamp",
+                "time",
+                "date",
+                "issued",
+                "run_time",
+                "observation_time",
+                "forecast_time",
+                "generated_time",
+            ]:
                 if field in data and data[field]:
                     return data[field]
 
             # Check nested structures
-            if 'metadata' in data and isinstance(data['metadata'], dict):
-                for field in ['timestamp', 'time', 'date']:
-                    if field in data['metadata']:
-                        return data['metadata'][field]
+            if "metadata" in data and isinstance(data["metadata"], dict):
+                for field in ["timestamp", "time", "date"]:
+                    if field in data["metadata"]:
+                        return data["metadata"][field]
 
             # Check observations array
-            if 'observations' in data and isinstance(data['observations'], list):
-                if data['observations'] and isinstance(data['observations'][0], dict):
-                    for field in ['timestamp', 'time', 'date']:
-                        if field in data['observations'][0]:
-                            return data['observations'][0][field]
+            if "observations" in data and isinstance(data["observations"], list):
+                if data["observations"] and isinstance(data["observations"][0], dict):
+                    for field in ["timestamp", "time", "date"]:
+                        if field in data["observations"][0]:
+                            return data["observations"][0][field]
 
             return None
 
         # Try object attributes
-        for attr in ['timestamp', 'time', 'date', 'issued', 'run_time',
-                    'observation_time', 'forecast_time', 'generated_time']:
+        for attr in [
+            "timestamp",
+            "time",
+            "date",
+            "issued",
+            "run_time",
+            "observation_time",
+            "forecast_time",
+            "generated_time",
+        ]:
             if hasattr(data, attr):
                 value = getattr(data, attr)
                 if value:
                     return value
 
         # Check nested objects
-        if hasattr(data, 'metadata') and hasattr(data.metadata, 'timestamp'):
+        if hasattr(data, "metadata") and hasattr(data.metadata, "timestamp"):
             return data.metadata.timestamp
 
-        if hasattr(data, 'observations') and data.observations:
+        if hasattr(data, "observations") and data.observations:
             first_obs = data.observations[0]
-            if hasattr(first_obs, 'timestamp'):
+            if hasattr(first_obs, "timestamp"):
                 return first_obs.timestamp
 
         return None
 
-    def _extract_fields(self, data: Any) -> Dict[str, Any]:
+    def _extract_fields(self, data: Any) -> dict[str, Any]:
         """Extract all fields from data object or dictionary."""
         if isinstance(data, dict):
             return data
@@ -512,7 +531,7 @@ class SourceScorer:
         # Convert object to dictionary
         fields = {}
         for attr in dir(data):
-            if not attr.startswith('_'):
+            if not attr.startswith("_"):
                 try:
                     value = getattr(data, attr)
                     if not callable(value):

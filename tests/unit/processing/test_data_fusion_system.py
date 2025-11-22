@@ -2,23 +2,23 @@
 Unit tests for the DataFusionSystem.
 """
 
-import unittest
-from unittest.mock import MagicMock, patch
 import json
-from pathlib import Path
-import sys
 import os
+import sys
+import unittest
 from datetime import datetime, timedelta
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 # Add src directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
 
+from src.core.config import Config
 from src.processing.data_fusion_system import DataFusionSystem
 from src.processing.models.buoy_data import BuoyData, BuoyObservation
-from src.processing.models.weather_data import WeatherData, WeatherPeriod
+from src.processing.models.swell_event import SwellComponent, SwellEvent, SwellForecast
 from src.processing.models.wave_model import ModelData, ModelForecast, ModelPoint
-from src.processing.models.swell_event import SwellEvent, SwellComponent, SwellForecast
-from src.core.config import Config
+from src.processing.models.weather_data import WeatherData, WeatherPeriod
 
 
 class TestDataFusionSystem(unittest.TestCase):
@@ -43,10 +43,10 @@ class TestDataFusionSystem(unittest.TestCase):
                     dominant_period=12.0,
                     wave_direction=315,
                     wind_speed=15.0,
-                    wind_direction=45
+                    wind_direction=45,
                 )
             ],
-            metadata={}
+            metadata={},
         )
 
         # Sample weather data
@@ -63,17 +63,17 @@ class TestDataFusionSystem(unittest.TestCase):
                     wind_speed=5,
                     wind_speed_unit="m/s",
                     wind_direction=45,
-                    short_forecast="Partly Sunny"
+                    short_forecast="Partly Sunny",
                 )
             ],
             metadata={
                 "wind_analysis": {
                     "shore_impacts": {
                         "north_shore": {"overall_rating": 0.8},
-                        "south_shore": {"overall_rating": 0.3}
+                        "south_shore": {"overall_rating": 0.3},
                     }
                 }
-            }
+            },
         )
 
         # Sample model data
@@ -91,9 +91,9 @@ class TestDataFusionSystem(unittest.TestCase):
                             longitude=-158.1,
                             wave_height=3.0,
                             wave_period=14.0,
-                            wave_direction=320
+                            wave_direction=320,
                         )
-                    ]
+                    ],
                 )
             ],
             metadata={
@@ -105,21 +105,18 @@ class TestDataFusionSystem(unittest.TestCase):
                         "peak_period": 14.0,
                         "peak_direction": 320,
                         "significance": 0.7,
-                        "hawaii_scale": 19.7
+                        "hawaii_scale": 19.7,
                     }
                 ]
-            }
+            },
         )
 
         # Sample fusion input data
         self.sample_fusion_data = {
-            "metadata": {
-                "forecast_id": "test_forecast",
-                "region": "hawaii"
-            },
+            "metadata": {"forecast_id": "test_forecast", "region": "hawaii"},
             "buoy_data": [self.sample_buoy_data],
             "weather_data": [self.sample_weather_data],
-            "model_data": [self.sample_model_data]
+            "model_data": [self.sample_model_data],
         }
 
     def test_validate_valid_data(self):
@@ -155,13 +152,15 @@ class TestDataFusionSystem(unittest.TestCase):
         self.assertEqual(forecast.forecast_id, "test_forecast", "Forecast ID should match input")
 
         # Check locations
-        self.assertGreaterEqual(len(forecast.locations), 4, "Should have at least 4 Hawaii locations")
+        self.assertGreaterEqual(
+            len(forecast.locations), 4, "Should have at least 4 Hawaii locations"
+        )
 
         # Check swell events
         self.assertGreaterEqual(len(forecast.swell_events), 1, "Should have at least 1 swell event")
 
         # Check metadata
-        self.assertIn('confidence', forecast.metadata, "Should have confidence metadata")
+        self.assertIn("confidence", forecast.metadata, "Should have confidence metadata")
 
     def test_extract_buoy_data(self):
         """Test buoy data extraction."""
@@ -199,73 +198,70 @@ class TestDataFusionSystem(unittest.TestCase):
         self.assertIn("model", sources, "Should include model events")
 
     def test_integrate_altimetry_metadata(self):
-        forecast = SwellForecast(forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={})
+        forecast = SwellForecast(
+            forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={}
+        )
         entries = [
             {
-                'file_path': '/tmp/altimetry.png',
-                'description': 'SSH anomaly',
-                'source_url': 'https://example.com/alt.png',
-                'type': 'image'
+                "file_path": "/tmp/altimetry.png",
+                "description": "SSH anomaly",
+                "source_url": "https://example.com/alt.png",
+                "type": "image",
             }
         ]
 
         self.fusion_system._integrate_altimetry_data(forecast, entries)
-        self.assertIn('altimetry', forecast.metadata)
-        self.assertEqual(forecast.metadata['altimetry'][0]['file_path'], '/tmp/altimetry.png')
+        self.assertIn("altimetry", forecast.metadata)
+        self.assertEqual(forecast.metadata["altimetry"][0]["file_path"], "/tmp/altimetry.png")
 
     def test_integrate_nearshore_metadata(self):
-        forecast = SwellForecast(forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={})
+        forecast = SwellForecast(
+            forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={}
+        )
         entries = [
             {
-                'station_id': 'hanalei_225',
-                'station_name': 'Hanalei',
-                'significant_height_m': 2.4,
-                'peak_period_s': 14.8,
-                'file_path': '/tmp/hanalei.json'
+                "station_id": "hanalei_225",
+                "station_name": "Hanalei",
+                "significant_height_m": 2.4,
+                "peak_period_s": 14.8,
+                "file_path": "/tmp/hanalei.json",
             }
         ]
 
         self.fusion_system._integrate_nearshore_data(forecast, entries)
-        self.assertIn('nearshore_buoys', forecast.metadata)
-        self.assertEqual(forecast.metadata['nearshore_buoys'][0]['station_id'], 'hanalei_225')
+        self.assertIn("nearshore_buoys", forecast.metadata)
+        self.assertEqual(forecast.metadata["nearshore_buoys"][0]["station_id"], "hanalei_225")
 
     def test_integrate_upper_air_metadata(self):
-        forecast = SwellForecast(forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={})
+        forecast = SwellForecast(
+            forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={}
+        )
         entries = [
-            {
-                'analysis_level': '250',
-                'product_type': 'jet_stream',
-                'source_id': 'wpc_250mb'
-            }
+            {"analysis_level": "250", "product_type": "jet_stream", "source_id": "wpc_250mb"}
         ]
 
         self.fusion_system._integrate_upper_air_data(forecast, entries)
-        self.assertIn('upper_air', forecast.metadata)
-        self.assertIn('upper_air_summary', forecast.metadata)
-        self.assertIn('250', forecast.metadata['upper_air_summary'])
+        self.assertIn("upper_air", forecast.metadata)
+        self.assertIn("upper_air_summary", forecast.metadata)
+        self.assertIn("250", forecast.metadata["upper_air_summary"])
 
     def test_integrate_climatology_metadata(self):
-        forecast = SwellForecast(forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={})
+        forecast = SwellForecast(
+            forecast_id="test", generated_time="2025-10-16T12:00:00Z", metadata={}
+        )
         entries = [
-            {
-                'source_id': 'snn_nsstat10',
-                'format': 'text',
-                'file_path': '/tmp/nsstat10.txt'
-            }
+            {"source_id": "snn_nsstat10", "format": "text", "file_path": "/tmp/nsstat10.txt"}
         ]
 
         self.fusion_system._integrate_climatology_data(forecast, entries)
-        self.assertIn('climatology', forecast.metadata)
-        self.assertIn('climatology_summary', forecast.metadata)
-        self.assertIn('snn_nsstat10', forecast.metadata['climatology_summary'])
+        self.assertIn("climatology", forecast.metadata)
+        self.assertIn("climatology_summary", forecast.metadata)
+        self.assertIn("snn_nsstat10", forecast.metadata["climatology_summary"])
 
     def test_calculate_shore_impacts(self):
         """Test shore impact calculation."""
         # Create a test forecast
-        forecast = SwellForecast(
-            forecast_id="test",
-            generated_time=datetime.now().isoformat()
-        )
+        forecast = SwellForecast(forecast_id="test", generated_time=datetime.now().isoformat())
 
         # Add Hawaii locations
         self.fusion_system._add_hawaii_locations(forecast)
@@ -277,7 +273,7 @@ class TestDataFusionSystem(unittest.TestCase):
             peak_time=datetime.now().isoformat(),
             primary_direction=315,  # NW swell (good for North Shore)
             significance=0.7,
-            hawaii_scale=15.0
+            hawaii_scale=15.0,
         )
         forecast.swell_events.append(event)
 
@@ -288,21 +284,19 @@ class TestDataFusionSystem(unittest.TestCase):
         north_shore = next(l for l in forecast.locations if l.shore.lower() == "north shore")
         south_shore = next(l for l in forecast.locations if l.shore.lower() == "south shore")
 
-        self.assertIn('overall_quality', north_shore.metadata)
-        self.assertIn('overall_quality', south_shore.metadata)
+        self.assertIn("overall_quality", north_shore.metadata)
+        self.assertIn("overall_quality", south_shore.metadata)
 
-        north_quality = north_shore.metadata['overall_quality']
-        south_quality = south_shore.metadata['overall_quality']
+        north_quality = north_shore.metadata["overall_quality"]
+        south_quality = south_shore.metadata["overall_quality"]
 
-        self.assertGreater(north_quality, south_quality,
-                          "North Shore should have higher quality for NW swell")
+        self.assertGreater(
+            north_quality, south_quality, "North Shore should have higher quality for NW swell"
+        )
 
     def test_calculate_confidence_scores(self):
         """Test confidence score calculation."""
-        forecast = SwellForecast(
-            forecast_id="test",
-            generated_time=datetime.now().isoformat()
-        )
+        forecast = SwellForecast(forecast_id="test", generated_time=datetime.now().isoformat())
 
         buoy_data = self.fusion_system._extract_buoy_data(self.sample_fusion_data)
         weather_data = self.fusion_system._extract_weather_data(self.sample_fusion_data)
@@ -312,29 +306,35 @@ class TestDataFusionSystem(unittest.TestCase):
             forecast, buoy_data, weather_data, model_data
         )
 
-        self.assertIn('confidence', metadata, "Should have confidence metadata")
-        self.assertIn('overall_score', metadata['confidence'], "Should have overall score")
-        self.assertIsInstance(metadata['confidence']['overall_score'], float,
-                             "Overall score should be a float")
+        self.assertIn("confidence", metadata, "Should have confidence metadata")
+        self.assertIn("overall_score", metadata["confidence"], "Should have overall score")
+        self.assertIsInstance(
+            metadata["confidence"]["overall_score"], float, "Overall score should be a float"
+        )
 
     def test_convert_to_hawaii_scale(self):
         """Test Hawaiian scale conversion."""
         # Test various wave heights
         test_cases = [
-            (1.0, 6.56),   # 1m ≈ 6.56ft face
+            (1.0, 6.56),  # 1m ≈ 6.56ft face
             (2.0, 13.12),  # 2m ≈ 13.12ft face
-            (3.0, 19.68)   # 3m ≈ 19.68ft face
+            (3.0, 19.68),  # 3m ≈ 19.68ft face
         ]
 
         for meters, expected_feet in test_cases:
             result = self.fusion_system._convert_to_hawaii_scale(meters)
-            self.assertAlmostEqual(result, expected_feet, places=1,
-                msg=f"{meters}m should convert to ~{expected_feet}ft in Hawaiian scale")
+            self.assertAlmostEqual(
+                result,
+                expected_feet,
+                places=1,
+                msg=f"{meters}m should convert to ~{expected_feet}ft in Hawaiian scale",
+            )
 
         # Test None input
-        self.assertIsNone(self.fusion_system._convert_to_hawaii_scale(None),
-                         "None input should return None")
+        self.assertIsNone(
+            self.fusion_system._convert_to_hawaii_scale(None), "None input should return None"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

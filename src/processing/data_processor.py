@@ -2,18 +2,18 @@
 Base data processor for SurfCastAI.
 """
 
+import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any, Optional, Union, TypeVar, Generic
 from pathlib import Path
-import json
+from typing import Any, Generic, TypeVar
 
-from ..core.config import Config
 from ..core.bundle_manager import BundleManager
+from ..core.config import Config
 
 # Generic type variables for input and output types
-T_Input = TypeVar('T_Input')
-T_Output = TypeVar('T_Output')
+T_Input = TypeVar("T_Input")
+T_Output = TypeVar("T_Output")
 
 
 class ProcessingResult:
@@ -32,9 +32,9 @@ class ProcessingResult:
         self,
         success: bool = True,
         data: Any = None,
-        error: Optional[str] = None,
-        warnings: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        error: str | None = None,
+        warnings: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """
         Initialize ProcessingResult.
@@ -52,7 +52,7 @@ class ProcessingResult:
         self.warnings = warnings or []
         self.metadata = metadata or {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert to dictionary.
 
@@ -60,10 +60,10 @@ class ProcessingResult:
             Dictionary representation
         """
         return {
-            'success': self.success,
-            'error': self.error,
-            'warnings': self.warnings,
-            'metadata': self.metadata
+            "success": self.success,
+            "error": self.error,
+            "warnings": self.warnings,
+            "metadata": self.metadata,
             # Note: 'data' is not included as it may be complex
         }
 
@@ -111,7 +111,7 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
         """
         pass
 
-    def validate(self, data: T_Input) -> List[str]:
+    def validate(self, data: T_Input) -> list[str]:
         """
         Validate input data before processing.
 
@@ -139,9 +139,7 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
             validation_errors = self.validate(data)
             if validation_errors:
                 return ProcessingResult(
-                    success=False,
-                    error="Validation failed",
-                    warnings=validation_errors
+                    success=False, error="Validation failed", warnings=validation_errors
                 )
 
             # Process data
@@ -149,12 +147,9 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
 
         except Exception as e:
             self.logger.error(f"Error processing data: {e}")
-            return ProcessingResult(
-                success=False,
-                error=f"Processing error: {str(e)}"
-            )
+            return ProcessingResult(success=False, error=f"Processing error: {str(e)}")
 
-    def process_file(self, file_path: Union[str, Path]) -> ProcessingResult:
+    def process_file(self, file_path: str | Path) -> ProcessingResult:
         """
         Process data from a file.
 
@@ -166,24 +161,20 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
         """
         file_path = Path(file_path)
         if not file_path.exists():
-            return ProcessingResult(
-                success=False,
-                error=f"File not found: {file_path}"
-            )
+            return ProcessingResult(success=False, error=f"File not found: {file_path}")
 
         try:
             # Read file content
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 content = f.read()
 
             # Parse JSON if file is JSON
-            if file_path.suffix.lower() in ['.json']:
+            if file_path.suffix.lower() in [".json"]:
                 try:
                     data = json.loads(content)
                 except json.JSONDecodeError as e:
                     return ProcessingResult(
-                        success=False,
-                        error=f"Invalid JSON in {file_path}: {e}"
+                        success=False, error=f"Invalid JSON in {file_path}: {e}"
                     )
             else:
                 # Use raw content for non-JSON files
@@ -194,16 +185,11 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
 
         except Exception as e:
             self.logger.error(f"Error processing file {file_path}: {e}")
-            return ProcessingResult(
-                success=False,
-                error=f"Error processing file: {str(e)}"
-            )
+            return ProcessingResult(success=False, error=f"Error processing file: {str(e)}")
 
     def process_bundle(
-        self,
-        bundle_id: Optional[str] = None,
-        file_pattern: Optional[str] = None
-    ) -> List[ProcessingResult]:
+        self, bundle_id: str | None = None, file_pattern: str | None = None
+    ) -> list[ProcessingResult]:
         """
         Process files from a data bundle.
 
@@ -214,7 +200,9 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
         Returns:
             List of ProcessingResult objects
         """
-        self.logger.info(f"process_bundle called: bundle_id={bundle_id}, file_pattern={file_pattern}")
+        self.logger.info(
+            f"process_bundle called: bundle_id={bundle_id}, file_pattern={file_pattern}"
+        )
 
         # Get bundle manager
         bundle_manager = BundleManager(self.config.data_directory)
@@ -223,31 +211,27 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
         bundle_path = bundle_manager.get_bundle_path(bundle_id)
         if bundle_path is None:
             self.logger.error(f"Bundle not found: {bundle_id}")
-            return [ProcessingResult(
-                success=False,
-                error=f"Bundle not found: {bundle_id}"
-            )]
+            return [ProcessingResult(success=False, error=f"Bundle not found: {bundle_id}")]
 
         # Get files from bundle
         if file_pattern:
             self.logger.info(f"About to glob: bundle_path={bundle_path}, pattern={file_pattern}")
             files = list(bundle_path.glob(file_pattern))
-            self.logger.info(f"Found {len(files)} files matching pattern '{file_pattern}' in {bundle_path}")
+            self.logger.info(
+                f"Found {len(files)} files matching pattern '{file_pattern}' in {bundle_path}"
+            )
         else:
             # Use file_list method from bundle_manager
             file_list = bundle_manager.get_bundle_file_list(bundle_id)
             files = []
             for file_info in file_list:
-                file_path = file_info.get('file_path')
+                file_path = file_info.get("file_path")
                 if file_path:
                     files.append(Path(file_path))
 
         if not files:
             self.logger.warning(f"No files found in bundle {bundle_id}")
-            return [ProcessingResult(
-                success=False,
-                error=f"No files found in bundle {bundle_id}"
-            )]
+            return [ProcessingResult(success=False, error=f"No files found in bundle {bundle_id}")]
 
         # Process each file
         results = []
@@ -257,10 +241,7 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
         return results
 
     def save_result(
-        self,
-        result: ProcessingResult,
-        output_path: Union[str, Path],
-        overwrite: bool = False
+        self, result: ProcessingResult, output_path: str | Path, overwrite: bool = False
     ) -> bool:
         """
         Save processing result to a file.
@@ -285,24 +266,24 @@ class DataProcessor(Generic[T_Input, T_Output], ABC):
 
         try:
             # Determine the format based on file extension
-            if output_path.suffix.lower() == '.json':
+            if output_path.suffix.lower() == ".json":
                 # Try to serialize to JSON
                 data = result.data
-                if hasattr(data, 'to_json'):
+                if hasattr(data, "to_json"):
                     # Use to_json method if available
-                    with open(output_path, 'w') as f:
+                    with open(output_path, "w") as f:
                         f.write(data.to_json())
-                elif hasattr(data, 'to_dict'):
+                elif hasattr(data, "to_dict"):
                     # Use to_dict method if available
-                    with open(output_path, 'w') as f:
+                    with open(output_path, "w") as f:
                         json.dump(data.to_dict(), f, indent=2)
                 else:
                     # Try direct JSON serialization
-                    with open(output_path, 'w') as f:
+                    with open(output_path, "w") as f:
                         json.dump(data, f, indent=2)
             else:
                 # Default to string representation
-                with open(output_path, 'w') as f:
+                with open(output_path, "w") as f:
                     f.write(str(result.data))
 
             self.logger.info(f"Saved result to {output_path}")

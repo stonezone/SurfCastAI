@@ -3,28 +3,24 @@
 Demo script for presenting SurfCastAI forecasts.
 """
 
+import json
 import os
 import sys
-import json
-from pathlib import Path
 import webbrowser
+from pathlib import Path
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 def show_forecast():
     """Show the sample forecast in the browser."""
-    forecast_path = Path('./output/sample_forecast.html')
-    analysis_path = Path('./output/gpt41_analysis.txt')
-    forecast_data_path = Path('./output/forecast_data.json')
+    forecast_path = Path("./output/sample_forecast.html")
+    analysis_path = Path("./output/gpt41_analysis.txt")
+    forecast_data_path = Path("./output/forecast_data.json")
 
     # Check if files exist
-    files_exist = all([
-        forecast_path.exists(),
-        analysis_path.exists(),
-        forecast_data_path.exists()
-    ])
+    files_exist = all([forecast_path.exists(), analysis_path.exists(), forecast_data_path.exists()])
 
     if not files_exist:
         print("\nError: Sample forecast files not found.")
@@ -52,7 +48,7 @@ def show_forecast():
 
     # Open analysis file
     try:
-        with open(analysis_path, 'r') as f:
+        with open(analysis_path) as f:
             analysis = f.read()
 
         print("\nGPT-4.1 Analysis:")

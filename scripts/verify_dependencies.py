@@ -5,50 +5,53 @@ Automatically verifies dependency versions and compatibility
 Enhanced version for migration monitoring
 """
 
-import sys
 import importlib
-import subprocess
 import json
+import os
+import subprocess
+import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List, Tuple
-import warnings
-import os
 
 # Expected versions (from our verification)
 EXPECTED_VERSIONS = {
-    'openai': '1.84.0',
-    'aiohttp': '3.12.11',
-    'pydantic': '2.11.5',
-    'numpy': '2.3.0',
-    'pandas': '2.3.0',
-    'httpx': '0.28.0',
-    'pytest': '8.3.2',
-    'rich': '13.8.1',
-    'pillow': '11.0.0',
-    'weasyprint': '62.3',
-    'markdown': '3.7',
-    'beautifulsoup4': '4.12.3',
-    'pyyaml': '6.0.2',
-    'python-dotenv': '1.0.1',
-    'typing_extensions': '4.12.2',
-    'colorama': '0.4.6',
-    'pytz': '2024.1',
-    'aiofiles': '24.1.0'
+    "openai": "1.84.0",
+    "aiohttp": "3.12.11",
+    "pydantic": "2.11.5",
+    "numpy": "2.3.0",
+    "pandas": "2.3.0",
+    "httpx": "0.28.0",
+    "pytest": "8.3.2",
+    "rich": "13.8.1",
+    "pillow": "11.0.0",
+    "weasyprint": "62.3",
+    "markdown": "3.7",
+    "beautifulsoup4": "4.12.3",
+    "pyyaml": "6.0.2",
+    "python-dotenv": "1.0.1",
+    "typing_extensions": "4.12.2",
+    "colorama": "0.4.6",
+    "pytz": "2024.1",
+    "aiofiles": "24.1.0",
 }
 
-CRITICAL_PACKAGES = ['openai', 'aiohttp', 'pydantic', 'numpy']
+CRITICAL_PACKAGES = ["openai", "aiohttp", "pydantic", "numpy"]
+
 
 class Colors:
     """Terminal colors for output."""
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    PURPLE = '\033[95m'
-    CYAN = '\033[96m'
-    WHITE = '\033[97m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
+
+    RED = "\033[91m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    PURPLE = "\033[95m"
+    CYAN = "\033[96m"
+    WHITE = "\033[97m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+
 
 def print_header(text: str):
     """Print a formatted header."""
@@ -56,53 +59,58 @@ def print_header(text: str):
     print(f"{Colors.BOLD}{Colors.CYAN}{text:^60}{Colors.ENDC}")
     print(f"{Colors.BOLD}{Colors.CYAN}{'='*60}{Colors.ENDC}\n")
 
+
 def print_status(package: str, current: str, expected: str, status: str):
     """Print package status with colors."""
     color_map = {
-        'CRITICAL': Colors.RED,
-        'OUTDATED': Colors.YELLOW,
-        'CURRENT': Colors.GREEN,
-        'NEWER': Colors.BLUE,
-        'UNKNOWN': Colors.PURPLE
+        "CRITICAL": Colors.RED,
+        "OUTDATED": Colors.YELLOW,
+        "CURRENT": Colors.GREEN,
+        "NEWER": Colors.BLUE,
+        "UNKNOWN": Colors.PURPLE,
     }
 
     color = color_map.get(status, Colors.WHITE)
     print(f"{package:20} {current:15} → {expected:15} {color}[{status}]{Colors.ENDC}")
 
+
 def get_package_version(package_name: str) -> str:
     """Get the currently installed version of a package."""
     try:
         # Handle special cases
-        if package_name == 'pillow':
+        if package_name == "pillow":
             from PIL import Image
+
             module = Image
         else:
             module = importlib.import_module(package_name)
 
-        version = getattr(module, '__version__', 'Unknown')
+        version = getattr(module, "__version__", "Unknown")
         return version
     except ImportError:
-        return 'Not Installed'
+        return "Not Installed"
     except Exception:
-        return 'Error'
+        return "Error"
+
 
 def compare_versions(current: str, expected: str) -> str:
     """Compare version strings and return status."""
-    if current in ['Not Installed', 'Error', 'Unknown']:
-        return 'CRITICAL'
+    if current in ["Not Installed", "Error", "Unknown"]:
+        return "CRITICAL"
 
     try:
         # Clean version strings (remove post/dev/rc suffixes)
         def clean_version(v):
             import re
-            return re.split(r'[+-]', v)[0]
+
+            return re.split(r"[+-]", v)[0]
 
         current_clean = clean_version(current)
         expected_clean = clean_version(expected)
 
         # Simple version comparison (works for most packages)
-        current_parts = [int(x) for x in current_clean.split('.')]
-        expected_parts = [int(x) for x in expected_clean.split('.')]
+        current_parts = [int(x) for x in current_clean.split(".")]
+        expected_parts = [int(x) for x in expected_clean.split(".")]
 
         # Pad shorter version with zeros
         max_len = max(len(current_parts), len(expected_parts))
@@ -111,38 +119,39 @@ def compare_versions(current: str, expected: str) -> str:
 
         if current_parts < expected_parts:
             if current_parts[0] < expected_parts[0]:  # Major version behind
-                return 'CRITICAL'
+                return "CRITICAL"
             else:
-                return 'OUTDATED'
+                return "OUTDATED"
         elif current_parts == expected_parts:
-            return 'CURRENT'
+            return "CURRENT"
         else:
-            return 'NEWER'
+            return "NEWER"
     except Exception:
-        return 'UNKNOWN'
+        return "UNKNOWN"
+
 
 def check_openai_model_usage():
     """Check for deprecated OpenAI model usage."""
     print_header("OpenAI Model Usage Check")
 
-    deprecated_models = ['gpt-4-1106-preview', 'gpt-3.5-turbo-1106', 'gpt-4-0613']
-    recommended_models = ['gpt-4o', 'gpt-4o-2024-08-06', 'gpt-4o-mini']
+    deprecated_models = ["gpt-4-1106-preview", "gpt-3.5-turbo-1106", "gpt-4-0613"]
+    recommended_models = ["gpt-4o", "gpt-4o-2024-08-06", "gpt-4o-mini"]
     issues_found = []
     good_usage = []
 
     # Search for model usage in Python files
-    python_files = list(Path('.').rglob('*.py'))
-    yaml_files = list(Path('.').rglob('*.yaml')) + list(Path('.').rglob('*.yml'))
+    python_files = list(Path(".").rglob("*.py"))
+    yaml_files = list(Path(".").rglob("*.yaml")) + list(Path(".").rglob("*.yml"))
 
     for file_path in python_files + yaml_files:
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
                 # Check for deprecated models
                 for model in deprecated_models:
                     if model in content:
-                        issues_found.append((file_path, model, 'deprecated'))
+                        issues_found.append((file_path, model, "deprecated"))
 
                 # Check for recommended models
                 for model in recommended_models:
@@ -156,7 +165,9 @@ def check_openai_model_usage():
         print(f"{Colors.RED}❌ Deprecated model usage found:{Colors.ENDC}")
         for file_path, model, issue_type in issues_found:
             print(f"  {file_path}: {model}")
-        print(f"\n{Colors.YELLOW}Recommendation: Update to 'gpt-4o' or 'gpt-4o-2024-08-06'{Colors.ENDC}")
+        print(
+            f"\n{Colors.YELLOW}Recommendation: Update to 'gpt-4o' or 'gpt-4o-2024-08-06'{Colors.ENDC}"
+        )
     else:
         print(f"{Colors.GREEN}✅ No deprecated model usage found{Colors.ENDC}")
 
@@ -165,25 +176,26 @@ def check_openai_model_usage():
         for file_path, model in good_usage:
             print(f"  {file_path}: {model}")
 
+
 def check_import_compatibility():
     """Test critical imports for compatibility."""
     print_header("Import Compatibility Check")
 
     tests = [
-        ('openai', 'from openai import AsyncOpenAI'),
-        ('aiohttp', 'import aiohttp'),
-        ('pydantic', 'from pydantic import BaseModel'),
-        ('numpy', 'import numpy as np'),
-        ('pandas', 'import pandas as pd'),
-        ('httpx', 'import httpx'),
-        ('rich', 'import rich'),
-        ('pytest', 'import pytest'),
-        ('PIL', 'from PIL import Image'),
-        ('yaml', 'import yaml'),
-        ('markdown', 'import markdown'),
-        ('bs4', 'from bs4 import BeautifulSoup'),
-        ('dotenv', 'import dotenv'),
-        ('colorama', 'import colorama')
+        ("openai", "from openai import AsyncOpenAI"),
+        ("aiohttp", "import aiohttp"),
+        ("pydantic", "from pydantic import BaseModel"),
+        ("numpy", "import numpy as np"),
+        ("pandas", "import pandas as pd"),
+        ("httpx", "import httpx"),
+        ("rich", "import rich"),
+        ("pytest", "import pytest"),
+        ("PIL", "from PIL import Image"),
+        ("yaml", "import yaml"),
+        ("markdown", "import markdown"),
+        ("bs4", "from bs4 import BeautifulSoup"),
+        ("dotenv", "import dotenv"),
+        ("colorama", "import colorama"),
     ]
 
     for package, import_stmt in tests:
@@ -195,20 +207,22 @@ def check_import_compatibility():
         except Exception as e:
             print(f"{Colors.YELLOW}⚠️  {package:20} import warning: {e}{Colors.ENDC}")
 
+
 def check_numpy_compatibility():
     """Check NumPy 2.x specific compatibility."""
     print_header("NumPy 2.x Compatibility Check")
 
     try:
         import numpy as np
-        version = tuple(map(int, np.__version__.split('.')[:2]))
+
+        version = tuple(map(int, np.__version__.split(".")[:2]))
 
         if version >= (2, 0):
             print(f"{Colors.GREEN}✅ NumPy 2.x detected ({np.__version__}){Colors.ENDC}")
 
             # Test free-threaded support
             try:
-                if hasattr(sys, '_is_gil_enabled'):
+                if hasattr(sys, "_is_gil_enabled"):
                     gil_status = "disabled" if not sys._is_gil_enabled() else "enabled"
                     print(f"   GIL status: {gil_status}")
                 else:
@@ -227,10 +241,13 @@ def check_numpy_compatibility():
                 print(f"   ❌ Array creation issue: {e}")
 
         else:
-            print(f"{Colors.YELLOW}⚠️  NumPy 1.x detected ({np.__version__}) - consider upgrading{Colors.ENDC}")
+            print(
+                f"{Colors.YELLOW}⚠️  NumPy 1.x detected ({np.__version__}) - consider upgrading{Colors.ENDC}"
+            )
 
     except ImportError:
         print(f"{Colors.RED}❌ NumPy not installed{Colors.ENDC}")
+
 
 def check_openai_api():
     """Test OpenAI API compatibility."""
@@ -238,10 +255,11 @@ def check_openai_api():
 
     try:
         from openai import AsyncOpenAI
+
         print(f"{Colors.GREEN}✅ AsyncOpenAI import successful{Colors.ENDC}")
 
         # Check if API key is available
-        api_key = os.environ.get('OPENAI_API_KEY')
+        api_key = os.environ.get("OPENAI_API_KEY")
         if api_key:
             print(f"{Colors.GREEN}✅ API key found in environment{Colors.ENDC}")
 
@@ -257,19 +275,21 @@ def check_openai_api():
     except ImportError as e:
         print(f"{Colors.RED}❌ OpenAI import failed: {e}{Colors.ENDC}")
 
+
 def performance_benchmark():
     """Run basic performance benchmarks."""
     print_header("Performance Benchmark")
 
     try:
         import time
-        from pydantic import BaseModel
         from typing import Optional
+
+        from pydantic import BaseModel
 
         class TestModel(BaseModel):
             id: int
             name: str
-            value: Optional[float] = None
+            value: float | None = None
 
         # Benchmark model creation
         start_time = time.time()
@@ -291,6 +311,7 @@ def performance_benchmark():
         # Test numpy performance (if available)
         try:
             import numpy as np
+
             start_time = time.time()
             arr = np.random.random((1000, 1000))
             result = np.dot(arr, arr.T)
@@ -310,6 +331,7 @@ def performance_benchmark():
     except Exception as e:
         print(f"{Colors.RED}❌ Benchmark failed: {e}{Colors.ENDC}")
 
+
 def generate_upgrade_commands():
     """Generate pip upgrade commands for outdated packages."""
     print_header("Upgrade Commands")
@@ -320,14 +342,14 @@ def generate_upgrade_commands():
         current_version = get_package_version(package)
         status = compare_versions(current_version, expected_version)
 
-        if status in ['CRITICAL', 'OUTDATED']:
+        if status in ["CRITICAL", "OUTDATED"]:
             outdated_packages.append((package, expected_version, status))
 
     if outdated_packages:
         print("Run these commands to upgrade outdated packages:\n")
 
         # Critical updates first
-        critical = [p for p in outdated_packages if p[2] == 'CRITICAL']
+        critical = [p for p in outdated_packages if p[2] == "CRITICAL"]
         if critical:
             print(f"{Colors.RED}# CRITICAL UPDATES (run first):{Colors.ENDC}")
             for package, version, _ in critical:
@@ -335,7 +357,7 @@ def generate_upgrade_commands():
             print()
 
         # Other updates
-        others = [p for p in outdated_packages if p[2] != 'CRITICAL']
+        others = [p for p in outdated_packages if p[2] != "CRITICAL"]
         if others:
             print(f"{Colors.YELLOW}# OTHER UPDATES:{Colors.ENDC}")
             for package, version, _ in others:
@@ -355,6 +377,7 @@ def generate_upgrade_commands():
     else:
         print(f"{Colors.GREEN}✅ All packages are up to date!{Colors.ENDC}")
 
+
 def check_requirements_file():
     """Check if requirements.txt matches expected versions."""
     print_header("Requirements File Check")
@@ -364,7 +387,7 @@ def check_requirements_file():
         print(f"{Colors.RED}❌ requirements.txt not found{Colors.ENDC}")
         return
 
-    with open(req_file, 'r') as f:
+    with open(req_file) as f:
         content = f.read()
 
     print("Checking requirements.txt against expected versions...")
@@ -374,6 +397,7 @@ def check_requirements_file():
         if f"{package}==" in content:
             # Extract version from requirements.txt
             import re
+
             pattern = rf"{package}==([^\s\n#]+)"
             match = re.search(pattern, content)
             if match:
@@ -391,6 +415,7 @@ def check_requirements_file():
         print(f"\n{Colors.YELLOW}Version mismatches found:{Colors.ENDC}")
         for package, req_version, expected_version in mismatches:
             print(f"  {package}: {req_version} → {expected_version}")
+
 
 def main():
     """Main verification function."""
@@ -412,7 +437,7 @@ def main():
         status = compare_versions(current_version, expected_version)
         print_status(package, current_version, expected_version, status)
 
-        if status == 'CRITICAL' and package in CRITICAL_PACKAGES:
+        if status == "CRITICAL" and package in CRITICAL_PACKAGES:
             critical_issues += 1
 
     # Run additional checks
@@ -440,7 +465,7 @@ def main():
         for package, expected_version in EXPECTED_VERSIONS.items():
             current_version = get_package_version(package)
             status = compare_versions(current_version, expected_version)
-            if status not in ['CURRENT', 'NEWER']:
+            if status not in ["CURRENT", "NEWER"]:
                 all_current = False
                 break
 
@@ -450,6 +475,7 @@ def main():
             print(f"{Colors.YELLOW}📝 Some packages still need updating (see above){Colors.ENDC}")
 
         return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

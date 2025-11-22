@@ -12,26 +12,26 @@ class TestForecastEngineAttributes(unittest.TestCase):
     def test_specialist_attributes_present_when_disabled(self) -> None:
         config = Config()
         config._config = {
-            'forecast': {
-                'use_specialist_team': False,
+            "forecast": {
+                "use_specialist_team": False,
             },
-            'openai': {},
+            "openai": {},
         }
 
         engine = ForecastEngine(config)
 
-        self.assertTrue(hasattr(engine, 'use_specialist_team'))
+        self.assertTrue(hasattr(engine, "use_specialist_team"))
         self.assertIs(engine.use_specialist_team, False)
 
-        self.assertTrue(hasattr(engine, 'buoy_analyst'))
+        self.assertTrue(hasattr(engine, "buoy_analyst"))
         self.assertIsNone(engine.buoy_analyst)
 
-        self.assertTrue(hasattr(engine, 'pressure_analyst'))
+        self.assertTrue(hasattr(engine, "pressure_analyst"))
         self.assertIsNone(engine.pressure_analyst)
 
-        self.assertTrue(hasattr(engine, 'senior_forecaster'))
+        self.assertTrue(hasattr(engine, "senior_forecaster"))
         self.assertIsNone(engine.senior_forecaster)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

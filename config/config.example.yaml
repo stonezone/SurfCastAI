@@ -121,8 +121,12 @@ data_sources:
   models:
     enabled: true
     urls:
+      # NOTE: WW3 CSV point guidance (wvprbl_hi) and FTP endpoints deprecated
+      # Using OPeNDAP gridded data instead (supports template expansion for date/hour)
       - "https://nomads.ncep.noaa.gov:9090/dods/gfs_0p25"
       - "https://nomads.ncep.noaa.gov:9090/dods/wave_multi_1.glo_0.16"
+
+      # PacIOOS SWAN Oahu regional model (high-resolution nearshore forecasts)
       - "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/"
   marine_forecasts:
     enabled: true
@@ -161,6 +165,58 @@ data_sources:
       - "https://ocean.weather.gov/shtml/P_96hrww.gif"                   # 96hr wind/wave forecast
       # Surface wind analysis - for fetch and local wind wave generation
       - "https://ocean.weather.gov/P_w_sfc_color.png"                    # Surface wind analysis
+  altimetry:
+    enabled: true
+    urls:
+      # NOTE: Legacy JASON/Sentinel SSH imagery (STAR, OSPO) deprecated/unavailable
+      # Using ERDDAP SST data as proxy for ocean state analysis
+      # SST patterns correlate with currents and can indicate swell propagation conditions
+
+      # CoastWatch ERDDAP - Multi-scale SST (Hawaii region)
+      - "https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.graph?analysed_sst[(last)][(19.0):(23.0)][(-161.0):(-154.0)]&.draw=surface&.vars=longitude|latitude|analysed_sst&.colorBar=Rainbow2|||||&.land=under"
+
+      # Upwell ERDDAP - SST anomaly (Pacific basin for long-period swell context)
+      - "https://upwell.pfeg.noaa.gov/erddap/griddap/jplMURSST41mday.graph?sst[(last)][(15.0):(30.0)][(-170.0):(-150.0)]&.draw=surface&.vars=longitude|latitude|sst&.colorBar=Rainbow|||||&.land=under"
+  nearshore_buoys:
+    enabled: true
+    sources:
+      # CDIP Station 106 - Kaumalapau, Lanai (nearshore directional spectra)
+      - id: "106"
+        url: "https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/archive/106p1/106p1_historic.nc"
+        format: "cdip_netcdf"
+        description: "CDIP 106 Kaumalapau - Directional wave spectra"
+        ndbc_fallback: "https://www.ndbc.noaa.gov/data/realtime2/51212.txt"
+
+      # CDIP Station 225 - Ewa Beach (nearshore directional spectra)
+      - id: "225"
+        url: "https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/225p1_rt.nc"
+        format: "cdip_netcdf"
+        description: "CDIP 225 Ewa Beach - Directional wave spectra for south shore translation"
+        ndbc_fallback: "https://www.ndbc.noaa.gov/data/realtime2/51202.txt"
+
+      # CDIP Station 239 - Waimea Bay (nearshore directional spectra)
+      - id: "239"
+        url: "https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/239p1_rt.nc"
+        format: "cdip_netcdf"
+        description: "CDIP 239 Waimea Bay - Critical for North Shore surf translation"
+        ndbc_fallback: "https://www.ndbc.noaa.gov/data/realtime2/51201.txt"
+
+      # CDIP Station 249 - Hanalei, Kauai (nearshore directional spectra)
+      - id: "249"
+        url: "https://thredds.cdip.ucsd.edu/thredds/dodsC/cdip/realtime/249p1_rt.nc"
+        format: "cdip_netcdf"
+        description: "CDIP 249 Hanalei - Nearshore validation for Kauai"
+        ndbc_fallback: "https://www.ndbc.noaa.gov/data/realtime2/51207.txt"
+  upper_air:
+    enabled: true
+    urls:
+      # NOTE: Legacy WPC/OPC/AWC upper-air chart imagery (250mb, 500mb) deprecated/unavailable
+      # Upper-level wind data available via GFS OPeNDAP in 'models' section
+      # Jet stream position can be inferred from surface pressure gradients in 'charts' section
+      #
+      # Alternative: Tropical Tidbits provides GFS-derived imagery but requires scraping HTML
+      # For now, relying on model data and surface analysis for jet diagnostics
+      []
   tropical:
     enabled: true
     urls:

@@ -26,8 +26,8 @@ def main():
     print()
 
     # Find .spec files in data directory
-    data_dir = Path(__file__).parent.parent / 'data' / 'www_ndbc_noaa_gov'
-    spec_files = list(data_dir.glob('*.spec'))
+    data_dir = Path(__file__).parent.parent / "data" / "www_ndbc_noaa_gov"
+    spec_files = list(data_dir.glob("*.spec"))
 
     if not spec_files:
         print("ERROR: No .spec files found in data directory")
@@ -64,7 +64,9 @@ def main():
             print(f"  Dominant Component ({peak.component_type}):")
             print(f"    Height: {peak.height_meters:.2f}m ({peak.height_meters * 3.28084:.1f}ft)")
             print(f"    Period: {peak.period_seconds:.1f}s")
-            print(f"    Direction: {peak.direction_degrees:.0f}° ({_direction_to_compass(peak.direction_degrees)})")
+            print(
+                f"    Direction: {peak.direction_degrees:.0f}° ({_direction_to_compass(peak.direction_degrees)})"
+            )
             print(f"    Energy: {peak.energy_density:.2f} m²/Hz")
             print(f"    Confidence: {peak.confidence:.2f}")
             print()
@@ -74,17 +76,19 @@ def main():
             print(f"  All Components ({len(result.peaks)}):")
             for i, peak in enumerate(result.peaks, 1):
                 print(f"    {i}. {peak.component_type.upper()}:")
-                print(f"       {peak.height_meters:.2f}m @ {peak.period_seconds:.1f}s from {peak.direction_degrees:.0f}°")
+                print(
+                    f"       {peak.height_meters:.2f}m @ {peak.period_seconds:.1f}s from {peak.direction_degrees:.0f}°"
+                )
             print()
 
         # Display metadata
         if result.metadata:
-            print(f"  Metadata:")
-            if 'total_wave_height' in result.metadata:
+            print("  Metadata:")
+            if "total_wave_height" in result.metadata:
                 print(f"    Total Wave Height: {result.metadata['total_wave_height']:.2f}m")
-            if 'average_period' in result.metadata:
+            if "average_period" in result.metadata:
                 print(f"    Average Period: {result.metadata['average_period']:.1f}s")
-            if 'mean_direction' in result.metadata:
+            if "mean_direction" in result.metadata:
                 print(f"    Mean Direction: {result.metadata['mean_direction']:.0f}°")
             print()
 
@@ -97,7 +101,7 @@ def main():
     analyzer = SpectralAnalyzer(
         min_period=10.0,  # Only consider long-period swell
         max_components=3,  # Limit to 3 components
-        min_separation_period=4.0  # Require larger period difference
+        min_separation_period=4.0,  # Require larger period difference
     )
 
     for spec_file in spec_files[:1]:  # Just analyze first file
@@ -106,7 +110,9 @@ def main():
         if result:
             print(f"  {spec_file.name}: {len(result.peaks)} component(s) found")
             for peak in result.peaks:
-                print(f"    - {peak.component_type}: {peak.period_seconds:.1f}s @ {peak.direction_degrees:.0f}°")
+                print(
+                    f"    - {peak.component_type}: {peak.period_seconds:.1f}s @ {peak.direction_degrees:.0f}°"
+                )
         else:
             print(f"  {spec_file.name}: Failed to parse")
         print()
@@ -114,11 +120,27 @@ def main():
 
 def _direction_to_compass(degrees: float) -> str:
     """Convert degrees to compass direction."""
-    dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-            'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
+    dirs = [
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
+    ]
     ix = round(degrees / 22.5) % 16
     return dirs[ix]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

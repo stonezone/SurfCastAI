@@ -2,6 +2,7 @@
 
 import concurrent.futures
 from pathlib import Path
+
 import pytest
 
 from src.core.bundle_manager import BundleManager
@@ -34,11 +35,11 @@ class TestConcurrentAtomicUpdates:
 
         content = marker_file.read_text()
         # Content should be one of the valid bundle IDs (not partial/corrupt)
-        assert content in bundle_ids, \
-            f"Marker contains unexpected content: {content}"
+        assert content in bundle_ids, f"Marker contains unexpected content: {content}"
         # Should not be truncated or contain multiple IDs
-        assert content.count("bundle-") == 1, \
-            f"Marker contains multiple or malformed IDs: {content}"
+        assert (
+            content.count("bundle-") == 1
+        ), f"Marker contains multiple or malformed IDs: {content}"
 
     def test_concurrent_read_write_no_partial_reads(self, tmp_path):
         """Test that reads never see partial writes."""
@@ -64,21 +65,18 @@ class TestConcurrentAtomicUpdates:
         # Execute concurrent reads and writes
         with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
             # Submit writer tasks
-            writer_futures = [
-                executor.submit(writer_task, bid) for bid in bundle_ids[:10]
-            ]
+            writer_futures = [executor.submit(writer_task, bid) for bid in bundle_ids[:10]]
             # Submit reader tasks
-            reader_futures = [
-                executor.submit(reader_task) for _ in range(5)
-            ]
+            reader_futures = [executor.submit(reader_task) for _ in range(5)]
 
             # Wait for all tasks
             all_futures = writer_futures + reader_futures
             concurrent.futures.wait(all_futures)
 
         # Verify no partial reads occurred
-        assert len(partial_reads) == 0, \
-            f"Found {len(partial_reads)} partial reads: {partial_reads[:5]}"
+        assert (
+            len(partial_reads) == 0
+        ), f"Found {len(partial_reads)} partial reads: {partial_reads[:5]}"
 
     def test_concurrent_updates_with_removals(self, tmp_path):
         """Test concurrent updates and removals maintain consistency."""
@@ -96,16 +94,13 @@ class TestConcurrentAtomicUpdates:
 
         # Execute concurrent mixed operations
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            futures = [
-                executor.submit(mixed_operations, i) for i in range(40)
-            ]
+            futures = [executor.submit(mixed_operations, i) for i in range(40)]
             concurrent.futures.wait(futures)
 
         # At the end, marker either exists with valid ID or doesn't exist
         if marker_file.exists():
             content = marker_file.read_text()
             # Should be a valid bundle ID
-            assert content.startswith("bundle-"), \
-                f"Invalid marker content: {content}"
+            assert content.startswith("bundle-"), f"Invalid marker content: {content}"
             assert len(content) > 7, f"Truncated marker content: {content}"
         # If it doesn't exist, that's also fine (last operation was removal)

@@ -11,7 +11,7 @@ import asyncio
 import base64
 import logging
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 
 class OpenAIClient:
@@ -47,18 +47,18 @@ class OpenAIClient:
     # Model pricing (per 1M tokens)
     # Source: https://openai.com/pricing
     MODEL_PRICING = {
-        'gpt-5-nano': {'input': 0.05, 'output': 0.40},
-        'gpt-5-mini': {'input': 0.25, 'output': 2.00},
-        'gpt-5': {'input': 1.25, 'output': 10.00},
-        'default': {'input': 0.01, 'output': 0.03}  # GPT-4 pricing
+        "gpt-5-nano": {"input": 0.05, "output": 0.40},
+        "gpt-5-mini": {"input": 0.25, "output": 2.00},
+        "gpt-5": {"input": 1.25, "output": 10.00},
+        "default": {"input": 0.01, "output": 0.03},  # GPT-4 pricing
     }
 
     # Supported image formats
     IMAGE_MIME_TYPES = {
-        '.png': 'image/png',
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.gif': 'image/gif'
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".gif": "image/gif",
     }
 
     def __init__(
@@ -66,8 +66,8 @@ class OpenAIClient:
         api_key: str,
         model: str,
         max_tokens: int,
-        temperature: Optional[float] = None,
-        logger: Optional[logging.Logger] = None
+        temperature: float | None = None,
+        logger: logging.Logger | None = None,
     ):
         """
         Initialize OpenAI API client.
@@ -83,7 +83,7 @@ class OpenAIClient:
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
-        self.logger = logger or logging.getLogger('openai.client')
+        self.logger = logger or logging.getLogger("openai.client")
 
         # Initialize cost tracking
         self.total_cost = 0.0
@@ -93,7 +93,9 @@ class OpenAIClient:
         self._cost_lock = asyncio.Lock()  # Thread-safe metric updates
 
         # Log initialization
-        temp_str = f"temperature={temperature}" if temperature is not None else "default temperature"
+        temp_str = (
+            f"temperature={temperature}" if temperature is not None else "default temperature"
+        )
         self.logger.info(
             f"OpenAI client initialized: model={model}, max_tokens={max_tokens}, {temp_str}"
         )
@@ -102,8 +104,8 @@ class OpenAIClient:
         self,
         system_prompt: str,
         user_prompt: str,
-        image_urls: Optional[List[str]] = None,
-        detail: str = "auto"
+        image_urls: list[str] | None = None,
+        detail: str = "auto",
     ) -> str:
         """
         Call OpenAI API to generate text with optional image inputs.
@@ -147,27 +149,26 @@ class OpenAIClient:
 
                 for url in image_urls[:10]:  # GPT-5 limit: 10 images
                     # Convert local paths to base64 data URLs
-                    if url.startswith('data/'):
+                    if url.startswith("data/"):
                         try:
                             url = self._convert_image_to_data_url(url)
                         except Exception as e:
                             self.logger.warning(f"Failed to load image {url}: {e}")
                             continue
 
-                    content.append({
-                        "type": "image_url",
-                        "image_url": {"url": url, "detail": detail}
-                    })
+                    content.append(
+                        {"type": "image_url", "image_url": {"url": url, "detail": detail}}
+                    )
 
                 messages = [
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": content}
+                    {"role": "user", "content": content},
                 ]
             else:
                 # Text-only message
                 messages = [
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
+                    {"role": "user", "content": user_prompt},
                 ]
 
             # Build API request parameters
@@ -186,10 +187,12 @@ class OpenAIClient:
             # Extract and track usage
             if response.choices and response.choices[0].message:
                 content = response.choices[0].message.content
-                self.logger.debug(f"API response content type: {type(content)}, value: {repr(content)}")
+                self.logger.debug(
+                    f"API response content type: {type(content)}, value: {repr(content)}"
+                )
 
                 # Track token usage and costs
-                if hasattr(response, 'usage') and response.usage:
+                if hasattr(response, "usage") and response.usage:
                     await self._track_usage(response.usage)
                 else:
                     self.logger.warning("No usage data returned from API")
@@ -220,7 +223,7 @@ class OpenAIClient:
             self.total_output_tokens = 0
             self.logger.debug("Metrics reset")
 
-    async def get_metrics(self) -> Dict[str, Any]:
+    async def get_metrics(self) -> dict[str, Any]:
         """
         Get current usage metrics.
 
@@ -234,11 +237,11 @@ class OpenAIClient:
         """
         async with self._cost_lock:
             return {
-                'total_cost': round(self.total_cost, 6),
-                'api_calls': self.api_call_count,
-                'input_tokens': self.total_input_tokens,
-                'output_tokens': self.total_output_tokens,
-                'model': self.model
+                "total_cost": round(self.total_cost, 6),
+                "api_calls": self.api_call_count,
+                "input_tokens": self.total_input_tokens,
+                "output_tokens": self.total_output_tokens,
+                "model": self.model,
             }
 
     def _convert_image_to_data_url(self, file_path: str) -> str:
@@ -273,7 +276,7 @@ class OpenAIClient:
         image_data = base64.b64encode(path.read_bytes()).decode()
         return f"data:{mime_type};base64,{image_data}"
 
-    async def _call_api_with_fallback(self, client, request_kwargs: Dict[str, Any]):
+    async def _call_api_with_fallback(self, client, request_kwargs: dict[str, Any]):
         """
         Call OpenAI API with graceful fallback for legacy models.
 
@@ -291,23 +294,20 @@ class OpenAIClient:
         try:
             # Try modern parameter first
             response = await client.chat.completions.create(
-                **request_kwargs,
-                max_completion_tokens=self.max_tokens
+                **request_kwargs, max_completion_tokens=self.max_tokens
             )
             return response
         except Exception as call_error:
             # Check if error is due to unsupported parameter
             error_text = str(call_error).lower()
-            if (
-                "max_completion_tokens" in error_text
-                and any(keyword in error_text for keyword in ("unsupported", "unrecognized", "unknown"))
+            if "max_completion_tokens" in error_text and any(
+                keyword in error_text for keyword in ("unsupported", "unrecognized", "unknown")
             ):
                 self.logger.debug(
                     f"max_completion_tokens unsupported for model {self.model}; retrying with max_tokens"
                 )
                 response = await client.chat.completions.create(
-                    **request_kwargs,
-                    max_tokens=self.max_tokens
+                    **request_kwargs, max_tokens=self.max_tokens
                 )
                 return response
             else:
@@ -358,18 +358,18 @@ class OpenAIClient:
         # Determine pricing tier
         model_lower = self.model.lower()
 
-        if 'gpt-5-mini' in model_lower:
-            pricing = self.MODEL_PRICING['gpt-5-mini']
-        elif 'gpt-5-nano' in model_lower:
-            pricing = self.MODEL_PRICING['gpt-5-nano']
-        elif 'gpt-5' in model_lower:
-            pricing = self.MODEL_PRICING['gpt-5']
+        if "gpt-5-mini" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-5-mini"]
+        elif "gpt-5-nano" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-5-nano"]
+        elif "gpt-5" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-5"]
         else:
-            pricing = self.MODEL_PRICING['default']
+            pricing = self.MODEL_PRICING["default"]
             self.logger.debug(f"Using default pricing for unknown model: {self.model}")
 
         # Calculate cost (pricing is per 1M tokens, so divide by 1M)
-        input_cost = input_tokens * (pricing['input'] / 1_000_000)
-        output_cost = output_tokens * (pricing['output'] / 1_000_000)
+        input_cost = input_tokens * (pricing["input"] / 1_000_000)
+        output_cost = output_tokens * (pricing["output"] / 1_000_000)
 
         return input_cost + output_cost

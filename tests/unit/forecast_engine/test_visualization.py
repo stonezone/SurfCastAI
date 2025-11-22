@@ -5,9 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.forecast_engine.visualization import ForecastVisualizer
 from src.forecast_engine.historical import HistoricalComparator
-
+from src.forecast_engine.visualization import ForecastVisualizer
 
 SAMPLE_FORECAST = {
     "forecast_id": "unit_test_forecast",
@@ -87,13 +86,17 @@ class TestForecastVisualization(unittest.TestCase):
                 "hawaii_scale": 8.0,
             }
         ]
-        previous_payload.setdefault("metadata", {}).setdefault("confidence", {}).update({"overall_score": 0.65})
+        previous_payload.setdefault("metadata", {}).setdefault("confidence", {}).update(
+            {"overall_score": 0.65}
+        )
         (previous_dir / "forecast_data.json").write_text(json.dumps(previous_payload))
 
         current_dir = self.output_dir / SAMPLE_FORECAST["forecast_id"]
         current_dir.mkdir()
 
-        summary = comparator.build_summary(SAMPLE_FORECAST["forecast_id"], current_dir, SAMPLE_FORECAST)
+        summary = comparator.build_summary(
+            SAMPLE_FORECAST["forecast_id"], current_dir, SAMPLE_FORECAST
+        )
         self.assertIsNotNone(summary)
         assert summary  # for mypy/static type hints
         self.assertIn("confidence_change", summary)

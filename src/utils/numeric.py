@@ -1,17 +1,16 @@
 """Numeric utility functions for safe data type conversions."""
 
 import logging
-from typing import Optional, Union
 
 logger = logging.getLogger(__name__)
 
 
 def safe_float(
-    value: Union[str, float, int, None],
-    min_val: Optional[float] = None,
-    max_val: Optional[float] = None,
-    field_name: str = "value"
-) -> Optional[float]:
+    value: str | float | int | None,
+    min_val: float | None = None,
+    max_val: float | None = None,
+    field_name: str = "value",
+) -> float | None:
     """
     Safely convert a value to float with optional bounds validation.
 
@@ -66,13 +65,13 @@ def safe_float(
                 return None
 
             # Handle strings with units like "10 mph"
-            if ' ' in value:
-                value = value.split(' ')[0]
+            if " " in value:
+                value = value.split(" ")[0]
 
             # Handle range strings like "10-15"
-            if '-' in value and not value.startswith('-'):
+            if "-" in value and not value.startswith("-"):
                 # Avoid treating negative numbers as ranges
-                parts = value.split('-')
+                parts = value.split("-")
                 if len(parts) == 2:
                     try:
                         low = float(parts[0])
@@ -91,15 +90,11 @@ def safe_float(
 
         # Check bounds if specified
         if min_val is not None and result < min_val:
-            logger.warning(
-                f"Rejecting {field_name}={result}: below minimum {min_val}"
-            )
+            logger.warning(f"Rejecting {field_name}={result}: below minimum {min_val}")
             return None
 
         if max_val is not None and result > max_val:
-            logger.warning(
-                f"Rejecting {field_name}={result}: above maximum {max_val}"
-            )
+            logger.warning(f"Rejecting {field_name}={result}: above maximum {max_val}")
             return None
 
         return result

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
-from datetime import datetime, timedelta
-import math
 import re
-from typing import Any, Dict, Iterable, List, Tuple
+from collections import defaultdict
+from collections.abc import Iterable
+from datetime import datetime, timedelta
+from typing import Any
 
 try:  # Python 3.9+
     from zoneinfo import ZoneInfo
@@ -17,12 +17,12 @@ except Exception:  # pragma: no cover - fallback on platforms without zoneinfo
     HAWAII_TZ = None  # type: ignore
 
 
-def build_context(forecast_data: Dict[str, Any]) -> Dict[str, Any]:
+def build_context(forecast_data: dict[str, Any]) -> dict[str, Any]:
     """Construct structured context strings to feed into LLM prompts."""
 
     metadata = forecast_data.get("metadata", {})
-    swell_events: List[Dict[str, Any]] = forecast_data.get("swell_events", [])
-    shore_data: Dict[str, Dict[str, Any]] = forecast_data.get("shore_data", {})
+    swell_events: list[dict[str, Any]] = forecast_data.get("swell_events", [])
+    shore_data: dict[str, dict[str, Any]] = forecast_data.get("shore_data", {})
     confidence = forecast_data.get("confidence", {})
 
     overview = _build_overview(metadata, confidence, swell_events)
@@ -36,8 +36,7 @@ def build_context(forecast_data: Dict[str, Any]) -> Dict[str, Any]:
     climatology = _build_climatology_section(metadata)
 
     shore_digests = {
-        shore: _build_shore_digest(shore_info)
-        for shore, shore_info in shore_data.items()
+        shore: _build_shore_digest(shore_info) for shore, shore_info in shore_data.items()
     }
 
     sections = [
@@ -81,9 +80,9 @@ def build_context(forecast_data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _build_overview(
-    metadata: Dict[str, Any],
-    confidence: Dict[str, Any],
-    swell_events: List[Dict[str, Any]],
+    metadata: dict[str, Any],
+    confidence: dict[str, Any],
+    swell_events: list[dict[str, Any]],
 ) -> str:
     score = confidence.get("overall_score")
     category = confidence.get("category", "Unknown")
@@ -116,8 +115,8 @@ def _build_overview(
     return "\n".join(lines)
 
 
-def _build_swell_matrix(swell_events: Iterable[Dict[str, Any]]) -> str:
-    rows: List[str] = []
+def _build_swell_matrix(swell_events: Iterable[dict[str, Any]]) -> str:
+    rows: list[str] = []
 
     sorted_events = sorted(
         swell_events,
@@ -137,7 +136,11 @@ def _build_swell_matrix(swell_events: Iterable[Dict[str, Any]]) -> str:
         peak = _format_hst(event.get("peak_time"))
         exposure = _format_exposures(meta)
         source_details = meta.get("source_details", {})
-        source = source_details.get("buoy_id") or source_details.get("source_type") or event.get("source", "unknown")
+        source = (
+            source_details.get("buoy_id")
+            or source_details.get("source_type")
+            or event.get("source", "unknown")
+        )
         signif = event.get("significance")
 
         h10 = _estimate_h10(height)
@@ -151,11 +154,13 @@ def _build_swell_matrix(swell_events: Iterable[Dict[str, Any]]) -> str:
     return "\n".join(rows) if rows else "No swell events available."
 
 
-def _build_timeline_section(swell_events: Iterable[Dict[str, Any]]) -> str:
-    timeline: Dict[datetime, List[Dict[str, Any]]] = defaultdict(list)
+def _build_timeline_section(swell_events: Iterable[dict[str, Any]]) -> str:
+    timeline: dict[datetime, list[dict[str, Any]]] = defaultdict(list)
 
     for event in swell_events:
-        for ts in filter(None, [event.get("start_time"), event.get("peak_time"), event.get("end_time")]):
+        for ts in filter(
+            None, [event.get("start_time"), event.get("peak_time"), event.get("end_time")]
+        ):
             dt = _parse_datetime(ts)
             if not dt:
                 continue
@@ -166,7 +171,7 @@ def _build_timeline_section(swell_events: Iterable[Dict[str, Any]]) -> str:
     if not timeline:
         return "Timeline data unavailable; buoy feeds lacked temporal metadata."
 
-    lines: List[str] = []
+    lines: list[str] = []
     for day in sorted(timeline.keys())[:6]:
         events = timeline[day]
         dominant = max(events, key=lambda e: e.get("hawaii_scale") or 0.0)
@@ -185,9 +190,7 @@ def _build_timeline_section(swell_events: Iterable[Dict[str, Any]]) -> str:
         ]
         secondary_text = "; ".join(filter(None, secondary))
 
-        line = (
-            f"{day_string}: dominant {direction} {height:.1f}ft H1/3 ({h10:.1f}ft H1/10 est) @ {period:.1f}s."
-        )
+        line = f"{day_string}: dominant {direction} {height:.1f}ft H1/3 ({h10:.1f}ft H1/10 est) @ {period:.1f}s."
         if secondary_text:
             line += f" Secondary energy: {secondary_text}."
 
@@ -196,7 +199,7 @@ def _build_timeline_section(swell_events: Iterable[Dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def _build_weather_section(metadata: Dict[str, Any]) -> str:
+def _build_weather_section(metadata: dict[str, Any]) -> str:
     weather = metadata.get("weather", {})
     if not weather:
         return "Weather data unavailable."
@@ -218,19 +221,17 @@ def _build_weather_section(metadata: Dict[str, Any]) -> str:
     return f"{wind_part}. METAR issued {issued}: {cond}."
 
 
-def _build_tide_section(metadata: Dict[str, Any]) -> str:
+def _build_tide_section(metadata: dict[str, Any]) -> str:
     tides = metadata.get("tides", {})
     if not tides:
         return "Tide data unavailable."
 
     highs = [
-        f"{_format_hst(time)} ({height:.2f} ft)"
-        for time, height in tides.get("high_tide", [])
+        f"{_format_hst(time)} ({height:.2f} ft)" for time, height in tides.get("high_tide", [])
     ][:3]
-    lows = [
-        f"{_format_hst(time)} ({height:.2f} ft)"
-        for time, height in tides.get("low_tide", [])
-    ][:3]
+    lows = [f"{_format_hst(time)} ({height:.2f} ft)" for time, height in tides.get("low_tide", [])][
+        :3
+    ]
 
     lines = []
     if highs:
@@ -250,10 +251,10 @@ def _build_tide_section(metadata: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _build_tropical_section(metadata: Dict[str, Any]) -> str:
+def _build_tropical_section(metadata: dict[str, Any]) -> str:
     tropical = metadata.get("tropical", {})
     entries = tropical.get("entries", []) if tropical else []
-    summary_parts: List[str] = []
+    summary_parts: list[str] = []
     for entry in entries[:2]:
         summary = entry.get("summary") or ""
         summary_parts.append(_strip_html(summary).strip())
@@ -269,23 +270,26 @@ def _build_tropical_section(metadata: Dict[str, Any]) -> str:
     return "\n".join(line for line in lines if line)
 
 
-def _build_upper_air_section(metadata: Dict[str, Any]) -> str:
-    products = _extract_metadata_list(metadata, [
-        "upper_air",
-        "upper_air_products",
-        "upper_air_charts",
-    ])
+def _build_upper_air_section(metadata: dict[str, Any]) -> str:
+    products = _extract_metadata_list(
+        metadata,
+        [
+            "upper_air",
+            "upper_air_products",
+            "upper_air_charts",
+        ],
+    )
     if not products:
         return "Upper-air analyses unavailable."
 
-    grouped: Dict[str, List[Dict[str, Any]]] = {}
+    grouped: dict[str, list[dict[str, Any]]] = {}
     for entry in products:
         if not isinstance(entry, dict):
             continue
         level = str(entry.get("analysis_level") or entry.get("level") or "unknown")
         grouped.setdefault(level, []).append(entry)
 
-    lines: List[str] = []
+    lines: list[str] = []
     for level in sorted(grouped.keys(), key=_sort_pressure_level):
         descriptors = []
         for item in grouped[level]:
@@ -297,16 +301,19 @@ def _build_upper_air_section(metadata: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _build_climatology_section(metadata: Dict[str, Any]) -> str:
-    references = _extract_metadata_list(metadata, [
-        "climatology",
-        "climatology_references",
-        "climatology_stats",
-    ])
+def _build_climatology_section(metadata: dict[str, Any]) -> str:
+    references = _extract_metadata_list(
+        metadata,
+        [
+            "climatology",
+            "climatology_references",
+            "climatology_stats",
+        ],
+    )
     if not references:
         return "Climatology references unavailable."
 
-    lines: List[str] = []
+    lines: list[str] = []
     for entry in references:
         if not isinstance(entry, dict):
             continue
@@ -318,13 +325,9 @@ def _build_climatology_section(metadata: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _build_data_gap_section(metadata: Dict[str, Any]) -> str:
+def _build_data_gap_section(metadata: dict[str, Any]) -> str:
     agent_results = metadata.get("agent_results", {})
-    missing = [
-        name
-        for name, stats in agent_results.items()
-        if stats.get("successful", 0) == 0
-    ]
+    missing = [name for name, stats in agent_results.items() if stats.get("successful", 0) == 0]
     if not agent_results:
         return "Data coverage notes unavailable (agent telemetry missing)."
     if not missing:
@@ -332,7 +335,7 @@ def _build_data_gap_section(metadata: Dict[str, Any]) -> str:
     return "Missing feeds: " + ", ".join(sorted(missing)) + "."
 
 
-def _build_shore_digest(shore_info: Dict[str, Any]) -> str:
+def _build_shore_digest(shore_info: dict[str, Any]) -> str:
     shore_name = shore_info.get("name") or shore_info.get("shore")
     events = sorted(
         shore_info.get("swell_events", []),
@@ -375,7 +378,9 @@ def _build_shore_digest(shore_info: Dict[str, Any]) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _extract_metadata_list(metadata: Dict[str, Any], candidate_keys: List[str]) -> List[Dict[str, Any]]:
+def _extract_metadata_list(
+    metadata: dict[str, Any], candidate_keys: list[str]
+) -> list[dict[str, Any]]:
     for key in candidate_keys:
         value = metadata.get(key)
         if isinstance(value, list):
@@ -451,7 +456,7 @@ def _deg_to_cardinal(deg: Any) -> str:
     return directions[idx]
 
 
-def _extract_period(event: Dict[str, Any]) -> float:
+def _extract_period(event: dict[str, Any]) -> float:
     period = event.get("dominant_period")
     if period:
         try:
@@ -461,14 +466,12 @@ def _extract_period(event: Dict[str, Any]) -> float:
 
     components = event.get("primary_components", [])
     values = [
-        float(comp.get("period"))
-        for comp in components
-        if comp.get("period") not in (None, "")
+        float(comp.get("period")) for comp in components if comp.get("period") not in (None, "")
     ]
     return max(values) if values else 0.0
 
 
-def _format_exposures(meta: Dict[str, Any]) -> str:
+def _format_exposures(meta: dict[str, Any]) -> str:
     exposures = []
     for key, value in meta.items():
         if not key.startswith("exposure_"):
@@ -492,7 +495,7 @@ def _estimate_h10(h13: float) -> float:
     return round(h13 * 1.3, 1)
 
 
-def _summarise_secondary(event: Dict[str, Any]) -> str:
+def _summarise_secondary(event: dict[str, Any]) -> str:
     direction = event.get("primary_direction_cardinal") or _deg_to_cardinal(
         event.get("primary_direction")
     )

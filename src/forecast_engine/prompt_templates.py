@@ -5,12 +5,12 @@ This module provides prompt templates for generating
 forecasts in different styles.
 """
 
-import os
-import logging
-from typing import Dict, Any, Optional
 import json
+import logging
+import os
+from typing import Any
 
-logger = logging.getLogger('forecast.templates')
+logger = logging.getLogger("forecast.templates")
 
 
 # Image analysis prompts for GPT-5 Vision
@@ -96,7 +96,7 @@ class PromptTemplates:
     and generate prompts for different forecast types.
     """
 
-    def __init__(self, templates_dir: Optional[str] = None):
+    def __init__(self, templates_dir: str | None = None):
         """
         Initialize the prompt templates.
 
@@ -116,17 +116,17 @@ class PromptTemplates:
     def _load_templates(self):
         """Load templates from files."""
         template_files = {
-            'caldwell': 'caldwell_template.json',
-            'north_shore': 'north_shore_template.json',
-            'south_shore': 'south_shore_template.json',
-            'daily': 'daily_template.json'
+            "caldwell": "caldwell_template.json",
+            "north_shore": "north_shore_template.json",
+            "south_shore": "south_shore_template.json",
+            "daily": "daily_template.json",
         }
 
         for template_name, filename in template_files.items():
             file_path = os.path.join(self.templates_dir, filename)
             if os.path.isfile(file_path):
                 try:
-                    with open(file_path, 'r') as f:
+                    with open(file_path) as f:
                         self.templates[template_name] = json.load(f)
                     logger.info(f"Loaded template: {template_name}")
                 except Exception as e:
@@ -138,10 +138,10 @@ class PromptTemplates:
 
     def _use_default_templates(self):
         """Use default templates."""
-        self._use_default_template('caldwell')
-        self._use_default_template('north_shore')
-        self._use_default_template('south_shore')
-        self._use_default_template('daily')
+        self._use_default_template("caldwell")
+        self._use_default_template("north_shore")
+        self._use_default_template("south_shore")
+        self._use_default_template("daily")
 
     def _use_default_template(self, template_name: str):
         """
@@ -150,7 +150,7 @@ class PromptTemplates:
         Args:
             template_name: Name of the template
         """
-        if template_name == 'caldwell':
+        if template_name == "caldwell":
             self.templates[template_name] = {
                 "system_prompt": """
 You are Pat Caldwell, the veteran Hawaiian surf forecaster. You write actual surf forecasts, not instructions about forecasting.
@@ -222,9 +222,9 @@ DATA DIGEST:
 {data_digest}
 
 Write the complete forecast now using the Pat Caldwell style with SUMMARY, DETAILS, NORTH SHORE, SOUTH SHORE, and OUTLOOK sections.
-"""
+""",
             }
-        elif template_name == 'north_shore':
+        elif template_name == "north_shore":
             self.templates[template_name] = {
                 "system_prompt": """
 Generate a detailed North Shore-specific surf forecast in Pat Caldwell's style. Focus on:
@@ -257,9 +257,9 @@ SHORE SNAPSHOT:
 {shore_digest}
 
 Write the complete North Shore forecast now using Pat Caldwell's technical style.
-"""
+""",
             }
-        elif template_name == 'south_shore':
+        elif template_name == "south_shore":
             self.templates[template_name] = {
                 "system_prompt": """
 Generate a detailed South Shore-specific surf forecast in Pat Caldwell's style. Focus on:
@@ -292,9 +292,9 @@ SHORE SNAPSHOT:
 {shore_digest}
 
 Write the complete South Shore forecast now using Pat Caldwell's technical style.
-"""
+""",
             }
-        elif template_name == 'daily':
+        elif template_name == "daily":
             self.templates[template_name] = {
                 "system_prompt": """
 Generate a concise daily surf report for Hawaii. Focus on:
@@ -324,10 +324,10 @@ DATA DIGEST:
 {data_digest}
 
 Write the complete daily report now in a concise, practical style.
-"""
+""",
             }
 
-    def get_template(self, template_name: str) -> Dict[str, Any]:
+    def get_template(self, template_name: str) -> dict[str, Any]:
         """
         Get a specific template.
 
@@ -343,17 +343,17 @@ Write the complete daily report now in a concise, practical style.
 
         return self.templates[template_name]
 
-    def get_all_templates(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_templates(self) -> dict[str, dict[str, Any]]:
         """Return a copy of all loaded templates."""
         return {key: dict(value) for key, value in self.templates.items()}
 
-    def update_templates(self, updates: Dict[str, Dict[str, Any]]) -> None:
+    def update_templates(self, updates: dict[str, dict[str, Any]]) -> None:
         """Merge external templates into the current collection."""
         for key, value in updates.items():
             if isinstance(value, dict):
                 self.templates[key] = dict(value)
 
-    def _get_swell_period(self, swell: Dict[str, Any]) -> float:
+    def _get_swell_period(self, swell: dict[str, Any]) -> float:
         """
         Extract dominant period from swell event.
 
@@ -364,20 +364,22 @@ Write the complete daily report now in a concise, practical style.
             Dominant period in seconds
         """
         # Try direct field first
-        if 'dominant_period' in swell and swell['dominant_period']:
-            return float(swell['dominant_period'])
+        if "dominant_period" in swell and swell["dominant_period"]:
+            return float(swell["dominant_period"])
 
         # Try primary components
-        primary_components = swell.get('primary_components', [])
+        primary_components = swell.get("primary_components", [])
         if primary_components:
             # Filter out None values and convert to float
-            periods = [float(c['period']) for c in primary_components if c.get('period') is not None]
+            periods = [
+                float(c["period"]) for c in primary_components if c.get("period") is not None
+            ]
             if periods:
                 return max(periods)
 
         return 0.0
 
-    def get_caldwell_prompt(self, forecast_data: Dict[str, Any]) -> str:
+    def get_caldwell_prompt(self, forecast_data: dict[str, Any]) -> str:
         """
         Generate a prompt for Caldwell-style forecast.
 
@@ -387,22 +389,22 @@ Write the complete daily report now in a concise, practical style.
         Returns:
             Formatted prompt string
         """
-        template = self.get_template('caldwell')
-        user_prompt = template.get('user_prompt', '')
+        template = self.get_template("caldwell")
+        user_prompt = template.get("user_prompt", "")
 
         # Format swell details
         swell_details = []
-        for swell in forecast_data.get('swell_events', []):
+        for swell in forecast_data.get("swell_events", []):
             period = self._get_swell_period(swell)
 
             # Extract source attribution
-            metadata = swell.get('metadata', {})
-            source_details = metadata.get('source_details', {})
+            metadata = swell.get("metadata", {})
+            source_details = metadata.get("source_details", {})
             source_info = ""
             if source_details:
-                buoy_id = source_details.get('buoy_id', '')
-                obs_time = source_details.get('observation_time', '')
-                source_type = source_details.get('source_type', '')
+                buoy_id = source_details.get("buoy_id", "")
+                obs_time = source_details.get("observation_time", "")
+                source_type = source_details.get("source_type", "")
                 if buoy_id and source_type:
                     source_info = f" (Source: {source_type} Buoy {buoy_id})"
 
@@ -415,37 +417,37 @@ Write the complete daily report now in a concise, practical style.
             )
 
         # Format seasonal context
-        seasonal_context = forecast_data.get('seasonal_context', {})
-        season = seasonal_context.get('current_season', 'unknown').title()
-        seasonal_patterns = seasonal_context.get('seasonal_patterns', {})
+        seasonal_context = forecast_data.get("seasonal_context", {})
+        season = seasonal_context.get("current_season", "unknown").title()
+        seasonal_patterns = seasonal_context.get("seasonal_patterns", {})
 
         seasonal_info = f"{season} season - "
         for shore, patterns in seasonal_patterns.items():
-            shore_name = shore.replace('_', ' ').title()
-            conditions = patterns.get('typical_conditions', '')
+            shore_name = shore.replace("_", " ").title()
+            conditions = patterns.get("typical_conditions", "")
             seasonal_info += f"{shore_name}: {conditions}. "
 
         weather_conditions = self._format_weather(forecast_data)
         tide_info = self._format_tides(forecast_data)
 
         # Format primary shores
-        primary_shores = ", ".join(forecast_data.get('shores', ['North Shore', 'South Shore']))
+        primary_shores = ", ".join(forecast_data.get("shores", ["North Shore", "South Shore"]))
 
         # Format prompt
         formatted_prompt = user_prompt.format(
-            start_date=forecast_data.get('start_date', ''),
-            end_date=forecast_data.get('end_date', ''),
+            start_date=forecast_data.get("start_date", ""),
+            end_date=forecast_data.get("end_date", ""),
             swell_details="\n".join(swell_details),
             seasonal_context=seasonal_info,
             weather_conditions=weather_conditions,
             tide_info=tide_info,
             primary_shores=primary_shores,
-            data_digest=forecast_data.get('data_digest', 'Data digest unavailable.')
+            data_digest=forecast_data.get("data_digest", "Data digest unavailable."),
         )
 
         return formatted_prompt
 
-    def get_shore_prompt(self, shore: str, forecast_data: Dict[str, Any]) -> str:
+    def get_shore_prompt(self, shore: str, forecast_data: dict[str, Any]) -> str:
         """
         Generate a prompt for shore-specific forecast.
 
@@ -456,20 +458,20 @@ Write the complete daily report now in a concise, practical style.
         Returns:
             Formatted prompt string
         """
-        template_name = shore if shore in ['north_shore', 'south_shore'] else 'north_shore'
+        template_name = shore if shore in ["north_shore", "south_shore"] else "north_shore"
         template = self.get_template(template_name)
-        user_prompt = template.get('user_prompt', '')
+        user_prompt = template.get("user_prompt", "")
 
         # Get shore data
-        shore_data = forecast_data.get('shore_data', {}).get(shore, {})
+        shore_data = forecast_data.get("shore_data", {}).get(shore, {})
         if not shore_data:
             logger.warning(f"No data found for {shore}")
             return f"Generate a {shore.replace('_', ' ').title()} forecast for {forecast_data.get('start_date', '')}."
 
         # Format shore-specific swells
         shore_swells = []
-        for swell in shore_data.get('swell_events', []):
-            exposure = swell.get('metadata', {}).get(f'exposure_{shore}', 0.5)
+        for swell in shore_data.get("swell_events", []):
+            exposure = swell.get("metadata", {}).get(f"exposure_{shore}", 0.5)
             effect = "strong" if exposure > 0.7 else ("moderate" if exposure > 0.4 else "minimal")
             period = self._get_swell_period(swell)
 
@@ -483,42 +485,42 @@ Write the complete daily report now in a concise, practical style.
         weather_conditions = self._format_weather(forecast_data)
 
         # Format popular breaks
-        popular_breaks = shore_data.get('metadata', {}).get('popular_breaks', [])
+        popular_breaks = shore_data.get("metadata", {}).get("popular_breaks", [])
         popular_breaks_str = ", ".join(popular_breaks) if popular_breaks else "Various breaks"
 
         # Format prompt
         formatted_prompt = user_prompt.format(
-            start_date=forecast_data.get('start_date', ''),
-            end_date=forecast_data.get('end_date', ''),
-            north_shore_swells="\n".join(shore_swells) if shore == 'north_shore' else "N/A",
-            south_shore_swells="\n".join(shore_swells) if shore == 'south_shore' else "N/A",
+            start_date=forecast_data.get("start_date", ""),
+            end_date=forecast_data.get("end_date", ""),
+            north_shore_swells="\n".join(shore_swells) if shore == "north_shore" else "N/A",
+            south_shore_swells="\n".join(shore_swells) if shore == "south_shore" else "N/A",
             weather_conditions=weather_conditions,
             popular_breaks=popular_breaks_str,
-            data_digest=forecast_data.get('data_digest', 'Data digest unavailable.'),
-            shore_digest=forecast_data.get('shore_digests', {}).get(shore, 'No shore-specific digest available.')
+            data_digest=forecast_data.get("data_digest", "Data digest unavailable."),
+            shore_digest=forecast_data.get("shore_digests", {}).get(
+                shore, "No shore-specific digest available."
+            ),
         )
 
         return formatted_prompt
 
-    def get_daily_prompt(self, forecast_data: Dict[str, Any]) -> str:
+    def get_daily_prompt(self, forecast_data: dict[str, Any]) -> str:
         """Generate the daily report prompt."""
 
-        template = self.get_template('daily')
-        user_prompt = template.get('user_prompt', '')
+        template = self.get_template("daily")
+        user_prompt = template.get("user_prompt", "")
 
-        region = forecast_data.get('region', 'Oahu')
-        start_date = forecast_data.get('start_date', '')
+        region = forecast_data.get("region", "Oahu")
+        start_date = forecast_data.get("start_date", "")
 
         # Summarise leading swell events for quick reference
         swells = []
-        for swell in forecast_data.get('swell_events', [])[:6]:
-            direction = swell.get('primary_direction_cardinal', 'Unknown')
-            faces = swell.get('hawaii_scale', 0.0)
+        for swell in forecast_data.get("swell_events", [])[:6]:
+            direction = swell.get("primary_direction_cardinal", "Unknown")
+            faces = swell.get("hawaii_scale", 0.0)
             period = self._get_swell_period(swell)
-            peak = swell.get('peak_time', 'n/a')
-            swells.append(
-                f"- {direction} {faces:.1f}ft (H1/3) @{period:.1f}s, peak {peak}"
-            )
+            peak = swell.get("peak_time", "n/a")
+            swells.append(f"- {direction} {faces:.1f}ft (H1/3) @{period:.1f}s, peak {peak}")
         current_swells = "\n".join(swells) if swells else "- No significant swell signals received."
 
         # Reuse weather/tide formatting
@@ -531,7 +533,7 @@ Write the complete daily report now in a concise, practical style.
             current_swells=current_swells,
             weather_conditions=weather_conditions,
             tide_info=tide_info,
-            data_digest=forecast_data.get('data_digest', 'Data digest unavailable.')
+            data_digest=forecast_data.get("data_digest", "Data digest unavailable."),
         )
 
         return formatted_prompt
@@ -540,12 +542,12 @@ Write the complete daily report now in a concise, practical style.
     # Shared formatting helpers
     # ------------------------------------------------------------------
 
-    def _format_weather(self, forecast_data: Dict[str, Any]) -> str:
-        weather = forecast_data.get('metadata', {}).get('weather', {})
-        wind_dir = weather.get('wind_direction')
-        wind_speed = weather.get('wind_speed') or weather.get('wind_speed_kt')
-        if wind_speed is None and weather.get('wind_speed_ms') is not None:
-            wind_speed = weather['wind_speed_ms'] * 1.94384
+    def _format_weather(self, forecast_data: dict[str, Any]) -> str:
+        weather = forecast_data.get("metadata", {}).get("weather", {})
+        wind_dir = weather.get("wind_direction")
+        wind_speed = weather.get("wind_speed") or weather.get("wind_speed_kt")
+        if wind_speed is None and weather.get("wind_speed_ms") is not None:
+            wind_speed = weather["wind_speed_ms"] * 1.94384
         if wind_dir is not None and wind_speed is not None:
             wind_str = f"Wind: {wind_dir}° at {wind_speed:.1f} kt"
         elif wind_dir is not None:
@@ -553,27 +555,31 @@ Write the complete daily report now in a concise, practical style.
         else:
             wind_str = "Wind: Variable/Light"
 
-        metar = weather.get('metar', {})
-        conditions = weather.get('conditions') or metar.get('metar') or 'Conditions unavailable'
-        issued = metar.get('issued', 'n/a')
+        metar = weather.get("metar", {})
+        conditions = weather.get("conditions") or metar.get("metar") or "Conditions unavailable"
+        issued = metar.get("issued", "n/a")
 
         return f"{wind_str}. Conditions: {conditions}. METAR issued: {issued}."
 
-    def _format_tides(self, forecast_data: Dict[str, Any]) -> str:
-        tides = forecast_data.get('metadata', {}).get('tides', {})
+    def _format_tides(self, forecast_data: dict[str, Any]) -> str:
+        tides = forecast_data.get("metadata", {}).get("tides", {})
         if not tides:
             return "Tides: unavailable."
 
-        highs = ", ".join([f"{time} ({height}ft)" for time, height in tides.get('high_tide', [])[:3]])
-        lows = ", ".join([f"{time} ({height}ft)" for time, height in tides.get('low_tide', [])[:3]])
+        highs = ", ".join(
+            [f"{time} ({height}ft)" for time, height in tides.get("high_tide", [])[:3]]
+        )
+        lows = ", ".join([f"{time} ({height}ft)" for time, height in tides.get("low_tide", [])[:3]])
 
         components = []
         if highs:
             components.append(f"High: {highs}")
         if lows:
             components.append(f"Low: {lows}")
-        latest = tides.get('latest_water_level')
+        latest = tides.get("latest_water_level")
         if latest:
-            components.append(f"Latest obs: {latest.get('time')} -> {latest.get('height_ft', 'n/a')} ft")
+            components.append(
+                f"Latest obs: {latest.get('time')} -> {latest.get('height_ft', 'n/a')} ft"
+            )
 
         return "Tides: " + "; ".join(components) if components else "Tides: unavailable."

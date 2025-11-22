@@ -9,7 +9,7 @@ import logging
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
+
 from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)
@@ -35,19 +35,19 @@ class ShorePerformance(BaseModel):
     avg_bias: float = Field(..., description="Average bias in feet (+ = over, - = under)")
     categorical_accuracy: float = Field(..., ge=0.0, le=1.0, description="Category accuracy")
 
-    @field_validator('avg_mae', 'avg_rmse')
+    @field_validator("avg_mae", "avg_rmse")
     @classmethod
     def round_to_one_decimal(cls, v: float) -> float:
         """Round metrics to one decimal place for readability."""
         return round(v, 1)
 
-    @field_validator('avg_bias')
+    @field_validator("avg_bias")
     @classmethod
     def round_bias_to_one_decimal(cls, v: float) -> float:
         """Round bias to one decimal place."""
         return round(v, 1)
 
-    @field_validator('categorical_accuracy')
+    @field_validator("categorical_accuracy")
     @classmethod
     def round_accuracy_to_two_decimals(cls, v: float) -> float:
         """Round accuracy to two decimal places (e.g., 0.85 = 85%)."""
@@ -72,11 +72,15 @@ class PerformanceReport(BaseModel):
     lookback_days: int = Field(..., ge=1, description="Days analyzed")
     overall_mae: float = Field(..., ge=0.0, description="Overall MAE in feet")
     overall_rmse: float = Field(..., ge=0.0, description="Overall RMSE in feet")
-    overall_categorical: float = Field(..., ge=0.0, le=1.0, description="Overall categorical accuracy")
-    shore_performance: List[ShorePerformance] = Field(default_factory=list, description="Per-shore metrics")
+    overall_categorical: float = Field(
+        ..., ge=0.0, le=1.0, description="Overall categorical accuracy"
+    )
+    shore_performance: list[ShorePerformance] = Field(
+        default_factory=list, description="Per-shore metrics"
+    )
     has_recent_data: bool = Field(..., description="Whether recent data exists")
 
-    @field_validator('report_date')
+    @field_validator("report_date")
     @classmethod
     def validate_date_format(cls, v: str) -> str:
         """Ensure date is in ISO format."""
@@ -86,13 +90,13 @@ class PerformanceReport(BaseModel):
             raise ValueError(f"report_date must be ISO format, got: {v}")
         return v
 
-    @field_validator('overall_mae', 'overall_rmse')
+    @field_validator("overall_mae", "overall_rmse")
     @classmethod
     def round_to_one_decimal(cls, v: float) -> float:
         """Round metrics to one decimal place for readability."""
         return round(v, 1)
 
-    @field_validator('overall_categorical')
+    @field_validator("overall_categorical")
     @classmethod
     def round_to_two_decimals(cls, v: float) -> float:
         """Round accuracy to two decimal places."""
@@ -166,7 +170,7 @@ class ValidationFeedback:
                 overall_row = cursor.fetchone()
 
                 # Check if we have any data
-                total_validations = overall_row['total_validations'] if overall_row else 0
+                total_validations = overall_row["total_validations"] if overall_row else 0
                 if total_validations == 0:
                     logger.info(f"No validations found in last {self.lookback_days} days")
                     return self._empty_report()
@@ -195,12 +199,12 @@ class ValidationFeedback:
                 shore_performance = []
                 for row in shore_rows:
                     shore_perf = ShorePerformance(
-                        shore=row['shore'],
-                        validation_count=row['validation_count'],
-                        avg_mae=row['avg_mae'] or 0.0,
-                        avg_rmse=row['avg_rmse'] or 0.0,
-                        avg_bias=row['avg_bias'] or 0.0,
-                        categorical_accuracy=row['categorical_accuracy'] or 0.0
+                        shore=row["shore"],
+                        validation_count=row["validation_count"],
+                        avg_mae=row["avg_mae"] or 0.0,
+                        avg_rmse=row["avg_rmse"] or 0.0,
+                        avg_bias=row["avg_bias"] or 0.0,
+                        categorical_accuracy=row["categorical_accuracy"] or 0.0,
                     )
                     shore_performance.append(shore_perf)
 
@@ -208,11 +212,11 @@ class ValidationFeedback:
                 report = PerformanceReport(
                     report_date=datetime.now().isoformat(),
                     lookback_days=self.lookback_days,
-                    overall_mae=overall_row['avg_mae'] or 0.0,
-                    overall_rmse=overall_row['avg_rmse'] or 0.0,
-                    overall_categorical=overall_row['categorical_accuracy'] or 0.0,
+                    overall_mae=overall_row["avg_mae"] or 0.0,
+                    overall_rmse=overall_row["avg_rmse"] or 0.0,
+                    overall_categorical=overall_row["categorical_accuracy"] or 0.0,
                     shore_performance=shore_performance,
-                    has_recent_data=True
+                    has_recent_data=True,
                 )
 
                 logger.info(
@@ -239,7 +243,7 @@ class ValidationFeedback:
             overall_rmse=0.0,
             overall_categorical=0.0,
             shore_performance=[],
-            has_recent_data=False
+            has_recent_data=False,
         )
 
     def generate_prompt_context(self, report: PerformanceReport) -> str:
@@ -295,9 +299,7 @@ class ValidationFeedback:
             for sp in report.shore_performance:
                 bias_desc = self._describe_bias(sp.avg_bias)
                 bias_warning = " ⚠️" if abs(sp.avg_bias) > 0.5 else ""
-                lines.append(
-                    f"- {sp.shore}: MAE {sp.avg_mae:.1f} ft, {bias_desc}{bias_warning}"
-                )
+                lines.append(f"- {sp.shore}: MAE {sp.avg_mae:.1f} ft, {bias_desc}{bias_warning}")
             lines.append("")
 
         # Adaptive guidance
@@ -334,7 +336,7 @@ class ValidationFeedback:
             else:
                 return f"underpredicting ({bias:.1f} ft avg bias)"
 
-    def _generate_guidance(self, report: PerformanceReport) -> List[str]:
+    def _generate_guidance(self, report: PerformanceReport) -> list[str]:
         """
         Generate actionable guidance based on performance metrics.
 
@@ -386,4 +388,4 @@ class ValidationFeedback:
         return guidance
 
 
-__all__ = ['ValidationFeedback', 'PerformanceReport', 'ShorePerformance']
+__all__ = ["ValidationFeedback", "PerformanceReport", "ShorePerformance"]

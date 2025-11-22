@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base_agent import BaseAgent
 
@@ -17,10 +17,10 @@ class ClimatologySource:
     source_id: str
     url: str
     format: str = "text"
-    description: Optional[str] = None
+    description: str | None = None
 
     @classmethod
-    def from_dict(cls, raw: Dict[str, Any]) -> "ClimatologySource":
+    def from_dict(cls, raw: dict[str, Any]) -> ClimatologySource:
         if not isinstance(raw, dict):  # pragma: no cover - defensive guard
             raise ValueError("Climatology entries must be dictionaries")
 
@@ -37,26 +37,23 @@ class ClimatologySource:
         return cls(source_id=source_id, url=url, format=fmt, description=description)
 
     def filename(self) -> str:
-        suffix = {
-            'json': '.json',
-            'csv': '.csv',
-            'html': '.html',
-            'text': '.txt'
-        }.get(self.format, '.dat')
+        suffix = {"json": ".json", "csv": ".csv", "html": ".html", "text": ".txt"}.get(
+            self.format, ".dat"
+        )
         return f"{self.source_id}{suffix}"
 
 
 class ClimatologyAgent(BaseAgent):
     """Collect textual/statistical climate references for context enrichment."""
 
-    async def collect(self, data_dir: Path) -> List[Dict[str, Any]]:
+    async def collect(self, data_dir: Path) -> list[dict[str, Any]]:
         data_dir.mkdir(exist_ok=True)
         config = self.config.get("data_sources", "climatology", {})
         sources_cfg = []
         if isinstance(config, dict):
             sources_cfg = config.get("sources", [])
 
-        sources: List[ClimatologySource] = []
+        sources: list[ClimatologySource] = []
         for entry in sources_cfg:
             try:
                 sources.append(ClimatologySource.from_dict(entry))
@@ -70,7 +67,7 @@ class ClimatologyAgent(BaseAgent):
         output_dir = data_dir / "climatology"
         output_dir.mkdir(exist_ok=True)
 
-        metadata: List[Dict[str, Any]] = []
+        metadata: list[dict[str, Any]] = []
         await self.ensure_http_client()
 
         for source in sources:
@@ -83,7 +80,7 @@ class ClimatologyAgent(BaseAgent):
                         data_type="unknown",
                         source_url=source.url,
                         error=result.error or "download_failed",
-                        status_code=result.status_code
+                        status_code=result.status_code,
                     )
                 )
                 continue
@@ -99,48 +96,49 @@ class ClimatologyAgent(BaseAgent):
                         description="Failed to persist climatology payload",
                         data_type="unknown",
                         source_url=source.url,
-                        error=str(exc)
+                        error=str(exc),
                     )
                 )
 
         return metadata
 
     async def _persist_payload(
-        self,
-        output_dir: Path,
-        source: ClimatologySource,
-        content: bytes
-    ) -> Dict[str, Any]:
+        self, output_dir: Path, source: ClimatologySource, content: bytes
+    ) -> dict[str, Any]:
         """Persist fetched climatology payload according to format."""
 
-        text = content.decode('utf-8', errors='ignore')
+        text = content.decode("utf-8", errors="ignore")
         file_path = output_dir / source.filename()
-        summary: Dict[str, Any] = {}
+        summary: dict[str, Any] = {}
 
-        if source.format == 'json':
+        if source.format == "json":
             data = json.loads(text)
-            with open(file_path, 'w') as fh:
+            with open(file_path, "w") as fh:
                 json.dump(data, fh, indent=2, ensure_ascii=False)
-            summary['record_count'] = len(data) if isinstance(data, list) else len(data.keys()) if isinstance(data, dict) else 0
-            data_type = 'json'
+            summary["record_count"] = (
+                len(data)
+                if isinstance(data, list)
+                else len(data.keys()) if isinstance(data, dict) else 0
+            )
+            data_type = "json"
 
-        elif source.format == 'csv':
-            with open(file_path, 'w') as fh:
+        elif source.format == "csv":
+            with open(file_path, "w") as fh:
                 fh.write(text)
-            summary['line_count'] = text.count('\n') + 1
-            data_type = 'csv'
+            summary["line_count"] = text.count("\n") + 1
+            data_type = "csv"
 
-        elif source.format == 'html':
-            with open(file_path, 'w') as fh:
+        elif source.format == "html":
+            with open(file_path, "w") as fh:
                 fh.write(text)
-            summary['character_count'] = len(text)
-            data_type = 'html'
+            summary["character_count"] = len(text)
+            data_type = "html"
 
         else:
-            with open(file_path, 'w') as fh:
+            with open(file_path, "w") as fh:
                 fh.write(text)
-            summary['line_count'] = text.count('\n') + 1
-            data_type = 'text'
+            summary["line_count"] = text.count("\n") + 1
+            data_type = "text"
 
         metadata = self.create_metadata(
             name=file_path.name,
@@ -150,7 +148,7 @@ class ClimatologyAgent(BaseAgent):
             file_path=str(file_path),
             size_bytes=file_path.stat().st_size,
             source_id=source.source_id,
-            format=source.format
+            format=source.format,
         )
         metadata.update(summary)
         return metadata

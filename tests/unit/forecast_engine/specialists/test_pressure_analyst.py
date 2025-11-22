@@ -16,29 +16,29 @@ Test Structure:
 - Isolated tests (no interdependencies)
 """
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, timedelta
-from typing import Dict, Any, List
-from pathlib import Path
 import json
-import tempfile
 import os
+import tempfile
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from src.forecast_engine.specialists.pressure_analyst import PressureAnalyst
 from src.forecast_engine.specialists.schemas import (
-    PressureAnalystOutput,
-    WeatherSystem,
-    PredictedSwell,
-    FrontalBoundary,
     AnalysisSummary,
-    FetchWindow,
-    SystemType,
-    FrontType,
     FetchQuality,
-    IntensificationTrend
+    FetchWindow,
+    FrontalBoundary,
+    FrontType,
+    IntensificationTrend,
+    PredictedSwell,
+    PressureAnalystOutput,
+    SystemType,
+    WeatherSystem,
 )
-
 
 # =============================================================================
 # FIXTURES
@@ -49,7 +49,7 @@ from src.forecast_engine.specialists.schemas import (
 def mock_config():
     """Create a mock configuration object."""
     config = Mock()
-    config.get.return_value = 'fake-api-key'
+    config.get.return_value = "fake-api-key"
     config.getint.return_value = 3000
     return config
 
@@ -66,61 +66,57 @@ def mock_engine():
 @pytest.fixture
 def pressure_analyst(mock_config, mock_engine):
     """Create a PressureAnalyst instance with mocked dependencies."""
-    return PressureAnalyst(config=mock_config, model_name='gpt-4o', engine=mock_engine)
+    return PressureAnalyst(config=mock_config, model_name="gpt-4o", engine=mock_engine)
 
 
 @pytest.fixture
 def sample_vision_response():
     """Create sample vision API response with complete data."""
     return {
-        'systems': [
+        "systems": [
             {
-                'type': 'low_pressure',
-                'location': '45N 160W',
-                'location_lat': 45.0,
-                'location_lon': -160.0,
-                'pressure_mb': 990,
-                'wind_speed_kt': 50,
-                'movement': 'SE at 25kt',
-                'intensification': 'strengthening',
-                'generation_time': '2025-10-08T12:00Z',
-                'fetch': {
-                    'direction': 'NNE',
-                    'distance_nm': 800.0,
-                    'duration_hrs': 36.0,
-                    'fetch_length_nm': 500.0,
-                    'quality': 'strong'
-                }
+                "type": "low_pressure",
+                "location": "45N 160W",
+                "location_lat": 45.0,
+                "location_lon": -160.0,
+                "pressure_mb": 990,
+                "wind_speed_kt": 50,
+                "movement": "SE at 25kt",
+                "intensification": "strengthening",
+                "generation_time": "2025-10-08T12:00Z",
+                "fetch": {
+                    "direction": "NNE",
+                    "distance_nm": 800.0,
+                    "duration_hrs": 36.0,
+                    "fetch_length_nm": 500.0,
+                    "quality": "strong",
+                },
             }
         ],
-        'predicted_swells': [
+        "predicted_swells": [
             {
-                'source_system': 'low_45N_160W',
-                'source_lat': 45.0,
-                'source_lon': -160.0,
-                'direction': 'NNE',
-                'direction_degrees': 22,
-                'arrival_time': '2025-10-10T10:00-12:00Z',
-                'estimated_height': '7-9ft',
-                'estimated_period': '13-15s',
-                'confidence': 0.75
+                "source_system": "low_45N_160W",
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "direction": "NNE",
+                "direction_degrees": 22,
+                "arrival_time": "2025-10-10T10:00-12:00Z",
+                "estimated_height": "7-9ft",
+                "estimated_period": "13-15s",
+                "confidence": 0.75,
             }
         ],
-        'frontal_boundaries': [
-            {
-                'type': 'cold_front',
-                'location': 'approaching from NW',
-                'timing': '2025-10-09T18:00Z'
-            }
-        ]
+        "frontal_boundaries": [
+            {"type": "cold_front", "location": "approaching from NW", "timing": "2025-10-09T18:00Z"}
+        ],
     }
 
 
 @pytest.fixture
 def temp_image_file():
     """Create a temporary image file for testing."""
-    with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
-        tmp.write(b'fake image data')
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+        tmp.write(b"fake image data")
         tmp_path = tmp.name
 
     yield tmp_path
@@ -139,7 +135,9 @@ class TestPressureAnalystVisionAPI:
     """Tests for vision API parsing functionality."""
 
     @pytest.mark.asyncio
-    async def test_analyze_with_vision_successful_analysis(self, pressure_analyst, temp_image_file, sample_vision_response):
+    async def test_analyze_with_vision_successful_analysis(
+        self, pressure_analyst, temp_image_file, sample_vision_response
+    ):
         """Test successful pressure chart analysis via vision API."""
         # Arrange
         pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(
@@ -147,62 +145,91 @@ class TestPressureAnalystVisionAPI:
         )
 
         # Act
-        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], 'North Pacific')
+        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], "North Pacific")
 
         # Assert
-        assert 'systems' in result
-        assert 'predicted_swells' in result
-        assert 'frontal_boundaries' in result
-        assert len(result['systems']) == 1
-        assert len(result['predicted_swells']) == 1
-        assert result['systems'][0]['type'] == 'low_pressure'
+        assert "systems" in result
+        assert "predicted_swells" in result
+        assert "frontal_boundaries" in result
+        assert len(result["systems"]) == 1
+        assert len(result["predicted_swells"]) == 1
+        assert result["systems"][0]["type"] == "low_pressure"
 
     @pytest.mark.asyncio
-    async def test_analyze_with_vision_multiple_low_pressure_systems(self, pressure_analyst, temp_image_file):
+    async def test_analyze_with_vision_multiple_low_pressure_systems(
+        self, pressure_analyst, temp_image_file
+    ):
         """Test detection of multiple low-pressure systems."""
         # Arrange
         multi_system_response = {
-            'systems': [
-                {'type': 'low_pressure', 'location': '45N 160W', 'location_lat': 45.0, 'location_lon': -160.0,
-                 'pressure_mb': 990, 'movement': 'E at 30kt', 'intensification': 'strengthening'},
-                {'type': 'low_pressure', 'location': '50N 170W', 'location_lat': 50.0, 'location_lon': -170.0,
-                 'pressure_mb': 980, 'movement': 'SE at 20kt', 'intensification': 'steady'},
-                {'type': 'high_pressure', 'location': '35N 150W', 'location_lat': 35.0, 'location_lon': -150.0,
-                 'pressure_mb': 1025, 'movement': 'stationary', 'intensification': 'steady'}
+            "systems": [
+                {
+                    "type": "low_pressure",
+                    "location": "45N 160W",
+                    "location_lat": 45.0,
+                    "location_lon": -160.0,
+                    "pressure_mb": 990,
+                    "movement": "E at 30kt",
+                    "intensification": "strengthening",
+                },
+                {
+                    "type": "low_pressure",
+                    "location": "50N 170W",
+                    "location_lat": 50.0,
+                    "location_lon": -170.0,
+                    "pressure_mb": 980,
+                    "movement": "SE at 20kt",
+                    "intensification": "steady",
+                },
+                {
+                    "type": "high_pressure",
+                    "location": "35N 150W",
+                    "location_lat": 35.0,
+                    "location_lon": -150.0,
+                    "pressure_mb": 1025,
+                    "movement": "stationary",
+                    "intensification": "steady",
+                },
             ],
-            'predicted_swells': [],
-            'frontal_boundaries': []
+            "predicted_swells": [],
+            "frontal_boundaries": [],
         }
         pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(
             return_value=json.dumps(multi_system_response)
         )
 
         # Act
-        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], 'North Pacific')
+        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], "North Pacific")
 
         # Assert
-        assert len(result['systems']) == 3
-        low_pressure_systems = [s for s in result['systems'] if s['type'] == 'low_pressure']
+        assert len(result["systems"]) == 3
+        low_pressure_systems = [s for s in result["systems"] if s["type"] == "low_pressure"]
         assert len(low_pressure_systems) == 2
-        assert result['systems'][0]['pressure_mb'] == 990
-        assert result['systems'][1]['pressure_mb'] == 980
+        assert result["systems"][0]["pressure_mb"] == 990
+        assert result["systems"][1]["pressure_mb"] == 980
 
     @pytest.mark.asyncio
-    async def test_analyze_with_vision_handles_markdown_code_blocks(self, pressure_analyst, temp_image_file, sample_vision_response):
+    async def test_analyze_with_vision_handles_markdown_code_blocks(
+        self, pressure_analyst, temp_image_file, sample_vision_response
+    ):
         """Test handling of markdown-wrapped JSON response."""
         # Arrange: Vision API returns JSON wrapped in markdown code blocks
         markdown_wrapped = f"```json\n{json.dumps(sample_vision_response)}\n```"
-        pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(return_value=markdown_wrapped)
+        pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(
+            return_value=markdown_wrapped
+        )
 
         # Act
-        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], 'North Pacific')
+        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], "North Pacific")
 
         # Assert: Successfully parsed despite markdown wrapping
-        assert 'systems' in result
-        assert len(result['systems']) == 1
+        assert "systems" in result
+        assert len(result["systems"]) == 1
 
     @pytest.mark.asyncio
-    async def test_analyze_with_vision_invalid_json_returns_empty(self, pressure_analyst, temp_image_file):
+    async def test_analyze_with_vision_invalid_json_returns_empty(
+        self, pressure_analyst, temp_image_file
+    ):
         """Test that invalid JSON returns empty structures."""
         # Arrange: Vision API returns invalid JSON
         pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(
@@ -210,17 +237,15 @@ class TestPressureAnalystVisionAPI:
         )
 
         # Act
-        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], 'North Pacific')
+        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], "North Pacific")
 
         # Assert: Returns empty structures instead of crashing
-        assert result == {
-            'systems': [],
-            'predicted_swells': [],
-            'frontal_boundaries': []
-        }
+        assert result == {"systems": [], "predicted_swells": [], "frontal_boundaries": []}
 
     @pytest.mark.asyncio
-    async def test_analyze_with_vision_api_error_returns_empty(self, pressure_analyst, temp_image_file):
+    async def test_analyze_with_vision_api_error_returns_empty(
+        self, pressure_analyst, temp_image_file
+    ):
         """Test that vision API errors return empty structures."""
         # Arrange: Vision API raises exception
         pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(
@@ -228,42 +253,38 @@ class TestPressureAnalystVisionAPI:
         )
 
         # Act
-        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], 'North Pacific')
+        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], "North Pacific")
 
         # Assert: Returns empty structures gracefully
-        assert result == {
-            'systems': [],
-            'predicted_swells': [],
-            'frontal_boundaries': []
-        }
+        assert result == {"systems": [], "predicted_swells": [], "frontal_boundaries": []}
 
     @pytest.mark.asyncio
-    async def test_analyze_with_vision_empty_response_returns_empty(self, pressure_analyst, temp_image_file):
+    async def test_analyze_with_vision_empty_response_returns_empty(
+        self, pressure_analyst, temp_image_file
+    ):
         """Test handling of empty/None response from vision API."""
         # Arrange: Vision API returns None
         pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(return_value=None)
 
         # Act
-        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], 'North Pacific')
+        result = await pressure_analyst._analyze_with_vision([temp_image_file], [], "North Pacific")
 
         # Assert
-        assert result == {
-            'systems': [],
-            'predicted_swells': [],
-            'frontal_boundaries': []
-        }
+        assert result == {"systems": [], "predicted_swells": [], "frontal_boundaries": []}
 
     @pytest.mark.asyncio
-    async def test_analyze_with_vision_includes_chart_times_in_prompt(self, pressure_analyst, temp_image_file, sample_vision_response):
+    async def test_analyze_with_vision_includes_chart_times_in_prompt(
+        self, pressure_analyst, temp_image_file, sample_vision_response
+    ):
         """Test that chart timestamps are included in the prompt."""
         # Arrange
-        chart_times = ['2025-10-08T00:00Z', '2025-10-08T06:00Z', '2025-10-08T12:00Z']
+        chart_times = ["2025-10-08T00:00Z", "2025-10-08T06:00Z", "2025-10-08T12:00Z"]
         pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(
             return_value=json.dumps(sample_vision_response)
         )
 
         # Act
-        await pressure_analyst._analyze_with_vision([temp_image_file], chart_times, 'North Pacific')
+        await pressure_analyst._analyze_with_vision([temp_image_file], chart_times, "North Pacific")
 
         # Assert: Check that call was made (timestamps would be in prompt)
         assert pressure_analyst.engine.openai_client.call_openai_api.called
@@ -271,14 +292,16 @@ class TestPressureAnalystVisionAPI:
         assert call_args is not None
 
     @pytest.mark.asyncio
-    async def test_analyze_with_vision_multiple_images(self, pressure_analyst, sample_vision_response):
+    async def test_analyze_with_vision_multiple_images(
+        self, pressure_analyst, sample_vision_response
+    ):
         """Test processing multiple pressure chart images."""
         # Arrange: Create multiple temporary images
-        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp1:
-            tmp1.write(b'image1')
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp1:
+            tmp1.write(b"image1")
             img1 = tmp1.name
-        with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp2:
-            tmp2.write(b'image2')
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp2:
+            tmp2.write(b"image2")
             img2 = tmp2.name
 
         try:
@@ -287,10 +310,10 @@ class TestPressureAnalystVisionAPI:
             )
 
             # Act
-            result = await pressure_analyst._analyze_with_vision([img1, img2], [], 'North Pacific')
+            result = await pressure_analyst._analyze_with_vision([img1, img2], [], "North Pacific")
 
             # Assert: Both images processed successfully
-            assert 'systems' in result
+            assert "systems" in result
             assert pressure_analyst.engine.openai_client.call_openai_api.called
         finally:
             # Cleanup
@@ -306,249 +329,281 @@ class TestPressureAnalystVisionAPI:
 class TestPressureAnalystSwellPredictions:
     """Tests for swell prediction enhancement functionality."""
 
-    def test_enhance_swell_predictions_calculates_travel_time(self, pressure_analyst, sample_vision_response):
+    def test_enhance_swell_predictions_calculates_travel_time(
+        self, pressure_analyst, sample_vision_response
+    ):
         """Test travel time calculation for storm-generated swell."""
         # Arrange
-        swells = sample_vision_response['predicted_swells']
-        systems = sample_vision_response['systems']
+        swells = sample_vision_response["predicted_swells"]
+        systems = sample_vision_response["systems"]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert
         assert len(enhanced) == 1
-        assert 'travel_time_hrs' in enhanced[0]
-        assert 'distance_nm' in enhanced[0]
-        assert 'calculated_arrival' in enhanced[0]
-        assert enhanced[0]['travel_time_hrs'] > 0
-        assert enhanced[0]['distance_nm'] > 0
+        assert "travel_time_hrs" in enhanced[0]
+        assert "distance_nm" in enhanced[0]
+        assert "calculated_arrival" in enhanced[0]
+        assert enhanced[0]["travel_time_hrs"] > 0
+        assert enhanced[0]["distance_nm"] > 0
 
     def test_enhance_swell_predictions_matches_source_system(self, pressure_analyst):
         """Test matching of swells to their source systems."""
         # Arrange
-        systems = [{
-            'type': 'low_pressure',
-            'location': '45N 160W',
-            'location_lat': 45.0,
-            'location_lon': -160.0,
-            'pressure_mb': 990,
-            'wind_speed_kt': 50,
-            'movement': 'SE at 25kt',
-            'intensification': 'strengthening',
-            'fetch': {
-                'quality': 'strong',
-                'duration_hrs': 36.0,
-                'fetch_length_nm': 500.0
+        systems = [
+            {
+                "type": "low_pressure",
+                "location": "45N 160W",
+                "location_lat": 45.0,
+                "location_lon": -160.0,
+                "pressure_mb": 990,
+                "wind_speed_kt": 50,
+                "movement": "SE at 25kt",
+                "intensification": "strengthening",
+                "fetch": {"quality": "strong", "duration_hrs": 36.0, "fetch_length_nm": 500.0},
             }
-        }]
-        swells = [{
-            'source_system': 'low_45n_160w',
-            'source_lat': 45.0,
-            'source_lon': -160.0,
-            'direction': 'NNE',
-            'estimated_period': '14s',
-            'confidence': 0.8
-        }]
+        ]
+        swells = [
+            {
+                "source_system": "low_45n_160w",
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "direction": "NNE",
+                "estimated_period": "14s",
+                "confidence": 0.8,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert: Fetch quality added from matched system
-        assert enhanced[0]['fetch_quality'] == 'strong'
-        assert enhanced[0]['fetch_duration_hrs'] == 36.0
-        assert enhanced[0]['fetch_length_nm'] == 500.0
+        assert enhanced[0]["fetch_quality"] == "strong"
+        assert enhanced[0]["fetch_duration_hrs"] == 36.0
+        assert enhanced[0]["fetch_length_nm"] == 500.0
 
     def test_enhance_swell_predictions_adds_source_characteristics(self, pressure_analyst):
         """Test that source system characteristics are added to swell."""
         # Arrange
-        systems = [{
-            'type': 'low_pressure',
-            'location': '45N 160W',
-            'location_lat': 45.0,
-            'location_lon': -160.0,
-            'pressure_mb': 985,
-            'wind_speed_kt': 55,
-            'movement': 'E at 30kt',
-            'intensification': 'strengthening'
-        }]
-        swells = [{
-            'source_system': 'low_45N_160W',
-            'source_lat': 45.0,
-            'source_lon': -160.0,
-            'estimated_period': '15s',
-            'confidence': 0.7
-        }]
+        systems = [
+            {
+                "type": "low_pressure",
+                "location": "45N 160W",
+                "location_lat": 45.0,
+                "location_lon": -160.0,
+                "pressure_mb": 985,
+                "wind_speed_kt": 55,
+                "movement": "E at 30kt",
+                "intensification": "strengthening",
+            }
+        ]
+        swells = [
+            {
+                "source_system": "low_45N_160W",
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "estimated_period": "15s",
+                "confidence": 0.7,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert
-        assert enhanced[0]['source_pressure_mb'] == 985
-        assert enhanced[0]['source_wind_speed_kt'] == 55
-        assert enhanced[0]['source_trend'] == 'strengthening'
+        assert enhanced[0]["source_pressure_mb"] == 985
+        assert enhanced[0]["source_wind_speed_kt"] == 55
+        assert enhanced[0]["source_trend"] == "strengthening"
 
     def test_enhance_swell_predictions_period_range_handling(self, pressure_analyst):
         """Test handling of period ranges (e.g., '13-15s')."""
         # Arrange
-        systems = [{
-            'type': 'low_pressure',
-            'location_lat': 45.0,
-            'location_lon': -160.0,
-            'generation_time': '2025-10-08T12:00Z'
-        }]
-        swells = [{
-            'source_system': 'test',
-            'source_lat': 45.0,
-            'source_lon': -160.0,
-            'estimated_period': '13-15s',  # Period range
-            'confidence': 0.8
-        }]
+        systems = [
+            {
+                "type": "low_pressure",
+                "location_lat": 45.0,
+                "location_lon": -160.0,
+                "generation_time": "2025-10-08T12:00Z",
+            }
+        ]
+        swells = [
+            {
+                "source_system": "test",
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "estimated_period": "13-15s",  # Period range
+                "confidence": 0.8,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert: Average period used for calculation (14s)
-        assert 'travel_time_hrs' in enhanced[0]
-        assert enhanced[0]['travel_time_hrs'] > 0
+        assert "travel_time_hrs" in enhanced[0]
+        assert enhanced[0]["travel_time_hrs"] > 0
 
     def test_enhance_swell_predictions_single_period_value(self, pressure_analyst):
         """Test handling of single period value (e.g., '14s')."""
         # Arrange
-        systems = [{
-            'type': 'low_pressure',
-            'location_lat': 45.0,
-            'location_lon': -160.0,
-            'generation_time': '2025-10-08T12:00Z'
-        }]
-        swells = [{
-            'source_system': 'test',
-            'source_lat': 45.0,
-            'source_lon': -160.0,
-            'estimated_period': '14s',  # Single value
-            'confidence': 0.8
-        }]
+        systems = [
+            {
+                "type": "low_pressure",
+                "location_lat": 45.0,
+                "location_lon": -160.0,
+                "generation_time": "2025-10-08T12:00Z",
+            }
+        ]
+        swells = [
+            {
+                "source_system": "test",
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "estimated_period": "14s",  # Single value
+                "confidence": 0.8,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert
-        assert 'travel_time_hrs' in enhanced[0]
-        assert enhanced[0]['travel_time_hrs'] > 0
+        assert "travel_time_hrs" in enhanced[0]
+        assert enhanced[0]["travel_time_hrs"] > 0
 
     def test_enhance_swell_predictions_no_matching_system(self, pressure_analyst):
         """Test swell enhancement when no matching source system found."""
         # Arrange
-        systems = [{
-            'type': 'low_pressure',
-            'location': '50N 170W',
-            'location_lat': 50.0,
-            'location_lon': -170.0
-        }]
-        swells = [{
-            'source_system': 'low_45N_160W',  # Doesn't match
-            'source_lat': 45.0,
-            'source_lon': -160.0,
-            'estimated_period': '14s',
-            'confidence': 0.7
-        }]
+        systems = [
+            {
+                "type": "low_pressure",
+                "location": "50N 170W",
+                "location_lat": 50.0,
+                "location_lon": -170.0,
+            }
+        ]
+        swells = [
+            {
+                "source_system": "low_45N_160W",  # Doesn't match
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "estimated_period": "14s",
+                "confidence": 0.7,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert: Physics calculations still work with coordinates
         assert len(enhanced) == 1
-        assert 'travel_time_hrs' in enhanced[0]
+        assert "travel_time_hrs" in enhanced[0]
 
     def test_enhance_swell_predictions_missing_coordinates(self, pressure_analyst):
         """Test enhancement when swell lacks source coordinates."""
         # Arrange
         systems = []
-        swells = [{
-            'source_system': 'unknown',
-            # No source_lat or source_lon
-            'estimated_period': '14s',
-            'confidence': 0.5
-        }]
+        swells = [
+            {
+                "source_system": "unknown",
+                # No source_lat or source_lon
+                "estimated_period": "14s",
+                "confidence": 0.5,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert: Gracefully handles missing coordinates
         assert len(enhanced) == 1
-        assert 'travel_time_hrs' not in enhanced[0]  # Can't calculate without coords
+        assert "travel_time_hrs" not in enhanced[0]  # Can't calculate without coords
 
     def test_enhance_swell_predictions_uses_generation_time(self, pressure_analyst):
         """Test that generation_time from system is used for arrival calculation."""
         # Arrange
-        systems = [{
-            'type': 'low_pressure',
-            'location_lat': 45.0,
-            'location_lon': -160.0,
-            'generation_time': '2025-10-08T12:00Z'
-        }]
-        swells = [{
-            'source_system': 'low_pressure',
-            'source_lat': 45.0,
-            'source_lon': -160.0,
-            'estimated_period': '14s',
-            'confidence': 0.8
-        }]
+        systems = [
+            {
+                "type": "low_pressure",
+                "location_lat": 45.0,
+                "location_lon": -160.0,
+                "generation_time": "2025-10-08T12:00Z",
+            }
+        ]
+        swells = [
+            {
+                "source_system": "low_pressure",
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "estimated_period": "14s",
+                "confidence": 0.8,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert: Calculated arrival includes generation time
-        assert 'calculated_arrival' in enhanced[0]
-        arrival = datetime.fromisoformat(enhanced[0]['calculated_arrival'].replace('Z', '+00:00'))
-        generation = datetime.fromisoformat('2025-10-08T12:00+00:00')
+        assert "calculated_arrival" in enhanced[0]
+        arrival = datetime.fromisoformat(enhanced[0]["calculated_arrival"].replace("Z", "+00:00"))
+        generation = datetime.fromisoformat("2025-10-08T12:00+00:00")
         assert arrival > generation
 
     def test_enhance_swell_predictions_fallback_to_current_time(self, pressure_analyst):
         """Test fallback to current time when generation_time missing."""
         # Arrange
-        systems = [{
-            'type': 'low_pressure',
-            'location_lat': 45.0,
-            'location_lon': -160.0
-            # No generation_time
-        }]
-        swells = [{
-            'source_system': 'low_pressure',
-            'source_lat': 45.0,
-            'source_lon': -160.0,
-            'estimated_period': '14s',
-            'confidence': 0.8
-        }]
+        systems = [
+            {
+                "type": "low_pressure",
+                "location_lat": 45.0,
+                "location_lon": -160.0,
+                # No generation_time
+            }
+        ]
+        swells = [
+            {
+                "source_system": "low_pressure",
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "estimated_period": "14s",
+                "confidence": 0.8,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert: Still calculates arrival (uses current time as fallback)
-        assert 'calculated_arrival' in enhanced[0]
-        assert 'travel_time_hrs' in enhanced[0]
+        assert "calculated_arrival" in enhanced[0]
+        assert "travel_time_hrs" in enhanced[0]
 
     def test_enhance_swell_predictions_propagation_method_flag(self, pressure_analyst):
         """Test that propagation_method flag is set correctly."""
         # Arrange
-        systems = [{
-            'type': 'low_pressure',
-            'location_lat': 45.0,
-            'location_lon': -160.0,
-            'generation_time': '2025-10-08T12:00Z'
-        }]
-        swells = [{
-            'source_system': 'test',
-            'source_lat': 45.0,
-            'source_lon': -160.0,
-            'estimated_period': '14s',
-            'confidence': 0.8
-        }]
+        systems = [
+            {
+                "type": "low_pressure",
+                "location_lat": 45.0,
+                "location_lon": -160.0,
+                "generation_time": "2025-10-08T12:00Z",
+            }
+        ]
+        swells = [
+            {
+                "source_system": "test",
+                "source_lat": 45.0,
+                "source_lon": -160.0,
+                "estimated_period": "14s",
+                "confidence": 0.8,
+            }
+        ]
 
         # Act
         enhanced = pressure_analyst._enhance_swell_predictions(swells, systems)
 
         # Assert
-        assert enhanced[0]['propagation_method'] == 'physics_based'
+        assert enhanced[0]["propagation_method"] == "physics_based"
 
 
 # =============================================================================
@@ -624,11 +679,9 @@ class TestPressureAnalystConfidence:
         """Test high confidence with 6+ images and strong fetch."""
         # Arrange
         num_images = 6
-        systems = [{
-            'fetch': {'quality': 'strong'}
-        }]
-        swells = [{'confidence': 0.8}]
-        chart_times = [f'2025-10-08T{i:02d}:00Z' for i in range(6)]
+        systems = [{"fetch": {"quality": "strong"}}]
+        swells = [{"confidence": 0.8}]
+        chart_times = [f"2025-10-08T{i:02d}:00Z" for i in range(6)]
 
         # Act
         confidence = pressure_analyst._calculate_analysis_confidence(
@@ -643,11 +696,9 @@ class TestPressureAnalystConfidence:
         """Test medium confidence with 4 images and moderate fetch."""
         # Arrange
         num_images = 4
-        systems = [{
-            'fetch': {'quality': 'moderate'}
-        }]
-        swells = [{'confidence': 0.6}]
-        chart_times = [f'2025-10-08T{i*6:02d}:00Z' for i in range(4)]
+        systems = [{"fetch": {"quality": "moderate"}}]
+        swells = [{"confidence": 0.6}]
+        chart_times = [f"2025-10-08T{i*6:02d}:00Z" for i in range(4)]
 
         # Act
         confidence = pressure_analyst._calculate_analysis_confidence(
@@ -661,10 +712,8 @@ class TestPressureAnalystConfidence:
         """Test low confidence with single image and weak fetch."""
         # Arrange
         num_images = 1
-        systems = [{
-            'fetch': {'quality': 'weak'}
-        }]
-        swells = [{'confidence': 0.3}]
+        systems = [{"fetch": {"quality": "weak"}}]
+        swells = [{"confidence": 0.3}]
         chart_times = []
 
         # Act
@@ -697,12 +746,12 @@ class TestPressureAnalystConfidence:
         """Test 10% confidence bonus for good temporal coverage (>24hr span)."""
         # Arrange: 8 images spanning 48 hours
         num_images = 8
-        systems = [{'fetch': {'quality': 'strong'}}]
-        swells = [{'confidence': 0.7}]
+        systems = [{"fetch": {"quality": "strong"}}]
+        swells = [{"confidence": 0.7}]
 
         # Chart times spanning 48 hours
         base_time = datetime(2025, 10, 8, 0, 0)
-        chart_times = [(base_time + timedelta(hours=i*6)).isoformat() + 'Z' for i in range(8)]
+        chart_times = [(base_time + timedelta(hours=i * 6)).isoformat() + "Z" for i in range(8)]
 
         # Act
         confidence = pressure_analyst._calculate_analysis_confidence(
@@ -733,12 +782,12 @@ class TestPressureAnalystImageValidation:
     def test_validate_image_paths_accepts_multiple_formats(self, pressure_analyst):
         """Test validation accepts various image formats."""
         # Arrange: Create multiple image files with different formats
-        formats = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+        formats = [".png", ".jpg", ".jpeg", ".gif", ".webp"]
         temp_files = []
 
         for fmt in formats:
             with tempfile.NamedTemporaryFile(suffix=fmt, delete=False) as tmp:
-                tmp.write(b'image data')
+                tmp.write(b"image data")
                 temp_files.append(tmp.name)
 
         try:
@@ -755,7 +804,7 @@ class TestPressureAnalystImageValidation:
     def test_validate_image_paths_rejects_nonexistent_file(self, pressure_analyst):
         """Test validation rejects non-existent files."""
         # Arrange
-        nonexistent_path = '/nonexistent/image.png'
+        nonexistent_path = "/nonexistent/image.png"
 
         # Act
         valid_paths = pressure_analyst._validate_image_paths([nonexistent_path])
@@ -766,8 +815,8 @@ class TestPressureAnalystImageValidation:
     def test_validate_image_paths_rejects_non_image_format(self, pressure_analyst):
         """Test validation rejects non-image file formats."""
         # Arrange: Create .txt file
-        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as tmp:
-            tmp.write(b'not an image')
+        with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as tmp:
+            tmp.write(b"not an image")
             txt_path = tmp.name
 
         try:
@@ -780,13 +829,15 @@ class TestPressureAnalystImageValidation:
             # Cleanup
             os.unlink(txt_path)
 
-    def test_validate_image_paths_filters_mixed_valid_invalid(self, pressure_analyst, temp_image_file):
+    def test_validate_image_paths_filters_mixed_valid_invalid(
+        self, pressure_analyst, temp_image_file
+    ):
         """Test validation filters mixed valid/invalid paths."""
         # Arrange: Mix of valid and invalid paths
         mixed_paths = [
             temp_image_file,  # Valid
-            '/nonexistent/image.png',  # Invalid: doesn't exist
-            '/tmp/document.pdf'  # Invalid: wrong format
+            "/nonexistent/image.png",  # Invalid: doesn't exist
+            "/tmp/document.pdf",  # Invalid: wrong format
         ]
 
         # Act
@@ -806,22 +857,21 @@ class TestPressureAnalystIntegration:
     """Integration tests for complete analyze() workflow."""
 
     @pytest.mark.asyncio
-    async def test_analyze_complete_workflow(self, pressure_analyst, temp_image_file, sample_vision_response):
+    async def test_analyze_complete_workflow(
+        self, pressure_analyst, temp_image_file, sample_vision_response
+    ):
         """Test complete analyze workflow with valid data."""
         # Arrange
         pressure_analyst.engine.openai_client.call_openai_api = AsyncMock(
             side_effect=[
                 json.dumps(sample_vision_response),  # Vision API call
-                "Comprehensive pressure analysis narrative"  # Narrative generation
+                "Comprehensive pressure analysis narrative",  # Narrative generation
             ]
         )
 
         data = {
-            'images': [temp_image_file],
-            'metadata': {
-                'chart_times': ['2025-10-08T00:00Z'],
-                'region': 'North Pacific'
-            }
+            "images": [temp_image_file],
+            "metadata": {"chart_times": ["2025-10-08T00:00Z"], "region": "North Pacific"},
         }
 
         # Act
@@ -835,14 +885,14 @@ class TestPressureAnalystIntegration:
         assert len(result.data.frontal_boundaries) == 1
         assert result.narrative is not None
         assert len(result.narrative) > 0
-        assert 'num_images' in result.metadata
-        assert result.metadata['region'] == 'North Pacific'
+        assert "num_images" in result.metadata
+        assert result.metadata["region"] == "North Pacific"
 
     @pytest.mark.asyncio
     async def test_analyze_missing_images_key_raises_error(self, pressure_analyst):
         """Test analyze raises ValueError for missing 'images' key."""
         # Arrange: Missing 'images' key
-        data = {'wrong_key': []}
+        data = {"wrong_key": []}
 
         # Act & Assert
         with pytest.raises(ValueError, match="Missing required keys"):
@@ -852,7 +902,7 @@ class TestPressureAnalystIntegration:
     async def test_analyze_empty_image_list_raises_error(self, pressure_analyst):
         """Test analyze raises ValueError for empty image list."""
         # Arrange: Empty images list
-        data = {'images': []}
+        data = {"images": []}
 
         # Act & Assert
         with pytest.raises(ValueError, match="must be a non-empty list"):
@@ -862,9 +912,7 @@ class TestPressureAnalystIntegration:
     async def test_analyze_no_valid_images_raises_error(self, pressure_analyst):
         """Test analyze raises ValueError when no valid images found."""
         # Arrange: Only invalid image paths
-        data = {
-            'images': ['/nonexistent/image1.png', '/nonexistent/image2.jpg']
-        }
+        data = {"images": ["/nonexistent/image1.png", "/nonexistent/image2.jpg"]}
 
         # Act & Assert
         with pytest.raises(ValueError, match="No valid image files found"):
@@ -883,15 +931,15 @@ class TestPressureAnalystInitialization:
         """Test that PressureAnalyst requires engine parameter."""
         # Act & Assert: Missing engine raises ValueError
         with pytest.raises(ValueError, match="requires engine parameter"):
-            PressureAnalyst(config=mock_config, model_name='gpt-4o', engine=None)
+            PressureAnalyst(config=mock_config, model_name="gpt-4o", engine=None)
 
     def test_initialization_success(self, mock_config, mock_engine):
         """Test successful initialization with all required parameters."""
         # Act
-        analyst = PressureAnalyst(config=mock_config, model_name='gpt-4o', engine=mock_engine)
+        analyst = PressureAnalyst(config=mock_config, model_name="gpt-4o", engine=mock_engine)
 
         # Assert
-        assert analyst.model_name == 'gpt-4o'
+        assert analyst.model_name == "gpt-4o"
         assert analyst.engine == mock_engine
         assert analyst.hawaii_lat == 21.5
         assert analyst.hawaii_lon == -158.0

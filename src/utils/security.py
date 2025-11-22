@@ -3,13 +3,12 @@ Security utilities for SurfCastAI.
 Provides URL validation, file path sanitization, and other security functions.
 """
 
-import re
 import os
+import re
 import socket
+from ipaddress import ip_address, ip_network
 from pathlib import Path
-from urllib.parse import urlparse, urlunparse, ParseResult
-from typing import Set, Optional, List
-from ipaddress import ip_address, ip_network, IPv4Address, IPv6Address
+from urllib.parse import urlparse, urlunparse
 
 from .exceptions import SecurityError
 
@@ -35,16 +34,15 @@ def is_private_ip(hostname: str) -> bool:
     # Define all private IP ranges
     private_ranges = [
         # IPv4 private ranges
-        ip_network('10.0.0.0/8'),          # RFC 1918 - Class A private network
-        ip_network('172.16.0.0/12'),       # RFC 1918 - Class B private networks
-        ip_network('192.168.0.0/16'),      # RFC 1918 - Class C private networks
-        ip_network('169.254.0.0/16'),      # RFC 3927 - Link-local
-        ip_network('127.0.0.0/8'),         # RFC 1122 - Loopback
-
+        ip_network("10.0.0.0/8"),  # RFC 1918 - Class A private network
+        ip_network("172.16.0.0/12"),  # RFC 1918 - Class B private networks
+        ip_network("192.168.0.0/16"),  # RFC 1918 - Class C private networks
+        ip_network("169.254.0.0/16"),  # RFC 3927 - Link-local
+        ip_network("127.0.0.0/8"),  # RFC 1122 - Loopback
         # IPv6 private ranges
-        ip_network('fc00::/7'),            # RFC 4193 - Unique local addresses
-        ip_network('fe80::/10'),           # RFC 4291 - Link-local
-        ip_network('::1/128'),             # RFC 4291 - Loopback
+        ip_network("fc00::/7"),  # RFC 4193 - Unique local addresses
+        ip_network("fe80::/10"),  # RFC 4291 - Link-local
+        ip_network("::1/128"),  # RFC 4291 - Loopback
     ]
 
     try:
@@ -61,13 +59,13 @@ def is_private_ip(hostname: str) -> bool:
             resolved_ip = socket.gethostbyname(hostname)
             # Recursively check the resolved IP
             return is_private_ip(resolved_ip)
-        except (socket.gaierror, socket.error):
+        except (OSError, socket.gaierror):
             # Unable to resolve hostname
             # For security, assume it's not private and let URL validation handle it
             return False
 
 
-def validate_url(url: str, allowed_domains: Optional[Set[str]] = None) -> str:
+def validate_url(url: str, allowed_domains: set[str] | None = None) -> str:
     """
     Validate URL for security and correctness.
 
@@ -94,7 +92,7 @@ def validate_url(url: str, allowed_domains: Optional[Set[str]] = None) -> str:
             raise SecurityError("URL must include scheme and domain")
 
         # Only allow HTTP(S)
-        if parsed.scheme not in ['http', 'https']:
+        if parsed.scheme not in ["http", "https"]:
             raise SecurityError(f"URL scheme '{parsed.scheme}' not allowed")
 
         if not parsed.netloc:
@@ -103,7 +101,7 @@ def validate_url(url: str, allowed_domains: Optional[Set[str]] = None) -> str:
         # Check against allowed domains if provided
         if allowed_domains and parsed.netloc not in allowed_domains:
             # Check if it's a subdomain of an allowed domain
-            if not any(parsed.netloc.endswith('.' + domain) for domain in allowed_domains):
+            if not any(parsed.netloc.endswith("." + domain) for domain in allowed_domains):
                 raise SecurityError(f"Domain '{parsed.netloc}' not in allowed domains")
 
         # Prevent SSRF attacks - block all private/internal IP addresses
@@ -112,7 +110,9 @@ def validate_url(url: str, allowed_domains: Optional[Set[str]] = None) -> str:
 
         # Use comprehensive private IP detection
         if is_private_ip(hostname):
-            raise SecurityError(f"Accessing private network '{hostname}' not allowed (SSRF protection)")
+            raise SecurityError(
+                f"Accessing private network '{hostname}' not allowed (SSRF protection)"
+            )
 
         # Rebuild URL to normalize components
         normalized_url = urlunparse(parsed)
@@ -136,31 +136,31 @@ def sanitize_filename(filename: str) -> str:
         Sanitized filename
     """
     if not filename:
-        return 'unnamed_file'
+        return "unnamed_file"
 
     # Prevent path traversal and strip surrounding whitespace
-    normalized = str(filename).replace('\\', '/')
+    normalized = str(filename).replace("\\", "/")
     sanitized = os.path.basename(normalized).strip()
 
     # Whitelist characters: letters, numbers, space, dash, underscore, dot
-    sanitized = re.sub(r'[^A-Za-z0-9._\- ]+', '', sanitized)
+    sanitized = re.sub(r"[^A-Za-z0-9._\- ]+", "", sanitized)
 
     # Collapse repeated whitespace
-    sanitized = re.sub(r'\s+', ' ', sanitized).strip()
+    sanitized = re.sub(r"\s+", " ", sanitized).strip()
 
     if not sanitized:
-        sanitized = 'unnamed_file'
+        sanitized = "unnamed_file"
 
     # Limit length while preserving extension
     if len(sanitized) > 255:
         name, ext = os.path.splitext(sanitized)
         ext = ext[:10]  # guard extreme extensions
-        sanitized = name[:255 - len(ext)] + ext
+        sanitized = name[: 255 - len(ext)] + ext
 
     return sanitized
 
 
-def validate_file_path(path: str, allowed_dirs: Optional[List[Path]] = None) -> Path:
+def validate_file_path(path: str, allowed_dirs: list[Path] | None = None) -> Path:
     """
     Validate file path for security.
 

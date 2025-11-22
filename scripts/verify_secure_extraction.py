@@ -12,10 +12,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.core.bundle_manager import (
-    BundleManager,
     MAX_ARCHIVE_FILE_SIZE,
     MAX_ARCHIVE_TOTAL_SIZE,
-    MAX_COMPRESSION_RATIO
+    MAX_COMPRESSION_RATIO,
+    BundleManager,
 )
 from src.utils.exceptions import SecurityError
 
@@ -48,6 +48,7 @@ def verify_exception():
     try:
         # Check that SecurityError is importable
         from src.utils.exceptions import SecurityError
+
         # Check that it can be raised and caught
         try:
             raise SecurityError("Test error")
@@ -70,15 +71,16 @@ def verify_methods():
     all_passed = True
 
     # Check safe_extract_archive exists
-    if hasattr(BundleManager, 'safe_extract_archive'):
+    if hasattr(BundleManager, "safe_extract_archive"):
         print("  ✓ safe_extract_archive() method exists")
 
         # Check method signature
         import inspect
+
         sig = inspect.signature(BundleManager.safe_extract_archive)
         params = list(sig.parameters.keys())
 
-        if params == ['self', 'archive_path', 'target_dir']:
+        if params == ["self", "archive_path", "target_dir"]:
             print("  ✓ safe_extract_archive() has correct signature")
         else:
             print(f"  ✗ safe_extract_archive() signature incorrect: {params}")
@@ -88,15 +90,16 @@ def verify_methods():
         all_passed = False
 
     # Check extract_archived_bundle still exists
-    if hasattr(BundleManager, 'extract_archived_bundle'):
+    if hasattr(BundleManager, "extract_archived_bundle"):
         print("  ✓ extract_archived_bundle() method exists")
 
         # Check method signature (should be unchanged)
         import inspect
+
         sig = inspect.signature(BundleManager.extract_archived_bundle)
         params = list(sig.parameters.keys())
 
-        if params == ['self', 'bundle_id']:
+        if params == ["self", "bundle_id"]:
             print("  ✓ extract_archived_bundle() signature maintained (backward compatible)")
         else:
             print(f"  ✗ extract_archived_bundle() signature changed: {params}")
@@ -150,7 +153,9 @@ def verify_tests():
     """Verify test file exists and can be imported."""
     print("\nVerifying Test Suite...")
 
-    test_path = Path(__file__).parent.parent / "tests" / "unit" / "core" / "test_secure_extraction.py"
+    test_path = (
+        Path(__file__).parent.parent / "tests" / "unit" / "core" / "test_secure_extraction.py"
+    )
 
     if test_path.exists():
         print(f"  ✓ Test file exists: {test_path.name}")
@@ -158,15 +163,17 @@ def verify_tests():
         # Try to import the test module
         try:
             import importlib.util
+
             spec = importlib.util.spec_from_file_location("test_secure_extraction", test_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
             # Count test methods
             import inspect
-            test_class = getattr(module, 'TestSecureArchiveExtraction', None)
+
+            test_class = getattr(module, "TestSecureArchiveExtraction", None)
             if test_class:
-                test_methods = [m for m in dir(test_class) if m.startswith('test_')]
+                test_methods = [m for m in dir(test_class) if m.startswith("test_")]
                 print(f"  ✓ Found {len(test_methods)} test methods")
                 return True
             else:
@@ -207,9 +214,9 @@ def verify_documentation():
 
 def main():
     """Run all verification checks."""
-    print("="*70)
+    print("=" * 70)
     print("TASK 2.4: SECURE ARCHIVE EXTRACTION - VERIFICATION")
-    print("="*70)
+    print("=" * 70)
     print()
 
     results = []
@@ -221,9 +228,9 @@ def main():
     results.append(("Test Suite", verify_tests()))
     results.append(("Documentation", verify_documentation()))
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("VERIFICATION SUMMARY")
-    print("="*70)
+    print("=" * 70)
 
     all_passed = True
     for category, passed in results:
@@ -232,7 +239,7 @@ def main():
         if not passed:
             all_passed = False
 
-    print("="*70)
+    print("=" * 70)
 
     if all_passed:
         print("\n✓ ALL VERIFICATION CHECKS PASSED")

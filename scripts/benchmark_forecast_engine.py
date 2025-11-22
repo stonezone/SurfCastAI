@@ -6,21 +6,22 @@ potential bottlenecks.
 """
 
 import asyncio
+import json
 import logging
+import os
 import sys
 import time
-import json
-import os
-from pathlib import Path
 import tracemalloc
 from datetime import datetime
+from pathlib import Path
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from test_forecast_engine import create_test_swell_forecast, setup_logging
 
 from src.core import Config, load_config
 from src.forecast_engine import ForecastEngine, ForecastFormatter
-from test_forecast_engine import create_test_swell_forecast, setup_logging
 
 
 async def benchmark_forecast_generation(config, logger, iterations=3):
@@ -108,22 +109,24 @@ async def benchmark_forecast_generation(config, logger, iterations=3):
         "response_size": {
             "average": avg_length,
         },
-        "openai_model": config.get('openai', 'model', 'unknown'),
-        "refinement_cycles": config.getint('forecast', 'refinement_cycles', 0)
+        "openai_model": config.get("openai", "model", "unknown"),
+        "refinement_cycles": config.getint("forecast", "refinement_cycles", 0),
     }
 
     # Log summary
-    logger.info(f"Benchmark completed")
+    logger.info("Benchmark completed")
     logger.info(f"Average generation time: {avg_time:.2f} seconds")
     logger.info(f"Average memory usage: {avg_memory:.2f} MB")
     logger.info(f"Average response size: {avg_length:.0f} characters")
 
     # Save results to file
-    benchmark_dir = Path(config.get('general', 'output_directory', './output')) / "benchmarks"
+    benchmark_dir = Path(config.get("general", "output_directory", "./output")) / "benchmarks"
     benchmark_dir.mkdir(parents=True, exist_ok=True)
 
-    result_file = benchmark_dir / f"forecast_benchmark_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    with open(result_file, 'w') as f:
+    result_file = (
+        benchmark_dir / f"forecast_benchmark_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    )
+    with open(result_file, "w") as f:
         json.dump(results, f, indent=2)
 
     logger.info(f"Benchmark results saved to {result_file}")
@@ -161,14 +164,14 @@ async def benchmark_formatting(config, logger, iterations=3):
     memory_usages = {}
 
     # Get active formats
-    formats = config.get('forecast', 'formats', 'markdown,html,pdf').split(',')
+    formats = config.get("forecast", "formats", "markdown,html,pdf").split(",")
 
     # Run benchmark for each format separately
     for fmt in formats:
         logger.info(f"Benchmarking {fmt} format")
 
         # Set single format for testing
-        config._config.set('forecast', 'formats', fmt)
+        config._config.set("forecast", "formats", fmt)
 
         format_times[fmt] = []
         memory_usages[fmt] = []
@@ -200,7 +203,7 @@ async def benchmark_formatting(config, logger, iterations=3):
                 await asyncio.sleep(0.5)
 
     # Restore original formats
-    config._config.set('forecast', 'formats', ','.join(formats))
+    config._config.set("forecast", "formats", ",".join(formats))
 
     # Calculate statistics
     results = {
@@ -225,17 +228,21 @@ async def benchmark_formatting(config, logger, iterations=3):
             "memory_usage_mb": {
                 "average": avg_memory,
                 "max": max_memory,
-            }
+            },
         }
 
-        logger.info(f"{fmt} format - Average time: {avg_time:.2f} seconds, Average memory: {avg_memory:.2f} MB")
+        logger.info(
+            f"{fmt} format - Average time: {avg_time:.2f} seconds, Average memory: {avg_memory:.2f} MB"
+        )
 
     # Save results to file
-    benchmark_dir = Path(config.get('general', 'output_directory', './output')) / "benchmarks"
+    benchmark_dir = Path(config.get("general", "output_directory", "./output")) / "benchmarks"
     benchmark_dir.mkdir(parents=True, exist_ok=True)
 
-    result_file = benchmark_dir / f"formatter_benchmark_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    with open(result_file, 'w') as f:
+    result_file = (
+        benchmark_dir / f"formatter_benchmark_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    )
+    with open(result_file, "w") as f:
         json.dump(results, f, indent=2)
 
     logger.info(f"Benchmark results saved to {result_file}")
@@ -253,20 +260,27 @@ async def main():
 
     # Parse command line arguments
     import argparse
+
     parser = argparse.ArgumentParser(description="Benchmark the SurfCastAI forecast engine.")
-    parser.add_argument('--component', '-c', choices=['engine', 'formatter', 'both'], default='both',
-                      help="Component to benchmark")
-    parser.add_argument('--iterations', '-i', type=int, default=3,
-                      help="Number of iterations for benchmark")
+    parser.add_argument(
+        "--component",
+        "-c",
+        choices=["engine", "formatter", "both"],
+        default="both",
+        help="Component to benchmark",
+    )
+    parser.add_argument(
+        "--iterations", "-i", type=int, default=3, help="Number of iterations for benchmark"
+    )
 
     args = parser.parse_args()
 
     try:
         # Run benchmarks
-        if args.component in ['engine', 'both']:
+        if args.component in ["engine", "both"]:
             await benchmark_forecast_generation(config, logger, args.iterations)
 
-        if args.component in ['formatter', 'both']:
+        if args.component in ["formatter", "both"]:
             await benchmark_formatting(config, logger, args.iterations)
 
         logger.info("Benchmarks completed successfully")

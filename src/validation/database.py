@@ -1,27 +1,28 @@
 """Validation database management."""
-import sqlite3
-import logging
+
 import json
+import logging
+import sqlite3
 import time
-from pathlib import Path
-from typing import Optional, Dict, Any, List, Union
-from datetime import datetime
 from contextlib import contextmanager
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # ISO 8601 format for all timestamps (without microseconds or timezone)
 # Example: '2025-10-11 12:00:00'
-TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S'
+TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 # Database connection configuration
 DB_TIMEOUT = 30.0  # Timeout in seconds for database operations
-MAX_RETRIES = 3    # Maximum number of retry attempts
+MAX_RETRIES = 3  # Maximum number of retry attempts
 RETRY_DELAY = 0.1  # Initial retry delay in seconds (exponential backoff)
 RETRY_BACKOFF_MULTIPLIER = 2.0  # Multiply delay by this for each retry
 
 
-def format_timestamp(dt: Union[datetime, str, float, int]) -> str:
+def format_timestamp(dt: datetime | str | float | int) -> str:
     """Convert datetime to ISO 8601 string format.
 
     Args:
@@ -40,7 +41,7 @@ def format_timestamp(dt: Union[datetime, str, float, int]) -> str:
     if isinstance(dt, str):
         # If already a string, parse and reformat to ensure consistency
         # Handle various ISO 8601 formats (with T, with Z, with microseconds)
-        dt_str = dt.replace('T', ' ').replace('Z', '').split('.')[0]
+        dt_str = dt.replace("T", " ").replace("Z", "").split(".")[0]
         try:
             dt_obj = datetime.strptime(dt_str, TIMESTAMP_FORMAT)
             return dt_obj.strftime(TIMESTAMP_FORMAT)
@@ -72,7 +73,7 @@ def parse_timestamp(timestamp_str: str) -> datetime:
 
     # Parse as ISO 8601 string
     # Handle various formats (with T, with Z, with microseconds)
-    clean_str = timestamp_str.replace('T', ' ').replace('Z', '').split('.')[0]
+    clean_str = timestamp_str.replace("T", " ").replace("Z", "").split(".")[0]
     return datetime.strptime(clean_str, TIMESTAMP_FORMAT)
 
 
@@ -80,7 +81,7 @@ def connect_with_retry(
     db_path: str,
     timeout: float = DB_TIMEOUT,
     max_retries: int = MAX_RETRIES,
-    retry_delay: float = RETRY_DELAY
+    retry_delay: float = RETRY_DELAY,
 ) -> sqlite3.Connection:
     """
     Connect to SQLite database with retry logic for transient failures.
@@ -111,7 +112,7 @@ def connect_with_retry(
             error_msg = str(e).lower()
 
             # Only retry on transient errors
-            if any(keyword in error_msg for keyword in ['locked', 'busy', 'timeout', 'disk i/o']):
+            if any(keyword in error_msg for keyword in ["locked", "busy", "timeout", "disk i/o"]):
                 if attempt < max_retries - 1:
                     logger.warning(
                         f"Database connection attempt {attempt + 1}/{max_retries} failed: {e}. "
@@ -239,9 +240,11 @@ class ValidationDatabase:
                 cursor.execute("PRAGMA table_info(forecasts)")
                 columns = [row[1] for row in cursor.fetchall()]
 
-                if 'confidence_report' not in columns:
+                if "confidence_report" not in columns:
                     cursor.execute("ALTER TABLE forecasts ADD COLUMN confidence_report JSON")
-                    logger.info("Added confidence_report column to forecasts table (Phase 4 migration)")
+                    logger.info(
+                        "Added confidence_report column to forecasts table (Phase 4 migration)"
+                    )
             except Exception as e:
                 logger.warning(f"Could not add confidence_report column (may already exist): {e}")
 
@@ -252,7 +255,7 @@ class ValidationDatabase:
         finally:
             conn.close()
 
-    def save_forecast(self, forecast_data: Dict[str, Any]) -> str:
+    def save_forecast(self, forecast_data: dict[str, Any]) -> str:
         """Save forecast metadata to database.
 
         Args:
@@ -264,11 +267,11 @@ class ValidationDatabase:
         Returns:
             forecast_id: The ID of the saved forecast
         """
-        metadata = forecast_data.get('metadata', {})
-        api_usage = metadata.get('api_usage', {})
+        metadata = forecast_data.get("metadata", {})
+        api_usage = metadata.get("api_usage", {})
 
         # Phase 4: Extract confidence report for JSON storage
-        confidence_report = metadata.get('confidence_report')
+        confidence_report = metadata.get("confidence_report")
         confidence_report_json = None
         if confidence_report:
             # confidence_report is already a dict from model_dump()
@@ -281,31 +284,34 @@ class ValidationDatabase:
                 cursor = conn.cursor()
 
                 # Convert generated_time to ISO 8601 format
-                generated_time = forecast_data.get('generated_time')
+                generated_time = forecast_data.get("generated_time")
                 if generated_time:
                     created_at = format_timestamp(generated_time)
                 else:
                     created_at = format_timestamp(datetime.now())
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO forecasts (
                         forecast_id, created_at, bundle_id, model_version,
                         total_tokens, input_tokens, output_tokens, model_cost_usd,
                         generation_time_sec, status, confidence_report
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    forecast_data.get('forecast_id'),
-                    created_at,
-                    metadata.get('source_data', {}).get('bundle_id'),
-                    api_usage.get('model', 'gpt-5-mini'),
-                    api_usage.get('input_tokens', 0) + api_usage.get('output_tokens', 0),
-                    api_usage.get('input_tokens', 0),
-                    api_usage.get('output_tokens', 0),
-                    api_usage.get('total_cost', 0.0),
-                    metadata.get('generation_time', 0.0),
-                    'completed',
-                    confidence_report_json  # Phase 4: Store structured confidence report as JSON
-                ))
+                """,
+                    (
+                        forecast_data.get("forecast_id"),
+                        created_at,
+                        metadata.get("source_data", {}).get("bundle_id"),
+                        api_usage.get("model", "gpt-5-mini"),
+                        api_usage.get("input_tokens", 0) + api_usage.get("output_tokens", 0),
+                        api_usage.get("input_tokens", 0),
+                        api_usage.get("output_tokens", 0),
+                        api_usage.get("total_cost", 0.0),
+                        metadata.get("generation_time", 0.0),
+                        "completed",
+                        confidence_report_json,  # Phase 4: Store structured confidence report as JSON
+                    ),
+                )
                 logger.info(f"Saved forecast {forecast_data.get('forecast_id')} to database")
         except Exception as e:
             logger.error(f"Failed to save forecast {forecast_data.get('forecast_id')}: {e}")
@@ -313,7 +319,7 @@ class ValidationDatabase:
         finally:
             conn.close()
 
-        return forecast_data.get('forecast_id')
+        return forecast_data.get("forecast_id")
 
     def save_prediction(
         self,
@@ -321,11 +327,11 @@ class ValidationDatabase:
         shore: str,
         forecast_time: datetime,
         valid_time: datetime,
-        predicted_height: Optional[float] = None,
-        predicted_period: Optional[float] = None,
-        predicted_direction: Optional[str] = None,
-        predicted_category: Optional[str] = None,
-        confidence: float = 0.7
+        predicted_height: float | None = None,
+        predicted_period: float | None = None,
+        predicted_direction: str | None = None,
+        predicted_category: str | None = None,
+        confidence: float = 0.7,
     ) -> int:
         """Save a single prediction to database.
 
@@ -349,23 +355,26 @@ class ValidationDatabase:
             with immediate_transaction(conn):
                 cursor = conn.cursor()
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO predictions (
                         forecast_id, shore, forecast_time, valid_time,
                         predicted_height, predicted_period, predicted_direction,
                         predicted_category, confidence
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    forecast_id,
-                    shore,
-                    format_timestamp(forecast_time),
-                    format_timestamp(valid_time),
-                    predicted_height,
-                    predicted_period,
-                    predicted_direction,
-                    predicted_category,
-                    confidence
-                ))
+                """,
+                    (
+                        forecast_id,
+                        shore,
+                        format_timestamp(forecast_time),
+                        format_timestamp(valid_time),
+                        predicted_height,
+                        predicted_period,
+                        predicted_direction,
+                        predicted_category,
+                        confidence,
+                    ),
+                )
                 prediction_id = cursor.lastrowid
                 logger.debug(f"Saved prediction {prediction_id} for forecast {forecast_id}")
         except Exception as e:
@@ -376,11 +385,7 @@ class ValidationDatabase:
 
         return prediction_id
 
-    def save_predictions(
-        self,
-        forecast_id: str,
-        predictions: List[Dict[str, Any]]
-    ) -> None:
+    def save_predictions(self, forecast_id: str, predictions: list[dict[str, Any]]) -> None:
         """Save multiple forecast predictions to database using batch insert.
 
         Args:
@@ -405,25 +410,28 @@ class ValidationDatabase:
                 batch_data = [
                     (
                         forecast_id,
-                        pred.get('shore'),
-                        format_timestamp(pred.get('forecast_time')),
-                        format_timestamp(pred.get('valid_time')),
-                        pred.get('height'),
-                        pred.get('period'),
-                        pred.get('direction'),
-                        pred.get('category'),
-                        pred.get('confidence', 0.7)
+                        pred.get("shore"),
+                        format_timestamp(pred.get("forecast_time")),
+                        format_timestamp(pred.get("valid_time")),
+                        pred.get("height"),
+                        pred.get("period"),
+                        pred.get("direction"),
+                        pred.get("category"),
+                        pred.get("confidence", 0.7),
                     )
                     for pred in predictions
                 ]
 
-                cursor.executemany("""
+                cursor.executemany(
+                    """
                     INSERT INTO predictions (
                         forecast_id, shore, forecast_time, valid_time,
                         predicted_height, predicted_period, predicted_direction,
                         predicted_category, confidence
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, batch_data)
+                """,
+                    batch_data,
+                )
 
                 logger.info(f"Saved {len(predictions)} predictions for forecast {forecast_id}")
         except Exception as e:
@@ -432,29 +440,26 @@ class ValidationDatabase:
         finally:
             conn.close()
 
-    def get_forecast(self, forecast_id: str) -> Optional[Dict[str, Any]]:
+    def get_forecast(self, forecast_id: str) -> dict[str, Any] | None:
         """Fetch a single forecast row by ID."""
         with connect_with_retry(str(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute(
-                "SELECT * FROM forecasts WHERE forecast_id = ?",
-                (forecast_id,)
-            )
+            cursor.execute("SELECT * FROM forecasts WHERE forecast_id = ?", (forecast_id,))
             row = cursor.fetchone()
             if row is None:
                 logger.warning("Forecast %s not found", forecast_id)
                 return None
             return dict(row)
 
-    def get_predictions_for_forecast(self, forecast_id: str) -> List[Dict[str, Any]]:
+    def get_predictions_for_forecast(self, forecast_id: str) -> list[dict[str, Any]]:
         """Return predictions associated with a forecast."""
         with connect_with_retry(str(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT * FROM predictions WHERE forecast_id = ? ORDER BY valid_time",
-                (forecast_id,)
+                (forecast_id,),
             )
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
@@ -463,10 +468,10 @@ class ValidationDatabase:
         self,
         buoy_id: str,
         observation_time: datetime,
-        wave_height: Optional[float] = None,
-        dominant_period: Optional[float] = None,
-        direction: Optional[float] = None,
-        source: str = 'NDBC'
+        wave_height: float | None = None,
+        dominant_period: float | None = None,
+        direction: float | None = None,
+        source: str = "NDBC",
     ) -> int:
         """Save actual buoy observation to database.
 
@@ -487,19 +492,22 @@ class ValidationDatabase:
             with immediate_transaction(conn):
                 cursor = conn.cursor()
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO actuals (
                         buoy_id, observation_time, wave_height,
                         dominant_period, direction, source
                     ) VALUES (?, ?, ?, ?, ?, ?)
-                """, (
-                    buoy_id,
-                    format_timestamp(observation_time),
-                    wave_height,
-                    dominant_period,
-                    direction,
-                    source
-                ))
+                """,
+                    (
+                        buoy_id,
+                        format_timestamp(observation_time),
+                        wave_height,
+                        dominant_period,
+                        direction,
+                        source,
+                    ),
+                )
                 actual_id = cursor.lastrowid
                 logger.debug(f"Saved actual observation {actual_id} for buoy {buoy_id}")
         except Exception as e:
@@ -510,10 +518,7 @@ class ValidationDatabase:
 
         return actual_id
 
-    def save_actuals(
-        self,
-        actuals: List[Dict[str, Any]]
-    ) -> None:
+    def save_actuals(self, actuals: list[dict[str, Any]]) -> None:
         """Save multiple buoy observations to database using batch insert.
 
         Args:
@@ -534,22 +539,25 @@ class ValidationDatabase:
                 # Prepare batch data for executemany
                 batch_data = [
                     (
-                        actual.get('buoy_id'),
-                        format_timestamp(actual.get('observation_time')),
-                        actual.get('wave_height'),
-                        actual.get('dominant_period'),
-                        actual.get('direction'),
-                        actual.get('source', 'NDBC')
+                        actual.get("buoy_id"),
+                        format_timestamp(actual.get("observation_time")),
+                        actual.get("wave_height"),
+                        actual.get("dominant_period"),
+                        actual.get("direction"),
+                        actual.get("source", "NDBC"),
                     )
                     for actual in actuals
                 ]
 
-                cursor.executemany("""
+                cursor.executemany(
+                    """
                     INSERT INTO actuals (
                         buoy_id, observation_time, wave_height,
                         dominant_period, direction, source
                     ) VALUES (?, ?, ?, ?, ?, ?)
-                """, batch_data)
+                """,
+                    batch_data,
+                )
 
                 logger.info(f"Saved {len(actuals)} actual observations")
         except Exception as e:
@@ -563,12 +571,12 @@ class ValidationDatabase:
         forecast_id: str,
         prediction_id: int,
         actual_id: int,
-        height_error: Optional[float] = None,
-        period_error: Optional[float] = None,
-        direction_error: Optional[float] = None,
-        category_match: Optional[bool] = None,
-        mae: Optional[float] = None,
-        rmse: Optional[float] = None
+        height_error: float | None = None,
+        period_error: float | None = None,
+        direction_error: float | None = None,
+        category_match: bool | None = None,
+        mae: float | None = None,
+        rmse: float | None = None,
     ) -> int:
         """Save validation result comparing prediction to actual.
 
@@ -592,24 +600,27 @@ class ValidationDatabase:
             with immediate_transaction(conn):
                 cursor = conn.cursor()
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO validations (
                         forecast_id, prediction_id, actual_id, validated_at,
                         height_error, period_error, direction_error,
                         category_match, mae, rmse
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    forecast_id,
-                    prediction_id,
-                    actual_id,
-                    format_timestamp(datetime.now()),
-                    height_error,
-                    period_error,
-                    direction_error,
-                    category_match,
-                    mae,
-                    rmse
-                ))
+                """,
+                    (
+                        forecast_id,
+                        prediction_id,
+                        actual_id,
+                        format_timestamp(datetime.now()),
+                        height_error,
+                        period_error,
+                        direction_error,
+                        category_match,
+                        mae,
+                        rmse,
+                    ),
+                )
                 validation_id = cursor.lastrowid
                 logger.info(f"Saved validation {validation_id} for forecast {forecast_id}")
         except Exception as e:
@@ -620,10 +631,7 @@ class ValidationDatabase:
 
         return validation_id
 
-    def save_validations(
-        self,
-        validations: List[Dict[str, Any]]
-    ) -> None:
+    def save_validations(self, validations: list[dict[str, Any]]) -> None:
         """Save multiple validation results to database using batch insert.
 
         Args:
@@ -650,27 +658,30 @@ class ValidationDatabase:
                 # Prepare batch data for executemany
                 batch_data = [
                     (
-                        val.get('forecast_id'),
-                        val.get('prediction_id'),
-                        val.get('actual_id'),
+                        val.get("forecast_id"),
+                        val.get("prediction_id"),
+                        val.get("actual_id"),
                         validated_at,
-                        val.get('height_error'),
-                        val.get('period_error'),
-                        val.get('direction_error'),
-                        val.get('category_match'),
-                        val.get('mae'),
-                        val.get('rmse')
+                        val.get("height_error"),
+                        val.get("period_error"),
+                        val.get("direction_error"),
+                        val.get("category_match"),
+                        val.get("mae"),
+                        val.get("rmse"),
                     )
                     for val in validations
                 ]
 
-                cursor.executemany("""
+                cursor.executemany(
+                    """
                     INSERT INTO validations (
                         forecast_id, prediction_id, actual_id, validated_at,
                         height_error, period_error, direction_error,
                         category_match, mae, rmse
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, batch_data)
+                """,
+                    batch_data,
+                )
 
                 logger.info(f"Saved {len(validations)} validation results")
         except Exception as e:
@@ -679,10 +690,7 @@ class ValidationDatabase:
         finally:
             conn.close()
 
-    def get_forecasts_needing_validation(
-        self,
-        hours_after: int = 24
-    ) -> List[Dict[str, Any]]:
+    def get_forecasts_needing_validation(self, hours_after: int = 24) -> list[dict[str, Any]]:
         """Get forecasts that need validation (24+ hours old).
 
         Args:
@@ -693,27 +701,27 @@ class ValidationDatabase:
         """
         # Calculate cutoff time and format as ISO 8601 string
         from datetime import timedelta
+
         cutoff_dt = datetime.now() - timedelta(hours=hours_after)
         cutoff = format_timestamp(cutoff_dt)
 
         with connect_with_retry(str(self.db_path)) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT f.forecast_id, f.created_at, f.bundle_id
                 FROM forecasts f
                 LEFT JOIN validations v ON f.forecast_id = v.forecast_id
                 WHERE f.created_at < ?
                 AND v.id IS NULL
                 ORDER BY f.created_at DESC
-            """, (cutoff,))
+            """,
+                (cutoff,),
+            )
 
             results = []
             for row in cursor.fetchall():
-                results.append({
-                    'forecast_id': row[0],
-                    'created_at': row[1],
-                    'bundle_id': row[2]
-                })
+                results.append({"forecast_id": row[0], "created_at": row[1], "bundle_id": row[2]})
 
         return results
 

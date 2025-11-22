@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 
 try:  # matplotlib is optional during runtime but required for charts
     import matplotlib.pyplot as plt
@@ -16,8 +16,24 @@ def degrees_to_cardinal(degrees):
     """Convert degrees to cardinal direction."""
     if degrees is None:
         return "?"
-    dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-            "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    dirs = [
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
+    ]
     ix = round(degrees / 22.5) % 16
     return dirs[ix]
 
@@ -25,13 +41,13 @@ def degrees_to_cardinal(degrees):
 class ForecastVisualizer:
     """Generate simple charts that highlight the swell mix for a forecast."""
 
-    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(self, logger: logging.Logger | None = None) -> None:
         self.logger = logger or logging.getLogger("forecast.visualizer")
         self.available = plt is not None
         if not self.available:
             self.logger.warning("Matplotlib not installed; skipping visualization generation")
 
-    def generate_all(self, forecast_data: Dict[str, Any], output_dir: Path) -> Dict[str, str]:
+    def generate_all(self, forecast_data: dict[str, Any], output_dir: Path) -> dict[str, str]:
         """Create all supported visualizations for a forecast."""
         if not self.available:
             return {}
@@ -39,7 +55,7 @@ class ForecastVisualizer:
         assets_dir = output_dir / "assets"
         assets_dir.mkdir(exist_ok=True)
 
-        charts: Dict[str, str] = {}
+        charts: dict[str, str] = {}
         swell_chart = self._build_swell_mix_chart(forecast_data, assets_dir)
         if swell_chart:
             charts["swell_mix"] = swell_chart
@@ -50,7 +66,9 @@ class ForecastVisualizer:
 
         return charts
 
-    def _build_swell_mix_chart(self, forecast_data: Dict[str, Any], assets_dir: Path) -> Optional[str]:
+    def _build_swell_mix_chart(
+        self, forecast_data: dict[str, Any], assets_dir: Path
+    ) -> str | None:
         """Plot Hawaiian scale heights for each detected swell event."""
         try:
             events = forecast_data.get("swell_events", [])
@@ -97,9 +115,16 @@ class ForecastVisualizer:
             ax.set_ylim(0, ymax or 1)
             ax.grid(axis="y", linestyle="--", alpha=0.4)
 
-            for bar, period in zip(bars, periods):
+            for bar, period in zip(bars, periods, strict=False):
                 if period is not None:
-                    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.2, f"{period:.0f}s", ha="center", va="bottom", fontsize=8)
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2,
+                        bar.get_height() + 0.2,
+                        f"{period:.0f}s",
+                        ha="center",
+                        va="bottom",
+                        fontsize=8,
+                    )
 
             fig.tight_layout()
             output_path = assets_dir / "swell_mix.png"
@@ -110,7 +135,9 @@ class ForecastVisualizer:
             self.logger.error(f"Failed to generate swell mix chart: {e}")
             return None
 
-    def _build_shore_focus_chart(self, forecast_data: Dict[str, Any], assets_dir: Path) -> Optional[str]:
+    def _build_shore_focus_chart(
+        self, forecast_data: dict[str, Any], assets_dir: Path
+    ) -> str | None:
         """Summarise expected face heights per shore based on event exposure."""
         try:
             # Support both formats: locations (list) and shore_data (dict)

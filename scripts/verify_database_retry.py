@@ -16,33 +16,33 @@ Usage:
 """
 
 import os
-import sys
-import time
 import sqlite3
+import sys
 import tempfile
+import time
 from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.validation.database import (
-    connect_with_retry,
-    extended_timeout_connection,
-    ValidationDatabase,
     DB_TIMEOUT,
     MAX_RETRIES,
+    RETRY_BACKOFF_MULTIPLIER,
     RETRY_DELAY,
-    RETRY_BACKOFF_MULTIPLIER
+    ValidationDatabase,
+    connect_with_retry,
+    extended_timeout_connection,
 )
 
 
 def test_successful_connection():
     """Test 1: Successful connection on first attempt."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 1: Successful Connection")
-    print("="*70)
+    print("=" * 70)
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         test_db = f.name
 
     try:
@@ -72,25 +72,25 @@ def test_successful_connection():
 
 def test_retry_on_locked_database():
     """Test 2: Retry logic with locked database."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 2: Retry on Locked Database")
-    print("="*70)
+    print("=" * 70)
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         test_db = f.name
 
     try:
         # Create and lock database
         conn1 = sqlite3.connect(test_db)
-        conn1.execute('CREATE TABLE test (id INTEGER)')
-        conn1.execute('BEGIN EXCLUSIVE')
-        print(f"✅ Database locked with EXCLUSIVE transaction")
+        conn1.execute("CREATE TABLE test (id INTEGER)")
+        conn1.execute("BEGIN EXCLUSIVE")
+        print("✅ Database locked with EXCLUSIVE transaction")
 
         # Try to connect (should retry and fail)
         print(f"Attempting connection with {MAX_RETRIES} retries...")
         try:
             conn2 = connect_with_retry(test_db, timeout=1.0, max_retries=2)
-            print(f"❌ FAILED: Connection succeeded when it should have failed")
+            print("❌ FAILED: Connection succeeded when it should have failed")
             conn2.close()
             return False
         except sqlite3.OperationalError as e:
@@ -109,20 +109,20 @@ def test_retry_on_locked_database():
 
 def test_exponential_backoff():
     """Test 3: Exponential backoff timing."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 3: Exponential Backoff Timing")
-    print("="*70)
+    print("=" * 70)
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         test_db = f.name
 
     try:
         # Create and lock database
         conn1 = sqlite3.connect(test_db)
-        conn1.execute('CREATE TABLE test (id INTEGER)')
-        conn1.execute('BEGIN EXCLUSIVE')
+        conn1.execute("CREATE TABLE test (id INTEGER)")
+        conn1.execute("BEGIN EXCLUSIVE")
 
-        print(f"Expected delays: 0.1s → 0.2s → 0.4s")
+        print("Expected delays: 0.1s → 0.2s → 0.4s")
         start = time.time()
 
         try:
@@ -134,10 +134,10 @@ def test_exponential_backoff():
             print(f"Total time: {elapsed:.2f}s")
 
             if 1.5 <= elapsed <= 2.5:
-                print(f"✅ Timing matches exponential backoff pattern")
+                print("✅ Timing matches exponential backoff pattern")
                 return True
             else:
-                print(f"⚠️  WARNING: Timing seems off (expected ~1.8s)")
+                print("⚠️  WARNING: Timing seems off (expected ~1.8s)")
                 return True  # Still pass, timing can vary
 
     finally:
@@ -148,17 +148,17 @@ def test_exponential_backoff():
 
 def test_non_transient_error():
     """Test 4: Non-transient errors fail immediately."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 4: Non-Transient Error Handling")
-    print("="*70)
+    print("=" * 70)
 
     # Try to connect to invalid path
     print("Attempting connection to invalid path...")
     start = time.time()
 
     try:
-        conn = connect_with_retry('/nonexistent/path/test.db', max_retries=3)
-        print(f"❌ FAILED: Connection succeeded to invalid path")
+        conn = connect_with_retry("/nonexistent/path/test.db", max_retries=3)
+        print("❌ FAILED: Connection succeeded to invalid path")
         conn.close()
         return False
     except Exception as e:
@@ -173,27 +173,27 @@ def test_non_transient_error():
 
 def test_pragma_application():
     """Test 5: PRAGMA settings applied correctly."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 5: PRAGMA Application")
-    print("="*70)
+    print("=" * 70)
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         test_db = f.name
 
     try:
         conn = connect_with_retry(test_db)
 
         # Check foreign keys
-        fk = conn.execute('PRAGMA foreign_keys').fetchone()[0]
+        fk = conn.execute("PRAGMA foreign_keys").fetchone()[0]
         print(f"Foreign keys enabled: {fk == 1}")
 
         # Check journal mode
-        jm = conn.execute('PRAGMA journal_mode').fetchone()[0]
+        jm = conn.execute("PRAGMA journal_mode").fetchone()[0]
         print(f"Journal mode: {jm}")
 
         conn.close()
 
-        if fk == 1 and jm.lower() == 'wal':
+        if fk == 1 and jm.lower() == "wal":
             print("✅ All PRAGMAs applied correctly")
             return True
         else:
@@ -203,7 +203,7 @@ def test_pragma_application():
     finally:
         if os.path.exists(test_db):
             os.remove(test_db)
-        for ext in ['-wal', '-shm']:
+        for ext in ["-wal", "-shm"]:
             wal_file = test_db + ext
             if os.path.exists(wal_file):
                 os.remove(wal_file)
@@ -211,25 +211,25 @@ def test_pragma_application():
 
 def test_context_manager():
     """Test 6: Context manager lifecycle."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 6: Context Manager Lifecycle")
-    print("="*70)
+    print("=" * 70)
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         test_db = f.name
 
     try:
         # Test context manager
         with extended_timeout_connection(test_db, timeout=60.0) as conn:
-            conn.execute('CREATE TABLE test (id INTEGER, value TEXT)')
+            conn.execute("CREATE TABLE test (id INTEGER, value TEXT)")
             conn.execute('INSERT INTO test VALUES (1, "test")')
             conn.commit()
-            result = conn.execute('SELECT * FROM test').fetchone()
+            result = conn.execute("SELECT * FROM test").fetchone()
             print(f"✅ Inserted and retrieved data: {result}")
 
         # Verify connection closed
         try:
-            conn.execute('SELECT 1')
+            conn.execute("SELECT 1")
             print("❌ FAILED: Connection should be closed")
             return False
         except sqlite3.ProgrammingError:
@@ -243,11 +243,11 @@ def test_context_manager():
 
 def test_validation_database_integration():
     """Test 7: ValidationDatabase integration."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 7: ValidationDatabase Integration")
-    print("="*70)
+    print("=" * 70)
 
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         test_db = f.name
 
     try:
@@ -257,36 +257,38 @@ def test_validation_database_integration():
         db = ValidationDatabase(test_db)
 
         print("Saving forecast...")
-        forecast_id = db.save_forecast({
-            'forecast_id': 'test-retry-123',
-            'generated_time': datetime.now(),
-            'metadata': {
-                'source_data': {'bundle_id': 'bundle-test'},
-                'api_usage': {
-                    'model': 'gpt-4',
-                    'input_tokens': 100,
-                    'output_tokens': 50,
-                    'total_cost': 0.01
+        forecast_id = db.save_forecast(
+            {
+                "forecast_id": "test-retry-123",
+                "generated_time": datetime.now(),
+                "metadata": {
+                    "source_data": {"bundle_id": "bundle-test"},
+                    "api_usage": {
+                        "model": "gpt-4",
+                        "input_tokens": 100,
+                        "output_tokens": 50,
+                        "total_cost": 0.01,
+                    },
+                    "generation_time": 1.5,
                 },
-                'generation_time': 1.5
             }
-        })
+        )
         print(f"✅ Saved forecast: {forecast_id}")
 
         print("Saving prediction...")
         pred_id = db.save_prediction(
             forecast_id=forecast_id,
-            shore='North Shore',
+            shore="North Shore",
             forecast_time=datetime.now(),
             valid_time=datetime.now(),
             predicted_height=10.0,
-            confidence=0.9
+            confidence=0.9,
         )
         print(f"✅ Saved prediction: {pred_id}")
 
         print("Retrieving forecast...")
         forecast = db.get_forecast(forecast_id)
-        if forecast and forecast['forecast_id'] == forecast_id:
+        if forecast and forecast["forecast_id"] == forecast_id:
             print(f"✅ Retrieved forecast: {forecast['forecast_id']}")
             return True
         else:
@@ -296,12 +298,13 @@ def test_validation_database_integration():
     except Exception as e:
         print(f"❌ FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
     finally:
         if os.path.exists(test_db):
             os.remove(test_db)
-        for ext in ['-wal', '-shm']:
+        for ext in ["-wal", "-shm"]:
             wal_file = test_db + ext
             if os.path.exists(wal_file):
                 os.remove(wal_file)
@@ -309,9 +312,9 @@ def test_validation_database_integration():
 
 def test_configuration():
     """Test configuration constants."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("CONFIGURATION CHECK")
-    print("="*70)
+    print("=" * 70)
 
     print(f"DB_TIMEOUT: {DB_TIMEOUT}s")
     print(f"MAX_RETRIES: {MAX_RETRIES}")
@@ -329,11 +332,11 @@ def test_configuration():
 
 def main():
     """Run all verification tests."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("DATABASE RETRY LOGIC VERIFICATION")
-    print("="*70)
-    print(f"Testing database retry logic with exponential backoff")
-    print(f"Location: src/validation/database.py")
+    print("=" * 70)
+    print("Testing database retry logic with exponential backoff")
+    print("Location: src/validation/database.py")
 
     tests = [
         ("Configuration Check", test_configuration),
@@ -354,13 +357,14 @@ def main():
         except Exception as e:
             print(f"\n❌ EXCEPTION in {name}: {e}")
             import traceback
+
             traceback.print_exc()
             results.append((name, False))
 
     # Summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("SUMMARY")
-    print("="*70)
+    print("=" * 70)
 
     passed = sum(1 for _, p in results if p)
     total = len(results)
@@ -379,5 +383,5 @@ def main():
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

@@ -30,10 +30,13 @@ def check_index_exists(db_path: Path, index_name: str) -> bool:
     """
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT name FROM sqlite_master
             WHERE type='index' AND name=?
-        """, (index_name,))
+        """,
+            (index_name,),
+        )
         return cursor.fetchone() is not None
 
 
@@ -61,9 +64,9 @@ def get_table_stats(db_path: Path) -> dict:
         db_size_bytes = page_count * page_size
 
         return {
-            'row_count': row_count,
-            'db_size_bytes': db_size_bytes,
-            'db_size_mb': round(db_size_bytes / 1024 / 1024, 2)
+            "row_count": row_count,
+            "db_size_bytes": db_size_bytes,
+            "db_size_mb": round(db_size_bytes / 1024 / 1024, 2),
         }
 
 
@@ -85,26 +88,30 @@ def benchmark_query(db_path: Path, with_index: bool = False) -> float:
 
         # Benchmark time-windowed query (typical for adaptive prompts)
         start = time.time()
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 COUNT(*) as total,
                 AVG(mae) as avg_mae,
                 AVG(rmse) as avg_rmse
             FROM validations
             WHERE validated_at >= datetime('now', '-7 days')
-        """)
+        """
+        )
         cursor.fetchone()
         elapsed_ms = (time.time() - start) * 1000
 
         # Verify query plan
-        cursor.execute("""
+        cursor.execute(
+            """
             EXPLAIN QUERY PLAN
             SELECT COUNT(*) FROM validations
             WHERE validated_at >= datetime('now', '-7 days')
-        """)
+        """
+        )
         query_plan = cursor.fetchall()
 
-        using_index = any('idx_validations_validated_at' in str(row) for row in query_plan)
+        using_index = any("idx_validations_validated_at" in str(row) for row in query_plan)
 
         return elapsed_ms, using_index
 
@@ -119,7 +126,7 @@ def migrate(db_path: Path, verify: bool = False) -> bool:
     Returns:
         True if migration successful, False otherwise
     """
-    index_name = 'idx_validations_validated_at'
+    index_name = "idx_validations_validated_at"
 
     # Check if database exists
     if not db_path.exists():
@@ -138,7 +145,7 @@ def migrate(db_path: Path, verify: bool = False) -> bool:
     if check_index_exists(db_path, index_name):
         print(f"✅ Index '{index_name}' already exists - no migration needed")
 
-        if verify and stats['row_count'] > 0:
+        if verify and stats["row_count"] > 0:
             print("\n🔬 Running verification benchmark...")
             elapsed_ms, using_index = benchmark_query(db_path, with_index=True)
             print(f"   Query time: {elapsed_ms:.2f}ms")
@@ -146,12 +153,12 @@ def migrate(db_path: Path, verify: bool = False) -> bool:
                 print(f"   ✅ Query optimizer is using {index_name}")
             else:
                 print(f"   ⚠️  Query optimizer NOT using {index_name} (table scan)")
-                print(f"   This may indicate outdated statistics - try: ANALYZE validations;")
+                print("   This may indicate outdated statistics - try: ANALYZE validations;")
 
         return True
 
     # Run pre-migration benchmark
-    if verify and stats['row_count'] > 0:
+    if verify and stats["row_count"] > 0:
         print("\n🔬 Running pre-migration benchmark (without index)...")
         pre_elapsed_ms, _ = benchmark_query(db_path, with_index=False)
         print(f"   Query time: {pre_elapsed_ms:.2f}ms (full table scan)")
@@ -170,7 +177,7 @@ def migrate(db_path: Path, verify: bool = False) -> bool:
         return False
 
     # Run post-migration benchmark
-    if verify and stats['row_count'] > 0:
+    if verify and stats["row_count"] > 0:
         print("\n🔬 Running post-migration benchmark (with index)...")
         post_elapsed_ms, using_index = benchmark_query(db_path, with_index=True)
         print(f"   Query time: {post_elapsed_ms:.2f}ms")
@@ -178,13 +185,15 @@ def migrate(db_path: Path, verify: bool = False) -> bool:
         if using_index:
             print(f"   ✅ Query optimizer is using {index_name}")
             speedup = pre_elapsed_ms / post_elapsed_ms
-            print(f"   📈 Speedup: {speedup:.1f}x faster ({pre_elapsed_ms:.2f}ms → {post_elapsed_ms:.2f}ms)")
+            print(
+                f"   📈 Speedup: {speedup:.1f}x faster ({pre_elapsed_ms:.2f}ms → {post_elapsed_ms:.2f}ms)"
+            )
         else:
             print(f"   ⚠️  Query optimizer NOT using {index_name}")
-            print(f"   This may resolve after ANALYZE - running now...")
+            print("   This may resolve after ANALYZE - running now...")
             with sqlite3.connect(db_path) as conn:
                 conn.execute("ANALYZE validations")
-            print(f"   ✅ Statistics updated")
+            print("   ✅ Statistics updated")
 
     # Final verification
     print("\n✅ Migration complete!")
@@ -198,15 +207,13 @@ def main():
         description="Add performance index to validation.db for adaptive prompt injection"
     )
     parser.add_argument(
-        '--db-path',
+        "--db-path",
         type=Path,
-        default=Path('data/validation.db'),
-        help='Path to validation database (default: data/validation.db)'
+        default=Path("data/validation.db"),
+        help="Path to validation database (default: data/validation.db)",
     )
     parser.add_argument(
-        '--verify',
-        action='store_true',
-        help='Run benchmarks to verify performance improvement'
+        "--verify", action="store_true", help="Run benchmarks to verify performance improvement"
     )
 
     args = parser.parse_args()
@@ -222,7 +229,9 @@ def main():
     if success:
         print("Migration completed successfully!")
         print("\nNext steps:")
-        print("1. Test performance queries: python -c 'from src.validation.performance import get_recent_performance; print(get_recent_performance())'")
+        print(
+            "1. Test performance queries: python -c 'from src.validation.performance import get_recent_performance; print(get_recent_performance())'"
+        )
         print("2. Review design doc: docs/ADAPTIVE_PERFORMANCE_QUERIES.md")
         print("3. Integrate with ForecastEngine (see doc Section 7)")
     else:

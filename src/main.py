@@ -7,16 +7,16 @@ Main entry point for running the forecasting pipeline.
 import argparse
 import asyncio
 import copy
+import json
 import logging
 import sys
-import json
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timezone
+from typing import Any
 
-from src.core import Config, load_config, DataCollector, BundleManager, MetadataTracker
-from src.processing import BuoyProcessor, WeatherProcessor, WaveModelProcessor, DataFusionSystem
+from src.core import BundleManager, Config, DataCollector, load_config
 from src.forecast_engine import ForecastEngine, ForecastFormatter
+from src.processing import BuoyProcessor, DataFusionSystem, WaveModelProcessor, WeatherProcessor
 from src.validation import ValidationDatabase
 
 
@@ -30,28 +30,25 @@ def setup_logging(config: Config) -> logging.Logger:
     Returns:
         Root logger
     """
-    log_level_str = config.get('general', 'log_level', 'INFO').upper()
+    log_level_str = config.get("general", "log_level", "INFO").upper()
     log_level = getattr(logging, log_level_str, logging.INFO)
 
     # Get log file path
-    log_file = config.get('general', 'log_file', 'surfcastai.log')
+    log_file = config.get("general", "log_file", "surfcastai.log")
 
     logging.basicConfig(
         level=log_level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler(log_file)
-        ]
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler(), logging.FileHandler(log_file)],
     )
 
-    logger = logging.getLogger('surfcastai')
+    logger = logging.getLogger("surfcastai")
     logger.info(f"Logging initialized at level {log_level_str}")
 
     return logger
 
 
-async def collect_data(config: Config, logger: logging.Logger) -> Dict[str, Any]:
+async def collect_data(config: Config, logger: logging.Logger) -> dict[str, Any]:
     """
     Collect data from all enabled sources.
 
@@ -73,7 +70,9 @@ async def collect_data(config: Config, logger: logging.Logger) -> Dict[str, Any]
     return results
 
 
-async def process_data(config: Config, logger: logging.Logger, bundle_id: Optional[str] = None) -> Dict[str, Any]:
+async def process_data(
+    config: Config, logger: logging.Logger, bundle_id: str | None = None
+) -> dict[str, Any]:
     """
     Process collected data.
 
@@ -95,10 +94,7 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
         bundle_id = bundle_manager.get_latest_bundle()
         if bundle_id is None:
             logger.error("No bundles found")
-            return {
-                "status": "error",
-                "message": "No data bundles found"
-            }
+            return {"status": "error", "message": "No data bundles found"}
 
     logger.info(f"Processing bundle: {bundle_id}")
 
@@ -106,18 +102,15 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     metadata = bundle_manager.get_bundle_metadata(bundle_id)
     if metadata is None:
         logger.error(f"Bundle {bundle_id} not found or has no metadata")
-        return {
-            "status": "error",
-            "message": f"Bundle {bundle_id} not found or has no metadata"
-        }
+        return {"status": "error", "message": f"Bundle {bundle_id} not found or has no metadata"}
 
-    def _load_agent_json(agent_name: str, pattern: str) -> List[Dict[str, Any]]:
+    def _load_agent_json(agent_name: str, pattern: str) -> list[dict[str, Any]]:
         agent_path = Path(config.data_directory) / bundle_id / agent_name
-        payloads: List[Dict[str, Any]] = []
+        payloads: list[dict[str, Any]] = []
         if agent_path.exists():
             for file_path in agent_path.glob(pattern):
                 try:
-                    with open(file_path, 'r') as fh:
+                    with open(file_path) as fh:
                         data = json.load(fh)
                         # If the JSON is a list, extend; otherwise append
                         if isinstance(data, list):
@@ -131,7 +124,9 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     # Process buoy data
     logger.info("Processing buoy data")
     buoy_processor = BuoyProcessor(config)
-    logger.info(f"BuoyProcessor created: {type(buoy_processor)}, has process_bundle: {hasattr(buoy_processor, 'process_bundle')}")
+    logger.info(
+        f"BuoyProcessor created: {type(buoy_processor)}, has process_bundle: {hasattr(buoy_processor, 'process_bundle')}"
+    )
     logger.info(f"Calling process_bundle with bundle_id={bundle_id}, pattern='**/buoy_*.json'")
     buoy_results = buoy_processor.process_bundle(bundle_id, "**/buoy_*.json")
     logger.info(f"process_bundle returned: {type(buoy_results)}, length={len(buoy_results)}")
@@ -147,18 +142,20 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     model_results = wave_model_processor.process_bundle(bundle_id, "models/model_*.*")
 
     # Load supplemental agent outputs
-    metar_data = _load_agent_json('metar', 'metar_*.json')
-    tide_data = _load_agent_json('tides', 'tide_*.json')
-    tropical_data = _load_agent_json('tropical', 'tropical_outlook.json')
-    chart_data = _load_agent_json('charts', '*.json')
-    altimetry_data = _load_agent_json('altimetry', 'metadata.json')
-    nearshore_data = _load_agent_json('nearshore_buoys', 'metadata.json')
-    upper_air_data = _load_agent_json('upper_air', 'metadata.json')
-    climatology_data = _load_agent_json('climatology', 'metadata.json')
+    metar_data = _load_agent_json("metar", "metar_*.json")
+    tide_data = _load_agent_json("tides", "tide_*.json")
+    tropical_data = _load_agent_json("tropical", "tropical_outlook.json")
+    chart_data = _load_agent_json("charts", "*.json")
+    altimetry_data = _load_agent_json("altimetry", "metadata.json")
+    nearshore_data = _load_agent_json("nearshore_buoys", "metadata.json")
+    upper_air_data = _load_agent_json("upper_air", "metadata.json")
+    climatology_data = _load_agent_json("climatology", "metadata.json")
 
     # Fuse the data
     logger.info("Fusing data from multiple sources")
-    logger.info(f"Buoy results: {len(buoy_results)} total, {sum(1 for r in buoy_results if r.success)} successful")
+    logger.info(
+        f"Buoy results: {len(buoy_results)} total, {sum(1 for r in buoy_results if r.success)} successful"
+    )
     fusion_system = DataFusionSystem(config)
 
     # Prepare data for fusion
@@ -174,7 +171,7 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
         "altimetry_data": altimetry_data,
         "nearshore_data": nearshore_data,
         "upper_air_data": upper_air_data,
-        "climatology_data": climatology_data
+        "climatology_data": climatology_data,
     }
 
     # Process fusion
@@ -186,17 +183,17 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
         "bundle_id": bundle_id,
         "buoy_results": {
             "total": len(buoy_results),
-            "successful": sum(1 for r in buoy_results if r.success)
+            "successful": sum(1 for r in buoy_results if r.success),
         },
         "weather_results": {
             "total": len(weather_results),
-            "successful": sum(1 for r in weather_results if r.success)
+            "successful": sum(1 for r in weather_results if r.success),
         },
         "model_results": {
             "total": len(model_results),
-            "successful": sum(1 for r in model_results if r.success)
+            "successful": sum(1 for r in model_results if r.success),
         },
-        "fusion_result": fusion_result.success
+        "fusion_result": fusion_result.success,
     }
 
     # Save fused data
@@ -216,7 +213,9 @@ async def process_data(config: Config, logger: logging.Logger, bundle_id: Option
     return results
 
 
-async def generate_forecast(config: Config, logger: logging.Logger, bundle_id: Optional[str] = None) -> Dict[str, Any]:
+async def generate_forecast(
+    config: Config, logger: logging.Logger, bundle_id: str | None = None
+) -> dict[str, Any]:
     """
     Generate forecast based on collected data.
 
@@ -238,10 +237,7 @@ async def generate_forecast(config: Config, logger: logging.Logger, bundle_id: O
         bundle_id = bundle_manager.get_latest_bundle()
         if bundle_id is None:
             logger.error("No bundles found")
-            return {
-                "status": "error",
-                "message": "No data bundles found"
-            }
+            return {"status": "error", "message": "No data bundles found"}
 
     logger.info(f"Using bundle: {bundle_id}")
 
@@ -253,27 +249,25 @@ async def generate_forecast(config: Config, logger: logging.Logger, bundle_id: O
         logger.error(f"Processed data not found: {fusion_path}")
         return {
             "status": "error",
-            "message": f"Processed data not found. Run data processing first."
+            "message": "Processed data not found. Run data processing first.",
         }
 
     # Load processed data
     logger.info(f"Loading processed data from {fusion_path}")
-    fusion_dict: Dict[str, Any] = {}
+    fusion_dict: dict[str, Any] = {}
 
-    with open(fusion_path, 'r') as f:
+    with open(fusion_path) as f:
         try:
             # Try to parse as JSON
             fusion_data = json.loads(f.read())
             # Convert to SwellForecast object
             from src.processing.models import dict_to_swell_forecast
+
             fusion_data = dict_to_swell_forecast(fusion_data)
             fusion_dict = fusion_data.to_dict()
         except json.JSONDecodeError:
             logger.error(f"Invalid JSON in {fusion_path}")
-            return {
-                "status": "error",
-                "message": f"Invalid JSON in processed data file"
-            }
+            return {"status": "error", "message": "Invalid JSON in processed data file"}
 
     # Create forecast engine
     logger.info("Creating forecast engine")
@@ -284,12 +278,9 @@ async def generate_forecast(config: Config, logger: logging.Logger, bundle_id: O
     forecast = await forecast_engine.generate_forecast(fusion_data)
 
     # Check for errors
-    if 'error' in forecast:
+    if "error" in forecast:
         logger.error(f"Forecast generation failed: {forecast['error']}")
-        return {
-            "status": "error",
-            "message": f"Forecast generation failed: {forecast['error']}"
-        }
+        return {"status": "error", "message": f"Forecast generation failed: {forecast['error']}"}
 
     # Format forecast
     logger.info("Formatting forecast")
@@ -299,43 +290,45 @@ async def generate_forecast(config: Config, logger: logging.Logger, bundle_id: O
     # Persist forecast and predictions to validation database
     try:
         # Ensure bundle metadata includes bundle_id for downstream queries
-        forecast.setdefault('metadata', {}).setdefault('source_data', {})['bundle_id'] = bundle_id
+        forecast.setdefault("metadata", {}).setdefault("source_data", {})["bundle_id"] = bundle_id
 
-        db_path = config.get('validation', 'database_path', 'data/validation.db')
+        db_path = config.get("validation", "database_path", "data/validation.db")
         database = ValidationDatabase(db_path)
 
-        forecast_id = forecast.get('forecast_id')
+        forecast_id = forecast.get("forecast_id")
         if forecast_id is None:
             raise ValueError("Forecast ID missing; cannot persist forecast")
 
-        generated_time = forecast.get('generated_time')
+        generated_time = forecast.get("generated_time")
         try:
-            created_dt = datetime.fromisoformat(generated_time.replace('Z', '+00:00'))
+            created_dt = datetime.fromisoformat(generated_time.replace("Z", "+00:00"))
         except Exception:
-            created_dt = datetime.now(timezone.utc)
+            created_dt = datetime.now(UTC)
 
-        forecast['created_at'] = created_dt.timestamp()
+        forecast["created_at"] = created_dt.timestamp()
 
         persist_forecast = copy.deepcopy(forecast)
-        persist_forecast['generated_time'] = forecast['created_at']
+        persist_forecast["generated_time"] = forecast["created_at"]
 
         database.save_forecast(persist_forecast)
 
-        predictions: List[Dict[str, Any]] = []
-        generated_time = forecast.get('generated_time')
-        for location in fusion_dict.get('locations', []):
-            shore = location.get('shore') or location.get('name')
-            for event in location.get('swell_events', []):
-                predictions.append({
-                    'shore': shore,
-                    'forecast_time': generated_time,
-                    'valid_time': event.get('peak_time') or event.get('start_time'),
-                    'height': event.get('hawaii_scale'),
-                    'period': event.get('dominant_period'),
-                    'direction': event.get('primary_direction_cardinal'),
-                    'category': event.get('metadata', {}).get('category'),
-                    'confidence': event.get('metadata', {}).get('confidence', 0.7)
-                })
+        predictions: list[dict[str, Any]] = []
+        generated_time = forecast.get("generated_time")
+        for location in fusion_dict.get("locations", []):
+            shore = location.get("shore") or location.get("name")
+            for event in location.get("swell_events", []):
+                predictions.append(
+                    {
+                        "shore": shore,
+                        "forecast_time": generated_time,
+                        "valid_time": event.get("peak_time") or event.get("start_time"),
+                        "height": event.get("hawaii_scale"),
+                        "period": event.get("dominant_period"),
+                        "direction": event.get("primary_direction_cardinal"),
+                        "category": event.get("metadata", {}).get("category"),
+                        "confidence": event.get("metadata", {}).get("confidence", 0.7),
+                    }
+                )
 
         if predictions:
             database.save_predictions(forecast_id, predictions)
@@ -347,12 +340,14 @@ async def generate_forecast(config: Config, logger: logging.Logger, bundle_id: O
     return {
         "status": "success",
         "bundle_id": bundle_id,
-        "forecast_id": forecast.get('forecast_id'),
-        "formats": formatted
+        "forecast_id": forecast.get("forecast_id"),
+        "formats": formatted,
     }
 
 
-async def run_pipeline(config: Config, logger: logging.Logger, mode: str, bundle_id: Optional[str] = None) -> Dict[str, Any]:
+async def run_pipeline(
+    config: Config, logger: logging.Logger, mode: str, bundle_id: str | None = None
+) -> dict[str, Any]:
     """
     Run the forecasting pipeline.
 
@@ -367,19 +362,19 @@ async def run_pipeline(config: Config, logger: logging.Logger, mode: str, bundle
     """
     results = {}
 
-    if mode in ['collect', 'full']:
+    if mode in ["collect", "full"]:
         collection_results = await collect_data(config, logger)
-        results['collection'] = collection_results
+        results["collection"] = collection_results
         # Use the newly created bundle for subsequent steps
-        bundle_id = collection_results.get('bundle_id')
+        bundle_id = collection_results.get("bundle_id")
 
-    if mode in ['process', 'forecast', 'full']:
+    if mode in ["process", "forecast", "full"]:
         processing_results = await process_data(config, logger, bundle_id)
-        results['processing'] = processing_results
+        results["processing"] = processing_results
 
-    if mode in ['forecast', 'full']:
+    if mode in ["forecast", "full"]:
         forecast_results = await generate_forecast(config, logger, bundle_id)
-        results['forecast'] = forecast_results
+        results["forecast"] = forecast_results
 
     return results
 
@@ -391,25 +386,25 @@ def list_bundles(config: Config) -> None:
 
     print(f"Found {len(bundles)} data bundles:")
     for i, bundle in enumerate(bundles):
-        timestamp = bundle.get('timestamp', 'unknown')
-        bundle_id = bundle.get('bundle_id', 'unknown')
+        timestamp = bundle.get("timestamp", "unknown")
+        bundle_id = bundle.get("bundle_id", "unknown")
 
         # Extract bundle statistics
-        stats = bundle.get('stats', {})
-        total_files = stats.get('total_files', 0)
-        successful = stats.get('successful_files', 0)
+        stats = bundle.get("stats", {})
+        total_files = stats.get("total_files", 0)
+        successful = stats.get("successful_files", 0)
 
         print(f"{i+1}. {bundle_id} - {timestamp}")
         print(f"   Files: {successful}/{total_files} successful")
 
         # Show error if present
-        if 'error' in bundle:
+        if "error" in bundle:
             print(f"   Error: {bundle['error']}")
 
         print()
 
 
-def bundle_info(config: Config, bundle_id: Optional[str] = None) -> None:
+def bundle_info(config: Config, bundle_id: str | None = None) -> None:
     """Display detailed information about a specific bundle."""
     bundle_manager = BundleManager(config.data_directory)
 
@@ -431,7 +426,7 @@ def bundle_info(config: Config, bundle_id: Optional[str] = None) -> None:
     print(f"Region: {metadata.get('region', 'unknown')}")
 
     # Print statistics
-    stats = metadata.get('stats', {})
+    stats = metadata.get("stats", {})
     print("\nStatistics:")
     print(f"  Total files: {stats.get('total_files', 0)}")
     print(f"  Successful files: {stats.get('successful_files', 0)}")
@@ -439,11 +434,11 @@ def bundle_info(config: Config, bundle_id: Optional[str] = None) -> None:
     print(f"  Total size: {stats.get('total_size_mb', 0):.2f} MB")
 
     # Print agent results
-    agent_results = metadata.get('agent_results', {})
+    agent_results = metadata.get("agent_results", {})
     print("\nAgent Results:")
     for agent, results in agent_results.items():
         print(f"  {agent}:")
-        if 'error' in results:
+        if "error" in results:
             print(f"    Error: {results['error']}")
         else:
             print(f"    Files: {results.get('successful', 0)}/{results.get('total', 0)} successful")
@@ -452,7 +447,8 @@ def bundle_info(config: Config, bundle_id: Optional[str] = None) -> None:
     # Print file list
     print("\nFile list available with --files option")
 
-def bundle_files(config: Config, bundle_id: Optional[str] = None) -> None:
+
+def bundle_files(config: Config, bundle_id: str | None = None) -> None:
     """Display file list for a specific bundle."""
     bundle_manager = BundleManager(config.data_directory)
 
@@ -470,16 +466,16 @@ def bundle_files(config: Config, bundle_id: Optional[str] = None) -> None:
 
     print(f"Files in bundle {bundle_id}:")
     for i, file_info in enumerate(files):
-        name = file_info.get('name', 'unknown')
-        path = file_info.get('path', 'unknown')
-        size = file_info.get('size_bytes', 0)
-        status = file_info.get('status', 'unknown')
+        name = file_info.get("name", "unknown")
+        path = file_info.get("path", "unknown")
+        size = file_info.get("size_bytes", 0)
+        status = file_info.get("status", "unknown")
 
         print(f"{i+1}. {name} ({size} bytes) - {status}")
         print(f"   Path: {path}")
 
         # Show error if present
-        if 'error' in file_info:
+        if "error" in file_info:
             print(f"   Error: {file_info['error']}")
 
         # Only show first 20 files, then summarize
@@ -489,6 +485,7 @@ def bundle_files(config: Config, bundle_id: Optional[str] = None) -> None:
 
         print()
 
+
 async def validate_forecast_cmd(config: Config, forecast_id: str) -> None:
     """
     Validate a specific forecast against actual observations.
@@ -497,13 +494,13 @@ async def validate_forecast_cmd(config: Config, forecast_id: str) -> None:
         config: Application configuration
         forecast_id: ID of forecast to validate
     """
-    from src.validation import ValidationDatabase, ForecastValidator
+    from src.validation import ForecastValidator, ValidationDatabase
 
     print(f"\nValidating forecast: {forecast_id}")
     print("=" * 60)
 
     # Initialize database and validator
-    db_path = config.get('validation', 'database_path', 'data/validation.db')
+    db_path = config.get("validation", "database_path", "data/validation.db")
     database = ValidationDatabase(db_path)
     validator = ForecastValidator(database)
 
@@ -514,27 +511,37 @@ async def validate_forecast_cmd(config: Config, forecast_id: str) -> None:
         # Print results
         print(f"\nForecast ID: {results['forecast_id']}")
         print(f"Validated at: {results['validated_at']}")
-        print(f"Predictions validated: {results['predictions_validated']}/{results['predictions_total']}")
+        print(
+            f"Predictions validated: {results['predictions_validated']}/{results['predictions_total']}"
+        )
 
-        if 'error' in results:
+        if "error" in results:
             print(f"\nError: {results['error']}")
             return
 
         # Print metrics
-        metrics = results.get('metrics', {})
+        metrics = results.get("metrics", {})
         print("\nMetrics:")
-        print(f"  MAE (Mean Absolute Error):        {metrics.get('mae', 0):.2f} ft  (target: < 2.0 ft)")
-        print(f"  RMSE (Root Mean Square Error):    {metrics.get('rmse', 0):.2f} ft  (target: < 2.5 ft)")
-        print(f"  Categorical Accuracy:              {metrics.get('categorical_accuracy', 0)*100:.1f}%  (target: > 75%)")
-        print(f"  Direction Accuracy:                {metrics.get('direction_accuracy', 0)*100:.1f}%  (target: > 80%)")
+        print(
+            f"  MAE (Mean Absolute Error):        {metrics.get('mae', 0):.2f} ft  (target: < 2.0 ft)"
+        )
+        print(
+            f"  RMSE (Root Mean Square Error):    {metrics.get('rmse', 0):.2f} ft  (target: < 2.5 ft)"
+        )
+        print(
+            f"  Categorical Accuracy:              {metrics.get('categorical_accuracy', 0)*100:.1f}%  (target: > 75%)"
+        )
+        print(
+            f"  Direction Accuracy:                {metrics.get('direction_accuracy', 0)*100:.1f}%  (target: > 80%)"
+        )
         print(f"  Sample Size:                       {metrics.get('sample_size', 0)} matches")
 
         # Print pass/fail status
         print("\nValidation Status:")
-        mae_pass = metrics.get('mae', float('inf')) < 2.0
-        rmse_pass = metrics.get('rmse', float('inf')) < 2.5
-        cat_pass = metrics.get('categorical_accuracy', 0) > 0.75
-        dir_pass = metrics.get('direction_accuracy', 0) > 0.80
+        mae_pass = metrics.get("mae", float("inf")) < 2.0
+        rmse_pass = metrics.get("rmse", float("inf")) < 2.5
+        cat_pass = metrics.get("categorical_accuracy", 0) > 0.75
+        dir_pass = metrics.get("direction_accuracy", 0) > 0.80
 
         print(f"  MAE < 2.0 ft:          {'✓ PASS' if mae_pass else '✗ FAIL'}")
         print(f"  RMSE < 2.5 ft:         {'✓ PASS' if rmse_pass else '✗ FAIL'}")
@@ -548,7 +555,7 @@ async def validate_forecast_cmd(config: Config, forecast_id: str) -> None:
         print(f"\nError: {e}")
     except Exception as e:
         print(f"\nUnexpected error: {e}")
-        logging.getLogger('surfcastai').error(f"Validation error: {e}", exc_info=True)
+        logging.getLogger("surfcastai").error(f"Validation error: {e}", exc_info=True)
 
 
 async def validate_all_forecasts_cmd(config: Config, hours_after: int = 24) -> None:
@@ -559,13 +566,13 @@ async def validate_all_forecasts_cmd(config: Config, hours_after: int = 24) -> N
         config: Application configuration
         hours_after: Minimum hours after forecast before validating
     """
-    from src.validation import ValidationDatabase, ForecastValidator
+    from src.validation import ForecastValidator, ValidationDatabase
 
     print(f"\nValidating all forecasts ({hours_after}+ hours old)")
     print("=" * 60)
 
     # Initialize database and validator
-    db_path = config.get('validation', 'database_path', 'data/validation.db')
+    db_path = config.get("validation", "database_path", "data/validation.db")
     database = ValidationDatabase(db_path)
     validator = ForecastValidator(database)
 
@@ -582,45 +589,45 @@ async def validate_all_forecasts_cmd(config: Config, hours_after: int = 24) -> N
     results_summary = []
 
     for i, forecast in enumerate(forecasts, 1):
-        forecast_id = forecast['forecast_id']
-        created_at = forecast['created_at']
+        forecast_id = forecast["forecast_id"]
+        created_at = forecast["created_at"]
 
         print(f"{i}. Validating {forecast_id} (created {created_at})...")
 
         try:
             results = await validator.validate_forecast(forecast_id, hours_after=hours_after)
 
-            metrics = results.get('metrics', {})
-            results_summary.append({
-                'forecast_id': forecast_id,
-                'success': 'error' not in results,
-                'mae': metrics.get('mae'),
-                'rmse': metrics.get('rmse'),
-                'categorical_accuracy': metrics.get('categorical_accuracy'),
-                'direction_accuracy': metrics.get('direction_accuracy'),
-                'sample_size': metrics.get('sample_size', 0)
-            })
+            metrics = results.get("metrics", {})
+            results_summary.append(
+                {
+                    "forecast_id": forecast_id,
+                    "success": "error" not in results,
+                    "mae": metrics.get("mae"),
+                    "rmse": metrics.get("rmse"),
+                    "categorical_accuracy": metrics.get("categorical_accuracy"),
+                    "direction_accuracy": metrics.get("direction_accuracy"),
+                    "sample_size": metrics.get("sample_size", 0),
+                }
+            )
 
-            print(f"   ✓ Validated: MAE={metrics.get('mae', 0):.2f}ft, "
-                  f"RMSE={metrics.get('rmse', 0):.2f}ft, "
-                  f"Cat={metrics.get('categorical_accuracy', 0)*100:.0f}%, "
-                  f"n={metrics.get('sample_size', 0)}")
+            print(
+                f"   ✓ Validated: MAE={metrics.get('mae', 0):.2f}ft, "
+                f"RMSE={metrics.get('rmse', 0):.2f}ft, "
+                f"Cat={metrics.get('categorical_accuracy', 0)*100:.0f}%, "
+                f"n={metrics.get('sample_size', 0)}"
+            )
 
         except Exception as e:
             print(f"   ✗ Error: {e}")
-            results_summary.append({
-                'forecast_id': forecast_id,
-                'success': False,
-                'error': str(e)
-            })
+            results_summary.append({"forecast_id": forecast_id, "success": False, "error": str(e)})
 
     # Print summary
     print("\n" + "=" * 60)
     print("Validation Summary:")
     print("=" * 60)
 
-    successful = [r for r in results_summary if r['success']]
-    failed = [r for r in results_summary if not r['success']]
+    successful = [r for r in results_summary if r["success"]]
+    failed = [r for r in results_summary if not r["success"]]
 
     print(f"\nTotal forecasts: {len(results_summary)}")
     print(f"Successfully validated: {len(successful)}")
@@ -628,13 +635,19 @@ async def validate_all_forecasts_cmd(config: Config, hours_after: int = 24) -> N
 
     if successful:
         # Calculate aggregate metrics
-        mae_values = [r['mae'] for r in successful if r.get('mae') is not None]
-        rmse_values = [r['rmse'] for r in successful if r.get('rmse') is not None]
-        cat_values = [r['categorical_accuracy'] for r in successful if r.get('categorical_accuracy') is not None]
-        dir_values = [r['direction_accuracy'] for r in successful if r.get('direction_accuracy') is not None]
+        mae_values = [r["mae"] for r in successful if r.get("mae") is not None]
+        rmse_values = [r["rmse"] for r in successful if r.get("rmse") is not None]
+        cat_values = [
+            r["categorical_accuracy"]
+            for r in successful
+            if r.get("categorical_accuracy") is not None
+        ]
+        dir_values = [
+            r["direction_accuracy"] for r in successful if r.get("direction_accuracy") is not None
+        ]
 
         if mae_values:
-            print(f"\nAggregate Metrics:")
+            print("\nAggregate Metrics:")
             print(f"  Average MAE:  {sum(mae_values)/len(mae_values):.2f} ft")
             print(f"  Average RMSE: {sum(rmse_values)/len(rmse_values):.2f} ft")
             if cat_values:
@@ -651,14 +664,15 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
         config: Application configuration
         days: Number of days to include in report
     """
-    from src.validation import ValidationDatabase
     import sqlite3
+
+    from src.validation import ValidationDatabase
 
     print(f"\nAccuracy Report (Last {days} Days)")
     print("=" * 60)
 
     # Initialize database
-    db_path = config.get('validation', 'database_path', 'data/validation.db')
+    db_path = config.get("validation", "database_path", "data/validation.db")
     database = ValidationDatabase(db_path)
 
     # Calculate cutoff timestamp
@@ -668,7 +682,8 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
         cursor = conn.cursor()
 
         # Get validation statistics
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 COUNT(DISTINCT f.forecast_id) as total_forecasts,
                 COUNT(v.id) as total_validations,
@@ -679,7 +694,9 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
             FROM forecasts f
             INNER JOIN validations v ON f.forecast_id = v.forecast_id
             WHERE f.created_at >= ?
-        """, (cutoff,))
+        """,
+            (cutoff,),
+        )
 
         row = cursor.fetchone()
 
@@ -694,13 +711,13 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
         categorical_accuracy = row[4]
         direction_accuracy = row[5]
 
-        print(f"\nOverview:")
+        print("\nOverview:")
         print(f"  Period: Last {days} days")
         print(f"  Validated Forecasts: {total_forecasts}")
         print(f"  Total Validations: {total_validations}")
         print(f"  Average Predictions per Forecast: {total_validations/total_forecasts:.1f}")
 
-        print(f"\nAccuracy Metrics:")
+        print("\nAccuracy Metrics:")
         print(f"  MAE (Mean Absolute Error):     {avg_mae:.2f} ft  (target: < 2.0 ft)")
         print(f"  RMSE (Root Mean Square Error): {avg_rmse:.2f} ft  (target: < 2.5 ft)")
         print(f"  Categorical Accuracy:          {categorical_accuracy*100:.1f}%  (target: > 75%)")
@@ -712,14 +729,15 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
         cat_pass = categorical_accuracy > 0.75
         dir_pass = direction_accuracy > 0.80
 
-        print(f"\nPerformance Assessment:")
+        print("\nPerformance Assessment:")
         print(f"  MAE Target:         {'✓ PASS' if mae_pass else '✗ FAIL'}")
         print(f"  RMSE Target:        {'✓ PASS' if rmse_pass else '✗ FAIL'}")
         print(f"  Categorical Target: {'✓ PASS' if cat_pass else '✗ FAIL'}")
         print(f"  Direction Target:   {'✓ PASS' if dir_pass else '✗ FAIL'}")
 
         # Get per-shore breakdown
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 p.shore,
                 COUNT(v.id) as validations,
@@ -731,12 +749,14 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
             INNER JOIN forecasts f ON p.forecast_id = f.forecast_id
             WHERE f.created_at >= ?
             GROUP BY p.shore
-        """, (cutoff,))
+        """,
+            (cutoff,),
+        )
 
         shore_stats = cursor.fetchall()
 
         if shore_stats:
-            print(f"\nPer-Shore Breakdown:")
+            print("\nPer-Shore Breakdown:")
             for shore, validations, mae, rmse, cat_acc in shore_stats:
                 print(f"\n  {shore}:")
                 print(f"    Validations: {validations}")
@@ -745,7 +765,8 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
                 print(f"    Categorical Accuracy: {cat_acc*100:.1f}%")
 
         # Get recent forecast details
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT
                 f.forecast_id,
                 f.created_at,
@@ -758,12 +779,14 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
             GROUP BY f.forecast_id
             ORDER BY f.created_at DESC
             LIMIT 10
-        """, (cutoff,))
+        """,
+            (cutoff,),
+        )
 
         recent_forecasts = cursor.fetchall()
 
         if recent_forecasts:
-            print(f"\nRecent Forecasts:")
+            print("\nRecent Forecasts:")
             print(f"  {'Forecast ID':<40} {'Date':<20} {'n':<4} {'MAE':<6} {'RMSE':<6}")
             print(f"  {'-'*40} {'-'*20} {'-'*4} {'-'*6} {'-'*6}")
             for forecast_id, created_at, validations, mae, rmse in recent_forecasts:
@@ -772,57 +795,92 @@ async def accuracy_report_cmd(config: Config, days: int = 30) -> None:
                     dt = datetime.fromisoformat(created_at)
                 else:
                     dt = datetime.fromtimestamp(created_at)
-                date_str = dt.strftime('%Y-%m-%d %H:%M')
+                date_str = dt.strftime("%Y-%m-%d %H:%M")
 
-                print(f"  {forecast_id:<40} {date_str:<20} {validations:<4} {mae:<6.2f} {rmse:<6.2f}")
+                print(
+                    f"  {forecast_id:<40} {date_str:<20} {validations:<4} {mae:<6.2f} {rmse:<6.2f}"
+                )
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="SurfCastAI: AI-Powered Oahu Surf Forecasting System")
-    parser.add_argument('--config', '-c', help="Path to configuration file")
+    parser = argparse.ArgumentParser(
+        description="SurfCastAI: AI-Powered Oahu Surf Forecasting System"
+    )
+    parser.add_argument("--config", "-c", help="Path to configuration file")
 
-    subparsers = parser.add_subparsers(dest='command', help='Command to execute')
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # Run command
-    run_parser = subparsers.add_parser('run', help='Run the forecasting pipeline')
-    run_parser.add_argument('--mode', '-m', choices=['collect', 'process', 'forecast', 'full'],
-                         default='full', help="Operation mode")
-    run_parser.add_argument('--bundle', '-b', help="Specific bundle ID to use")
-    run_parser.add_argument('--skip-collection', action='store_true',
-                         help="Skip automatic data collection (use existing bundle)")
-    run_parser.add_argument('--model', choices=['gpt-5', 'gpt-5-mini', 'gpt-5-nano'],
-                         help="Override OpenAI model for this run")
-    run_parser.add_argument('--specialists', choices=['on', 'off'],
-                         help="Enable or disable specialist team for this run")
+    run_parser = subparsers.add_parser("run", help="Run the forecasting pipeline")
+    run_parser.add_argument(
+        "--mode",
+        "-m",
+        choices=["collect", "process", "forecast", "full"],
+        default="full",
+        help="Operation mode",
+    )
+    run_parser.add_argument("--bundle", "-b", help="Specific bundle ID to use")
+    run_parser.add_argument(
+        "--skip-collection",
+        action="store_true",
+        help="Skip automatic data collection (use existing bundle)",
+    )
+    run_parser.add_argument(
+        "--model",
+        choices=["gpt-5", "gpt-5-mini", "gpt-5-nano"],
+        help="Override OpenAI model for this run",
+    )
+    run_parser.add_argument(
+        "--specialists",
+        choices=["on", "off"],
+        help="Enable or disable specialist team for this run",
+    )
 
     # List bundles command
-    list_parser = subparsers.add_parser('list', help='List available data bundles')
+    list_parser = subparsers.add_parser("list", help="List available data bundles")
 
     # Bundle info command
-    info_parser = subparsers.add_parser('info', help='Show bundle information')
-    info_parser.add_argument('--bundle', '-b', help="Specific bundle ID to use")
+    info_parser = subparsers.add_parser("info", help="Show bundle information")
+    info_parser.add_argument("--bundle", "-b", help="Specific bundle ID to use")
 
     # Bundle files command
-    files_parser = subparsers.add_parser('files', help='List files in a bundle')
-    files_parser.add_argument('--bundle', '-b', help="Specific bundle ID to use")
+    files_parser = subparsers.add_parser("files", help="List files in a bundle")
+    files_parser.add_argument("--bundle", "-b", help="Specific bundle ID to use")
 
     # Validation commands
-    validate_parser = subparsers.add_parser('validate', help='Validate a specific forecast')
-    validate_parser.add_argument('--forecast', '-f', required=True, help="Forecast ID to validate")
+    validate_parser = subparsers.add_parser("validate", help="Validate a specific forecast")
+    validate_parser.add_argument("--forecast", "-f", required=True, help="Forecast ID to validate")
 
-    validate_all_parser = subparsers.add_parser('validate-all', help='Validate all pending forecasts')
-    validate_all_parser.add_argument('--hours-after', type=int, default=24,
-                                     help="Minimum hours after forecast before validating (default: 24)")
+    validate_all_parser = subparsers.add_parser(
+        "validate-all", help="Validate all pending forecasts"
+    )
+    validate_all_parser.add_argument(
+        "--hours-after",
+        type=int,
+        default=24,
+        help="Minimum hours after forecast before validating (default: 24)",
+    )
 
-    accuracy_report_parser = subparsers.add_parser('accuracy-report', help='Generate accuracy report')
-    accuracy_report_parser.add_argument('--days', type=int, default=30,
-                                        help="Number of days to include in report (default: 30)")
+    accuracy_report_parser = subparsers.add_parser(
+        "accuracy-report", help="Generate accuracy report"
+    )
+    accuracy_report_parser.add_argument(
+        "--days", type=int, default=30, help="Number of days to include in report (default: 30)"
+    )
 
-    cleanup_parser = subparsers.add_parser('cleanup', help='Remove old data bundles based on retention policy')
-    cleanup_parser.add_argument('--older-than', type=int, help='Override retention days (defaults to config general.data_retention_days)')
+    cleanup_parser = subparsers.add_parser(
+        "cleanup", help="Remove old data bundles based on retention policy"
+    )
+    cleanup_parser.add_argument(
+        "--older-than",
+        type=int,
+        help="Override retention days (defaults to config general.data_retention_days)",
+    )
 
-    validate_config_parser = subparsers.add_parser('validate-config', help='Validate configuration and exit')
+    validate_config_parser = subparsers.add_parser(
+        "validate-config", help="Validate configuration and exit"
+    )
 
     # Parse arguments
     args = parser.parse_args()
@@ -836,7 +894,7 @@ def main():
     logger.info(f"Starting SurfCastAI with command: {args.command}")
 
     # Validate configuration at startup (except for validate-config command which handles it separately)
-    if args.command != 'validate-config':
+    if args.command != "validate-config":
         errors, warnings = config.validate()
 
         # Log warnings
@@ -859,21 +917,20 @@ def main():
 
     try:
         # Execute command
-        if args.command == 'run':
-            if hasattr(args, 'model') and args.model:
-                config.set('openai', 'model', args.model)
+        if args.command == "run":
+            if hasattr(args, "model") and args.model:
+                config.set("openai", "model", args.model)
                 logger.info(f"Overriding OpenAI model via CLI: {args.model}")
 
-            if hasattr(args, 'specialists') and args.specialists:
-                use_specialists = args.specialists == 'on'
-                config.set('forecast', 'use_specialist_team', use_specialists)
+            if hasattr(args, "specialists") and args.specialists:
+                use_specialists = args.specialists == "on"
+                config.set("forecast", "use_specialist_team", use_specialists)
                 logger.info(
-                    "Specialist team %s via CLI",
-                    'enabled' if use_specialists else 'disabled'
+                    "Specialist team %s via CLI", "enabled" if use_specialists else "disabled"
                 )
 
             # Auto-collect fresh data before forecast unless --skip-collection is set
-            if args.mode == 'forecast' and not args.skip_collection:
+            if args.mode == "forecast" and not args.skip_collection:
                 logger.info("=" * 60)
                 logger.info("Auto-collecting fresh data before forecast generation...")
                 logger.info("(Use --skip-collection to skip this step)")
@@ -883,69 +940,71 @@ def main():
                 collection_results = asyncio.run(collect_data(config, logger))
 
                 # Use the newly created bundle for forecast
-                args.bundle = collection_results.get('bundle_id')
+                args.bundle = collection_results.get("bundle_id")
 
                 # Log collection summary
-                stats = collection_results.get('stats', {})
+                stats = collection_results.get("stats", {})
                 logger.info(f"Fresh data collected: Bundle {args.bundle}")
-                logger.info(f"Files: {stats.get('successful_files', 0)}/{stats.get('total_files', 0)} successful")
+                logger.info(
+                    f"Files: {stats.get('successful_files', 0)}/{stats.get('total_files', 0)} successful"
+                )
 
             # Run the pipeline
             results = asyncio.run(run_pipeline(config, logger, args.mode, args.bundle))
 
             # Print summary
-            if 'collection' in results:
-                collection = results['collection']
+            if "collection" in results:
+                collection = results["collection"]
                 print("\nData Collection Summary:")
                 print(f"  Bundle ID: {collection.get('bundle_id', 'unknown')}")
-                stats = collection.get('stats', {})
+                stats = collection.get("stats", {})
                 print(f"  Total files: {stats.get('total_files', 0)}")
                 print(f"  Successful files: {stats.get('successful_files', 0)}")
                 print(f"  Failed files: {stats.get('failed_files', 0)}")
 
-            if 'processing' in results:
-                processing = results['processing']
+            if "processing" in results:
+                processing = results["processing"]
                 print("\nData Processing Summary:")
                 print(f"  Status: {processing.get('status', 'unknown')}")
 
-            if 'forecast' in results:
-                forecast = results['forecast']
+            if "forecast" in results:
+                forecast = results["forecast"]
                 print("\nForecast Generation Summary:")
                 print(f"  Status: {forecast.get('status', 'unknown')}")
 
             print("\nSurfCastAI completed successfully!")
             return 0
 
-        elif args.command == 'list':
+        elif args.command == "list":
             # List available bundles
             list_bundles(config)
             return 0
 
-        elif args.command == 'info':
+        elif args.command == "info":
             # Show bundle information
             bundle_info(config, args.bundle)
             return 0
 
-        elif args.command == 'files':
+        elif args.command == "files":
             # List files in a bundle
             bundle_files(config, args.bundle)
             return 0
 
-        elif args.command == 'validate':
+        elif args.command == "validate":
             # Validate a specific forecast
             asyncio.run(validate_forecast_cmd(config, args.forecast))
             return 0
 
-        elif args.command == 'validate-all':
+        elif args.command == "validate-all":
             # Validate all pending forecasts
             asyncio.run(validate_all_forecasts_cmd(config, args.hours_after))
             return 0
 
-        elif args.command == 'accuracy-report':
+        elif args.command == "accuracy-report":
             # Generate accuracy report
             asyncio.run(accuracy_report_cmd(config, args.days))
             return 0
-        elif args.command == 'cleanup':
+        elif args.command == "cleanup":
             manager = BundleManager(config.data_directory)
             if args.older_than is not None:
                 removed = manager.cleanup_old_bundles(args.older_than)
@@ -956,14 +1015,14 @@ def main():
             if removed_bundles:
                 print("Removed bundles:")
                 for bundle in removed_bundles:
-                    bundle_id = bundle.get('bundle_id', 'unknown')
-                    timestamp = bundle.get('timestamp', 'unknown')
+                    bundle_id = bundle.get("bundle_id", "unknown")
+                    timestamp = bundle.get("timestamp", "unknown")
                     print(f"  - {bundle_id} (timestamp: {timestamp})")
                 print(f"Total removed: {len(removed_bundles)}")
             else:
                 print("No bundles eligible for cleanup.")
             return 0
-        elif args.command == 'validate-config':
+        elif args.command == "validate-config":
             errors, warnings = config.validate()
             if warnings:
                 print("Configuration warnings:")

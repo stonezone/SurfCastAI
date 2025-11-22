@@ -9,7 +9,7 @@ offline or air-gapped environments.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     from zoneinfo import ZoneInfo  # Python 3.9+
@@ -20,7 +20,7 @@ except ImportError:  # pragma: no cover - fallback for platforms without zoneinf
 class LocalForecastGenerator:
     """Compose deterministic surf forecast text from structured swell data."""
 
-    def __init__(self, forecast_data: Dict[str, Any]):
+    def __init__(self, forecast_data: dict[str, Any]):
         self.data = forecast_data
         self.weather = forecast_data.get("metadata", {}).get("weather", {})
         self.tides = forecast_data.get("metadata", {}).get("tides", {})
@@ -98,12 +98,11 @@ class LocalForecastGenerator:
             else "Mix of reefs and sandbars respond similarly today."
         )
 
-        confidence_line = (
-            f"Overall confidence checks in at {self.confidence:.1f}/1.0; expect typical seasonal variability."
-        )
+        confidence_line = f"Overall confidence checks in at {self.confidence:.1f}/1.0; expect typical seasonal variability."
 
         advice = (
-            "Morning sessions stay smoother before afternoon trades add texture." if "morning" not in wind_line.lower()
+            "Morning sessions stay smoother before afternoon trades add texture."
+            if "morning" not in wind_line.lower()
             else wind_line
         )
 
@@ -136,9 +135,7 @@ class LocalForecastGenerator:
         wind = self._wind_summary()
         tide_line = self._tide_summary()
 
-        action_line = (
-            "Target dawn patrol for clean faces before trades rise after lunch; town reefs handle winds best."
-        )
+        action_line = "Target dawn patrol for clean faces before trades rise after lunch; town reefs handle winds best."
 
         parts = [
             f"Today ({self.data.get('start_date')}): {season_phrase}",
@@ -154,8 +151,8 @@ class LocalForecastGenerator:
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
-    def _map_event_exposures(self) -> Dict[str, List[Dict[str, Any]]]:
-        exposures: Dict[str, List[Dict[str, Any]]] = {}
+    def _map_event_exposures(self) -> dict[str, list[dict[str, Any]]]:
+        exposures: dict[str, list[dict[str, Any]]] = {}
         for shore_key, shore_info in self.shore_data.items():
             for event in shore_info.get("swell_events", []):
                 event_id = event.get("event_id")
@@ -186,7 +183,9 @@ class LocalForecastGenerator:
         wind = self._wind_summary()
 
         secondary_mentions = []
-        for event in sorted(self.events, key=lambda e: e.get("hawaii_scale", 0.0), reverse=True)[1:3]:
+        for event in sorted(self.events, key=lambda e: e.get("hawaii_scale", 0.0), reverse=True)[
+            1:3
+        ]:
             secondary_mentions.append(
                 f"Secondary {event.get('primary_direction_cardinal', 'Unknown')} lines hold {self._faces_text(event.get('hawaii_scale', 0.0))} faces {self._timing_phrase(event)}."
             )
@@ -201,8 +200,12 @@ class LocalForecastGenerator:
         return " ".join(part for part in summary_parts if part)
 
     def _build_detail_lines(self) -> str:
-        lines: List[str] = []
-        for event in sorted(self.events, key=lambda e: (e.get("significance", 0.0), e.get("hawaii_scale", 0.0)), reverse=True):
+        lines: list[str] = []
+        for event in sorted(
+            self.events,
+            key=lambda e: (e.get("significance", 0.0), e.get("hawaii_scale", 0.0)),
+            reverse=True,
+        ):
             event_id = event.get("event_id")
             direction = event.get("primary_direction_cardinal", "Unknown")
             period = event.get("dominant_period", 0.0)
@@ -230,9 +233,9 @@ class LocalForecastGenerator:
             )
         return " ".join(lines)
 
-    def _shore_activity(self, shore_key: str) -> List[Dict[str, Any]]:
+    def _shore_activity(self, shore_key: str) -> list[dict[str, Any]]:
         shore_info = self.shore_data.get(shore_key, {})
-        records: List[Dict[str, Any]] = []
+        records: list[dict[str, Any]] = []
         for event in shore_info.get("swell_events", []):
             hawaiian = event.get("hawaii_scale", 0.0)
             faces_text = self._faces_text(hawaiian)
@@ -253,8 +256,16 @@ class LocalForecastGenerator:
 
     def _build_outlook_text(self) -> str:
         season_phrase = self._seasonal_phrase()
-        north_hint = "North" if any(e for e in self.events if self._event_has_shore(e, "north_shore")) else "North"
-        south_hint = "South" if any(e for e in self.events if self._event_has_shore(e, "south_shore")) else "South"
+        north_hint = (
+            "North"
+            if any(e for e in self.events if self._event_has_shore(e, "north_shore"))
+            else "North"
+        )
+        south_hint = (
+            "South"
+            if any(e for e in self.events if self._event_has_shore(e, "south_shore"))
+            else "South"
+        )
         return (
             f"Expect {season_phrase} patterns to hold. {north_hint} Shore stays active through the next couple of days "
             f"while {south_hint} Shore trends toward seasonal background. Monitor new NDBC runs for updates."
@@ -274,13 +285,13 @@ class LocalForecastGenerator:
 
     def _wind_sentence_for_shore(self, shore_key: str) -> str:
         if not self.weather:
-            return "Light local winds allow for glassy sessions early, with a mild bump by afternoon."
+            return (
+                "Light local winds allow for glassy sessions early, with a mild bump by afternoon."
+            )
         direction = self.weather.get("wind_direction", "ENE")
         speed = self.weather.get("wind_speed", 15)
         shoreline = "North Shore" if shore_key == "north_shore" else "South Shore"
-        return (
-            f"{shoreline} sees {direction} trades around {speed} kt; aim for morning windows before onshores roughen the faces."
-        )
+        return f"{shoreline} sees {direction} trades around {speed} kt; aim for morning windows before onshores roughen the faces."
 
     def _tide_summary(self) -> str:
         high = self._format_tide_list(self.tides.get("high_tide"))
@@ -302,7 +313,7 @@ class LocalForecastGenerator:
     def _hawaiian_text(hawaiian_height: float) -> str:
         return f"{hawaiian_height:.1f}ft Hawaiian"
 
-    def _face_range(self, hawaiian_height: float) -> List[int]:
+    def _face_range(self, hawaiian_height: float) -> list[int]:
         base = max(hawaiian_height, 0.5)
         low = max(1, int(round(base * 2)))
         high = max(low + 1, int(round(base * 3)))
@@ -315,7 +326,7 @@ class LocalForecastGenerator:
         except ValueError:
             return 0.0
 
-    def _timing_phrase(self, event: Dict[str, Any]) -> str:
+    def _timing_phrase(self, event: dict[str, Any]) -> str:
         start = self._format_time(event.get("start_time"))
         peak = self._format_time(event.get("peak_time"))
         if start and peak:
@@ -326,7 +337,7 @@ class LocalForecastGenerator:
             return f"arriving {start}"
         return "on tap all period"
 
-    def _window_phrase(self, event: Dict[str, Any]) -> str:
+    def _window_phrase(self, event: dict[str, Any]) -> str:
         start = self._format_time(event.get("start_time"))
         peak = self._format_time(event.get("peak_time"))
         end = self._format_time(event.get("end_time"))
@@ -336,11 +347,11 @@ class LocalForecastGenerator:
             return f"around {peak}"
         return "through the period"
 
-    def _peak_phrase(self, event: Dict[str, Any]) -> str:
+    def _peak_phrase(self, event: dict[str, Any]) -> str:
         peak = self._format_time(event.get("peak_time"))
         return peak if peak else "the daylight hours"
 
-    def _format_time(self, raw: Optional[str]) -> Optional[str]:
+    def _format_time(self, raw: str | None) -> str | None:
         if not raw:
             return None
         try:
@@ -354,10 +365,14 @@ class LocalForecastGenerator:
         except Exception:
             return raw
 
-    def _format_tide_list(self, tide_data: Any) -> Optional[str]:
+    def _format_tide_list(self, tide_data: Any) -> str | None:
         if not tide_data:
             return None
-        if isinstance(tide_data, (list, tuple)) and tide_data and not isinstance(tide_data[0], (list, tuple)):
+        if (
+            isinstance(tide_data, (list, tuple))
+            and tide_data
+            and not isinstance(tide_data[0], (list, tuple))
+        ):
             # Single pair stored as [time, height]
             time_str, height = tide_data
             return f"at {time_str} ({height:.1f} ft)"
@@ -366,7 +381,7 @@ class LocalForecastGenerator:
             entries.append(f"at {time_str} ({height:.1f} ft)")
         return " and ".join(entries)
 
-    def _event_shore_focus(self, event_id: Optional[str]) -> str:
+    def _event_shore_focus(self, event_id: str | None) -> str:
         exposures = self.event_exposures.get(event_id or "", [])
         if not exposures:
             return "both shores"
@@ -378,14 +393,14 @@ class LocalForecastGenerator:
             return ", ".join(self._shore_title(e["shore"]) for e in moderate)
         return "exposed coasts"
 
-    def _event_has_shore(self, event: Dict[str, Any], shore_key: str) -> bool:
+    def _event_has_shore(self, event: dict[str, Any], shore_key: str) -> bool:
         exposures = self.event_exposures.get(event.get("event_id"), [])
         return any(exp.get("shore") == shore_key for exp in exposures)
 
-    def _event_has_any_shore(self, event_id: Optional[str]) -> bool:
+    def _event_has_any_shore(self, event_id: str | None) -> bool:
         return bool(self.event_exposures.get(event_id or "", []))
 
-    def _confidence_text(self, event_id: Optional[str]) -> str:
+    def _confidence_text(self, event_id: str | None) -> str:
         if not self._event_has_any_shore(event_id):
             return "moderate"
         base = self.confidence
@@ -402,7 +417,9 @@ class LocalForecastGenerator:
         season = self.seasonal.get("current_season", "seasonal").title()
         patterns = self.seasonal.get("seasonal_patterns", {})
         north = patterns.get("north_shore", {}).get("typical_conditions", "steady trade swell")
-        south = patterns.get("south_shore", {}).get("typical_conditions", "occasional background pulses")
+        south = patterns.get("south_shore", {}).get(
+            "typical_conditions", "occasional background pulses"
+        )
         return f"{season} pattern with {north.lower()} up north and {south.lower()} in town"
 
 

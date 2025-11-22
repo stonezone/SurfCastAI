@@ -52,8 +52,8 @@ def client(test_output_dir, monkeypatch):
     import sys
 
     # Remove module from cache if it exists to force reimport
-    if 'src.web.app' in sys.modules:
-        del sys.modules['src.web.app']
+    if "src.web.app" in sys.modules:
+        del sys.modules["src.web.app"]
 
     from src.web import app as app_module
 
@@ -102,10 +102,11 @@ def test_rate_limiter_initialized(client):
 
     # Import the app module
     import sys
+
     from src.web import app as app_module
 
     # Verify rate limiter is attached to app state
-    assert hasattr(app_module.app.state, 'limiter')
+    assert hasattr(app_module.app.state, "limiter")
     assert app_module.app.state.limiter is not None
 
 
@@ -144,8 +145,10 @@ def test_custom_rate_limit_handler_exists(client):
     test_client, _ = client
 
     import sys
-    from src.web import app as app_module
+
     from slowapi.errors import RateLimitExceeded
+
+    from src.web import app as app_module
 
     # Verify custom exception handler is registered
     assert RateLimitExceeded in app_module.app.exception_handlers
@@ -156,6 +159,7 @@ def test_rate_limit_configuration(client):
     test_client, _ = client
 
     import sys
+
     from src.web import app as app_module
 
     limiter = app_module.app.state.limiter
@@ -164,6 +168,6 @@ def test_rate_limit_configuration(client):
     assert limiter is not None
 
     # Verify default limits are set
-    assert hasattr(limiter, '_default_limits')
+    assert hasattr(limiter, "_default_limits")
     # The limiter stores limits internally, verify it's configured
     assert limiter._default_limits is not None

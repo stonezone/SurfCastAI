@@ -3,19 +3,19 @@ Buoy data processor for SurfCastAI.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Union, Tuple
-from pathlib import Path
-import json
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any
+
 import numpy as np
 from scipy import stats
 
-from .data_processor import DataProcessor, ProcessingResult
-from .models.buoy_data import BuoyData, BuoyObservation
 from ..core.config import Config
+from .data_processor import DataProcessor, ProcessingResult
+from .models.buoy_data import BuoyData
 
 
-class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
+class BuoyProcessor(DataProcessor[dict[str, Any], BuoyData]):
     """
     Processor for buoy data.
 
@@ -34,9 +34,9 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
             config: Application configuration
         """
         super().__init__(config)
-        self.logger = logging.getLogger('processor.buoy')
+        self.logger = logging.getLogger("processor.buoy")
 
-    def validate(self, data: Dict[str, Any]) -> List[str]:
+    def validate(self, data: dict[str, Any]) -> list[str]:
         """
         Validate buoy data.
 
@@ -49,16 +49,16 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         errors = []
 
         # Check for required fields
-        if 'station_id' not in data:
+        if "station_id" not in data:
             errors.append("Missing station_id field")
 
         # Check for observations
-        if 'observations' not in data or not data['observations']:
+        if "observations" not in data or not data["observations"]:
             errors.append("No observations in buoy data")
 
         return errors
 
-    def process(self, data: Dict[str, Any]) -> ProcessingResult:
+    def process(self, data: dict[str, Any]) -> ProcessingResult:
         """
         Process buoy data.
 
@@ -72,7 +72,8 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
             # Check if this is already saved JSON format (has 'station_id' and 'observations' keys)
             # or raw NDBC format
             import json
-            if 'station_id' in data and 'observations' in data:
+
+            if "station_id" in data and "observations" in data:
                 # Already in saved format, use from_json
                 buoy_data = BuoyData.from_json(json.dumps(data))
             else:
@@ -82,9 +83,7 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
             # Check if we have any observations
             if not buoy_data.observations:
                 return ProcessingResult(
-                    success=False,
-                    error="No observations found in buoy data",
-                    data=buoy_data
+                    success=False, error="No observations found in buoy data", data=buoy_data
                 )
 
             # Clean and normalize data
@@ -97,20 +96,14 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
             buoy_data.metadata.update(metadata)
 
             return ProcessingResult(
-                success=True,
-                data=buoy_data,
-                warnings=warnings,
-                metadata=metadata
+                success=True, data=buoy_data, warnings=warnings, metadata=metadata
             )
 
         except Exception as e:
             self.logger.error(f"Error processing buoy data: {e}")
-            return ProcessingResult(
-                success=False,
-                error=f"Processing error: {str(e)}"
-            )
+            return ProcessingResult(success=False, error=f"Processing error: {str(e)}")
 
-    def process_file(self, file_path: Union[str, Path]) -> ProcessingResult:
+    def process_file(self, file_path: str | Path) -> ProcessingResult:
         """
         Process data from a file, with spec file detection.
 
@@ -141,7 +134,7 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
 
         return result
 
-    def detect_trend(self, buoy_data: BuoyData, hours: int = 24) -> Dict[str, Any]:
+    def detect_trend(self, buoy_data: BuoyData, hours: int = 24) -> dict[str, Any]:
         """
         Detect trends in wave height over the specified time period.
 
@@ -170,7 +163,7 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
                 continue
 
             try:
-                obs_time = datetime.fromisoformat(obs.timestamp.replace('Z', '+00:00'))
+                obs_time = datetime.fromisoformat(obs.timestamp.replace("Z", "+00:00"))
                 if obs_time >= cutoff_time.replace(tzinfo=obs_time.tzinfo):
                     # Convert meters to feet for slope calculation
                     heights.append(obs.wave_height * 3.28084)
@@ -181,11 +174,11 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         # Need at least 3 points for meaningful regression
         if len(heights) < 3:
             return {
-                'direction': 'unknown',
-                'slope': 0.0,
-                'confidence': 0.0,
-                'r_squared': 0.0,
-                'sample_size': len(heights)
+                "direction": "unknown",
+                "slope": 0.0,
+                "confidence": 0.0,
+                "r_squared": 0.0,
+                "sample_size": len(heights),
             }
 
         # Convert timestamps to hours since first observation
@@ -200,28 +193,28 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         # Threshold: slope > 0.2 feet/hour = increasing (about 2.4 feet over 12 hours)
         # This is reasonable for detecting significant swell changes
         if slope > 0.2:
-            direction = 'increasing'
+            direction = "increasing"
         elif slope < -0.2:
-            direction = 'decreasing'
+            direction = "decreasing"
         else:
-            direction = 'stable'
+            direction = "stable"
 
         # Calculate confidence based on r_squared and sample size
-        r_squared = r_value ** 2
+        r_squared = r_value**2
         sample_factor = min(1.0, len(heights) / 24.0)  # More samples = higher confidence
         confidence = r_squared * sample_factor
 
         return {
-            'direction': direction,
-            'slope': float(slope),
-            'confidence': float(confidence),
-            'r_squared': float(r_squared),
-            'sample_size': len(heights),
-            'p_value': float(p_value),
-            'std_error': float(std_err)
+            "direction": direction,
+            "slope": float(slope),
+            "confidence": float(confidence),
+            "r_squared": float(r_squared),
+            "sample_size": len(heights),
+            "p_value": float(p_value),
+            "std_error": float(std_err),
         }
 
-    def detect_anomalies(self, buoy_data: BuoyData, threshold: float = 2.0) -> Dict[str, Any]:
+    def detect_anomalies(self, buoy_data: BuoyData, threshold: float = 2.0) -> dict[str, Any]:
         """
         Detect anomalous readings in buoy data using z-score method.
 
@@ -250,12 +243,12 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
 
         if len(heights) < 3:
             return {
-                'anomalies': [],
-                'anomaly_count': 0,
-                'mean_height': 0.0,
-                'std_height': 0.0,
-                'z_scores': [],
-                'sample_size': len(heights)
+                "anomalies": [],
+                "anomaly_count": 0,
+                "mean_height": 0.0,
+                "std_height": 0.0,
+                "z_scores": [],
+                "sample_size": len(heights),
             }
 
         # Calculate z-scores
@@ -266,12 +259,12 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         # Avoid division by zero
         if std_height == 0:
             return {
-                'anomalies': [],
-                'anomaly_count': 0,
-                'mean_height': float(mean_height),
-                'std_height': 0.0,
-                'z_scores': [0.0] * len(heights),
-                'sample_size': len(heights)
+                "anomalies": [],
+                "anomaly_count": 0,
+                "mean_height": float(mean_height),
+                "std_height": 0.0,
+                "z_scores": [0.0] * len(heights),
+                "sample_size": len(heights),
             }
 
         z_scores = (heights_array - mean_height) / std_height
@@ -293,16 +286,16 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
                 )
 
         return {
-            'anomalies': anomalies,
-            'anomaly_count': len(anomalies),
-            'mean_height': float(mean_height),
-            'std_height': float(std_height),
-            'z_scores': [float(z) for z in z_scores],
-            'sample_size': len(heights),
-            'threshold': threshold
+            "anomalies": anomalies,
+            "anomaly_count": len(anomalies),
+            "mean_height": float(mean_height),
+            "std_height": float(std_height),
+            "z_scores": [float(z) for z in z_scores],
+            "sample_size": len(heights),
+            "threshold": threshold,
         }
 
-    def calculate_quality_score(self, buoy_data: BuoyData) -> Dict[str, Any]:
+    def calculate_quality_score(self, buoy_data: BuoyData) -> dict[str, Any]:
         """
         Calculate a quality score for buoy data based on freshness, completeness, and consistency.
 
@@ -322,10 +315,10 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
             - consistency_score: Consistency score (0.0-1.0)
         """
         scores = {
-            'overall_score': 0.0,
-            'freshness_score': 0.0,
-            'completeness_score': 0.0,
-            'consistency_score': 0.0
+            "overall_score": 0.0,
+            "freshness_score": 0.0,
+            "completeness_score": 0.0,
+            "consistency_score": 0.0,
         }
 
         if not buoy_data.observations:
@@ -334,23 +327,23 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         # 1. Calculate freshness score
         latest_obs = buoy_data.observations[0]
         try:
-            obs_time = datetime.fromisoformat(latest_obs.timestamp.replace('Z', '+00:00'))
+            obs_time = datetime.fromisoformat(latest_obs.timestamp.replace("Z", "+00:00"))
             now = datetime.now(obs_time.tzinfo)
             hours_old = (now - obs_time).total_seconds() / 3600
 
             # Score decreases linearly from 1.0 at 0 hours to 0.0 at 6 hours
             if hours_old <= 1.0:
-                scores['freshness_score'] = 1.0
+                scores["freshness_score"] = 1.0
             elif hours_old >= 6.0:
-                scores['freshness_score'] = 0.0
+                scores["freshness_score"] = 0.0
             else:
-                scores['freshness_score'] = 1.0 - (hours_old - 1.0) / 5.0
+                scores["freshness_score"] = 1.0 - (hours_old - 1.0) / 5.0
         except (ValueError, TypeError):
-            scores['freshness_score'] = 0.5  # Unknown freshness
+            scores["freshness_score"] = 0.5  # Unknown freshness
 
         # 2. Calculate completeness score
-        essential_fields = ['wave_height', 'dominant_period', 'wave_direction']
-        optional_fields = ['wind_speed', 'wind_direction', 'water_temperature']
+        essential_fields = ["wave_height", "dominant_period", "wave_direction"]
+        optional_fields = ["wind_speed", "wind_direction", "water_temperature"]
         all_fields = essential_fields + optional_fields
 
         complete_count = 0
@@ -358,11 +351,15 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
 
         for obs in buoy_data.observations:
             # Check essential fields
-            essential_present = sum(1 for field in essential_fields if getattr(obs, field) is not None)
+            essential_present = sum(
+                1 for field in essential_fields if getattr(obs, field) is not None
+            )
 
             if essential_present == len(essential_fields):
                 # Check optional fields
-                optional_present = sum(1 for field in optional_fields if getattr(obs, field) is not None)
+                optional_present = sum(
+                    1 for field in optional_fields if getattr(obs, field) is not None
+                )
                 if optional_present == len(optional_fields):
                     complete_count += 1
                 else:
@@ -371,11 +368,11 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
                 partial_count += 1
 
         total_obs = len(buoy_data.observations)
-        scores['completeness_score'] = (complete_count + 0.5 * partial_count) / total_obs
+        scores["completeness_score"] = (complete_count + 0.5 * partial_count) / total_obs
 
         # 3. Calculate consistency score (check for sudden jumps)
         if len(buoy_data.observations) < 2:
-            scores['consistency_score'] = 1.0
+            scores["consistency_score"] = 1.0
         else:
             jump_count = 0
             checked_pairs = 0
@@ -393,15 +390,15 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
                         jump_count += 1
 
             if checked_pairs > 0:
-                scores['consistency_score'] = 1.0 - (jump_count / checked_pairs)
+                scores["consistency_score"] = 1.0 - (jump_count / checked_pairs)
             else:
-                scores['consistency_score'] = 1.0
+                scores["consistency_score"] = 1.0
 
         # 4. Calculate overall score (weighted average)
-        scores['overall_score'] = (
-            0.4 * scores['freshness_score'] +
-            0.3 * scores['completeness_score'] +
-            0.3 * scores['consistency_score']
+        scores["overall_score"] = (
+            0.4 * scores["freshness_score"]
+            + 0.3 * scores["completeness_score"]
+            + 0.3 * scores["consistency_score"]
         )
 
         return scores
@@ -430,16 +427,21 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
             if obs.dominant_period is not None and obs.dominant_period < 0:
                 obs.dominant_period = None
 
-            if obs.wave_direction is not None and (obs.wave_direction < 0 or obs.wave_direction > 360):
+            if obs.wave_direction is not None and (
+                obs.wave_direction < 0 or obs.wave_direction > 360
+            ):
                 obs.wave_direction = None
 
             valid_observations.append(obs)
 
         # Sort observations by timestamp (newest first)
         valid_observations.sort(
-            key=lambda obs: datetime.fromisoformat(obs.timestamp.replace('Z', '+00:00'))
-            if 'T' in obs.timestamp else datetime.now(),
-            reverse=True
+            key=lambda obs: (
+                datetime.fromisoformat(obs.timestamp.replace("Z", "+00:00"))
+                if "T" in obs.timestamp
+                else datetime.now()
+            ),
+            reverse=True,
         )
 
         # Update buoy data with cleaned observations
@@ -447,7 +449,7 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
 
         return buoy_data
 
-    def _analyze_buoy_data(self, buoy_data: BuoyData) -> tuple[List[str], Dict[str, Any]]:
+    def _analyze_buoy_data(self, buoy_data: BuoyData) -> tuple[list[str], dict[str, Any]]:
         """
         Analyze buoy data for quality and special conditions.
 
@@ -464,13 +466,13 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         """
         warnings = []
         metadata = {
-            'analysis': {
-                'timestamp': datetime.now().isoformat(),
-                'quality_score': 1.0,
-                'trends': {},
-                'anomalies': {},
-                'quality_details': {},
-                'special_conditions': []
+            "analysis": {
+                "timestamp": datetime.now().isoformat(),
+                "quality_score": 1.0,
+                "trends": {},
+                "anomalies": {},
+                "quality_details": {},
+                "special_conditions": [],
             }
         }
 
@@ -478,10 +480,10 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         try:
             # 1. Detect trends
             trend_info = self.detect_trend(buoy_data, hours=24)
-            metadata['analysis']['trends'] = trend_info
+            metadata["analysis"]["trends"] = trend_info
 
             # Log trend information
-            if trend_info['confidence'] > 0.5:
+            if trend_info["confidence"] > 0.5:
                 trend_msg = (
                     f"Wave height trend: {trend_info['direction']} "
                     f"(slope: {trend_info['slope']:.3f} ft/hr, "
@@ -490,10 +492,14 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
                 self.logger.info(trend_msg)
 
                 # Add warning for significant trends
-                if trend_info['direction'] == 'increasing' and abs(trend_info['slope']) > 1.0:
-                    warnings.append(f"Rapidly increasing wave heights detected ({trend_info['slope']:.2f} ft/hr)")
-                elif trend_info['direction'] == 'decreasing' and abs(trend_info['slope']) > 1.0:
-                    warnings.append(f"Rapidly decreasing wave heights detected ({trend_info['slope']:.2f} ft/hr)")
+                if trend_info["direction"] == "increasing" and abs(trend_info["slope"]) > 1.0:
+                    warnings.append(
+                        f"Rapidly increasing wave heights detected ({trend_info['slope']:.2f} ft/hr)"
+                    )
+                elif trend_info["direction"] == "decreasing" and abs(trend_info["slope"]) > 1.0:
+                    warnings.append(
+                        f"Rapidly decreasing wave heights detected ({trend_info['slope']:.2f} ft/hr)"
+                    )
 
         except Exception as e:
             self.logger.warning(f"Failed to detect trends: {e}")
@@ -501,13 +507,13 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         try:
             # 2. Detect anomalies
             anomaly_info = self.detect_anomalies(buoy_data, threshold=2.0)
-            metadata['analysis']['anomalies'] = anomaly_info
+            metadata["analysis"]["anomalies"] = anomaly_info
 
             # Adjust quality score based on anomaly count
-            if anomaly_info['anomaly_count'] > 0:
-                anomaly_ratio = anomaly_info['anomaly_count'] / max(1, anomaly_info['sample_size'])
+            if anomaly_info["anomaly_count"] > 0:
+                anomaly_ratio = anomaly_info["anomaly_count"] / max(1, anomaly_info["sample_size"])
                 anomaly_penalty = min(0.5, anomaly_ratio * 2.0)  # Max 0.5 penalty
-                metadata['analysis']['quality_score'] -= anomaly_penalty
+                metadata["analysis"]["quality_score"] -= anomaly_penalty
 
                 warnings.append(
                     f"Detected {anomaly_info['anomaly_count']} anomalous readings - "
@@ -520,49 +526,49 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
         try:
             # 3. Calculate quality score
             quality_info = self.calculate_quality_score(buoy_data)
-            metadata['analysis']['quality_details'] = quality_info
+            metadata["analysis"]["quality_details"] = quality_info
 
             # Use the detailed quality score as the overall score
-            metadata['analysis']['quality_score'] = quality_info['overall_score']
+            metadata["analysis"]["quality_score"] = quality_info["overall_score"]
 
             # Add warnings for low quality scores
-            if quality_info['overall_score'] < 0.4:
+            if quality_info["overall_score"] < 0.4:
                 warnings.append(
                     f"Poor data quality (score: {quality_info['overall_score']:.2f}) - "
                     f"use with caution"
                 )
-            elif quality_info['overall_score'] < 0.6:
+            elif quality_info["overall_score"] < 0.6:
                 warnings.append(
                     f"Moderate data quality (score: {quality_info['overall_score']:.2f})"
                 )
 
             # Specific warnings for quality components
-            if quality_info['freshness_score'] < 0.5:
+            if quality_info["freshness_score"] < 0.5:
                 warnings.append("Data is not fresh - may not reflect current conditions")
-            if quality_info['completeness_score'] < 0.5:
+            if quality_info["completeness_score"] < 0.5:
                 warnings.append("Incomplete data - missing essential fields")
-            if quality_info['consistency_score'] < 0.7:
+            if quality_info["consistency_score"] < 0.7:
                 warnings.append("Inconsistent data - sudden jumps detected")
 
         except Exception as e:
             self.logger.warning(f"Failed to calculate quality score: {e}")
 
         # Store weight for data fusion based on quality score
-        metadata['analysis']['weight'] = metadata['analysis']['quality_score']
+        metadata["analysis"]["weight"] = metadata["analysis"]["quality_score"]
 
         # Check data freshness
         if buoy_data.observations:
             latest_obs = buoy_data.observations[0]
             try:
-                obs_time = datetime.fromisoformat(latest_obs.timestamp.replace('Z', '+00:00'))
+                obs_time = datetime.fromisoformat(latest_obs.timestamp.replace("Z", "+00:00"))
                 now = datetime.now(obs_time.tzinfo)
                 hours_old = (now - obs_time).total_seconds() / 3600
 
-                metadata['analysis']['hours_since_update'] = hours_old
+                metadata["analysis"]["hours_since_update"] = hours_old
 
                 if hours_old > 6:
                     warnings.append(f"Buoy data is {hours_old:.1f} hours old")
-                    metadata['analysis']['quality_score'] -= min(0.5, hours_old / 24)
+                    metadata["analysis"]["quality_score"] -= min(0.5, hours_old / 24)
             except (ValueError, TypeError):
                 warnings.append("Could not parse observation timestamp")
 
@@ -571,8 +577,12 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
             gap_found = False
             for i in range(len(buoy_data.observations) - 1):
                 try:
-                    current = datetime.fromisoformat(buoy_data.observations[i].timestamp.replace('Z', '+00:00'))
-                    next_obs = datetime.fromisoformat(buoy_data.observations[i+1].timestamp.replace('Z', '+00:00'))
+                    current = datetime.fromisoformat(
+                        buoy_data.observations[i].timestamp.replace("Z", "+00:00")
+                    )
+                    next_obs = datetime.fromisoformat(
+                        buoy_data.observations[i + 1].timestamp.replace("Z", "+00:00")
+                    )
                     gap = (current - next_obs).total_seconds() / 3600
 
                     if gap > 3:  # More than 3 hours between observations
@@ -583,7 +593,7 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
 
             if gap_found:
                 warnings.append("Gaps found in buoy data time series")
-                metadata['analysis']['quality_score'] -= 0.2
+                metadata["analysis"]["quality_score"] -= 0.2
 
         # Analyze wave height trends
         if len(buoy_data.observations) >= 3:
@@ -602,28 +612,32 @@ class BuoyProcessor(DataProcessor[Dict[str, Any], BuoyData]):
                     else:
                         trend = "stable"
 
-                    metadata['analysis']['trends']['wave_height'] = trend
+                    metadata["analysis"]["trends"]["wave_height"] = trend
 
                 # Calculate stats
-                metadata['analysis']['trends']['max_height'] = max(heights)
-                metadata['analysis']['trends']['min_height'] = min(heights)
-                metadata['analysis']['trends']['avg_height'] = sum(heights) / len(heights)
+                metadata["analysis"]["trends"]["max_height"] = max(heights)
+                metadata["analysis"]["trends"]["min_height"] = min(heights)
+                metadata["analysis"]["trends"]["avg_height"] = sum(heights) / len(heights)
 
         # Check for special conditions
         latest = buoy_data.latest_observation
         if latest:
             # Check for large swell
             if latest.wave_height is not None and latest.wave_height > 4.0:  # 4m ~ 13ft
-                metadata['analysis']['special_conditions'].append("large_swell")
+                metadata["analysis"]["special_conditions"].append("large_swell")
 
             # Check for long period swell
             if latest.dominant_period is not None and latest.dominant_period > 16.0:
-                metadata['analysis']['special_conditions'].append("long_period_swell")
+                metadata["analysis"]["special_conditions"].append("long_period_swell")
 
             # Check for storm conditions
-            if (latest.wind_speed is not None and latest.wind_speed > 15.0 and
-                latest.wave_height is not None and latest.wave_height > 3.0):
-                metadata['analysis']['special_conditions'].append("storm_conditions")
+            if (
+                latest.wind_speed is not None
+                and latest.wind_speed > 15.0
+                and latest.wave_height is not None
+                and latest.wave_height > 3.0
+            ):
+                metadata["analysis"]["special_conditions"].append("storm_conditions")
 
         return warnings, metadata
 

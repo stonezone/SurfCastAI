@@ -7,9 +7,10 @@ after pressure analysis is generated, not in DataFusionSystem where
 pressure analysis doesn't exist yet.
 """
 
-import sys
 import json
+import sys
 from pathlib import Path
+
 
 def test_storm_detection_fix():
     """Verify storm detection fix by checking recent forecast output."""
@@ -54,7 +55,9 @@ def test_storm_detection_fix():
         return False
 
     # Check pressure analysis file exists
-    pressure_analysis = Path("data/805ef271-00a1-441a-bd7f-88c8096ad1a2/debug/image_analysis_pressure.txt")
+    pressure_analysis = Path(
+        "data/805ef271-00a1-441a-bd7f-88c8096ad1a2/debug/image_analysis_pressure.txt"
+    )
 
     print()
     print("Pressure analysis check:")
@@ -146,6 +149,7 @@ def test_storm_detection_fix():
     print("- Data flow is now correct: pressure analysis → storm detection → forecast")
 
     return True
+
 
 if __name__ == "__main__":
     success = test_storm_detection_fix()

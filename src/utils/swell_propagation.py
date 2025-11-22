@@ -8,10 +8,9 @@ This is how professional forecasters like Pat Caldwell calculate
 swell arrival timing from distant storms.
 """
 
+import logging
 import math
 from datetime import datetime, timedelta
-from typing import Tuple, Optional
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -54,11 +53,7 @@ class SwellPropagationCalculator:
         # Cg = (g * T) / (4π)
         return (GRAVITY * period_seconds) / (4 * math.pi)
 
-    def haversine_distance(
-        self,
-        lat1: float, lon1: float,
-        lat2: float, lon2: float
-    ) -> float:
+    def haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """
         Calculate great circle distance between two points.
 
@@ -76,9 +71,10 @@ class SwellPropagationCalculator:
         dlat = math.radians(lat2 - lat1)
 
         # Haversine formula
-        a = (math.sin(dlat / 2) ** 2 +
-             math.cos(lat1_rad) * math.cos(lat2_rad) *
-             math.sin(dlon / 2) ** 2)
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2) ** 2
+        )
         c = 2 * math.asin(math.sqrt(a))
 
         # Earth radius in km
@@ -96,8 +92,8 @@ class SwellPropagationCalculator:
         source_lon: float,
         period_seconds: float,
         target_lat: float = HAWAII_LAT,
-        target_lon: float = HAWAII_LON
-    ) -> Tuple[float, float, float]:
+        target_lon: float = HAWAII_LON,
+    ) -> tuple[float, float, float]:
         """
         Calculate swell travel time from source to target.
 
@@ -112,10 +108,7 @@ class SwellPropagationCalculator:
             Tuple of (travel_time_hours, distance_nm, group_velocity_knots)
         """
         # Calculate distance
-        distance_nm = self.haversine_distance(
-            source_lat, source_lon,
-            target_lat, target_lon
-        )
+        distance_nm = self.haversine_distance(source_lat, source_lon, target_lat, target_lon)
 
         # Calculate group velocity
         group_velocity_ms = self.calculate_group_velocity(period_seconds)
@@ -140,8 +133,8 @@ class SwellPropagationCalculator:
         period_seconds: float,
         generation_time: datetime,
         target_lat: float = HAWAII_LAT,
-        target_lon: float = HAWAII_LON
-    ) -> Tuple[datetime, dict]:
+        target_lon: float = HAWAII_LON,
+    ) -> tuple[datetime, dict]:
         """
         Calculate when swell will arrive at target location.
 
@@ -157,21 +150,20 @@ class SwellPropagationCalculator:
             Tuple of (arrival_time, details_dict)
         """
         travel_hours, distance_nm, velocity_kt = self.calculate_travel_time(
-            source_lat, source_lon, period_seconds,
-            target_lat, target_lon
+            source_lat, source_lon, period_seconds, target_lat, target_lon
         )
 
         arrival_time = generation_time + timedelta(hours=travel_hours)
 
         details = {
-            'source_location': {'lat': source_lat, 'lon': source_lon},
-            'target_location': {'lat': target_lat, 'lon': target_lon},
-            'distance_nm': distance_nm,
-            'period_seconds': period_seconds,
-            'group_velocity_knots': velocity_kt,
-            'travel_time_hours': travel_hours,
-            'generation_time': generation_time.isoformat(),
-            'arrival_time': arrival_time.isoformat(),
+            "source_location": {"lat": source_lat, "lon": source_lon},
+            "target_location": {"lat": target_lat, "lon": target_lon},
+            "distance_nm": distance_nm,
+            "period_seconds": period_seconds,
+            "group_velocity_knots": velocity_kt,
+            "travel_time_hours": travel_hours,
+            "generation_time": generation_time.isoformat(),
+            "arrival_time": arrival_time.isoformat(),
         }
 
         return arrival_time, details
@@ -179,8 +171,8 @@ class SwellPropagationCalculator:
     def estimate_period_from_storm(
         self,
         wind_speed_kt: float,
-        fetch_length_nm: Optional[float] = None,
-        duration_hours: Optional[float] = None
+        fetch_length_nm: float | None = None,
+        duration_hours: float | None = None,
     ) -> float:
         """
         Estimate dominant wave period from storm characteristics.
@@ -260,9 +252,7 @@ def example_kamchatka_swell():
     generation_time = datetime(2025, 10, 8, 12, 0)  # Oct 8, 12:00 HST
 
     # Calculate arrival
-    arrival, details = calc.calculate_arrival(
-        source_lat, source_lon, period, generation_time
-    )
+    arrival, details = calc.calculate_arrival(source_lat, source_lon, period, generation_time)
 
     print("=" * 60)
     print("KAMCHATKA SWELL EXAMPLE (Pat Caldwell Oct 8, 2025)")
@@ -273,9 +263,11 @@ def example_kamchatka_swell():
     print(f"Estimated Period: {period:.1f}s")
     print(f"\nDistance to Hawaii: {details['distance_nm']:.0f} nm")
     print(f"Group Velocity: {details['group_velocity_knots']:.1f} kt")
-    print(f"Travel Time: {details['travel_time_hours']:.1f} hours ({details['travel_time_hours']/24:.1f} days)")
+    print(
+        f"Travel Time: {details['travel_time_hours']:.1f} hours ({details['travel_time_hours']/24:.1f} days)"
+    )
     print(f"\nArrival Time: {arrival.strftime('%a %b %d, %I:%M %p')}")
-    print(f"\nPat Caldwell predicted: 'Sunday morning' (Oct 12)")
+    print("\nPat Caldwell predicted: 'Sunday morning' (Oct 12)")
     print(f"Our calculation: {arrival.strftime('%A %p')} (Oct {arrival.day})")
     print("=" * 60)
 

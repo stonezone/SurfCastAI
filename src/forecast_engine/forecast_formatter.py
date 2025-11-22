@@ -5,18 +5,17 @@ This module handles formatting of generated forecasts into
 various output formats (markdown, HTML, PDF).
 """
 
-import logging
-import os
-from typing import Dict, List, Any, Optional, Union
-from pathlib import Path
 import json
-from datetime import datetime
+import logging
 import re
+from datetime import datetime
+from pathlib import Path
 from textwrap import dedent
+from typing import Any
 
 from ..core.config import Config
-from .visualization import ForecastVisualizer
 from .historical import HistoricalComparator
+from .visualization import ForecastVisualizer
 
 
 class ForecastFormatter:
@@ -38,19 +37,19 @@ class ForecastFormatter:
             config: Application configuration
         """
         self.config = config
-        self.logger = logging.getLogger('forecast.formatter')
+        self.logger = logging.getLogger("forecast.formatter")
 
         # Load formatting options
-        self.formats = self.config.get('forecast', 'formats', 'markdown,html,pdf').split(',')
-        self.output_dir = Path(self.config.get('general', 'output_directory', './output'))
+        self.formats = self.config.get("forecast", "formats", "markdown,html,pdf").split(",")
+        self.output_dir = Path(self.config.get("general", "output_directory", "./output"))
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        self.visualizer = ForecastVisualizer(self.logger.getChild('visuals'))
-        self.history = HistoricalComparator(self.output_dir, self.logger.getChild('history'))
+        self.visualizer = ForecastVisualizer(self.logger.getChild("visuals"))
+        self.history = HistoricalComparator(self.output_dir, self.logger.getChild("history"))
 
-    def format_forecast(self, forecast_data: Dict[str, Any]) -> Dict[str, str]:
+    def format_forecast(self, forecast_data: dict[str, Any]) -> dict[str, str]:
         """
         Format a forecast into the configured output formats.
 
@@ -64,8 +63,10 @@ class ForecastFormatter:
             self.logger.info("Starting forecast formatting")
 
             # Extract forecast information
-            forecast_id = forecast_data.get('forecast_id', f"forecast_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
-            generated_time = forecast_data.get('generated_time', datetime.now().isoformat())
+            forecast_id = forecast_data.get(
+                "forecast_id", f"forecast_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            )
+            generated_time = forecast_data.get("generated_time", datetime.now().isoformat())
 
             # Create forecast directory
             forecast_dir = self.output_dir / forecast_id
@@ -76,18 +77,20 @@ class ForecastFormatter:
                 self.logger.info("Generating visualizations...")
                 visualizations = self.visualizer.generate_all(forecast_data, forecast_dir)
                 self.logger.info(f"Generated {len(visualizations)} visualizations")
-                forecast_data.setdefault('metadata', {})['visualizations'] = visualizations
+                forecast_data.setdefault("metadata", {})["visualizations"] = visualizations
             except Exception as e:
                 self.logger.error(f"Visualization generation failed: {e}")
-                forecast_data.setdefault('metadata', {})['visualizations'] = {}
+                forecast_data.setdefault("metadata", {})["visualizations"] = {}
 
             # Build historical summary with error handling
             try:
                 self.logger.info("Building historical summary...")
-                history_summary = self.history.build_summary(forecast_id, forecast_dir, forecast_data)
+                history_summary = self.history.build_summary(
+                    forecast_id, forecast_dir, forecast_data
+                )
                 if history_summary:
                     self.logger.info("Historical summary completed")
-                    forecast_data['metadata']['historical_summary'] = history_summary
+                    forecast_data["metadata"]["historical_summary"] = history_summary
                 else:
                     self.logger.info("No historical summary available")
             except Exception as e:
@@ -96,47 +99,47 @@ class ForecastFormatter:
             # Format outputs
             output_paths = {}
 
-            if 'markdown' in self.formats:
+            if "markdown" in self.formats:
                 try:
                     self.logger.info("Generating markdown format...")
                     markdown_path = self._format_markdown(forecast_data, forecast_dir)
-                    output_paths['markdown'] = str(markdown_path)
+                    output_paths["markdown"] = str(markdown_path)
                     self.logger.info(f"Markdown format saved to: {markdown_path}")
                 except Exception as e:
                     self.logger.error(f"Failed to generate markdown: {e}")
 
-            if 'html' in self.formats:
+            if "html" in self.formats:
                 try:
                     self.logger.info("Generating HTML format...")
                     html_path = self._format_html(forecast_data, forecast_dir)
-                    output_paths['html'] = str(html_path)
+                    output_paths["html"] = str(html_path)
                     self.logger.info(f"HTML format saved to: {html_path}")
                 except Exception as e:
                     self.logger.error(f"Failed to generate html: {e}")
 
-            if 'pdf' in self.formats:
+            if "pdf" in self.formats:
                 try:
                     self.logger.info("Generating PDF format...")
                     pdf_path = self._format_pdf(forecast_data, forecast_dir)
-                    output_paths['pdf'] = str(pdf_path)
+                    output_paths["pdf"] = str(pdf_path)
                     self.logger.info(f"PDF format saved to: {pdf_path}")
                 except Exception as e:
                     self.logger.error(f"Failed to generate pdf: {e}")
 
             # Save original forecast data for reference
-            with open(forecast_dir / 'forecast_data.json', 'w') as f:
+            with open(forecast_dir / "forecast_data.json", "w") as f:
                 # Convert to JSON-serializable format
                 serializable_data = self._make_serializable(forecast_data)
                 json.dump(serializable_data, f, indent=2)
 
-            output_paths['json'] = str(forecast_dir / 'forecast_data.json')
+            output_paths["json"] = str(forecast_dir / "forecast_data.json")
 
             self.logger.info(f"Forecast formatting completed for forecast ID: {forecast_id}")
             return output_paths
 
         except Exception as e:
             self.logger.error(f"Error formatting forecast: {e}")
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     def _make_serializable(self, data: Any) -> Any:
         """
@@ -158,72 +161,79 @@ class ForecastFormatter:
             # Convert to string representation
             return str(data)
 
-    def _format_markdown(self, forecast_data: Dict[str, Any], output_dir: Path) -> Path:
+    def _format_markdown(self, forecast_data: dict[str, Any], output_dir: Path) -> Path:
         """Format forecast as markdown."""
         self.logger.info("Formatting forecast as markdown")
 
-        forecast_id = forecast_data.get('forecast_id')
-        generated_time = forecast_data.get('generated_time')
+        forecast_id = forecast_data.get("forecast_id")
+        generated_time = forecast_data.get("generated_time")
 
         try:
-            date_obj = datetime.fromisoformat(generated_time.replace('Z', '+00:00'))
-            date_str = date_obj.strftime('%B %d, %Y at %H:%M %Z')
+            date_obj = datetime.fromisoformat(generated_time.replace("Z", "+00:00"))
+            date_str = date_obj.strftime("%B %d, %Y at %H:%M %Z")
         except (ValueError, TypeError):
             date_str = generated_time
 
-        markdown_parts: List[str] = []
+        markdown_parts: list[str] = []
         markdown_parts.append("# Hawaii Surf Forecast\n")
         markdown_parts.append(f"*Generated on {date_str}*\n\n")
 
-        main_forecast = forecast_data.get('main_forecast', '')
+        main_forecast = forecast_data.get("main_forecast", "")
         if main_forecast:
             formatted = self._format_forecast_text(main_forecast)
             markdown_parts.append(f"## Main Forecast\n\n{formatted}\n\n")
 
-        north_shore = forecast_data.get('north_shore', '')
+        north_shore = forecast_data.get("north_shore", "")
         if north_shore:
             formatted_ns = self._format_forecast_text(north_shore)
             markdown_parts.append(f"## North Shore Forecast\n\n{formatted_ns}\n\n")
 
-        south_shore = forecast_data.get('south_shore', '')
+        south_shore = forecast_data.get("south_shore", "")
         if south_shore:
             formatted_ss = self._format_forecast_text(south_shore)
             markdown_parts.append(f"## South Shore Forecast\n\n{formatted_ss}\n\n")
 
-        daily = forecast_data.get('daily', '')
+        daily = forecast_data.get("daily", "")
         if daily:
             formatted_daily = self._format_forecast_text(daily)
             markdown_parts.append(f"## Daily Forecast\n\n{formatted_daily}\n\n")
 
-        confidence = forecast_data.get('metadata', {}).get('confidence', {})
+        confidence = forecast_data.get("metadata", {}).get("confidence", {})
         if confidence:
-            overall_score = confidence.get('overall_score', 0)
-            category = confidence.get('category', 'Moderate')
-            breakdown = confidence.get('breakdown', {})
+            overall_score = confidence.get("overall_score", 0)
+            category = confidence.get("category", "Moderate")
+            breakdown = confidence.get("breakdown", {})
 
-            markdown_parts.append('## Forecast Confidence\n\n')
+            markdown_parts.append("## Forecast Confidence\n\n")
             markdown_parts.append(
                 f"**{category}** Confidence ({breakdown.get('overall_score_out_of_10', overall_score * 10):.1f}/10)\n\n"
             )
 
-            factors = confidence.get('factors', {})
-            if factors and breakdown.get('factor_descriptions'):
-                markdown_parts.append('**Confidence Factors:**\n\n')
-                descriptions = breakdown.get('factor_descriptions', {})
-                factors_out_of_10 = breakdown.get('factors', {})
+            factors = confidence.get("factors", {})
+            if factors and breakdown.get("factor_descriptions"):
+                markdown_parts.append("**Confidence Factors:**\n\n")
+                descriptions = breakdown.get("factor_descriptions", {})
+                factors_out_of_10 = breakdown.get("factors", {})
 
-                for factor_key in ['model_consensus', 'source_reliability', 'data_completeness',
-                                  'forecast_horizon', 'historical_accuracy']:
+                for factor_key in [
+                    "model_consensus",
+                    "source_reliability",
+                    "data_completeness",
+                    "forecast_horizon",
+                    "historical_accuracy",
+                ]:
                     if factor_key in factors_out_of_10:
-                        factor_name = factor_key.replace('_', ' ').title()
+                        factor_name = factor_key.replace("_", " ").title()
                         score_10 = factors_out_of_10[factor_key]
-                        description = descriptions.get(factor_key, '')
-                        markdown_parts.append(f"- **{factor_name}**: {score_10}/10 - {description}\n")
-                markdown_parts.append('\n')
+                        description = descriptions.get(factor_key, "")
+                        markdown_parts.append(
+                            f"- **{factor_name}**: {score_10}/10 - {description}\n"
+                        )
+                markdown_parts.append("\n")
 
                 # Add data source summary
-                if 'total_sources' in breakdown:
-                    source_counts = breakdown.get('source_counts', {})
+                if "total_sources" in breakdown:
+                    source_counts = breakdown.get("source_counts", {})
                     markdown_parts.append(
                         f"**Data Sources**: {breakdown['total_sources']} sources "
                         f"({source_counts.get('buoys', 0)} buoys, "
@@ -231,49 +241,50 @@ class ForecastFormatter:
                         f"{source_counts.get('weather', 0)} weather)\n\n"
                     )
 
-        visuals = forecast_data.get('metadata', {}).get('visualizations', {})
+        visuals = forecast_data.get("metadata", {}).get("visualizations", {})
         if visuals:
-            markdown_parts.append('## Visual Highlights\n\n')
+            markdown_parts.append("## Visual Highlights\n\n")
             for name, image_path in visuals.items():
                 rel_path = Path(image_path)
                 try:
                     rel_path = rel_path.relative_to(output_dir)
                 except ValueError:
                     rel_path = Path(image_path).name
-                caption = name.replace('_', ' ').title()
+                caption = name.replace("_", " ").title()
                 markdown_parts.append(f"![{caption}]({rel_path.as_posix()})\n\n")
 
-        history = forecast_data.get('metadata', {}).get('historical_summary')
+        history = forecast_data.get("metadata", {}).get("historical_summary")
         if history:
-            prev_id = history.get('previous_id', 'previous forecast')
-            prev_time = history.get('previous_generated', 'unknown time')
-            markdown_parts.append('## Historical Comparison\n\n')
+            prev_id = history.get("previous_id", "previous forecast")
+            prev_time = history.get("previous_generated", "unknown time")
+            markdown_parts.append("## Historical Comparison\n\n")
             markdown_parts.append(f"Compared with **{prev_id}** generated on {prev_time}:\n\n")
-            for line in history.get('summary_lines', []):
+            for line in history.get("summary_lines", []):
                 markdown_parts.append(f"- {line}\n")
-            markdown_parts.append('\n')
+            markdown_parts.append("\n")
 
-        markdown_parts.append('---\n')
-        markdown_parts.append('*Generated by SurfCastAI - AI-Powered Surf Forecasting*\n')
+        markdown_parts.append("---\n")
+        markdown_parts.append("*Generated by SurfCastAI - AI-Powered Surf Forecasting*\n")
 
         output_path = output_dir / f"{forecast_id}.md"
-        with open(output_path, 'w') as fh:
-            fh.write(''.join(markdown_parts))
+        with open(output_path, "w") as fh:
+            fh.write("".join(markdown_parts))
         return output_path
-    def _format_html(self, forecast_data: Dict[str, Any], output_dir: Path) -> Path:
+
+    def _format_html(self, forecast_data: dict[str, Any], output_dir: Path) -> Path:
         """Format forecast as responsive HTML."""
         self.logger.info("Formatting forecast as HTML")
 
-        forecast_id = forecast_data.get('forecast_id')
-        generated_time = forecast_data.get('generated_time')
+        forecast_id = forecast_data.get("forecast_id")
+        generated_time = forecast_data.get("generated_time")
 
         try:
-            date_obj = datetime.fromisoformat(generated_time.replace('Z', '+00:00'))
-            date_str = date_obj.strftime('%B %d, %Y at %H:%M %Z')
+            date_obj = datetime.fromisoformat(generated_time.replace("Z", "+00:00"))
+            date_str = date_obj.strftime("%B %d, %Y at %H:%M %Z")
         except (ValueError, TypeError, AttributeError):
             date_str = str(generated_time)
 
-        segments: List[str] = []
+        segments: list[str] = []
         segments.append(
             dedent(
                 f"""<!DOCTYPE html>
@@ -397,7 +408,7 @@ class ForecastFormatter:
             )
         )
 
-        main_forecast = forecast_data.get('main_forecast', '')
+        main_forecast = forecast_data.get("main_forecast", "")
         if main_forecast:
             formatted = self._markdown_to_html(self._format_forecast_text(main_forecast))
             segments.append(
@@ -410,10 +421,10 @@ class ForecastFormatter:
                 )
             )
 
-        north_shore = forecast_data.get('north_shore', '')
-        south_shore = forecast_data.get('south_shore', '')
+        north_shore = forecast_data.get("north_shore", "")
+        south_shore = forecast_data.get("south_shore", "")
         if north_shore or south_shore:
-            shore_sections: List[str] = ['    <div class="shore-specific">']
+            shore_sections: list[str] = ['    <div class="shore-specific">']
             if north_shore:
                 formatted_ns = self._markdown_to_html(self._format_forecast_text(north_shore))
                 shore_sections.append(
@@ -423,7 +434,7 @@ class ForecastFormatter:
             {formatted_ns}
         </div>
 """
-                    ).rstrip('\n')
+                    ).rstrip("\n")
                 )
             if south_shore:
                 formatted_ss = self._markdown_to_html(self._format_forecast_text(south_shore))
@@ -434,12 +445,12 @@ class ForecastFormatter:
             {formatted_ss}
         </div>
 """
-                    ).rstrip('\n')
+                    ).rstrip("\n")
                 )
             shore_sections.append("    </div>")
             segments.append("\n".join(shore_sections) + "\n")
 
-        daily = forecast_data.get('daily', '')
+        daily = forecast_data.get("daily", "")
         if daily:
             formatted_daily = self._markdown_to_html(self._format_forecast_text(daily))
             segments.append(
@@ -452,11 +463,11 @@ class ForecastFormatter:
                 )
             )
 
-        visuals = forecast_data.get('metadata', {}).get('visualizations', {})
+        visuals = forecast_data.get("metadata", {}).get("visualizations", {})
         if visuals:
             visual_block = [
                 '    <div class="forecast-section">',
-                '        <h2>Visual Highlights</h2>',
+                "        <h2>Visual Highlights</h2>",
                 '        <div class="charts-grid">',
             ]
             for name, image_path in visuals.items():
@@ -465,7 +476,7 @@ class ForecastFormatter:
                     rel_path = rel_path.relative_to(output_dir)
                 except ValueError:
                     rel_path = Path(image_path).name
-                caption = name.replace('_', ' ').title()
+                caption = name.replace("_", " ").title()
                 visual_block.append(
                     dedent(
                         f"""            <div class="chart-card">
@@ -473,29 +484,29 @@ class ForecastFormatter:
                 <p><strong>{caption}</strong></p>
             </div>
 """
-                    ).rstrip('\n')
+                    ).rstrip("\n")
                 )
-            visual_block.extend(['        </div>', '    </div>'])
+            visual_block.extend(["        </div>", "    </div>"])
             segments.append("\n".join(visual_block) + "\n")
 
-        history = forecast_data.get('metadata', {}).get('historical_summary')
+        history = forecast_data.get("metadata", {}).get("historical_summary")
         if history:
-            prev_id = history.get('previous_id', 'previous forecast')
-            prev_time = history.get('previous_generated', 'unknown time')
+            prev_id = history.get("previous_id", "previous forecast")
+            prev_time = history.get("previous_generated", "unknown time")
             history_block = [
                 '    <div class="forecast-section history-card">',
-                f'        <h2>Historical Comparison</h2>',
-                f'        <p>Compared with <strong>{prev_id}</strong> generated on {prev_time}:</p>',
-                '        <ul>',
+                "        <h2>Historical Comparison</h2>",
+                f"        <p>Compared with <strong>{prev_id}</strong> generated on {prev_time}:</p>",
+                "        <ul>",
             ]
-            for line in history.get('summary_lines', []):
+            for line in history.get("summary_lines", []):
                 history_block.append(f"            <li>{line}</li>")
-            history_block.extend(['        </ul>', '    </div>'])
+            history_block.extend(["        </ul>", "    </div>"])
             segments.append("\n".join(history_block) + "\n")
 
-        confidence = forecast_data.get('metadata', {}).get('confidence', {})
+        confidence = forecast_data.get("metadata", {}).get("confidence", {})
         if confidence:
-            overall_score = confidence.get('overall_score', 0)
+            overall_score = confidence.get("overall_score", 0)
             confidence_percent = int(overall_score * 100)
             segments.append(
                 dedent(
@@ -508,12 +519,15 @@ class ForecastFormatter:
 """
                 )
             )
-            factors = confidence.get('factors', {})
+            factors = confidence.get("factors", {})
             if factors:
-                factor_lines = ['        <h3>Confidence Factors</h3>', '        <div class="confidence-factors">']
+                factor_lines = [
+                    "        <h3>Confidence Factors</h3>",
+                    '        <div class="confidence-factors">',
+                ]
                 for factor, value in factors.items():
                     factor_percent = int(value * 100)
-                    factor_name = factor.replace('_', ' ').title()
+                    factor_name = factor.replace("_", " ").title()
                     factor_lines.append(
                         dedent(
                             f"""            <div class="factor">
@@ -523,9 +537,9 @@ class ForecastFormatter:
                 </div>
             </div>
 """
-                        ).rstrip('\n')
+                        ).rstrip("\n")
                     )
-                factor_lines.append('        </div>')
+                factor_lines.append("        </div>")
                 segments.append("\n".join(factor_lines) + "\n")
             segments.append("    </div>\n")
 
@@ -540,14 +554,13 @@ class ForecastFormatter:
             )
         )
 
-        html = ''.join(segments)
+        html = "".join(segments)
         output_path = output_dir / f"{forecast_id}.html"
-        with open(output_path, 'w') as fh:
+        with open(output_path, "w") as fh:
             fh.write(html)
         return output_path
 
-
-    def _format_pdf(self, forecast_data: Dict[str, Any], output_dir: Path) -> Path:
+    def _format_pdf(self, forecast_data: dict[str, Any], output_dir: Path) -> Path:
         """
         Format forecast as PDF.
 
@@ -568,7 +581,7 @@ class ForecastFormatter:
             import weasyprint
 
             # Extract forecast information
-            forecast_id = forecast_data.get('forecast_id')
+            forecast_id = forecast_data.get("forecast_id")
 
             # Generate PDF
             pdf_path = output_dir / f"{forecast_id}.pdf"
@@ -577,7 +590,9 @@ class ForecastFormatter:
             return pdf_path
 
         except ImportError:
-            self.logger.error("WeasyPrint not installed. Please install it with: pip install weasyprint")
+            self.logger.error(
+                "WeasyPrint not installed. Please install it with: pip install weasyprint"
+            )
             # Return the HTML path as fallback
             return html_path
         except Exception as e:
@@ -596,7 +611,7 @@ class ForecastFormatter:
             Formatted text
         """
         # Add heading levels to all-caps lines
-        lines = text.split('\n')
+        lines = text.split("\n")
         formatted_lines = []
 
         for line in lines:
@@ -617,14 +632,22 @@ class ForecastFormatter:
             else:
                 formatted_lines.append(line)
 
-        formatted_text = '\n'.join(formatted_lines)
+        formatted_text = "\n".join(formatted_lines)
 
         # Highlight important terms (feet, wave heights, etc.)
-        formatted_text = re.sub(r'(\d+[\-\–]?\d*\s*(?:feet|foot|ft)(?:\s*\(Hawaiian\s*(?:scale)?\)?)?)',
-                              r'**\1**', formatted_text, flags=re.IGNORECASE)
+        formatted_text = re.sub(
+            r"(\d+[\-\–]?\d*\s*(?:feet|foot|ft)(?:\s*\(Hawaiian\s*(?:scale)?\)?)?)",
+            r"**\1**",
+            formatted_text,
+            flags=re.IGNORECASE,
+        )
 
-        formatted_text = re.sub(r'(\d+[\-\–]\d+\s*(?:seconds|second|sec|s))',
-                              r'**\1**', formatted_text, flags=re.IGNORECASE)
+        formatted_text = re.sub(
+            r"(\d+[\-\–]\d+\s*(?:seconds|second|sec|s))",
+            r"**\1**",
+            formatted_text,
+            flags=re.IGNORECASE,
+        )
 
         return formatted_text
 
@@ -653,18 +676,18 @@ class ForecastFormatter:
             html = markdown_text
 
             # Convert headers
-            html = re.sub(r'^### (.*?)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
-            html = re.sub(r'^## (.*?)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
-            html = re.sub(r'^# (.*?)$', r'<h1>\1</h1>', html, flags=re.MULTILINE)
+            html = re.sub(r"^### (.*?)$", r"<h3>\1</h3>", html, flags=re.MULTILINE)
+            html = re.sub(r"^## (.*?)$", r"<h2>\1</h2>", html, flags=re.MULTILINE)
+            html = re.sub(r"^# (.*?)$", r"<h1>\1</h1>", html, flags=re.MULTILINE)
 
             # Convert bold
-            html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
+            html = re.sub(r"\*\*(.*?)\*\*", r"<strong>\1</strong>", html)
 
             # Convert italic
-            html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', html)
+            html = re.sub(r"\*(.*?)\*", r"<em>\1</em>", html)
 
             # Convert paragraphs
-            html = re.sub(r'\n\n', r'</p><p>', html)
+            html = re.sub(r"\n\n", r"</p><p>", html)
             html = f"<p>{html}</p>"
 
             return html

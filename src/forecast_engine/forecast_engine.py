@@ -9,23 +9,21 @@ import asyncio
 import copy
 import logging
 import os
-import json
-from typing import Dict, List, Any, Optional, Union, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
-from .prompt_templates import PromptTemplates
+from ..core.config import Config
+from ..core.openai_client import OpenAIClient
+from ..processing.models.swell_event import SwellForecast
+from ..processing.storm_detector import StormDetector
+from ..utils.prompt_loader import PromptLoader
+from ..utils.swell_propagation import SwellPropagationCalculator
 from ..utils.validation_feedback import ValidationFeedback
+from .data_manager import ForecastDataManager
 from .local_generator import LocalForecastGenerator
 from .model_settings import ModelSettings
-from ..processing.models.swell_event import SwellForecast, SwellEvent, ForecastLocation
-from ..core.config import Config
-from ..utils.prompt_loader import PromptLoader
-from .context_builder import build_context
-from ..core.openai_client import OpenAIClient
-from .data_manager import ForecastDataManager
-from ..processing.storm_detector import StormDetector
-from ..utils.swell_propagation import SwellPropagationCalculator
+from .prompt_templates import PromptTemplates
 
 
 class ForecastEngine:
@@ -48,24 +46,24 @@ class ForecastEngine:
             config: Application configuration
         """
         self.config = config
-        self.logger = logging.getLogger('forecast.engine')
+        self.logger = logging.getLogger("forecast.engine")
 
         # Set up templates
-        templates_dir = self.config.get('forecast', 'templates_dir', None)
+        templates_dir = self.config.get("forecast", "templates_dir", None)
         self.templates = PromptTemplates(templates_dir)
         self.prompt_loader = PromptLoader(
             templates_dir,
-            logger=self.logger.getChild('prompt_loader'),
-            fallback_provider=self.templates.get_all_templates
+            logger=self.logger.getChild("prompt_loader"),
+            fallback_provider=self.templates.get_all_templates,
         )
 
         if not self.prompt_loader.is_fallback_enabled():
             alias_map = {
-                'caldwell_main': 'caldwell',
-                'caldwell': 'caldwell',
-                'north_shore': 'north_shore',
-                'south_shore': 'south_shore',
-                'daily': 'daily',
+                "caldwell_main": "caldwell",
+                "caldwell": "caldwell",
+                "north_shore": "north_shore",
+                "south_shore": "south_shore",
+                "daily": "daily",
             }
             replacements = self.prompt_loader.as_templates(alias_map)
             if replacements:
@@ -73,91 +71,98 @@ class ForecastEngine:
 
         # Load OpenAI configuration
         # Try config first, then fall back to environment variable
-        self.openai_api_key = self.config.get('openai', 'api_key') or os.environ.get('OPENAI_API_KEY')
-        
+        self.openai_api_key = self.config.get("openai", "api_key") or os.environ.get(
+            "OPENAI_API_KEY"
+        )
+
         # Get model name and set appropriate max_tokens
-        model_name = self.config.get('openai', 'model', 'gpt-5-nano')
-        
+        model_name = self.config.get("openai", "model", "gpt-5-nano")
+
         # Model-specific max_tokens limits
         model_limits = {
-            'gpt-4o-mini': 16384,
-            'gpt-4o': 16384,
-            'gpt-4-turbo': 4096,
-            'gpt-4': 8192,
-            'gpt-5-nano': 32768,
-            'gpt-5-mini': 32768,
-            'gpt-5': 32768
+            "gpt-4o-mini": 16384,
+            "gpt-4o": 16384,
+            "gpt-4-turbo": 4096,
+            "gpt-4": 8192,
+            "gpt-5-nano": 32768,
+            "gpt-5-mini": 32768,
+            "gpt-5": 32768,
         }
-        
+
         # Determine max_tokens: config value, or model-specific limit, or 4096 default
-        config_max_tokens = self.config.getint('openai', 'max_tokens', None)
+        config_max_tokens = self.config.getint("openai", "max_tokens", None)
         if config_max_tokens is not None:
             default_max_tokens = config_max_tokens
         else:
             default_max_tokens = model_limits.get(model_name, 4096)
-        
+
         primary_config = {
             "name": model_name,
             "max_tokens": default_max_tokens,
-            "verbosity": self.config.get('openai', 'verbosity', 'high'),
-            "reasoning_effort": self.config.get('openai', 'reasoning_effort', 'medium'),
+            "verbosity": self.config.get("openai", "verbosity", "high"),
+            "reasoning_effort": self.config.get("openai", "reasoning_effort", "medium"),
         }
 
         # GPT-5-nano only supports temperature=1 (default), skip for this model
-        if 'gpt-5' in model_name.lower():
+        if "gpt-5" in model_name.lower():
             self.temperature = None  # Use model default
         else:
-            self.temperature = self.config.getfloat('openai', 'temperature', 0.7)
+            self.temperature = self.config.getfloat("openai", "temperature", 0.7)
         self.primary_model_settings = ModelSettings.from_config(primary_config)
-        self.openai_model = self.primary_model_settings.name  # Backwards compatibility for legacy callers
+        self.openai_model = (
+            self.primary_model_settings.name
+        )  # Backwards compatibility for legacy callers
         self.max_tokens = self.primary_model_settings.max_output_tokens
 
-        analysis_models_raw = self.config.get('openai', 'analysis_models', []) or []
+        analysis_models_raw = self.config.get("openai", "analysis_models", []) or []
         self.analysis_model_settings = [
-            ModelSettings.from_config(raw, defaults={
-                "max_tokens": self.primary_model_settings.max_output_tokens,
-                "verbosity": self.primary_model_settings.verbosity,
-                "reasoning_effort": self.primary_model_settings.reasoning_effort,
-            })
+            ModelSettings.from_config(
+                raw,
+                defaults={
+                    "max_tokens": self.primary_model_settings.max_output_tokens,
+                    "verbosity": self.primary_model_settings.verbosity,
+                    "reasoning_effort": self.primary_model_settings.reasoning_effort,
+                },
+            )
             for raw in analysis_models_raw
             if isinstance(raw, dict)
         ]
 
         self.use_local_generator = self.config.getboolean(
-            'forecast',
-            'use_local_generator',
-            default=not bool(self.openai_api_key)
+            "forecast", "use_local_generator", default=not bool(self.openai_api_key)
         )
         if self.use_local_generator:
-            self.logger.info('Using local forecast generator (OpenAI disabled)')
+            self.logger.info("Using local forecast generator (OpenAI disabled)")
 
         # Set up iterative refinement
         # Disable refinement for GPT-5 models - they work better with single strong prompts
-        if 'gpt-5' in model_name.lower():
+        if "gpt-5" in model_name.lower():
             self.refinement_cycles = 0
-            self.logger.info('Refinement cycles disabled for GPT-5 model')
+            self.logger.info("Refinement cycles disabled for GPT-5 model")
         else:
-            self.refinement_cycles = self.config.getint('forecast', 'refinement_cycles', 2)
-        self.quality_threshold = self.config.getfloat('forecast', 'quality_threshold', 0.8)
+            self.refinement_cycles = self.config.getint("forecast", "refinement_cycles", 2)
+        self.quality_threshold = self.config.getfloat("forecast", "quality_threshold", 0.8)
 
         # Load image configuration
-        self.max_images = self.config.getint('forecast', 'max_images', 10)
+        self.max_images = self.config.getint("forecast", "max_images", 10)
 
         # Load image detail levels with defaults
-        image_detail_config = self.config.get('forecast', 'image_detail_levels', {})
+        image_detail_config = self.config.get("forecast", "image_detail_levels", {})
         if not isinstance(image_detail_config, dict):
             image_detail_config = {}
 
-        self.image_detail_pressure = image_detail_config.get('pressure_charts', 'high')
-        self.image_detail_wave = image_detail_config.get('wave_models', 'auto')
-        self.image_detail_satellite = image_detail_config.get('satellite', 'auto')
-        self.image_detail_sst = image_detail_config.get('sst_charts', 'low')
+        self.image_detail_pressure = image_detail_config.get("pressure_charts", "high")
+        self.image_detail_wave = image_detail_config.get("wave_models", "auto")
+        self.image_detail_satellite = image_detail_config.get("satellite", "auto")
+        self.image_detail_sst = image_detail_config.get("sst_charts", "low")
 
         # Log image configuration
-        self.logger.info(f'Image configuration: max_images={self.max_images}')
-        self.logger.info(f'Image detail levels: pressure={self.image_detail_pressure}, '
-                        f'wave={self.image_detail_wave}, satellite={self.image_detail_satellite}, '
-                        f'sst={self.image_detail_sst}')
+        self.logger.info(f"Image configuration: max_images={self.max_images}")
+        self.logger.info(
+            f"Image detail levels: pressure={self.image_detail_pressure}, "
+            f"wave={self.image_detail_wave}, satellite={self.image_detail_satellite}, "
+            f"sst={self.image_detail_sst}"
+        )
 
         # Initialize OpenAI client
         self.openai_client = OpenAIClient(
@@ -165,7 +170,7 @@ class ForecastEngine:
             model=self.openai_model,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
-            logger=self.logger.getChild('openai_client')
+            logger=self.logger.getChild("openai_client"),
         )
 
         # Initialize data manager
@@ -175,7 +180,7 @@ class ForecastEngine:
             image_detail_wave=self.image_detail_wave,
             image_detail_satellite=self.image_detail_satellite,
             image_detail_sst=self.image_detail_sst,
-            logger=self.logger.getChild('data_manager')
+            logger=self.logger.getChild("data_manager"),
         )
 
         # Initialize storm detection components
@@ -183,46 +188,62 @@ class ForecastEngine:
         self.propagation_calc = SwellPropagationCalculator()
 
         # Initialize token budget enforcement (kept in ForecastEngine for orchestration)
-        self.token_budget = self.config.getint('forecast', 'token_budget', 150000)
-        self.warn_threshold = self.config.getint('forecast', 'warn_threshold', 200000)
+        self.token_budget = self.config.getint("forecast", "token_budget", 150000)
+        self.warn_threshold = self.config.getint("forecast", "warn_threshold", 200000)
         self.enable_budget_enforcement = self.config.getboolean(
-            'forecast', 'enable_budget_enforcement', True
+            "forecast", "enable_budget_enforcement", True
         )
         self.estimated_tokens = 0
 
         # Log budget configuration
-        self.logger.info(f"Token budget enforcement: {'enabled' if self.enable_budget_enforcement else 'disabled'}")
-        self.logger.info(f"Token budget: {self.token_budget}, Warning threshold: {self.warn_threshold}")
+        self.logger.info(
+            f"Token budget enforcement: {'enabled' if self.enable_budget_enforcement else 'disabled'}"
+        )
+        self.logger.info(
+            f"Token budget: {self.token_budget}, Warning threshold: {self.warn_threshold}"
+        )
 
         # Specialist team setup (optional - feature flag)
-        self.use_specialist_team = self.config.getboolean('forecast', 'use_specialist_team', False)
+        self.use_specialist_team = self.config.getboolean("forecast", "use_specialist_team", False)
 
         if self.use_specialist_team:
             try:
                 from .specialists import BuoyAnalyst, PressureAnalyst, SeniorForecaster
 
-                buoy_config = self.config.get('specialists', 'buoy', {})
-                pressure_config = self.config.get('specialists', 'pressure', {})
+                buoy_config = self.config.get("specialists", "buoy", {})
+                pressure_config = self.config.get("specialists", "pressure", {})
 
                 # Get the model for each specialist from the config
-                buoy_model = self.config.get_specialist_model('buoy_analyst')
-                pressure_model = self.config.get_specialist_model('pressure_analyst')
-                senior_model = self.config.get_specialist_model('senior_forecaster')
+                buoy_model = self.config.get_specialist_model("buoy_analyst")
+                pressure_model = self.config.get_specialist_model("pressure_analyst")
+                senior_model = self.config.get_specialist_model("senior_forecaster")
 
                 # Instantiate specialists and PASS THE MODEL NAME + ENGINE REFERENCE
                 # Engine reference enables cost tracking for specialist API calls
-                self.buoy_analyst = BuoyAnalyst(config, model_name=buoy_model, engine=self) if buoy_config.get('enabled', True) else None
-                self.pressure_analyst = PressureAnalyst(config, model_name=pressure_model, engine=self) if pressure_config.get('enabled', True) else None
-                self.senior_forecaster = SeniorForecaster(config, model_name=senior_model, engine=self)
+                self.buoy_analyst = (
+                    BuoyAnalyst(config, model_name=buoy_model, engine=self)
+                    if buoy_config.get("enabled", True)
+                    else None
+                )
+                self.pressure_analyst = (
+                    PressureAnalyst(config, model_name=pressure_model, engine=self)
+                    if pressure_config.get("enabled", True)
+                    else None
+                )
+                self.senior_forecaster = SeniorForecaster(
+                    config, model_name=senior_model, engine=self
+                )
 
                 specialists_enabled = []
                 if self.buoy_analyst:
-                    specialists_enabled.append('BuoyAnalyst')
+                    specialists_enabled.append("BuoyAnalyst")
                 if self.pressure_analyst:
-                    specialists_enabled.append('PressureAnalyst')
-                specialists_enabled.append('SeniorForecaster')
+                    specialists_enabled.append("PressureAnalyst")
+                specialists_enabled.append("SeniorForecaster")
 
-                self.logger.info(f"Specialist team architecture enabled: {', '.join(specialists_enabled)}")
+                self.logger.info(
+                    f"Specialist team architecture enabled: {', '.join(specialists_enabled)}"
+                )
             except ImportError as e:
                 raise ImportError(
                     f"Failed to import specialists: {e}\n"
@@ -249,7 +270,7 @@ class ForecastEngine:
         await self.openai_client.reset_metrics()
         self.estimated_tokens = 0
 
-    async def generate_forecast(self, swell_forecast: SwellForecast) -> Dict[str, Any]:
+    async def generate_forecast(self, swell_forecast: SwellForecast) -> dict[str, Any]:
         """
         Generate a complete surf forecast from processed data.
 
@@ -296,8 +317,8 @@ class ForecastEngine:
             main_forecast = await self._generate_main_forecast(forecast_data)
 
             # Generate shore-specific forecasts
-            north_shore_forecast = await self._generate_shore_forecast('north_shore', forecast_data)
-            south_shore_forecast = await self._generate_shore_forecast('south_shore', forecast_data)
+            north_shore_forecast = await self._generate_shore_forecast("north_shore", forecast_data)
+            south_shore_forecast = await self._generate_shore_forecast("south_shore", forecast_data)
 
             # Generate daily forecast
             daily_forecast = await self._generate_daily_forecast(forecast_data)
@@ -305,44 +326,44 @@ class ForecastEngine:
             # Get API usage metrics
             metrics = await self.openai_client.get_metrics()
             api_usage = {
-                'total_cost': metrics['total_cost'],
-                'api_calls': metrics['api_calls'],
-                'input_tokens': metrics['input_tokens'],
-                'output_tokens': metrics['output_tokens'],
-                'model': self.openai_model
+                "total_cost": metrics["total_cost"],
+                "api_calls": metrics["api_calls"],
+                "input_tokens": metrics["input_tokens"],
+                "output_tokens": metrics["output_tokens"],
+                "model": self.openai_model,
             }
             cost_summary = (
-                metrics['total_cost'],
-                metrics['api_calls'],
-                metrics['input_tokens'],
-                metrics['output_tokens']
+                metrics["total_cost"],
+                metrics["api_calls"],
+                metrics["input_tokens"],
+                metrics["output_tokens"],
             )
 
             # Merge raw metadata from the fusion stage with runtime metrics
-            fused_metadata = copy.deepcopy(forecast_data.get('metadata', {}))
-            fused_metadata['source_data'] = {
-                'swell_events': len(swell_forecast.swell_events),
-                'locations': len(swell_forecast.locations)
+            fused_metadata = copy.deepcopy(forecast_data.get("metadata", {}))
+            fused_metadata["source_data"] = {
+                "swell_events": len(swell_forecast.swell_events),
+                "locations": len(swell_forecast.locations),
             }
-            fused_metadata['confidence'] = forecast_data.get('confidence', {})
-            fused_metadata['api_usage'] = api_usage
+            fused_metadata["confidence"] = forecast_data.get("confidence", {})
+            fused_metadata["api_usage"] = api_usage
 
             # Carry forward helpful context artifacts if present
-            if 'seasonal_context' in forecast_data:
-                fused_metadata.setdefault('seasonal_context', forecast_data['seasonal_context'])
-            if 'images' in forecast_data:
-                fused_metadata.setdefault('images', forecast_data['images'])
-            if 'storm_arrivals' in forecast_data:
-                fused_metadata.setdefault('storm_arrivals', forecast_data['storm_arrivals'])
+            if "seasonal_context" in forecast_data:
+                fused_metadata.setdefault("seasonal_context", forecast_data["seasonal_context"])
+            if "images" in forecast_data:
+                fused_metadata.setdefault("images", forecast_data["images"])
+            if "storm_arrivals" in forecast_data:
+                fused_metadata.setdefault("storm_arrivals", forecast_data["storm_arrivals"])
 
             result = {
-                'forecast_id': forecast_id,
-                'generated_time': generated_time,
-                'main_forecast': main_forecast,
-                'north_shore': north_shore_forecast,
-                'south_shore': south_shore_forecast,
-                'daily': daily_forecast,
-                'metadata': fused_metadata
+                "forecast_id": forecast_id,
+                "generated_time": generated_time,
+                "main_forecast": main_forecast,
+                "north_shore": north_shore_forecast,
+                "south_shore": south_shore_forecast,
+                "daily": daily_forecast,
+                "metadata": fused_metadata,
             }
 
             # Log final cost summary
@@ -357,13 +378,12 @@ class ForecastEngine:
         except Exception as e:
             self.logger.error(f"Error generating forecast: {e}")
             return {
-                'error': str(e),
-                'forecast_id': swell_forecast.forecast_id,
-                'generated_time': datetime.now().isoformat()
+                "error": str(e),
+                "forecast_id": swell_forecast.forecast_id,
+                "generated_time": datetime.now().isoformat(),
             }
 
-
-    def _check_token_budget(self, estimated: int) -> Tuple[bool, str]:
+    def _check_token_budget(self, estimated: int) -> tuple[bool, str]:
         """
         Check if estimated token usage fits within budget.
 
@@ -383,10 +403,7 @@ class ForecastEngine:
 
         # Hard limit check
         if estimated > self.warn_threshold:
-            return (
-                False,
-                f"Estimated {estimated} tokens exceeds hard limit {self.warn_threshold}"
-            )
+            return (False, f"Estimated {estimated} tokens exceeds hard limit {self.warn_threshold}")
 
         # Budget warning check (but still allow)
         if estimated > self.token_budget:
@@ -402,13 +419,17 @@ class ForecastEngine:
 
         # Log warnings at thresholds
         if pct_used >= 90:
-            self.logger.warning(f"Token usage at {pct_used:.1f}% of budget ({estimated}/{self.token_budget})")
+            self.logger.warning(
+                f"Token usage at {pct_used:.1f}% of budget ({estimated}/{self.token_budget})"
+            )
         elif pct_used >= 80:
-            self.logger.info(f"Token usage at {pct_used:.1f}% of budget ({estimated}/{self.token_budget})")
+            self.logger.info(
+                f"Token usage at {pct_used:.1f}% of budget ({estimated}/{self.token_budget})"
+            )
 
         return (True, f"Within budget: {estimated}/{self.token_budget} ({pct_used:.1f}%)")
 
-    async def _generate_main_forecast(self, forecast_data: Dict[str, Any]) -> str:
+    async def _generate_main_forecast(self, forecast_data: dict[str, Any]) -> str:
         """
         Generate the main comprehensive forecast.
 
@@ -435,34 +456,40 @@ class ForecastEngine:
             return generator.build_main_forecast()
 
         # Get images and select critical ones (using configured max_images)
-        images = forecast_data.get('images', {})
+        images = forecast_data.get("images", {})
         selected_images = self.data_manager.select_critical_images(images)
 
         # Log token estimation
         estimated_tokens = 0
         for img in selected_images:
-            detail = img['detail']
-            if detail == 'high':
+            detail = img["detail"]
+            if detail == "high":
                 estimated_tokens += 3000
-            elif detail == 'auto':
+            elif detail == "auto":
                 estimated_tokens += 1500
-            elif detail == 'low':
+            elif detail == "low":
                 estimated_tokens += 500
 
         if selected_images:
-            self.logger.info(f"Token usage - Images: ~{estimated_tokens} tokens (estimated) from {len(selected_images)} images")
+            self.logger.info(
+                f"Token usage - Images: ~{estimated_tokens} tokens (estimated) from {len(selected_images)} images"
+            )
 
         # Group selected images by type
-        pressure_charts = [img['url'] for img in selected_images if img['type'] in ('pressure_chart', 'pressure_forecast')]
-        satellite_imgs = [img['url'] for img in selected_images if img['type'] == 'satellite']
-        wave_model_imgs = [img['url'] for img in selected_images if img['type'] == 'wave_model']
-        sst_charts = [img['url'] for img in selected_images if img['type'] == 'sst_chart']
+        pressure_charts = [
+            img["url"]
+            for img in selected_images
+            if img["type"] in ("pressure_chart", "pressure_forecast")
+        ]
+        satellite_imgs = [img["url"] for img in selected_images if img["type"] == "satellite"]
+        wave_model_imgs = [img["url"] for img in selected_images if img["type"] == "wave_model"]
+        sst_charts = [img["url"] for img in selected_images if img["type"] == "sst_chart"]
 
         # Create debug directory for saving image analysis
-        bundle_id = forecast_data.get('metadata', {}).get('bundle_id')
+        bundle_id = forecast_data.get("metadata", {}).get("bundle_id")
         debug_dir = None
         if bundle_id:
-            debug_dir = Path('data') / bundle_id / 'debug'
+            debug_dir = Path("data") / bundle_id / "debug"
             debug_dir.mkdir(exist_ok=True, parents=True)
             self.logger.info(f"Created debug directory: {debug_dir}")
 
@@ -470,24 +497,36 @@ class ForecastEngine:
         image_analysis = ""
         if pressure_charts:
             from .prompt_templates import PRESSURE_CHART_ANALYSIS_PROMPT
+
             try:
-                self.logger.info(f"Calling {self.openai_model} for pressure chart analysis ({len(pressure_charts)} charts)...")
+                self.logger.info(
+                    f"Calling {self.openai_model} for pressure chart analysis ({len(pressure_charts)} charts)..."
+                )
                 # Get detail level for pressure charts
-                pressure_detail = next((img['detail'] for img in selected_images if img['type'] in ('pressure_chart', 'pressure_forecast')), 'high')
+                pressure_detail = next(
+                    (
+                        img["detail"]
+                        for img in selected_images
+                        if img["type"] in ("pressure_chart", "pressure_forecast")
+                    ),
+                    "high",
+                )
                 analysis = await asyncio.wait_for(
                     self.openai_client.call_openai_api(
-                        system_prompt=self.templates.get_template('caldwell').get('system_prompt', ''),
+                        system_prompt=self.templates.get_template("caldwell").get(
+                            "system_prompt", ""
+                        ),
                         user_prompt=PRESSURE_CHART_ANALYSIS_PROMPT,
                         image_urls=pressure_charts,
-                        detail=pressure_detail
+                        detail=pressure_detail,
                     ),
-                    timeout=300.0
+                    timeout=300.0,
                 )
                 self.logger.info("Pressure chart analysis completed")
 
                 # Save to debug file
                 if debug_dir:
-                    with open(debug_dir / 'image_analysis_pressure.txt', 'w') as f:
+                    with open(debug_dir / "image_analysis_pressure.txt", "w") as f:
                         f.write(analysis)
 
                 image_analysis += f"\n\nPRESSURE CHART ANALYSIS:\n{analysis}\n"
@@ -495,16 +534,16 @@ class ForecastEngine:
                 # Detect storms from pressure analysis and calculate arrivals
                 try:
                     storms = self.storm_detector.parse_pressure_analysis(
-                        analysis,
-                        datetime.now().isoformat()
+                        analysis, datetime.now().isoformat()
                     )
                     if storms:
                         arrivals = self.storm_detector.calculate_hawaii_arrivals(
-                            storms,
-                            self.propagation_calc
+                            storms, self.propagation_calc
                         )
-                        forecast_data['storm_arrivals'] = arrivals
-                        self.logger.info(f"Detected {len(storms)} storm(s), calculated {len(arrivals)} arrival(s)")
+                        forecast_data["storm_arrivals"] = arrivals
+                        self.logger.info(
+                            f"Detected {len(storms)} storm(s), calculated {len(arrivals)} arrival(s)"
+                        )
 
                         # Log arrival details
                         for arrival in arrivals:
@@ -516,7 +555,7 @@ class ForecastEngine:
                         self.logger.info("No storms detected in pressure analysis")
                 except Exception as e:
                     self.logger.error(f"Error in storm detection: {e}", exc_info=True)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self.logger.error("Pressure chart analysis timed out after 5 minutes")
                 image_analysis += "\n\nPRESSURE CHART ANALYSIS: [TIMEOUT]\n"
             except Exception as e:
@@ -525,28 +564,35 @@ class ForecastEngine:
 
         if satellite_imgs:
             from .prompt_templates import SATELLITE_IMAGE_ANALYSIS_PROMPT
+
             try:
-                self.logger.info(f"Calling {self.openai_model} for satellite image analysis ({len(satellite_imgs)} images)...")
+                self.logger.info(
+                    f"Calling {self.openai_model} for satellite image analysis ({len(satellite_imgs)} images)..."
+                )
                 # Get detail level for satellite images
-                satellite_detail = next((img['detail'] for img in selected_images if img['type'] == 'satellite'), 'auto')
+                satellite_detail = next(
+                    (img["detail"] for img in selected_images if img["type"] == "satellite"), "auto"
+                )
                 analysis = await asyncio.wait_for(
                     self.openai_client.call_openai_api(
-                        system_prompt=self.templates.get_template('caldwell').get('system_prompt', ''),
+                        system_prompt=self.templates.get_template("caldwell").get(
+                            "system_prompt", ""
+                        ),
                         user_prompt=SATELLITE_IMAGE_ANALYSIS_PROMPT,
                         image_urls=satellite_imgs,
-                        detail=satellite_detail
+                        detail=satellite_detail,
                     ),
-                    timeout=300.0
+                    timeout=300.0,
                 )
                 self.logger.info("Satellite image analysis completed")
 
                 # Save to debug file
                 if debug_dir:
-                    with open(debug_dir / 'image_analysis_satellite.txt', 'w') as f:
+                    with open(debug_dir / "image_analysis_satellite.txt", "w") as f:
                         f.write(analysis)
 
                 image_analysis += f"\n\nSATELLITE IMAGERY ANALYSIS:\n{analysis}\n"
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self.logger.error("Satellite image analysis timed out after 5 minutes")
                 image_analysis += "\n\nSATELLITE IMAGERY ANALYSIS: [TIMEOUT]\n"
             except Exception as e:
@@ -556,34 +602,43 @@ class ForecastEngine:
         if wave_model_imgs:
             self.logger.info(f"Analyzing {len(wave_model_imgs)} wave model images")
             # Get detail level for wave models
-            wave_detail = next((img['detail'] for img in selected_images if img['type'] == 'wave_model'), 'high')
+            wave_detail = next(
+                (img["detail"] for img in selected_images if img["type"] == "wave_model"), "high"
+            )
             # Note: Wave model analysis prompt can be added later
             # For now, we just log that we have them available
 
         if sst_charts:
             from .prompt_templates import SST_CHART_ANALYSIS_PROMPT
+
             try:
-                self.logger.info(f"Calling {self.openai_model} for SST chart analysis ({len(sst_charts)} charts)...")
+                self.logger.info(
+                    f"Calling {self.openai_model} for SST chart analysis ({len(sst_charts)} charts)..."
+                )
                 # Get detail level for SST charts
-                sst_detail = next((img['detail'] for img in selected_images if img['type'] == 'sst_chart'), 'low')
+                sst_detail = next(
+                    (img["detail"] for img in selected_images if img["type"] == "sst_chart"), "low"
+                )
                 analysis = await asyncio.wait_for(
                     self.openai_client.call_openai_api(
-                        system_prompt=self.templates.get_template('caldwell').get('system_prompt', ''),
+                        system_prompt=self.templates.get_template("caldwell").get(
+                            "system_prompt", ""
+                        ),
                         user_prompt=SST_CHART_ANALYSIS_PROMPT,
                         image_urls=sst_charts,
-                        detail=sst_detail
+                        detail=sst_detail,
                     ),
-                    timeout=300.0
+                    timeout=300.0,
                 )
                 self.logger.info("SST chart analysis completed")
 
                 # Save to debug file
                 if debug_dir:
-                    with open(debug_dir / 'image_analysis_sst.txt', 'w') as f:
+                    with open(debug_dir / "image_analysis_sst.txt", "w") as f:
                         f.write(analysis)
 
                 image_analysis += f"\n\nSEA SURFACE TEMPERATURE ANALYSIS:\n{analysis}\n"
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self.logger.error("SST chart analysis timed out after 5 minutes")
                 image_analysis += "\n\nSEA SURFACE TEMPERATURE ANALYSIS: [TIMEOUT]\n"
             except Exception as e:
@@ -601,26 +656,30 @@ class ForecastEngine:
             prompt = f"{prompt}\n\n{arrival_context}\n\nIncorporate the above swell arrival predictions into your forecast timeline."
 
         # Get template
-        template = self.templates.get_template('caldwell')
-        system_prompt = template.get('system_prompt', '')
+        template = self.templates.get_template("caldwell")
+        system_prompt = template.get("system_prompt", "")
 
         # Add seasonal context to system prompt
-        seasonal_context = forecast_data.get('seasonal_context', {})
-        season = seasonal_context.get('current_season', 'unknown')
-        seasonal_patterns = seasonal_context.get('seasonal_patterns', {})
+        seasonal_context = forecast_data.get("seasonal_context", {})
+        season = seasonal_context.get("current_season", "unknown")
+        seasonal_patterns = seasonal_context.get("seasonal_patterns", {})
 
         system_prompt += f"\nCurrent Season: {season.title()}\n"
         system_prompt += f"Typical {season.title()} Patterns:\n"
         for shore, info in seasonal_patterns.items():
-            system_prompt += f"- {shore.replace('_', ' ').title()}: {info.get('typical_conditions', '')}\n"
+            system_prompt += (
+                f"- {shore.replace('_', ' ').title()}: {info.get('typical_conditions', '')}\n"
+            )
 
         # Add confidence information
-        confidence = forecast_data.get('confidence', {})
-        overall_confidence = confidence.get('overall_score', 0.7)
+        confidence = forecast_data.get("confidence", {})
+        overall_confidence = confidence.get("overall_score", 0.7)
 
         system_prompt += f"\nOverall Forecast Confidence: {overall_confidence:.1f}/1.0\n"
         if overall_confidence < 0.6:
-            system_prompt += "Include appropriate language indicating lower confidence in the forecast.\n"
+            system_prompt += (
+                "Include appropriate language indicating lower confidence in the forecast.\n"
+            )
 
         # Add adaptive context based on recent performance
         adaptive_context = self._get_adaptive_context()
@@ -631,11 +690,10 @@ class ForecastEngine:
         try:
             self.logger.info(f"Calling {self.openai_model} for main forecast generation...")
             forecast = await asyncio.wait_for(
-                self.openai_client.call_openai_api(system_prompt, prompt),
-                timeout=300.0
+                self.openai_client.call_openai_api(system_prompt, prompt), timeout=300.0
             )
             self.logger.info("Main forecast generation completed")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.logger.error("Main forecast generation timed out after 5 minutes")
             forecast = "Error: Forecast generation timed out. Please try again."
             return forecast
@@ -650,7 +708,7 @@ class ForecastEngine:
 
         return forecast
 
-    async def _generate_shore_forecast(self, shore: str, forecast_data: Dict[str, Any]) -> str:
+    async def _generate_shore_forecast(self, shore: str, forecast_data: dict[str, Any]) -> str:
         """
         Generate a shore-specific forecast.
 
@@ -674,20 +732,24 @@ class ForecastEngine:
             prompt = f"{prompt}\n\n{arrival_context}"
 
         # Get template
-        template_name = 'north_shore' if 'north' in shore.lower() else 'south_shore'
+        template_name = "north_shore" if "north" in shore.lower() else "south_shore"
         template = self.templates.get_template(template_name)
-        system_prompt = template.get('system_prompt', '')
+        system_prompt = template.get("system_prompt", "")
 
         # Add seasonal context to system prompt
-        seasonal_context = forecast_data.get('seasonal_context', {})
-        season = seasonal_context.get('current_season', 'unknown')
-        seasonal_patterns = seasonal_context.get('seasonal_patterns', {})
+        seasonal_context = forecast_data.get("seasonal_context", {})
+        season = seasonal_context.get("current_season", "unknown")
+        seasonal_patterns = seasonal_context.get("seasonal_patterns", {})
 
         if shore in seasonal_patterns:
             shore_info = seasonal_patterns[shore]
             system_prompt += f"\nCurrent Season: {season.title()}\n"
-            system_prompt += f"Typical {season.title()} Patterns for {shore.replace('_', ' ').title()}:\n"
-            system_prompt += f"- Primary Swell Direction: {shore_info.get('primary_swell_direction', '')}\n"
+            system_prompt += (
+                f"Typical {season.title()} Patterns for {shore.replace('_', ' ').title()}:\n"
+            )
+            system_prompt += (
+                f"- Primary Swell Direction: {shore_info.get('primary_swell_direction', '')}\n"
+            )
             system_prompt += f"- Typical Size Range: {shore_info.get('typical_size_range', '')}\n"
             system_prompt += f"- Typical Conditions: {shore_info.get('typical_conditions', '')}\n"
 
@@ -700,11 +762,10 @@ class ForecastEngine:
         try:
             self.logger.info(f"Calling {self.openai_model} for {shore} forecast generation...")
             forecast = await asyncio.wait_for(
-                self.openai_client.call_openai_api(system_prompt, prompt),
-                timeout=300.0
+                self.openai_client.call_openai_api(system_prompt, prompt), timeout=300.0
             )
             self.logger.info(f"{shore} forecast generation completed")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.logger.error(f"{shore} forecast generation timed out after 5 minutes")
             forecast = f"Error: {shore} forecast timed out. Please try again."
         except Exception as e:
@@ -713,7 +774,7 @@ class ForecastEngine:
 
         return forecast
 
-    async def _generate_daily_forecast(self, forecast_data: Dict[str, Any]) -> str:
+    async def _generate_daily_forecast(self, forecast_data: dict[str, Any]) -> str:
         """
         Generate a daily forecast.
 
@@ -728,8 +789,8 @@ class ForecastEngine:
             return generator.build_daily_forecast()
 
         # Get template
-        template = self.templates.get_template('daily')
-        system_prompt = template.get('system_prompt', '')
+        template = self.templates.get_template("daily")
+        system_prompt = template.get("system_prompt", "")
 
         # Build prompt with enriched context
         prompt = self.templates.get_daily_prompt(forecast_data)
@@ -748,11 +809,10 @@ class ForecastEngine:
         try:
             self.logger.info(f"Calling {self.openai_model} for daily forecast generation...")
             forecast = await asyncio.wait_for(
-                self.openai_client.call_openai_api(system_prompt, prompt),
-                timeout=300.0
+                self.openai_client.call_openai_api(system_prompt, prompt), timeout=300.0
             )
             self.logger.info("Daily forecast generation completed")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.logger.error("Daily forecast generation timed out after 5 minutes")
             forecast = "Error: Daily forecast timed out. Please try again."
         except Exception as e:
@@ -761,7 +821,7 @@ class ForecastEngine:
 
         return forecast
 
-    def _format_arrival_predictions(self, forecast_data: Dict[str, Any]) -> str:
+    def _format_arrival_predictions(self, forecast_data: dict[str, Any]) -> str:
         """
         Format swell arrival predictions for inclusion in forecast prompt.
 
@@ -774,7 +834,7 @@ class ForecastEngine:
         try:
             # Storm arrivals are stored directly in forecast_data (not metadata)
             # This is set by storm detection in _generate_main_forecast() after pressure analysis
-            arrivals = forecast_data.get('storm_arrivals', [])
+            arrivals = forecast_data.get("storm_arrivals", [])
 
             if not arrivals:
                 return ""
@@ -786,11 +846,12 @@ class ForecastEngine:
             for arrival in arrivals:
                 # Format arrival time nicely
                 from datetime import datetime
-                arrival_dt = datetime.fromisoformat(arrival['arrival_time'].replace('Z', '+00:00'))
-                arrival_str = arrival_dt.strftime('%A %B %d, %I:%M %p HST')
+
+                arrival_dt = datetime.fromisoformat(arrival["arrival_time"].replace("Z", "+00:00"))
+                arrival_str = arrival_dt.strftime("%A %B %d, %I:%M %p HST")
 
                 # Format travel details
-                travel_days = arrival['travel_time_hours'] / 24
+                travel_days = arrival["travel_time_hours"] / 24
 
                 lines.append(
                     f"• {arrival['storm_id'].replace('_', ' ').title()}: "
@@ -841,7 +902,7 @@ class ForecastEngine:
             self.logger.warning(f"Error generating adaptive context: {e}")
             return ""  # Graceful degradation
 
-    async def _refine_forecast(self, initial_forecast: str, forecast_data: Dict[str, Any]) -> str:
+    async def _refine_forecast(self, initial_forecast: str, forecast_data: dict[str, Any]) -> str:
         """
         Apply iterative refinement to improve forecast quality.
 
@@ -882,7 +943,7 @@ Do NOT add fictional data or contradict the original forecast's core information
                 system_prompt += "\nFocus particularly on clarity and specificity of details.\n"
 
             # Add confidence indicators if confidence is low
-            confidence = forecast_data.get('confidence', {}).get('overall_score', 0.7)
+            confidence = forecast_data.get("confidence", {}).get("overall_score", 0.7)
             if confidence < 0.6:
                 system_prompt += "\nMake sure to include appropriate language indicating uncertainty where relevant.\n"
 
@@ -899,16 +960,19 @@ Improve this forecast while maintaining its style and core information. Focus on
 
             # Generate refined forecast with timeout
             try:
-                self.logger.info(f"Calling {self.openai_model} for refinement cycle {i+1}/{self.refinement_cycles}...")
+                self.logger.info(
+                    f"Calling {self.openai_model} for refinement cycle {i+1}/{self.refinement_cycles}..."
+                )
                 refined_forecast = await asyncio.wait_for(
-                    self.openai_client.call_openai_api(system_prompt, prompt),
-                    timeout=300.0
+                    self.openai_client.call_openai_api(system_prompt, prompt), timeout=300.0
                 )
                 self.logger.info(f"Refinement cycle {i+1}/{self.refinement_cycles} completed")
                 # Update current forecast for next cycle
                 current_forecast = refined_forecast
-            except asyncio.TimeoutError:
-                self.logger.error(f"Refinement cycle {i+1}/{self.refinement_cycles} timed out after 5 minutes")
+            except TimeoutError:
+                self.logger.error(
+                    f"Refinement cycle {i+1}/{self.refinement_cycles} timed out after 5 minutes"
+                )
                 # Continue with current forecast, skip this refinement
                 continue
             except Exception as e:

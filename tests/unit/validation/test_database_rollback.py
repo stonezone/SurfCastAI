@@ -1,16 +1,19 @@
 """Test database transaction rollback for batch operations."""
-import pytest
+
 import sqlite3
 import tempfile
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
+
+import pytest
+
 from src.validation.database import ValidationDatabase
 
 
 @pytest.fixture
 def temp_db():
     """Create a temporary database for testing."""
-    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         db_path = f.name
 
     # Create database instance
@@ -26,18 +29,18 @@ def temp_db():
 def sample_forecast(temp_db):
     """Create a sample forecast for testing."""
     forecast_data = {
-        'forecast_id': 'test-forecast-123',
-        'generated_time': datetime.now(),
-        'metadata': {
-            'source_data': {'bundle_id': 'bundle-123'},
-            'api_usage': {
-                'model': 'gpt-4',
-                'input_tokens': 1000,
-                'output_tokens': 500,
-                'total_cost': 0.05
+        "forecast_id": "test-forecast-123",
+        "generated_time": datetime.now(),
+        "metadata": {
+            "source_data": {"bundle_id": "bundle-123"},
+            "api_usage": {
+                "model": "gpt-4",
+                "input_tokens": 1000,
+                "output_tokens": 500,
+                "total_cost": 0.05,
             },
-            'generation_time': 5.5
-        }
+            "generation_time": 5.5,
+        },
     }
     forecast_id = temp_db.save_forecast(forecast_data)
     return forecast_id
@@ -50,14 +53,14 @@ class TestPredictionsBatchRollback:
         """Test successful batch prediction insert."""
         predictions = [
             {
-                'shore': 'North Shore',
-                'forecast_time': datetime.now(),
-                'valid_time': datetime.now() + timedelta(hours=i),
-                'height': 8.0 + i,
-                'period': 12.0,
-                'direction': 'NW',
-                'category': 'overhead',
-                'confidence': 0.85
+                "shore": "North Shore",
+                "forecast_time": datetime.now(),
+                "valid_time": datetime.now() + timedelta(hours=i),
+                "height": 8.0 + i,
+                "period": 12.0,
+                "direction": "NW",
+                "category": "overhead",
+                "confidence": 0.85,
             }
             for i in range(5)
         ]
@@ -68,25 +71,25 @@ class TestPredictionsBatchRollback:
         # Verify all predictions were saved
         saved_predictions = temp_db.get_predictions_for_forecast(sample_forecast)
         assert len(saved_predictions) == 5
-        assert saved_predictions[0]['shore'] == 'North Shore'
+        assert saved_predictions[0]["shore"] == "North Shore"
 
     def test_save_predictions_rollback_on_invalid_data(self, temp_db, sample_forecast):
         """Test that batch insert rolls back on invalid data."""
         predictions = [
             {
-                'shore': 'North Shore',
-                'forecast_time': datetime.now(),
-                'valid_time': datetime.now() + timedelta(hours=1),
-                'height': 8.0,
-                'period': 12.0
+                "shore": "North Shore",
+                "forecast_time": datetime.now(),
+                "valid_time": datetime.now() + timedelta(hours=1),
+                "height": 8.0,
+                "period": 12.0,
             },
             {
-                'shore': None,  # Invalid: shore is required
-                'forecast_time': datetime.now(),
-                'valid_time': datetime.now() + timedelta(hours=2),
-                'height': 9.0,
-                'period': 13.0
-            }
+                "shore": None,  # Invalid: shore is required
+                "forecast_time": datetime.now(),
+                "valid_time": datetime.now() + timedelta(hours=2),
+                "height": 9.0,
+                "period": 13.0,
+            },
         ]
 
         # Should raise exception and rollback
@@ -105,12 +108,12 @@ class TestActualsBatchRollback:
         """Test successful batch actual insert."""
         actuals = [
             {
-                'buoy_id': '51201',
-                'observation_time': datetime.now() - timedelta(hours=i),
-                'wave_height': 8.0 + i,
-                'dominant_period': 12.0,
-                'direction': 315.0,
-                'source': 'NDBC'
+                "buoy_id": "51201",
+                "observation_time": datetime.now() - timedelta(hours=i),
+                "wave_height": 8.0 + i,
+                "dominant_period": 12.0,
+                "direction": 315.0,
+                "source": "NDBC",
             }
             for i in range(5)
         ]
@@ -131,17 +134,17 @@ class TestActualsBatchRollback:
         """Test that batch insert rolls back on invalid data."""
         actuals = [
             {
-                'buoy_id': '51201',
-                'observation_time': datetime.now(),
-                'wave_height': 8.0,
-                'dominant_period': 12.0
+                "buoy_id": "51201",
+                "observation_time": datetime.now(),
+                "wave_height": 8.0,
+                "dominant_period": 12.0,
             },
             {
-                'buoy_id': None,  # Invalid: buoy_id is required
-                'observation_time': datetime.now(),
-                'wave_height': 9.0,
-                'dominant_period': 13.0
-            }
+                "buoy_id": None,  # Invalid: buoy_id is required
+                "observation_time": datetime.now(),
+                "wave_height": 9.0,
+                "dominant_period": 13.0,
+            },
         ]
 
         # Should raise exception and rollback
@@ -166,10 +169,10 @@ class TestValidationsBatchRollback:
         # Create some predictions and actuals first
         predictions = [
             {
-                'shore': 'North Shore',
-                'forecast_time': datetime.now(),
-                'valid_time': datetime.now() + timedelta(hours=i),
-                'height': 8.0 + i
+                "shore": "North Shore",
+                "forecast_time": datetime.now(),
+                "valid_time": datetime.now() + timedelta(hours=i),
+                "height": 8.0 + i,
             }
             for i in range(3)
         ]
@@ -177,9 +180,9 @@ class TestValidationsBatchRollback:
 
         actuals = [
             {
-                'buoy_id': '51201',
-                'observation_time': datetime.now() + timedelta(hours=i),
-                'wave_height': 8.5 + i
+                "buoy_id": "51201",
+                "observation_time": datetime.now() + timedelta(hours=i),
+                "wave_height": 8.5 + i,
             }
             for i in range(3)
         ]
@@ -196,12 +199,12 @@ class TestValidationsBatchRollback:
         # Create validations
         validations = [
             {
-                'forecast_id': sample_forecast,
-                'prediction_id': saved_predictions[i]['id'],
-                'actual_id': actual_ids[i],
-                'height_error': 0.5,
-                'mae': 0.5,
-                'rmse': 0.6
+                "forecast_id": sample_forecast,
+                "prediction_id": saved_predictions[i]["id"],
+                "actual_id": actual_ids[i],
+                "height_error": 0.5,
+                "mae": 0.5,
+                "rmse": 0.6,
             }
             for i in range(3)
         ]
@@ -223,12 +226,12 @@ class TestValidationsBatchRollback:
         # Create a validation with None for required field
         validations = [
             {
-                'forecast_id': None,  # Invalid: forecast_id is required
-                'prediction_id': 1,
-                'actual_id': 1,
-                'height_error': 0.5,
-                'mae': 0.5,
-                'rmse': 0.6
+                "forecast_id": None,  # Invalid: forecast_id is required
+                "prediction_id": 1,
+                "actual_id": 1,
+                "height_error": 0.5,
+                "mae": 0.5,
+                "rmse": 0.6,
             }
         ]
 
@@ -253,9 +256,9 @@ class TestDatabaseIntegrity:
         """Test that database connection is properly closed even after exception."""
         invalid_predictions = [
             {
-                'shore': None,  # Invalid
-                'forecast_time': datetime.now(),
-                'valid_time': datetime.now()
+                "shore": None,  # Invalid
+                "forecast_time": datetime.now(),
+                "valid_time": datetime.now(),
             }
         ]
 
@@ -266,10 +269,10 @@ class TestDatabaseIntegrity:
         # Should be able to perform other operations (connection was closed)
         predictions = [
             {
-                'shore': 'South Shore',
-                'forecast_time': datetime.now(),
-                'valid_time': datetime.now() + timedelta(hours=1),
-                'height': 4.0
+                "shore": "South Shore",
+                "forecast_time": datetime.now(),
+                "valid_time": datetime.now() + timedelta(hours=1),
+                "height": 4.0,
             }
         ]
 
@@ -278,7 +281,7 @@ class TestDatabaseIntegrity:
 
         saved = temp_db.get_predictions_for_forecast(sample_forecast)
         assert len(saved) == 1
-        assert saved[0]['shore'] == 'South Shore'
+        assert saved[0]["shore"] == "South Shore"
 
     def test_empty_batch_operations(self, temp_db, sample_forecast):
         """Test that empty batch operations don't cause issues."""
@@ -294,10 +297,10 @@ class TestDatabaseIntegrity:
         # Verify database is still functional
         predictions = [
             {
-                'shore': 'East Shore',
-                'forecast_time': datetime.now(),
-                'valid_time': datetime.now() + timedelta(hours=1),
-                'height': 3.0
+                "shore": "East Shore",
+                "forecast_time": datetime.now(),
+                "valid_time": datetime.now() + timedelta(hours=1),
+                "height": 3.0,
             }
         ]
         temp_db.save_predictions(sample_forecast, predictions)
@@ -306,5 +309,5 @@ class TestDatabaseIntegrity:
         assert len(saved) == 1
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

@@ -13,7 +13,7 @@
    - Heights: 0.4m - 3.2m range
    - Periods: 3s - 18s range
    - Direction trends detected correctly
-   
+
 2. **Anomaly Detection:** Working - 3 anomalies detected with proper Z-scores
    - Buoy 51101: 2.8m (2.7σ from mean)
    - Buoy 51211: 0.4m (2.3σ from mean)

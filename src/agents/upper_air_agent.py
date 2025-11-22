@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base_agent import BaseAgent
 
@@ -18,18 +18,20 @@ class UpperAirSource:
     url: str
     level: str
     product_type: str = "jet_stream"
-    description: Optional[str] = None
-    date_format: Optional[str] = None
+    description: str | None = None
+    date_format: str | None = None
 
     @classmethod
-    def from_dict(cls, raw: Dict[str, Any]) -> "UpperAirSource":
+    def from_dict(cls, raw: dict[str, Any]) -> UpperAirSource:
         if not isinstance(raw, dict):  # pragma: no cover - defensive guard
             raise ValueError("Upper-air configuration entries must be dictionaries")
 
         source_id = str(raw.get("id") or raw.get("source_id") or "upper_air").strip()
         url = str(raw.get("url", "")).strip()
         level = str(raw.get("level", "")).strip()
-        product_type = str(raw.get("type", raw.get("product_type", "jet_stream"))).strip() or "jet_stream"
+        product_type = (
+            str(raw.get("type", raw.get("product_type", "jet_stream"))).strip() or "jet_stream"
+        )
         description = raw.get("description")
         date_format = raw.get("date_format")
 
@@ -46,12 +48,12 @@ class UpperAirSource:
             level=level,
             product_type=product_type,
             description=description,
-            date_format=date_format
+            date_format=date_format,
         )
 
     def filename(self) -> str:
         """Derive a filename for the downloaded asset."""
-        basename = self.url.split('?')[0].split('/')[-1] or f"{self.source_id}.png"
+        basename = self.url.split("?")[0].split("/")[-1] or f"{self.source_id}.png"
         return f"{self.source_id}_{self.level}_{basename}"
 
 
@@ -69,7 +71,7 @@ class UpperAirAgent(BaseAgent):
         Returns:
             datetime: The most recent 00Z timestamp (UTC).
         """
-        now_utc = datetime.now(timezone.utc)
+        now_utc = datetime.now(UTC)
 
         # If before 02:00 UTC, use yesterday's 00Z
         if now_utc.hour < 2:
@@ -77,9 +79,11 @@ class UpperAirAgent(BaseAgent):
         else:
             target_date = now_utc.date()
 
-        return datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0, tzinfo=timezone.utc)
+        return datetime(
+            target_date.year, target_date.month, target_date.day, 0, 0, 0, tzinfo=UTC
+        )
 
-    def _expand_date_template(self, url: str, date_format: Optional[str] = None) -> str:
+    def _expand_date_template(self, url: str, date_format: str | None = None) -> str:
         """
         Expand {date} placeholder in URL with computed synoptic time.
 
@@ -90,28 +94,30 @@ class UpperAirAgent(BaseAgent):
         Returns:
             str: URL with date placeholder expanded, or original URL if no placeholder
         """
-        if '{date}' not in url:
+        if "{date}" not in url:
             return url
 
         if not date_format:
-            self.logger.warning("URL contains {date} placeholder but no date_format specified, using default %y%m%d")
+            self.logger.warning(
+                "URL contains {date} placeholder but no date_format specified, using default %y%m%d"
+            )
             date_format = "%y%m%d"
 
         synoptic_time = self._compute_most_recent_00z()
         date_str = synoptic_time.strftime(date_format)
-        expanded_url = url.replace('{date}', date_str)
+        expanded_url = url.replace("{date}", date_str)
 
         self.logger.info(f"Expanded URL template: {url} -> {expanded_url}")
         return expanded_url
 
-    async def collect(self, data_dir: Path) -> List[Dict[str, Any]]:
+    async def collect(self, data_dir: Path) -> list[dict[str, Any]]:
         data_dir.mkdir(exist_ok=True)
         config = self.config.get("data_sources", "upper_air", {})
         sources_cfg = []
         if isinstance(config, dict):
             sources_cfg = config.get("sources", [])
 
-        sources: List[UpperAirSource] = []
+        sources: list[UpperAirSource] = []
         for entry in sources_cfg:
             try:
                 sources.append(UpperAirSource.from_dict(entry))
@@ -122,7 +128,7 @@ class UpperAirAgent(BaseAgent):
             self.logger.warning("No upper-air sources configured")
             return []
 
-        metadata: List[Dict[str, Any]] = []
+        metadata: list[dict[str, Any]] = []
         await self.ensure_http_client()
 
         for source in sources:
@@ -134,17 +140,17 @@ class UpperAirAgent(BaseAgent):
                 expanded_url,
                 filename=filename,
                 data_dir=data_dir,
-                description=source.description or f"Upper-air analysis ({source.level} hPa)"
+                description=source.description or f"Upper-air analysis ({source.level} hPa)",
             )
 
-            if result.get('status') == 'success':
-                file_path = Path(result.get('file_path', ''))
+            if result.get("status") == "success":
+                file_path = Path(result.get("file_path", ""))
                 if file_path.exists():
-                    result['size_bytes'] = file_path.stat().st_size
-                result['analysis_level'] = source.level
-                result['product_type'] = source.product_type
-                result['source_id'] = source.source_id
-                result['data_source'] = 'SPC' if 'spc.noaa.gov' in expanded_url else 'NOAA/WPC'
+                    result["size_bytes"] = file_path.stat().st_size
+                result["analysis_level"] = source.level
+                result["product_type"] = source.product_type
+                result["source_id"] = source.source_id
+                result["data_source"] = "SPC" if "spc.noaa.gov" in expanded_url else "NOAA/WPC"
             metadata.append(result)
 
         return metadata
