@@ -173,7 +173,11 @@ class ConfidenceScorer:
                     max_height = max(c.height for c in event.primary_components)
                     heights.append(max_height)
 
+            if not heights:
+                return 0.5  # Neutral if no height data found
+
             if len(heights) < 2:
+                self.logger.debug("Single model source available; assuming high consensus")
                 return 0.7
 
             # Calculate variance in predictions

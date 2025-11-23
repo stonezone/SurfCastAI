@@ -56,15 +56,6 @@ class DataCollector:
         self.data_dir = Path(config.data_directory)
         self.data_dir.mkdir(exist_ok=True)
 
-        # Initialize statistics
-        self.stats = {
-            "total_files": 0,
-            "successful_files": 0,
-            "failed_files": 0,
-            "agents": {},
-            "total_size_bytes": 0,
-        }
-
         # Configure agents
         self.agents = {}
         self._configure_agents()
@@ -137,7 +128,8 @@ class DataCollector:
         Returns:
             Dictionary with collection results and metadata
         """
-        self.stats = {
+        # Initialize run-specific statistics (local variable to avoid shared state corruption)
+        run_stats = {
             "total_files": 0,
             "successful_files": 0,
             "failed_files": 0,
@@ -190,12 +182,12 @@ class DataCollector:
                     agent_results[agent_name] = stats
                     all_metadata.extend(metadata)
 
-                    # Update global statistics
-                    self.stats["total_files"] += stats["total"]
-                    self.stats["successful_files"] += stats["successful"]
-                    self.stats["failed_files"] += stats["failed"]
-                    self.stats["total_size_bytes"] += stats["total_size_bytes"]
-                    self.stats["agents"][agent_name] = stats
+                    # Update run statistics
+                    run_stats["total_files"] += stats["total"]
+                    run_stats["successful_files"] += stats["successful"]
+                    run_stats["failed_files"] += stats["failed"]
+                    run_stats["total_size_bytes"] += stats["total_size_bytes"]
+                    run_stats["agents"][agent_name] = stats
 
         finally:
             # Close HTTP client
@@ -210,10 +202,10 @@ class DataCollector:
             "region": region,
             "agent_results": agent_results,
             "stats": {
-                "total_files": self.stats["total_files"],
-                "successful_files": self.stats["successful_files"],
-                "failed_files": self.stats["failed_files"],
-                "total_size_mb": round(self.stats["total_size_bytes"] / (1024 * 1024), 2),
+                "total_files": run_stats["total_files"],
+                "successful_files": run_stats["successful_files"],
+                "failed_files": run_stats["failed_files"],
+                "total_size_mb": round(run_stats["total_size_bytes"] / (1024 * 1024), 2),
             },
         }
 
@@ -225,15 +217,15 @@ class DataCollector:
 
         self.logger.info(f"Data collection complete. Bundle ID: {bundle_id}")
         self.logger.info(
-            f"Total files: {self.stats['total_files']}, "
-            f"Successful: {self.stats['successful_files']}, "
-            f"Failed: {self.stats['failed_files']}"
+            f"Total files: {run_stats['total_files']}, "
+            f"Successful: {run_stats['successful_files']}, "
+            f"Failed: {run_stats['failed_files']}"
         )
 
         return {
             "bundle_id": bundle_id,
             "bundle_dir": str(bundle_dir),
-            "stats": self.stats,
+            "stats": run_stats,
             "metadata": bundle_metadata,
         }
 

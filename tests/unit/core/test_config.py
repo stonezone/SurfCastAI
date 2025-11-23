@@ -284,7 +284,8 @@ class TestConfig(unittest.TestCase):
 
         data_dir = config.data_directory
         self.assertIsInstance(data_dir, Path)
-        self.assertEqual(str(data_dir), "./test_data")
+        # Path normalizes "./test_data" to "test_data"
+        self.assertEqual(str(data_dir), "test_data")
 
     def test_output_directory_property(self):
         """Test output_directory property."""
@@ -293,7 +294,8 @@ class TestConfig(unittest.TestCase):
 
         output_dir = config.output_directory
         self.assertIsInstance(output_dir, Path)
-        self.assertEqual(str(output_dir), "./test_output")
+        # Path normalizes "./test_output" to "test_output"
+        self.assertEqual(str(output_dir), "test_output")
 
     @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key-from-env"})
     def test_openai_api_key_from_env(self):

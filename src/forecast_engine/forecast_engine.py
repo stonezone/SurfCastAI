@@ -313,15 +313,17 @@ class ForecastEngine:
                 # When specialist workflow is fully implemented, it will replace
                 # the individual _generate_* calls with senior_forecaster synthesis.
 
-            # Generate main forecast
+            # Generate main forecast (Must run first to populate storm_arrivals from image analysis)
             main_forecast = await self._generate_main_forecast(forecast_data)
 
-            # Generate shore-specific forecasts
-            north_shore_forecast = await self._generate_shore_forecast("north_shore", forecast_data)
-            south_shore_forecast = await self._generate_shore_forecast("south_shore", forecast_data)
+            # Generate derivative forecasts in parallel to reduce total latency
+            north_task = self._generate_shore_forecast("north_shore", forecast_data)
+            south_task = self._generate_shore_forecast("south_shore", forecast_data)
+            daily_task = self._generate_daily_forecast(forecast_data)
 
-            # Generate daily forecast
-            daily_forecast = await self._generate_daily_forecast(forecast_data)
+            north_shore_forecast, south_shore_forecast, daily_forecast = await asyncio.gather(
+                north_task, south_task, daily_task
+            )
 
             # Get API usage metrics
             metrics = await self.openai_client.get_metrics()

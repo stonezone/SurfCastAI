@@ -13,21 +13,6 @@ from dotenv import load_dotenv
 
 from .rate_limiter import RateLimitConfig
 
-_ConfigPathBase = type(Path())
-
-
-class _ConfigPath(_ConfigPathBase):
-    """Path wrapper that preserves leading './' when stringified."""
-
-    def __new__(cls, raw: str | Path):
-        self = super().__new__(cls, raw)
-        self._raw = str(raw)
-        return self
-
-    def __str__(self) -> str:  # pragma: no cover - simple accessor
-        return getattr(self, "_raw", super().__str__())
-
-
 # Load environment variables from .env file at module import
 # This ensures env vars are available before any config is loaded
 # Get project root (2 levels up from this file: src/core/config.py)
@@ -441,13 +426,13 @@ class Config:
     def data_directory(self) -> Path:
         """Get data directory path."""
         raw = self.get("general", "data_directory", "./data")
-        return _ConfigPath(raw)
+        return Path(raw)
 
     @property
     def output_directory(self) -> Path:
         """Get output directory path."""
         raw = self.get("general", "output_directory", "./output")
-        return _ConfigPath(raw)
+        return Path(raw)
 
     @property
     def openai_api_key(self) -> str | None:

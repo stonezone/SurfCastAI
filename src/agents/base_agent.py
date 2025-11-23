@@ -37,6 +37,7 @@ class BaseAgent(ABC):
         self.http_client = http_client
         self.agent_name = self.__class__.__name__
         self.logger = logging.getLogger(f"agent.{self.agent_name.lower()}")
+        self._owns_client = False
 
     @abstractmethod
     async def collect(self, data_dir: Path) -> list[dict[str, Any]]:
@@ -114,6 +115,39 @@ class BaseAgent(ABC):
                 user_agent=self.config.get("data_collection", "user_agent", "SurfCastAI/1.0"),
                 output_dir=self.config.data_directory,
             )
+            self._owns_client = True
+
+    async def close(self):
+        """
+        Close the HTTP client if it was created by this agent.
+
+        This method should be called when the agent is no longer needed
+        to prevent resource leaks. Only closes the client if it was
+        created by this agent (not provided externally).
+        """
+        if self._owns_client and self.http_client:
+            self.logger.debug("Closing HTTP client")
+            await self.http_client.close()
+            self.http_client = None
+            self._owns_client = False
+
+    async def __aenter__(self):
+        """
+        Async context manager entry.
+
+        Ensures HTTP client is initialized when entering the context.
+        """
+        await self.ensure_http_client()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """
+        Async context manager exit.
+
+        Ensures HTTP client is properly closed when exiting the context.
+        """
+        await self.close()
+        return False
 
     async def download_file(
         self,
