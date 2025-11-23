@@ -342,9 +342,7 @@ class BundleManager:
             if bundle_time is None:
                 bundle_path = self.data_dir / bundle_id
                 if bundle_path.exists():
-                    bundle_time = datetime.fromtimestamp(
-                        bundle_path.stat().st_mtime, tz=UTC
-                    )
+                    bundle_time = datetime.fromtimestamp(bundle_path.stat().st_mtime, tz=UTC)
 
             if bundle_time and bundle_time < cutoff_time:
                 if self._remove_bundle(bundle_id):

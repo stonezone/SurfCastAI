@@ -46,23 +46,23 @@ a.LHC {
 div.list-group h4:first-child {
 	 margin-top: 0.5em;
  }
- 
+
  div.list-group h4 {
 	 margin-top: 1em;
  }
- 
+
 div.container#navigator {
 	padding: 0px;
 	width: 100% !important;
 	margin: 0px !important;
 }
- 
+
  div.row#map {
 	margin-left: 0em !important;
 	margin-right: 0em !important;
 	width: 100% !important;
-	border-radius: 10px; 
-	border: 1px solid #666; 
+	border-radius: 10px;
+	border: 1px solid #666;
 	padding: 0.5em !important;
 }
 
@@ -77,10 +77,10 @@ div#mapCont.IECase {
 					/* this formula makes sure the aspect ratio of the container equals that of the svg graphic */
 					/* padding-top: (svg height / svg width) * width-value; */
 	padding-top: calc(1464/1800 * 70%) !important;
-    position: relative;   
-	background-image: url(images/svg/MapBackground_1800x1464.jpg);  
-	background-size: 100% 100%; 
-	background-repeat: no-repeat; 
+    position: relative;
+	background-image: url(images/svg/MapBackground_1800x1464.jpg);
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
 }
 
 div#linkList {
@@ -91,19 +91,19 @@ div#linkList {
 
 @media screen and (min-width: 1001px) and (max-width: 1500px) {
 	div#mapCont.IECase {
-		background-image: url(images/svg/MapBackground_1400x1139.jpg);  
+		background-image: url(images/svg/MapBackground_1400x1139.jpg);
 	}
 }
 
 @media screen and (min-width: 601px) and (max-width: 1000px) {
 	div#mapCont.IECase {
-		background-image: url(images/svg/MapBackground_1000x813.jpg);  
+		background-image: url(images/svg/MapBackground_1000x813.jpg);
 	}
-}	
+}
 
 @media screen and (max-width: 600px) {
 	div#mapCont.IECase {
-		background-image: url(images/svg/MapBackground_600x488.jpg);  
+		background-image: url(images/svg/MapBackground_600x488.jpg);
 	}
 }
 
@@ -115,21 +115,21 @@ div#linkList {
 
 </style>
 </head>
-<body><div id="shutdown2025" style="display: table-cell; margin: 0px; width: 99%; border: 1px solid #666;background-color: #8b0000; padding: 10px 30px; font-size: 15px; font-family: sans-serif !important; color: #ffffff;"><p>The U.S. government is closed. However, because the information this website provides is necessary to protect life and property, this site will be updated and maintained during the federal government shutdown. For the latest forecasts and critical weather information, visit <a style="color: #ffffff; font-weight: bold;" href="https://www.weather.gov">www.weather.gov</a>.To learn more, visit <a style="color: #ffffff; font-weight: bold;" href="https://www.commerce.gov/news/blog">commerce.gov</a>. </p></div> 
+<body><div id="shutdown2025" style="display: table-cell; margin: 0px; width: 99%; border: 1px solid #666;background-color: #8b0000; padding: 10px 30px; font-size: 15px; font-family: sans-serif !important; color: #ffffff;"><p>The U.S. government is closed. However, because the information this website provides is necessary to protect life and property, this site will be updated and maintained during the federal government shutdown. For the latest forecasts and critical weather information, visit <a style="color: #ffffff; font-weight: bold;" href="https://www.weather.gov">www.weather.gov</a>.To learn more, visit <a style="color: #ffffff; font-weight: bold;" href="https://www.commerce.gov/news/blog">commerce.gov</a>. </p></div>
 <!--// add class 'active' to div#myModal to make this box visible //-->
 <!--// script edited to check for this class on 9/19/2022 //-->
 <div id="myModal" class="modal">
 	<div class="modal-content" style='padding: 6px; border-radius: 0px;'>
 	  <div class="modal-body" style='padding: 4px;'>
 		<span class="close">&times;</span>
-		<p style='margin-top: 2px !important;'><strong style='color: #93052a;'>Notice:</strong> 
+		<p style='margin-top: 2px !important;'><strong style='color: #93052a;'>Notice:</strong>
 		This site has successfully transitioned the image data source from GOES-16 to
 		GOES-19. There are some remaining anomalies in the production of mesoscale
 		geocolor images which are being investigated. Everything else should be operating
-		as expected. Please contact: 
+		as expected. Please contact:
 		<a href="mailto:nesdis.star.webmaster@noaa.gov">NESDIS.STAR.webmaster@noaa.gov</a> if you have any questions.</p>
 	  </div>
-	</div> 
+	</div>
 </div>
 <div class="container-fluid">
    <div class="row" style="background-color: #000;">
@@ -140,7 +140,7 @@ div#linkList {
 				<source media="(min-width: 150px)" srcset="images/banner/GOESAllBanner_600x60px.jpg"
 					title="NOAA GOES Image Viewer website">
 				<img src="images/banner/GOESAllBanner_600x60px.jpg" alt="NOAA GOES Image Viewer website" class="img-responsive">
-			</picture> 
+			</picture>
 		</a>
 	</div>
 </div><input type='hidden' id='IsDEV' value='false'>
@@ -153,7 +153,7 @@ div#linkList {
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
 		  </button>
-		  
+
 <p title='current time' id='timeBlockNav'>
 <span class='localTimeContainer' data-ts='2025-10-04T17:31:29-04:00'>4 Oct 2025 - 17:31 EDT</span><br>
 4 Oct 2025 - 21:31 UTC</p>
@@ -165,7 +165,7 @@ div#linkList {
 				<ul class="dropdown-menu" role="menu">
 					<li><a title='GOES-East - Continental U.S.' href='conus.php?sat=G19'>GOES-East CONUS<span class='caret'></span></a>
 						<ul class='dropdown-menu' role='menu'>
-							<li><a href='conus.php?sat=G19' 
+							<li><a href='conus.php?sat=G19'
 							 title="GOES-East Continental U.S. - all channels"><strong>All channels</strong></a></li>
 							<li class='divider'></li>
 							<li class='dropdown-header'>RGBs</li>
@@ -1789,7 +1789,7 @@ div#linkList {
 			<li><a href='meso_band.php?sat=G19&lat=15N&amp;lon=106W&amp;band=15&amp;length=30' ><strong>Band 15</strong> - IR: dirty longwave</a></li>
 			<li><a class='navHighlight' href='meso_band.php?sat=G19&lat=15N&amp;lon=106W&amp;band=16&amp;length=30' title='corresponds approximately to GOES-13 longwave IR channel'><strong>Band 16</strong> - IR: CO&#8322; longwave</a></li>
 		</ul>
-	</li>	
+	</li>
 			<li class='divider'></li>
 		<li class='dropdown-header'>GOES-West</li>
 			<li><a href='meso.php?sat=G18&lat=15N&amp;lon=124W'>North Pacific Ocean<span class='caret'></span></a>
@@ -1822,7 +1822,7 @@ div#linkList {
 			<li><a href='meso_band.php?sat=G18&lat=15N&amp;lon=124W&amp;band=15&amp;length=30'><strong>Band 15</strong> - IR: dirty longwave</a></li>
 			<li><a class='navHighlight' href='meso_band.php?sat=G18&lat=15N&amp;lon=124W&amp;band=16&amp;length=30' title='corresponds approximately to GOES-13 longwave IR channel'><strong>Band 16</strong> - IR: CO&#8322; longwave</a></li>
 		</ul>
-	</li>	
+	</li>
 			<li><a href='meso.php?sat=G18&lat=55N&amp;lon=149W'>North Pacific Ocean<span class='caret'></span></a>
 		<ul class='dropdown-menu' role='menu'>
 			<li><a href='meso.php?sat=G18&lat=55N&amp;lon=149W'><strong>North Pacific Ocean - all channels</strong></a></li>
@@ -1853,7 +1853,7 @@ div#linkList {
 			<li><a href='meso_band.php?sat=G18&lat=55N&amp;lon=149W&amp;band=15&amp;length=30'><strong>Band 15</strong> - IR: dirty longwave</a></li>
 			<li><a class='navHighlight' href='meso_band.php?sat=G18&lat=55N&amp;lon=149W&amp;band=16&amp;length=30' title='corresponds approximately to GOES-13 longwave IR channel'><strong>Band 16</strong> - IR: CO&#8322; longwave</a></li>
 		</ul>
-	</li>	
+	</li>
 		</ul>
 </li>
 			<!--// Start of STORM FLOATERS //-->
@@ -1940,7 +1940,7 @@ if (document.getElementById('M1MovingTarget')) {
 				<a id="taw" class="list-group-item" href="sector.php?sat=G19&sector=taw">Tropical Atlantic Ocean</a>
 				<a id="eep" class="list-group-item" href="sector.php?sat=G19&sector=eep">Eastern Pacific Ocean</a>
 				<a id="mex" class="list-group-item" href="sector.php?sat=G19&sector=mex">Mexico</a>
-				<a id="cam" class="list-group-item" href="sector.php?sat=G19&sector=cam">Central America</a>			
+				<a id="cam" class="list-group-item" href="sector.php?sat=G19&sector=cam">Central America</a>
 				<a id="nsa" class="list-group-item" href="sector.php?sat=G19&sector=nsa">South America (north)</a>
 				<a id="ssa" class="list-group-item" href="sector.php?sat=G19&sector=ssa">South America (south)</a>
 				<a href="#GOES-West" id="GOES-West"></a>
@@ -1969,31 +1969,31 @@ if (document.getElementById('M1MovingTarget')) {
 						svg {   /*styling for good browsers */
 								border-radius: 10px;
 								border: 1px solid #666;
-								background-image: url(images/svg/MapBackground_1800x1464.jpg);  
-								background-size: 100% 100%; 
-								background-repeat: no-repeat; 
+								background-image: url(images/svg/MapBackground_1800x1464.jpg);
+								background-size: 100% 100%;
+								background-repeat: no-repeat;
 								width: 100%;
 								height: 100%;
 							}
 
 						@media screen and (min-width: 1001px) and (max-width: 1500px) {
 							svg {
-								background-image: url(images/svg/MapBackground_1400x1139.jpg);  
+								background-image: url(images/svg/MapBackground_1400x1139.jpg);
 							}
 						}
 
 						@media screen and (min-width: 601px) and (max-width: 1000px) {
 							svg {
-								background-image: url(images/svg/MapBackground_1000x813.jpg);  
+								background-image: url(images/svg/MapBackground_1000x813.jpg);
 							}
 						}
 
 						@media screen and (max-width: 600px) {
 							svg {
-								background-image: url(images/svg/MapBackground_600x488.jpg);  
+								background-image: url(images/svg/MapBackground_600x488.jpg);
 							}
 						}
-							
+
 						svg.IEOnly {  /* styling for IE non-Edge browsers */
 							border-radius: 10px;
 							border: 1px solid #666;
@@ -2013,34 +2013,34 @@ if (document.getElementById('M1MovingTarget')) {
 
 						a.map-highlight path {
 							fill: #fff;
-							opacity: 0.4; 
+							opacity: 0.4;
 							cursor: pointer;
 						}
 
 						/* for overlap sectors */
 						path.map-highlight {
 							fill: #fff;
-							opacity: 0.4; 
+							opacity: 0.4;
 							cursor: pointer;
 						}
-				
+
 				   </style>
 				</defs>
 
 				<g><title>Continental U.S.</title>
-					<path id="CONUS_path" 
+					<path id="CONUS_path"
 					d="M498 180h660c25.49 0 56.46-3.485 80 1a25.076 25.076 0 0 0 4 5v390c0 16.091 1.73 35.655-1 50a24.823 24.823 0 0 0-5 4H576c-25.488 0-56.46 3.485-80-1a24.935 24.935 0 0 0-4-5V234c0-16.091-1.732-35.655 1-50a24.935 24.935 0 0 0 5-4z"/>
 					</g>
 				<g><title>Pacific U.S.</title>
-					<path id="PACUS_path"  
+					<path id="PACUS_path"
 					d="M8 180h660c25.488 0 56.46-3.485 80 1a24.935 24.935 0 0 0 4 5v390c0 16.091 1.732 35.655-1 50a24.935 24.935 0 0 0-5 4H86c-25.488 0-56.46 3.485-80-1a24.96 24.96 0 0 0-4-5V234c0-16.091-1.732-35.655 1-50a24.958 24.958 0 0 0 5-4z"/>
 					</g>
 				<g><title>GOES-East Full Disk</title>
-					<path id="G19FD_path" 
+					<path id="G19FD_path"
 					d="M1082 69c108.49-1.891 200.09 17.176 275 49 25.47 10.82 50.06 19.616 72 33l25 11c26.32 16.059 52.27 33.856 77 52 13.23 9.709 22.97 24.214 36 34 28.31 21.26 50.02 45.4 71 74 14.72 20.059 33.42 37.542 47 59 24.45 38.627 43.09 80.618 62 125 16.39 38.472 27.57 84.371 39 128q.495 7.5 1 15c3.83 16.61 4.18 36.145 8 53v32c4.66 20.876 3.8 51.837-1 72v21c-3.78 16.368-2.5 36.029-7 53-11.22 42.335-18.91 89.06-35 128-77.75 188.13-207.73 319.02-396 397-49.65 20.56-109.87 28.87-167 42h-21c-21.91 4.73-49.77 2.99-75 3-83.23.02-166.074-17.24-226-42-40.855-16.88-80.952-32.89-117-55-116.641-71.55-216.666-176.55-274-307-11.106-25.27-17.862-51.506-27-79-4.933-14.842-10.509-31.143-15-47-6.475-22.861-8.7-47.918-14-70l-1-38c-4.909-21.8-7.383-54.76-2-78v-28c1.353-8.919 2.049-20.425 4-29l1-19c10.022-40.628 15.772-90.128 31-127 10.993-26.618 23.219-54.547 35-80 3.182-6.875 5.082-13.582 9-20 88.948-145.7 197.843-249.191 364-318 43.656-18.079 93.466-25 143-37 18.1-4.385 38.61-2.126 56-6 8.49-1.892 15.6 3.3 22-1z"/>
 					</g>
 				<g><title>GOES-West Full Disk</title>
-					<path id="G18FD_path" 
+					<path id="G18FD_path"
 					d="M500 69c108.516-1.888 200.1 17.18 275 49 25.51 10.837 50.074 19.58 72 33l25 11c27.768 16.944 55.1 35.727 81 55 11.729 8.729 20.319 22.223 32 31 30.16 22.661 52.53 48.654 75 79 13.53 18.273 30.54 34.318 43 54 26.29 41.54 46.11 86.8 66 135 14.69 35.606 24.58 78.256 35 118q.495 7.5 1 15c3.83 16.61 4.18 36.145 8 53v32c4.65 20.856 3.79 51.893-1 72v21c-3.32 14.484-2.29 30.412-6 46-7.27 30.534-13.55 62.263-23 91-3.77 11.469-4.53 22.121-9 33-27.03 65.76-58.85 123.85-97 178-11.54 16.38-25.88 30.95-38 47q-4.5 4.005-9 8a218.072 218.072 0 0 1-41 41c-5.782 4.37-10.191 11.62-16 16-17.8 13.43-34.756 28.18-53 41-21.863 15.37-46 27.99-69 42-20.05 12.21-42.634 19.52-65 29-21.546 9.13-45.436 17.4-69 25-10.639 3.43-20.02 2.94-31 6-22.858 6.38-49.062 10.26-72 16-16.041 4.01-33.951-1.71-51 2-25.736 5.61-84.862 3.53-108-2q-13-.495-26-1c-20.467-4.83-42.937-6.01-64-12-26.5-7.53-55.74-13.57-81-24-46.41-19.17-93.255-41.27-134-67-14.178-8.95-27.579-20.33-41-30-28.957-20.87-54.15-44.15-79-69-5.492-5.49-25.411-23.29-28-29V309c6.911-5.223 12.745-14.042 18-21l19-18c12.225-12.224 24.171-26.563 38-37 19.7-14.864 38.74-30.769 59-45 42.469-29.83 92.374-54.122 143-75 44.037-18.161 93.072-25.119 143-37 18.15-4.319 38.578-2.218 56-6 8.476-1.84 15.644 3.318 22-1z"/>
 					</g>
 
@@ -2059,7 +2059,7 @@ if (document.getElementById('M1MovingTarget')) {
 					<path id="tsp_path"
 					d="M0,846c260.57,0,751.448.782,830,2v451c-0.961,1.42-.977,3.27-1,6H0V846Z"/>
 					</a></g>
-				<g><title>Hawaii</title>	
+				<g><title>Hawaii</title>
 					<a class="direct" xlink:href="sector.php?sat=G18&sector=hi">
 					<path id="hi_path"
 					d="M132 554l6-3 8-2 9 1 6 3 7 2 7 3 8 3 9 5 7 6 7 8 4 9s-1.5 4-2 6-4 5-4 5l-7 2-7 1h-7l-7-7-1-5-4-8-7-5-5-4-7-3-7-2-7 1-7-2-1-6z"/>
@@ -2086,7 +2086,7 @@ if (document.getElementById('M1MovingTarget')) {
 					</a></g>
 				<g><title>Northern Atlantic Ocean</title>
 					<a class="direct" xlink:href="sector.php?sat=G19&sector=na">
-					<path id="na_path" 
+					<path id="na_path"
 					d="M1208-2l592,1-1,385-626,1,7-14,12-17,13-24,6-13,27-8,21-10,18-6,18-8,11-16,25,6,28,3,12-12-2-16-9-16-17,1-4-9,3-10V196l-16-13-24-14-18-6-10-14-8-13-8-10-12-12-9-15,3-17,8-26,1-12-14-13-15-11-6-8c1-2-3-7-3-7Z"/>
 					</a></g>
 				<g><title>U.S. West Coast</title>
@@ -2095,31 +2095,31 @@ if (document.getElementById('M1MovingTarget')) {
 					d="M513,248l28,5,1,4,1,4v4l3,5v4l3,4,1,6,1,7-1,7v7l-2,6-2,7-3,4,1,4,1,4v4l2,4-2,6v9l3,3,2,2,1,5,1,4,2,3,5,3,2,4,5,4,1,6,4,5,1,5,4,3,5,4,5,5,1,5v5l3,1,5,1,4-1,4,1,6,2,3,1,3,3,4,1,5,4,2,7,3,6,4,7,3,4,3,5,3,4,1,4,3,4,4,3,4,3,5,3,3,3-1,3-2,2h-6l-4-2-2,3,4,3,4,3,2,4,5,2,4,3,4,1,5,2,4,3,6,3v4l-1,7,2,4,4,2,7,5,4,2,3,3,2,2,1,4,6,3-2,8-2,6-5,5-5,6-10,5-8,1-14-7-21-13-27-23-34-43-40-58-32-39-28-47-13-32s-4-31,1-46c4.177-12.532,23-23,23-23Z"/>
 					</a></g>
 				<g><title>Northeast</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G19&sector=ne">
 					<path id="ne_path"
 					d="M1074,368s-0.44-.043,0,4c0.25,2.3,0,10,0,10s-0.38,7.939,0,8.2c0.31,0.216,28-.2,28-0.2l-0.5-4,1.5-3,3-3.5,2.5-3.5,1.5-5.5,2.5-4.5,3-3.5,4-3.5,2-8,4-3,7-2.5h4.5l5-1.5,5-3,5-1,7.5,1.5,6.5,1.5,5-6,2-7-6.5.5L1163,328l-3.5-2.5-1.5-5,3-5,3.5-3,4.5-2,5-2,6-1,6-3,7.36-2.675c0.94-.5,6.3-0.647,7.64-1.825,0.56-.491,5.84-0.325,8-5,0.86-1.858-7.55-3.831-8-5-1.07-2.762-1.39-.46-3-4-0.66-1.458,1.35-5.847,2-8,1.24-4.145-.22-7.361-3-9a11.257,11.257,0,0,0-7-2c-3.64.061-11-3-11-3l-7,7-5,14-6,5a50.139,50.139,0,0,1-14,3c-12.24.667-17-6-17-6s-3.56-1.546-4,0a9.418,9.418,0,0,1-5,6l-11,2-9,6-8,8-8.5,1.5-10,2L1074,348v20Z"/>
 					</a></g>
 				<g><title>Southeast</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G19&sector=se">
 					<path id="se_path"
 					d="M1103 395l.5 5 1.5 4v3.5l-1.5 2.5-4 2.5-4.5 2-1.5 3-2.5 1h-4.5l-5 1-3.5 1-1 4.5-3 3h-4l-3.5 2.5-3 3-3.5 1.5-2.5 1-3.5 2.5-3.5 3-3.5 2.5-3.5 4-2 2.5-2.5 2.5-1.5 3.5-.5 4.5 1.5 4.5 2 5.5.5 4.5 2 3 3 5.5 2 5 2 4.5 2 5 1 4v10l-1 6-1 5-3 4-6.5 3.5-5 1-4.5 1-5-.5-4.5-.5-4-.5-2.5-2.5.5-3.5 3.5 1.5 4.5.5 6.5-.5 5-4-4-5-3-4.5-2.5-4.5-3.5-4-3-6-1-5v-8.5l.5-3.5-4-3.5-4.5-5-4-2-3-2-2.5 2-4 2.5-3.5.5-4.5-1-2-3-3.5-2-6-3.5v-74s101.8-.73 124-1c2.87-.035 1 5 1 5z"/>
-					</a></g>	
+					</a></g>
 				<g><title>Southern Mississippi Valley</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G19&sector=smv">
 					<path id="smv_path"
 					d="M977 466v-74l-89 1v81h13l12 2 6 1 8 4h7l5-2 6 3 6-2 2-5-3-3 1-4 8 1 9-1z"/>
 					</a></g>
 				<g><title>Central Great Lakes</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G19&sector=cgl">
 					<path id="cgl_path"
 					d="M921,391l153-1,1-78s-11.62,2.594-14,4c-2.16,1.271-12.78,5.321-14,6-1.41.785-10,0-10,0l-4-8,1-12s-15.21-12.258-8-6c-1.14-.989-7-6-7-6l-13-9-14-10-12-4-8-2-9-2-8-1-10-3-13-4-11-5V391Z"/>
 					</a></g>
 				<g><title>U.S. East Coast</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G19&sector=eus">
 					<path id="eus_path"
 					d="M1194 304l-5 1-5 3-6 2-5 2-4 1-4 1-2 3-3 3v4l1 4 8 1v6l1 5-3 3-5 1-10-3-6 2-4 2-8 1-5 3-4 2-2 5-3 6-8 6-2 7-2 5-3 3-2 6 1 7 2 7 1 6-4 4-6 3-4 5-5-2-7 2-3 6-4 2h-4l-3 3-5 4-7 3-5 5-4 4-5 5-3 7 1 5 3 7 4 7 2 7 3 4 2 6 2 5-1 7v4l12-4c9-7 9-5 14-11l15-15 20-22 17-21 18-20 14-22 12-22 8-12 9-17 9-13 4-11 1-7z"/>
@@ -2131,37 +2131,37 @@ if (document.getElementById('M1MovingTarget')) {
 					d="M799 392l121 1V251h-18c2.285-3.427-40.951-4.573-60-4-11.275.339-37.49 0-42 0"/>
 					</a></g>
 				<g><title>Southern Plains</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G19&sector=sp">
 					<path id="sp_path"
 					d="M888 392v83l-5 2-3-2v6l-6 3-4 2-5 1-3 5-3 3-3 4-1 6v7l2 8-7-1-6-1-7-3-8-6-6-11-5-7-6-9-8-9-7-1-8 2-8 7-9-3-7-8-1-77z"/>
 					</a></g>
 				<g><title>Northern Rockies</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G19&sector=nr">
 					<path id="nr_path"
 					d="M798 392l1-145-155-1 1 144z"/>
 					</a></g>
 				<g><title>Pacific Southwest</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G18&sector=psw">
 					<path id="psw_path"
 					d="M649 327H544l1 5 1 6-1 4-1 6 1 6 4 4 2 5 3 5 4 6 3 5 3 5 2 6 5 1-1 5 5 4 4 5 5 4 1 5 1 4 5 2 7 1 7 2 5 2 4 3 6 3 4 5 4 6 14 1 21 1s-1.1-53.867-1-54c.5-.655-11.874.089-12 0-.831-.588-1-63-1-63z"/>
 					</a></g>
-				<g><title>Southern Rockies</title>	
-					<a class="direct" 
+				<g><title>Southern Rockies</title>
+					<a class="direct"
 					xlink:href="sector.php?sat=G19&sector=sr">
 					<path id="sr_path"
 					d="M662 386v57l5 2 11 5 11 3 11 2h25v-5l13-3 19 11 5 4 2 8 7 6-1-90H662z"/>
 					</a></g>
 				<g><title>Pacific Northwest</title>
-					<a class="direct" 
+					<a class="direct"
 					xlink:href="sector.php?sat=G18&sector=pnw">
 					<path id="pnw_path"
 					d="M649 326H543v-6l3-4 2-5 1-7 1-10v-6l-1-7-2-6-1-7-4-7v-3l-1-3h13l3 2 6-3-2-4-2-4h90v80z"/>
 					</a></g>
 				<g><title>Eastern Pacific Ocean</title>
-					<a class="direct" xlink:href="sector.php?sat=G19&sector=eep">	
+					<a class="direct" xlink:href="sector.php?sat=G19&sector=eep">
 					<path id="eep_path"
 					d="M830 620l17 6 6 3 8 3h7l8-1 5-3h7l5-1 5 2 4 3 4 4 3 5 6 4 4 5 5 3 7 1 6 1 8 4 8 3 8 1 4-2 3 5 5 4 3 6 5 5 4 3 1 5v6l4 5 4 2 5 2 4 1 5 4v5l5 3 3 1 4 2 3-1 5 1 5 2 3 4 4 3 6 1s-.14 39.5-1 72c-.12 4.538-6.17 11.9-6.28 15.992-.09 3.381-3.21 15.266.28 19.008 5.46 5.848 6 8 6 8H830V620z"/>
 					</a></g>
@@ -2170,12 +2170,12 @@ if (document.getElementById('M1MovingTarget')) {
 					<path id="mex_path"
 					d="M629 443l33 2 5 1 7 3 5 2 6 1 4 2 7 1 7 1 9-1 10 1 3-2 3-4 4-1 5-1 5 1 3 2 6 3 6 5 5 5 3 5 3 4 3 5 5 2 5 1 3-2 6-4 6-2 7-1 4 3 4 5 4 7 5 8 3 5 4 8 6 6 7 4 7 1 7 1h2v3l-2 3-2 5v14l-1 7v4l4 5 2 2-1 3v3l2 4 4 4 4 3 2 4 2 5 3 4 7 2 5 2 2 3 4-1h3l5-1 5-2 5-2h5l4 1 4-3 2-3 3-2v-4l1-4 2-6 3-5 4-2 5-2 6-1 5-1 6-1 5 1 5-2 5 1 2 3 2 4a8.517 8.517 0 0 1 0 3 14.967 14.967 0 0 1-2 3l-2 3-3 3a28.253 28.253 0 0 0-1 3c-.333 1.333-1 5-1 5l-1 4-1 4-1 3v4l-2 1-5-6h-3l-1 3-2 3-14-1v5l-5 2 1 2 3 3 3 2v3l-2 3-6 1h-7l-4 1-6 4-4 4-1 5-1 6-4-5-5-5-6-4-6-3-6-1-6 2-7 3-6 1h-6l-5-2-7-2-7-3-5-2-8-3-7-3-8-3-4-3-5-5-5 1-6-2-6-2-4-4-4-4-4-2-5-2-4-3-3-4-2-4-1-5 4-1-2-3 3-4-1-5-5-4v-5l-6-6-5-4-5-6-7-6-5-4-4-5-7-4-3-5 3-5-4-4-3-1-4-1-5-4v-5l-6-2-5-6-5-4-3 2-3-3 2-6-3-4-1-4-2-4-2-5-3-2-4-1v-3l-5 1-3-2-3 2v4l1 4 2 5 2 3 3 2 3 3 4 2 3 5 3 3 2 4 1 3 2 4 4 3 3 3 4 4 2 4 1 4 1 3 2 5 3 2 1 3 1 3 4 2 3 2 3 4 4 4v5l-3 3-5 3-4-4-1-4-5-4-5-3-4-2-4-3-5-3 1-5 2-5-3-5-4-2-4-3-3-2-5-1-4-2-4-2-3-4-3-3-2-2 1-3 3 1h5l3-2-1-5-3-2-5-3-4-3-3-3-3-3-2-4-2-4-3-3-2-5-2-4z"/>
 					</a></g>
-				<g><title>Central America</title>	
+				<g><title>Central America</title>
 					<a class="direct" xlink:href="sector.php?sat=G19&sector=cam">
 					<path id="cam_path"
 					d="M916 629l-1 3-3 5-1 7 6 7 9 2h6l7 4 6 1 7 4h7l4 3 5 4 5 4 4 6 4 4 2 5v6l3 5 5 3 6 1 7 4 4 5 4 5 7 4 7-1 7 4 9 6h6l6-4 1-7 1-6h4l6 6 6 8 2-5 9-14-9-6-5-4-5-2h-5l-7 2-6 3-3 2-5 3-5-4-6-2-5-4-3-4-4-2-2-6-1-4 1-6 2-8-1-7 1-7 6-4 1-9-7-5-6-4-10-5h-15l-9 2-8-1-8 1 6-14-2-7-4-10-4 5-3 3h-13v5h-5l8 10-2 5-8-1-7 1-5 2z"/>
 					</a></g>
-				<g><title>South America (northern)</title>	
+				<g><title>South America (northern)</title>
 					<a class="direct" xlink:href="sector.php?sat=G19&sector=nsa">
 					<path id="nsa_path"
 					d="M1092 697l-21 32s4.71 7.781 4 26a58.486 58.486 0 0 1-2 14l-11 12a117.932 117.932 0 0 0-16 19 60.317 60.317 0 0 0-7 14l-4 22s8.08 1.672 7 9c-1.56 10.555-8 11-8 11l-2 20 16 16 10 16 9 18 12 23 8 16 10 19 17 12 26 12 15 15 3 25 348-2s7.76-8.17 11-14c3.29-5.92 6-25 6-25l3-22v-21l21-26 22-23 4-20-9-33s-13.84-1.9-26-8c-11.94-5.988-30-21-30-21l-28-1-22-12-36-13-15-22-22-26-16-11-23-15-30-1-17-17-20-19-13-14-22-2-23 5-25-4-14-8-28-10-30 12-17 3z"/>
@@ -2202,7 +2202,7 @@ if (document.getElementById('M1MovingTarget')) {
 					</a></g>
 
 				<g><title>Tropical Atlantic Ocean</title>
-					<a class="direct" xlink:href="sector.php?sat=G19&sector=taw">	
+					<a class="direct" xlink:href="sector.php?sat=G19&sector=taw">
 					<path id="taw_path"
 					d="M1174 385l626 1v459h-274l-16-12-11-1h-8l-8-1h-5l-7-4-7-2-8-7-10-2-11-5-11-4-8-10-10-14-9-11-8-9-13-10-10-8-19-11-13-1-13-2h-4l-8-7-17-17-21-20 4-3 3-4 3-3 4-3 4-4 1-4-1-7-2-6-2-5-4-9-7-10-4-6-6-12-8-11-8-8-11-4-11-4-11-7-11-7-14-6-13-7-13-7-14-7-14-7-13-9-14-9-10-9-13-14 35-40 22-27 17-20c1-2 7-11 7-11z"/>
 					</a></g>
@@ -2275,7 +2275,7 @@ $(document).ready(function() {
 		console.log('got to here!');
 	}
 });
-	
+
 //<span> element with 'x' that closes the modal
 var span = document.getElementsByClassName("close")[0];
 
@@ -2289,7 +2289,7 @@ window.onclick = function(event) {
   if (event.target == modal) {
     modal.style.display = "none";
   }
-} 
+}
 </script>
 <script>
 	if (navigator.appName == 'Microsoft Internet Explorer' ||  !!(navigator.userAgent.match(/Trident/) || navigator.userAgent.match(/rv:11/)) || (typeof $.browser !== "undefined" && $.browser.msie == 1)) {

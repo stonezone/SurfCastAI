@@ -22,7 +22,7 @@ general:
 openai:
   # Default model - used as fallback if a specialist doesn't have one defined
   # Also used by legacy code paths for backward compatibility
-  default_model: gpt-5-mini
+  default_model: gpt-5-nano
 
   # Specialist-specific model assignments (tiered AI architecture)
   # Each specialist can use a different model based on task complexity:
@@ -31,8 +31,8 @@ openai:
   #   - gpt-5: Premium ($1.25/1M in, $10.00/1M out) - High-quality synthesis
   specialist_models:
     buoy_analyst: gpt-5-nano        # Simple buoy data analysis
-    pressure_analyst: gpt-5-mini    # Complex meteorology with vision API
-    senior_forecaster: gpt-5        # Final high-quality forecast synthesis
+    pressure_analyst: gpt-5-nano    # Using nano for cost optimization during testing
+    senior_forecaster: gpt-5-nano   # Using nano for cost optimization during testing
 
   # Global OpenAI settings (apply to all models)
   # NOTE: API key must be set via OPENAI_API_KEY environment variable in .env file
@@ -106,8 +106,10 @@ data_sources:
   weather:
     enabled: true
     urls:
-      - "https://api.weather.gov/gridpoints/HNL/12,52/forecast"
-      - "https://api.weather.gov/gridpoints/HNL/8,65/forecast"
+      # NWS Forecast Office Honolulu (HFO) grid forecasts
+      # Grid coordinates updated (HNL office code deprecated, now HFO)
+      - "https://api.weather.gov/gridpoints/HFO/148,158/forecast"  # North Shore area
+      - "https://api.weather.gov/gridpoints/HFO/154,145/forecast"  # South Shore (Honolulu)
   metar:
     enabled: true
     urls:
@@ -121,13 +123,19 @@ data_sources:
   models:
     enabled: true
     urls:
-      # NOTE: WW3 CSV point guidance (wvprbl_hi) and FTP endpoints deprecated
-      # Using OPeNDAP gridded data instead (supports template expansion for date/hour)
+      # WW3 Multi-Grid OPeNDAP (gridded data, fallback if CSV fails)
       - "https://nomads.ncep.noaa.gov:9090/dods/gfs_0p25"
       - "https://nomads.ncep.noaa.gov:9090/dods/wave_multi_1.glo_0.16"
 
+      # WW3 CSV Point Guidance (Hawaii grid points with template expansion)
+      # Template: {date} = YYYYMMDD, {hour} = 00/06/12/18
+      # Tries most recent cycle first, falls back to earlier cycles
+      - "https://nomads.ncep.noaa.gov/pub/data/nccf/com/wave/prod/multi_1.{date}/points/hawaii/wvprbl_hi.{date}.t{hour}z.csv"
+      - "https://ftpprd.ncep.noaa.gov/data/nccf/com/wave/prod/multi_1.{date}/points/hawaii/wvprbl_hi.{date}.t{hour}z.csv"
+
       # PacIOOS SWAN Oahu regional model (high-resolution nearshore forecasts)
-      - "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/"
+      # NOTE: Currently returning 404, keeping for future restoration
+      # - "https://www.pacioos.hawaii.edu/wave-model/swan-oahu/"
   marine_forecasts:
     enabled: true
     urls:
@@ -209,14 +217,30 @@ data_sources:
         ndbc_fallback: "https://www.ndbc.noaa.gov/data/realtime2/51207.txt"
   upper_air:
     enabled: true
-    urls:
-      # NOTE: Legacy WPC/OPC/AWC upper-air chart imagery (250mb, 500mb) deprecated/unavailable
-      # Upper-level wind data available via GFS OPeNDAP in 'models' section
-      # Jet stream position can be inferred from surface pressure gradients in 'charts' section
-      #
-      # Alternative: Tropical Tidbits provides GFS-derived imagery but requires scraping HTML
-      # For now, relying on model data and surface analysis for jet diagnostics
-      []
+    sources:
+      # SPC Upper-Air Analysis (objectively analyzed maps)
+      # Template: {date} = YYMMDD_HH format (e.g., 251123_00)
+      # SPC publishes maps at 00Z and 12Z synoptic times
+      - id: "spc_250mb"
+        url: "https://www.spc.noaa.gov/obswx/maps/250_{date}.gif"
+        level: "250mb"
+        product_type: "jet_stream"
+        description: "SPC 250mb analysis - jet stream position"
+        date_format: "%y%m%d_%H"
+
+      - id: "spc_500mb"
+        url: "https://www.spc.noaa.gov/obswx/maps/500_{date}.gif"
+        level: "500mb"
+        product_type: "upper_low"
+        description: "SPC 500mb analysis - upper-level lows and ridges"
+        date_format: "%y%m%d_%H"
+
+      # UCAR/RAL Real-Time Upper Air (backup)
+      # These require query parameters, keeping for future enhancement
+      # - id: "ucar_250mb"
+      #   url: "https://weather.ral.ucar.edu/upper/displayUpper.php?img=upaCNTR_250.gif"
+      #   level: "250mb"
+      #   description: "UCAR 250mb contour analysis"
   tropical:
     enabled: true
     urls:

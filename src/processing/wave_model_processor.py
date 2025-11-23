@@ -786,9 +786,7 @@ class WaveModelProcessor(DataProcessor[dict[str, Any], ModelData]):
 
         return peaks
 
-    def _calculate_swell_significance(
-        self, height: float | None, period: float | None
-    ) -> float:
+    def _calculate_swell_significance(self, height: float | None, period: float | None) -> float:
         """
         Calculate significance score for a swell event.
 
@@ -828,5 +826,6 @@ class WaveModelProcessor(DataProcessor[dict[str, Any], ModelData]):
         Returns:
             Wave height in Hawaiian scale (feet)
         """
-        # Hawaiian scale approximated by doubling significant wave height in feet
-        return meters * 6.56168
+        # Hawaiian scale ≈ Hs in feet (back height)
+        # DO NOT multiply by 2 - that would give face height
+        return meters * 3.28084  # 1m = 3.28084ft

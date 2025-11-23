@@ -66,9 +66,7 @@ class ForecastVisualizer:
 
         return charts
 
-    def _build_swell_mix_chart(
-        self, forecast_data: dict[str, Any], assets_dir: Path
-    ) -> str | None:
+    def _build_swell_mix_chart(self, forecast_data: dict[str, Any], assets_dir: Path) -> str | None:
         """Plot Hawaiian scale heights for each detected swell event."""
         try:
             events = forecast_data.get("swell_events", [])

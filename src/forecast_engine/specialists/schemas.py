@@ -368,12 +368,8 @@ class PredictedSwell(BaseModel):
     # Source system characteristics
     fetch_quality: FetchQuality | None = Field(None, description="Quality of generating fetch")
     fetch_duration_hrs: float | None = Field(None, ge=0, description="Fetch duration in hours")
-    fetch_length_nm: float | None = Field(
-        None, ge=0, description="Fetch length in nautical miles"
-    )
-    source_pressure_mb: int | None = Field(
-        None, description="Source system pressure in millibars"
-    )
+    fetch_length_nm: float | None = Field(None, ge=0, description="Fetch length in nautical miles")
+    source_pressure_mb: int | None = Field(None, description="Source system pressure in millibars")
     source_wind_speed_kt: int | None = Field(
         None, ge=0, description="Source system wind speed in knots"
     )

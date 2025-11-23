@@ -184,9 +184,7 @@ class ForecastValidator:
             "validations": validation_records,
         }
 
-    async def _get_forecast_data(
-        self, forecast_id: str, hours_after: int
-    ) -> dict[str, Any] | None:
+    async def _get_forecast_data(self, forecast_id: str, hours_after: int) -> dict[str, Any] | None:
         """
         Get forecast and predictions from database.
 

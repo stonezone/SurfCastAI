@@ -138,9 +138,7 @@ class SeniorForecaster(BaseSpecialist):
             self.max_tokens = 2000
             self.min_specialists_required = 2
 
-    async def analyze(
-        self, data: dict[str, Any] | SeniorForecasterInput
-    ) -> SeniorForecasterOutput:
+    async def analyze(self, data: dict[str, Any] | SeniorForecasterInput) -> SeniorForecasterOutput:
         """
         Synthesize specialist reports into final forecast.
 

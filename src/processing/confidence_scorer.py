@@ -46,9 +46,7 @@ class ConfidenceScorer:
     # Expected data sources for completeness calculation
     EXPECTED_SOURCES = ["buoys", "models", "charts", "satellite"]
 
-    def __init__(
-        self, weights: ConfidenceWeights | None = None, validation_db: Any | None = None
-    ):
+    def __init__(self, weights: ConfidenceWeights | None = None, validation_db: Any | None = None):
         """
         Initialize the confidence scorer.
 

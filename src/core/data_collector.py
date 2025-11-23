@@ -175,7 +175,9 @@ class DataCollector:
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
             # Process results
-            for i, (agent_name, result) in enumerate(zip(self.agents.keys(), results, strict=False)):
+            for i, (agent_name, result) in enumerate(
+                zip(self.agents.keys(), results, strict=False)
+            ):
                 if isinstance(result, Exception):
                     self.logger.error(f"Error in agent {agent_name}: {result}")
                     agent_results[agent_name] = {

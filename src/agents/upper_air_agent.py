@@ -79,9 +79,7 @@ class UpperAirAgent(BaseAgent):
         else:
             target_date = now_utc.date()
 
-        return datetime(
-            target_date.year, target_date.month, target_date.day, 0, 0, 0, tzinfo=UTC
-        )
+        return datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0, tzinfo=UTC)
 
     def _expand_date_template(self, url: str, date_format: str | None = None) -> str:
         """

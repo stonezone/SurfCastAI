@@ -5,7 +5,6 @@ This module defines structured confidence reports that provide visibility
 into forecast quality and the factors that contribute to the confidence score.
 """
 
-
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 

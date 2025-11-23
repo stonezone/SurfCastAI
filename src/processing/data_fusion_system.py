@@ -1274,6 +1274,9 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
         approximately equal to the significant wave height (not face height).
         Face height is typically 1.5-2x the Hawaiian scale.
 
+        Per CLAUDE.md calibration requirements: 3.0m deepwater swell @ 15s
+        should convert to ~10-15 ft Hawaiian scale faces.
+
         Args:
             meters: Significant wave height in meters
 
@@ -1283,8 +1286,9 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
         if meters is None:
             return None
 
-        # Hawaiian scale approximated as face height (≈ 2 x significant wave height in feet)
-        return meters * 6.56168
+        # Convert meters to feet (1m = 3.28084 ft) for Hawaiian scale (back of wave)
+        # This represents the significant wave height, not face height
+        return meters * 3.28084
 
     def _attach_source_scores(
         self,

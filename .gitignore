@@ -1,6 +1,6 @@
 # Configuration (secrets and local settings)
-# config.yaml contains API keys and credentials - never commit
 config/config.yaml
+.env
 
 # Python
 __pycache__/
@@ -31,9 +31,6 @@ env/
 ENV/
 venv/
 
-# Environment variables
-.env
-
 # IDEs and OS
 .idea/
 .vscode/
@@ -61,13 +58,24 @@ logs/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Local agent artifacts
-.code/agents/**
+# Local agent artifacts / tools
+.claude/
+.code/
+.serena/
 
-# Pre-commit
-.pre-commit-config.yaml.backup
+# Pre-commit and tooling caches
 .mypy_cache/
 .ruff_cache/
+.pre-commit-config.yaml.backup
 
 # Archives
 ARCHIVE_*/
+
+# Project-specific data and outputs
+data/
+output/
+
+# Project-specific logs & temp files
+surfcastai.log
+tmp_forecast_gpt5.log
+tmp_forecast_mini.log

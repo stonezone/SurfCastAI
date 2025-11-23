@@ -26,8 +26,8 @@ A comprehensive, automated, AI-powered surf forecasting system for Oahu, Hawaii.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/surfCastAI.git
-cd surfCastAI
+git clone https://github.com/stonezone/SurfCastAI.git
+cd SurfCastAI
 
 # Run the setup script
 ./setup.sh
@@ -200,7 +200,7 @@ The system loads configuration in this order:
 
 ### Key Configuration Options
 
-See [CONFIGURATION.md](/Users/zackjordan/code/surfCastAI/CONFIGURATION.md) for complete details. Key settings include:
+See [CONFIGURATION.md](CONFIGURATION.md) for complete details. Key settings include:
 
 - **OpenAI Model Selection:** `gpt-4o`, `gpt-4o-mini`, or `gpt-5-nano`
 - **Rate Limits:** Per-domain request throttling
@@ -291,7 +291,7 @@ python src/main.py validate --forecast forecast_20251007_120000
 python src/main.py accuracy-report --days 30
 ```
 
-See [VALIDATION_GUIDE.md](/Users/zackjordan/code/surfCastAI/VALIDATION_GUIDE.md) for complete validation documentation.
+See [VALIDATION_GUIDE.md](VALIDATION_GUIDE.md) for complete validation documentation.
 
 ## Web Viewer
 
@@ -403,7 +403,7 @@ See [tests/README.md](tests/README.md) for more information on the testing frame
 
 ## Deployment
 
-For production deployment, see [DEPLOYMENT.md](/Users/zackjordan/code/surfCastAI/DEPLOYMENT.md) for:
+For production deployment, see [DEPLOYMENT.md](DEPLOYMENT.md) for:
 - Automated scheduling with cron/systemd
 - Docker containerization
 - Monitoring and alerting
@@ -570,12 +570,13 @@ The system protects against malicious archives. If you see this error:
 
 ## Documentation
 
-- **[README.md](/Users/zackjordan/code/surfCastAI/README.md)** - This file (overview, installation, usage)
-- **[VALIDATION_GUIDE.md](/Users/zackjordan/code/surfCastAI/VALIDATION_GUIDE.md)** - Complete validation system guide
-- **[CONFIGURATION.md](/Users/zackjordan/code/surfCastAI/CONFIGURATION.md)** - All configuration options explained
-- **[DEPLOYMENT.md](/Users/zackjordan/code/surfCastAI/DEPLOYMENT.md)** - Production deployment guide
-- **[API.md](/Users/zackjordan/code/surfCastAI/API.md)** - API documentation for all modules
-- **[CLAUDE.md](/Users/zackjordan/code/surfCastAI/CLAUDE.md)** - Project status and implementation notes
+- **[README.md](README.md)** - This file (overview, installation, usage)
+- **[VALIDATION_GUIDE.md](VALIDATION_GUIDE.md)** - Complete validation system guide
+- **[CONFIGURATION.md](CONFIGURATION.md)** - All configuration options explained
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment guide
+- **[CLAUDE.md](CLAUDE.md)** - Project status and implementation notes
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 
 ## Security Best Practices
 
