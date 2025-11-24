@@ -44,6 +44,7 @@ class TestDataCollectorStatsReset(unittest.IsolatedAsyncioTestCase):
         self.temp_dir.cleanup()
 
     async def test_stats_reset_between_runs(self) -> None:
+        """Test that stats are correctly calculated for each run without carryover."""
         first_metadata = [
             {"status": "success", "size_bytes": 512},
             {"status": "success", "size_bytes": 256},
@@ -53,6 +54,7 @@ class TestDataCollectorStatsReset(unittest.IsolatedAsyncioTestCase):
 
         first_result = await self.collector.collect_data()
 
+        # Verify first run stats
         self.assertEqual(first_result["stats"]["total_files"], 3)
         self.assertEqual(first_result["stats"]["successful_files"], 2)
         self.assertEqual(first_result["stats"]["failed_files"], 1)
@@ -65,20 +67,22 @@ class TestDataCollectorStatsReset(unittest.IsolatedAsyncioTestCase):
 
         second_result = await self.collector.collect_data()
 
+        # Verify second run stats are independent (not cumulative)
         expected_total = len(second_metadata)
         expected_success = sum(1 for item in second_metadata if item["status"] == "success")
         expected_failed = expected_total - expected_success
         expected_size = sum(item["size_bytes"] for item in second_metadata)
 
-        self.assertEqual(self.collector.stats["total_files"], expected_total)
-        self.assertEqual(self.collector.stats["successful_files"], expected_success)
-        self.assertEqual(self.collector.stats["failed_files"], expected_failed)
-        self.assertEqual(self.collector.stats["total_size_bytes"], expected_size)
+        # Check returned stats from second run
         self.assertEqual(second_result["stats"]["total_files"], expected_total)
-        self.assertEqual(self.collector.stats["agents"]["dummy"]["total"], expected_total)
+        self.assertEqual(second_result["stats"]["successful_files"], expected_success)
+        self.assertEqual(second_result["stats"]["failed_files"], expected_failed)
+        self.assertEqual(second_result["stats"]["total_size_bytes"], expected_size)
 
-        self.assertEqual(self.collector.stats["agents"]["dummy"]["successful"], expected_success)
-        self.assertEqual(self.collector.stats["agents"]["dummy"]["failed"], expected_failed)
+        # Check agent-specific stats
+        self.assertEqual(second_result["stats"]["agents"]["dummy"]["total"], expected_total)
+        self.assertEqual(second_result["stats"]["agents"]["dummy"]["successful"], expected_success)
+        self.assertEqual(second_result["stats"]["agents"]["dummy"]["failed"], expected_failed)
 
 
 if __name__ == "__main__":

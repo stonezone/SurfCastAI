@@ -1070,8 +1070,9 @@ class SeniorForecaster(BaseSpecialist):
         heights = []
         for swell in swells:
             if "height" in swell and swell["height"] is not None:
-                # Buoy height in meters, convert to feet (face height ~= 1.5-2x)
-                heights.append(swell["height"] * 1.8 * 3.28)  # meters to feet, face multiplier
+                # Heights from fusion are already in Hawaiian scale feet
+                # Just convert to face height approximation (H1/10 ≈ 1.5x H1/3)
+                heights.append(swell["height"] * 1.5)
             elif "height_str" in swell:
                 # Parse predicted height string
                 try:

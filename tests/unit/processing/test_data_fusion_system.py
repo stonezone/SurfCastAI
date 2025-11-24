@@ -281,8 +281,8 @@ class TestDataFusionSystem(unittest.TestCase):
         self.fusion_system._calculate_shore_impacts(forecast, [self.sample_weather_data])
 
         # Check that North Shore has higher quality than South Shore
-        north_shore = next(l for l in forecast.locations if l.shore.lower() == "north shore")
-        south_shore = next(l for l in forecast.locations if l.shore.lower() == "south shore")
+        north_shore = next(loc for loc in forecast.locations if loc.shore.lower() == "north shore")
+        south_shore = next(loc for loc in forecast.locations if loc.shore.lower() == "south shore")
 
         self.assertIn("overall_quality", north_shore.metadata)
         self.assertIn("overall_quality", south_shore.metadata)
@@ -314,11 +314,12 @@ class TestDataFusionSystem(unittest.TestCase):
 
     def test_convert_to_hawaii_scale(self):
         """Test Hawaiian scale conversion."""
-        # Test various wave heights
+        # Test various wave heights with average shore correction (0.75)
+        # Hawaiian scale measures back height with refraction/shadowing corrections
         test_cases = [
-            (1.0, 6.56),  # 1m ≈ 6.56ft face
-            (2.0, 13.12),  # 2m ≈ 13.12ft face
-            (3.0, 19.68),  # 3m ≈ 19.68ft face
+            (1.0, 2.46),  # 1m × 3.28084 × 0.75 ≈ 2.46ft Hawaiian scale (back height)
+            (2.0, 4.92),  # 2m × 3.28084 × 0.75 ≈ 4.92ft
+            (3.0, 7.38),  # 3m × 3.28084 × 0.75 ≈ 7.38ft
         ]
 
         for meters, expected_feet in test_cases:
@@ -334,6 +335,137 @@ class TestDataFusionSystem(unittest.TestCase):
         self.assertIsNone(
             self.fusion_system._convert_to_hawaii_scale(None), "None input should return None"
         )
+
+
+class TestPatCaldwellCalibration(unittest.TestCase):
+    """
+    Test _convert_to_surf_height() against Pat Caldwell's Nov 2025 forecast data.
+
+    Source: Pat Caldwell / Surf News Network, Nov 21, 2025
+    These tests validate that our conversion produces surf heights
+    within acceptable range of Pat's real-world forecasts.
+    """
+
+    def setUp(self):
+        """Create a DataFusionSystem instance for testing."""
+        from src.processing.data_fusion_system import DataFusionSystem
+
+        # Create mock config (following pattern from TestDataFusionSystem)
+        self.config = MagicMock(spec=Config)
+        self.fusion_system = DataFusionSystem(self.config)
+
+    def test_north_shore_nw_swell_14s(self):
+        """
+        Pat 11/23: 7ft (2.13m) NNW @ 14s → 10 ft H1/3 surf
+        Factor: 1.35 + 0.1*(14-12) = 1.55x
+        Expected: 2.13 * 3.28 * 1.55 = 10.8 ft
+        """
+        result = self.fusion_system._convert_to_surf_height(2.13, "north_shore", period=14)
+        self.assertIsNotNone(result, "Should return a value for North Shore 14s swell")
+        self.assertGreaterEqual(
+            result, 9, f"North Shore 14s swell: expected ≥9ft, got {result:.1f}ft"
+        )
+        self.assertLessEqual(
+            result, 12, f"North Shore 14s swell: expected ≤12ft, got {result:.1f}ft"
+        )
+
+    def test_north_shore_nw_swell_16s(self):
+        """
+        Pat 11/26: 9ft (2.74m) NNW @ 16s → 15 ft H1/3 surf (Big Wednesday!)
+        Factor: 1.35 + 0.1*(16-12) = 1.75x
+        Expected: 2.74 * 3.28 * 1.75 = 15.7 ft
+        """
+        result = self.fusion_system._convert_to_surf_height(2.74, "north_shore", period=16)
+        self.assertIsNotNone(result, "Should return a value for North Shore 16s swell")
+        self.assertGreaterEqual(
+            result, 13, f"North Shore 16s swell: expected ≥13ft, got {result:.1f}ft"
+        )
+        self.assertLessEqual(
+            result, 18, f"North Shore 16s swell: expected ≤18ft, got {result:.1f}ft"
+        )
+
+    def test_north_shore_nw_swell_13s(self):
+        """
+        Pat 11/21: 5ft (1.52m) NNW @ 13s → 6 ft H1/3 surf
+        Factor: 1.35 + 0.1*(13-12) = 1.45x
+        Expected: 1.52 * 3.28 * 1.45 = 7.2 ft
+        """
+        result = self.fusion_system._convert_to_surf_height(1.52, "north_shore", period=13)
+        self.assertIsNotNone(result, "Should return a value for North Shore 13s swell")
+        self.assertGreaterEqual(
+            result, 5, f"North Shore 13s swell: expected ≥5ft, got {result:.1f}ft"
+        )
+        self.assertLessEqual(result, 9, f"North Shore 13s swell: expected ≤9ft, got {result:.1f}ft")
+
+    def test_south_shore_sse_swell(self):
+        """
+        Pat 11/23: 2ft (0.61m) SSE @ 11s → 1 ft H1/3 surf
+        Factor: 1.0 (no period bonus for south shore)
+        Expected: 0.61 * 3.28 * 1.0 = 2.0 ft
+        """
+        result = self.fusion_system._convert_to_surf_height(0.61, "south_shore", period=11)
+        self.assertIsNotNone(result, "Should return a value for South Shore 11s swell")
+        self.assertGreaterEqual(
+            result, 1, f"South Shore 11s swell: expected ≥1ft, got {result:.1f}ft"
+        )
+        self.assertLessEqual(result, 3, f"South Shore 11s swell: expected ≤3ft, got {result:.1f}ft")
+
+    def test_east_shore_trade_swell(self):
+        """
+        Pat 11/22: 6ft (1.83m) ENE @ 8s → 3 ft H1/3 surf
+        Factor: 0.55 (trade swell loses energy)
+        Expected: 1.83 * 3.28 * 0.55 = 3.3 ft
+        """
+        result = self.fusion_system._convert_to_surf_height(1.83, "east_shore", period=8)
+        self.assertIsNotNone(result, "Should return a value for East Shore 8s trade swell")
+        self.assertGreaterEqual(
+            result, 2, f"East Shore 8s trade swell: expected ≥2ft, got {result:.1f}ft"
+        )
+        self.assertLessEqual(
+            result, 5, f"East Shore 8s trade swell: expected ≤5ft, got {result:.1f}ft"
+        )
+
+    def test_east_shore_stronger_trade(self):
+        """
+        Pat 11/21: 8ft (2.44m) ENE @ 8s → 5 ft H1/3 surf
+        Factor: 0.55
+        Expected: 2.44 * 3.28 * 0.55 = 4.4 ft
+        """
+        result = self.fusion_system._convert_to_surf_height(2.44, "east_shore", period=8)
+        self.assertIsNotNone(result, "Should return a value for East Shore stronger trade")
+        self.assertGreaterEqual(
+            result, 3, f"East Shore stronger trade: expected ≥3ft, got {result:.1f}ft"
+        )
+        self.assertLessEqual(
+            result, 6, f"East Shore stronger trade: expected ≤6ft, got {result:.1f}ft"
+        )
+
+    def test_west_shore_nw_wrap(self):
+        """
+        West shore receives wrapped NW swell with some energy loss.
+        Test: 2.5m @ 14s
+        Factor: 0.9 + 0.05*(14-12) = 1.0x
+        Expected: 2.5 * 3.28 * 1.0 = 8.2 ft
+        """
+        result = self.fusion_system._convert_to_surf_height(2.5, "west_shore", period=14)
+        self.assertIsNotNone(result, "Should return a value for West Shore NW wrap")
+        self.assertGreaterEqual(result, 7, f"West Shore NW wrap: expected ≥7ft, got {result:.1f}ft")
+        self.assertLessEqual(result, 10, f"West Shore NW wrap: expected ≤10ft, got {result:.1f}ft")
+
+    def test_default_no_shore(self):
+        """
+        When no shore specified, use 1.0x factor (no adjustment).
+        Test: 2.0m deepwater → 6.56 ft
+        """
+        result = self.fusion_system._convert_to_surf_height(2.0, shore=None, period=14)
+        self.assertIsNotNone(result, "Should return a value for default (no shore)")
+        self.assertGreaterEqual(result, 6, f"Default (no shore): expected ≥6ft, got {result:.1f}ft")
+        self.assertLessEqual(result, 7, f"Default (no shore): expected ≤7ft, got {result:.1f}ft")
+
+    def test_none_input(self):
+        """None input should return None."""
+        result = self.fusion_system._convert_to_surf_height(None, "north_shore", period=14)
+        self.assertIsNone(result, "None input should return None")
 
 
 if __name__ == "__main__":

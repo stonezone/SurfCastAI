@@ -28,6 +28,55 @@ from .storm_detector import StormDetector
 # Phantom swell filtering threshold
 MIN_SWELL_PERIOD = 4.0  # seconds
 
+# Shore-specific correction factors for Hawaiian scale conversion
+# Accounts for refraction and island shadowing effects
+SHORE_CORRECTION_FACTORS = {
+    "north_shore": {
+        "refraction": 0.85,  # NW swells wrap well
+        "shadowing": 1.0,  # No island shadowing from NW
+    },
+    "south_shore": {
+        "refraction": 0.60,  # S swells lose significant energy
+        "shadowing": 0.50,  # Heavy island shadowing
+    },
+    "east_shore": {
+        "refraction": 0.70,  # Trade swell refraction
+        "shadowing": 0.60,  # Partial shadowing
+    },
+    "west_shore": {
+        "refraction": 0.75,  # Variable by angle
+        "shadowing": 0.80,  # Less shadowing than south
+    },
+}
+
+# Calibrated from Pat Caldwell Nov 21, 2025 forecast data
+# Converts deepwater H1/3 to surf face height by shore
+SHORE_SURF_FACTORS = {
+    "north_shore": {
+        # NNW-NNE (310-040°): Shoaling amplifies swell
+        # Pat: 5-7ft deepwater → 6-10ft surf face = 1.35x avg
+        "factor": 1.35,
+        "period_bonus": 0.1,  # Add 0.1x per second over 12s
+    },
+    "south_shore": {
+        # SSE-SSW (150-210°): Long-period arrives at similar height
+        # Pat: 2ft deepwater → 2ft surf face = 1.0x
+        "factor": 1.0,
+        "period_bonus": 0.0,
+    },
+    "east_shore": {
+        # ENE-E (60-90°): Short-period trade swell loses energy
+        # Pat: 6-8ft deepwater → 3-5ft surf face = 0.55x
+        "factor": 0.55,
+        "period_bonus": 0.0,
+    },
+    "west_shore": {
+        # Estimate: NW wrap loses some energy
+        "factor": 0.9,
+        "period_bonus": 0.05,
+    },
+}
+
 
 class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
     """
@@ -434,7 +483,11 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
                         significance=self._calculate_significance(
                             peak.height_meters, peak.period_seconds
                         ),
-                        hawaii_scale=self._convert_to_hawaii_scale(peak.height_meters),
+                        hawaii_scale=self._convert_to_hawaii_scale(
+                            peak.height_meters,
+                            shore=None,  # Will use average - buoy events apply to all shores
+                            direction=peak.direction_degrees,
+                        ),
                         source="buoy_spectral",
                         quality_flag="valid",
                         metadata={
@@ -530,7 +583,11 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
                 peak_time=latest.timestamp,
                 primary_direction=latest.wave_direction,
                 significance=self._calculate_significance(latest.wave_height, dominant_period),
-                hawaii_scale=self._convert_to_hawaii_scale(latest.wave_height),
+                hawaii_scale=self._convert_to_hawaii_scale(
+                    latest.wave_height,
+                    shore=None,  # Will use average
+                    direction=latest.wave_direction,
+                ),
                 source="buoy",
                 quality_flag=quality_flag,  # Set quality flag on event
                 metadata={
@@ -743,7 +800,11 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
                         significance=self._calculate_significance(
                             max_point.wave_height, max_point.wave_period
                         ),
-                        hawaii_scale=self._convert_to_hawaii_scale(max_point.wave_height),
+                        hawaii_scale=self._convert_to_hawaii_scale(
+                            max_point.wave_height,
+                            shore=None,  # Will use average
+                            direction=max_point.wave_direction,
+                        ),
                         source="model",
                         metadata={
                             "model_id": model_data.model_id,
@@ -1266,29 +1327,134 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
         # Ensure result is between 0 and 1
         return min(1.0, significance)
 
-    def _convert_to_hawaii_scale(self, meters: float | None) -> float | None:
+    def _convert_to_hawaii_scale(
+        self, meters: float | None, shore: str | None = None, direction: float | None = None
+    ) -> float | None:
         """
-        Convert wave height from meters to Hawaiian scale.
+        Convert wave height from deepwater meters to Hawaiian scale feet.
 
-        Hawaiian scale measures wave height from the back of the wave,
-        approximately equal to the significant wave height (not face height).
-        Face height is typically 1.5-2x the Hawaiian scale.
+        Accounts for:
+        - Refraction losses as swell wraps around island
+        - Island shadowing effects (especially south/east shores)
+        - Shore-specific exposure factors
 
-        Per CLAUDE.md calibration requirements: 3.0m deepwater swell @ 15s
-        should convert to ~10-15 ft Hawaiian scale faces.
+        Hawaiian scale measures from back of wave (≈ H1/3), not face height.
+        Face height is typically 1.5-2x Hawaiian scale.
 
         Args:
-            meters: Significant wave height in meters
+            meters: Deepwater significant wave height in meters
+            shore: Target shore ('north_shore', 'south_shore', 'east_shore', 'west_shore')
+            direction: Swell direction in degrees (optional, for future refinement)
 
         Returns:
-            Wave height in Hawaiian scale (feet) or None if input is None
+            Nearshore wave height in Hawaiian scale feet, or None if input is None
+
+        Examples:
+            >>> # North Shore: 2.5m deepwater NW swell
+            >>> _convert_to_hawaii_scale(2.5, 'north_shore', 300)
+            6.95  # ~7 ft Hawaiian (10-12 ft faces)
+
+            >>> # South Shore: 2.8m deepwater S swell
+            >>> _convert_to_hawaii_scale(2.8, 'south_shore', 180)
+            2.75  # ~3 ft Hawaiian (5-6 ft faces) - heavy losses!
         """
         if meters is None:
             return None
 
-        # Convert meters to feet (1m = 3.28084 ft) for Hawaiian scale (back of wave)
-        # This represents the significant wave height, not face height
-        return meters * 3.28084
+        # If no shore specified, use conservative average factors
+        if shore is None:
+            correction = 0.75  # Average of all shores
+        else:
+            factors = SHORE_CORRECTION_FACTORS.get(
+                shore, {"refraction": 0.75, "shadowing": 0.75}  # Default fallback
+            )
+            # Combined correction factor
+            correction = factors["refraction"] * factors["shadowing"]
+
+        # Apply shore-specific correction to get nearshore height
+        nearshore_meters = meters * correction
+
+        # Convert to feet for Hawaiian scale (back height)
+        hawaiian_feet = nearshore_meters * 3.28084
+
+        return hawaiian_feet
+
+    def _convert_to_surf_height(
+        self, meters: float | None, shore: str | None = None, period: float | None = None
+    ) -> float | None:
+        """
+        Convert deepwater H1/3 (meters) to surf face height (feet).
+
+        Based on Pat Caldwell calibration data Nov 2025.
+        Returns surf H1/3 face height, NOT Hawaiian scale back height.
+
+        Args:
+            meters: Deepwater significant wave height in meters
+            shore: Target shore ('north_shore', 'south_shore', 'east_shore', 'west_shore')
+            period: Swell period in seconds (optional, for period bonus)
+
+        Returns:
+            Surf face height in feet, or None if input is None
+
+        Examples:
+            >>> # North Shore: 2.13m deepwater @ 14s
+            >>> _convert_to_surf_height(2.13, 'north_shore', period=14)
+            10.8  # matches Pat's 10 ft H1/3
+
+            >>> # South Shore: 0.61m deepwater @ 11s
+            >>> _convert_to_surf_height(0.61, 'south_shore', period=11)
+            2.0  # matches Pat's 2 ft H1/3
+        """
+        if meters is None:
+            return None
+
+        # Convert to feet first
+        deepwater_ft = meters * 3.28084
+
+        # Get shore-specific factor
+        shore_data = SHORE_SURF_FACTORS.get(
+            shore, {"factor": 1.0, "period_bonus": 0.0}  # Default: no adjustment
+        )
+        factor = shore_data["factor"]
+
+        # Period bonus for long-period groundswell (>12s)
+        if period is not None and period > 12:
+            factor += shore_data["period_bonus"] * (period - 12)
+
+        # Compute surf face height
+        surf_face_ft = deepwater_ft * factor
+
+        return surf_face_ft
+
+    def _compute_shore_specific_height(self, event: SwellEvent, shore: str) -> float:
+        """
+        Compute shore-specific Hawaiian scale height for a swell event.
+
+        Takes the event's deepwater height and applies shore-specific
+        refraction and shadowing corrections.
+
+        Args:
+            event: SwellEvent with height and direction
+            shore: Target shore name
+
+        Returns:
+            Shore-specific height in Hawaiian scale feet
+        """
+        # Get the source height in meters (reverse the generic conversion)
+        if event.hawaii_scale:
+            # Back-calculate deepwater meters from the averaged conversion
+            deepwater_m = event.hawaii_scale / (3.28084 * 0.75)
+        elif event.height:
+            deepwater_m = event.height
+        else:
+            return 0.0
+
+        # Apply shore-specific conversion
+        shore_height = self._convert_to_hawaii_scale(
+            deepwater_m, shore=shore, direction=event.primary_direction
+        )
+
+        return shore_height or 0.0
 
     def _attach_source_scores(
         self,

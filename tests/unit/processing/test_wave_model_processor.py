@@ -316,12 +316,14 @@ class TestWaveModelProcessor(unittest.TestCase):
         )
 
     def test_hawaii_scale_conversion(self):
-        """Test Hawaiian scale conversion."""
-        # Test various wave heights
+        """Test Hawaiian scale conversion (meters to feet, back height)."""
+        # Hawaiian scale measures the back of the wave, approximately equal to Hs
+        # NOT face height (which would be 1.5-2x larger)
+        # Standard conversion: 1 meter = 3.28084 feet
         test_cases = [
-            (1.0, 6.56),  # 1m ≈ 6.56ft face
-            (2.0, 13.12),  # 2m ≈ 13.12ft face
-            (3.0, 19.68),  # 3m ≈ 19.68ft face
+            (1.0, 3.28),  # 1m → ~3.28ft (back height, not 6.56ft face)
+            (2.0, 6.56),  # 2m → ~6.56ft (back height)
+            (3.0, 9.84),  # 3m → ~9.84ft (back height)
         ]
 
         for meters, expected_feet in test_cases:
@@ -330,7 +332,7 @@ class TestWaveModelProcessor(unittest.TestCase):
                 result,
                 expected_feet,
                 places=1,
-                msg=f"{meters}m should convert to ~{expected_feet}ft in Hawaiian scale",
+                msg=f"{meters}m should convert to ~{expected_feet}ft Hawaiian scale (back height)",
             )
 
 

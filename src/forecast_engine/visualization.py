@@ -173,9 +173,9 @@ class ForecastVisualizer:
                     continue
 
                 avg_height = total_height / valid_events
-                # Convert Hawaiian scale to approximate face height range
-                face_low = max(1, round(avg_height * 2))
-                face_high = max(face_low + 1, round(avg_height * 3))
+                # Per Pat Caldwell: H1/3 to H1/10 range is roughly 1.0x to 1.5x
+                face_low = max(1, round(avg_height))  # H1/3 surf face
+                face_high = max(face_low + 1, round(avg_height * 1.5))  # H1/10 surf face
                 shore_labels.append(display)
                 face_ranges.append((face_low, face_high))
 
