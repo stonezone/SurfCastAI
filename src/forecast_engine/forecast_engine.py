@@ -190,30 +190,65 @@ class ForecastEngine:
             base_url=self.base_url,  # None for OpenAI, custom URL for Kimi K2
         )
 
-        # Hybrid Vision Architecture: GPT-4o-mini for image analysis when primary doesn't support vision
-        # This enables "GPT Eyes + Kimi Brain" - cheaper vision with powerful reasoning
+        # Hybrid Vision Architecture for non-vision primary models
+        # Supports: Kimi vision (moonshot-v1-*-vision) or OpenAI (gpt-4o-mini) fallback
         self.vision_client = None
-        self.vision_model = self.config.get("forecast", "vision_fallback_model", "gpt-4o-mini")
+        self.vision_model = self.config.get("forecast", "vision_fallback_model", "auto")
         
         # Check if primary model supports vision
         vision_capable_models = {"gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-5", "gpt-5-mini", "gpt-5-nano"}
+        kimi_vision_models = {"moonshot-v1-128k-vision-preview", "moonshot-v1-32k-vision-preview", "moonshot-v1-8k-vision-preview"}
         self.primary_has_vision = model_name.lower() in vision_capable_models
         
-        # Create vision fallback client if needed (Kimi K2 doesn't support vision)
+        # Create vision fallback client if needed
         if self.llm_provider == "kimi" or not self.primary_has_vision:
-            openai_api_key = os.environ.get("OPENAI_API_KEY")
-            if openai_api_key:
-                self.vision_client = OpenAIClient(
-                    api_key=openai_api_key,
-                    model=self.vision_model,
-                    max_tokens=4096,  # Smaller for vision analysis
-                    temperature=0.3,  # More deterministic for image description
-                    logger=self.logger.getChild("vision_client"),
-                    base_url=None,  # Always use OpenAI for vision
-                )
-                self.logger.info(f"Hybrid vision enabled: {self.vision_model} for images, {model_name} for reasoning")
+            # For Kimi: prefer Kimi's own vision model (same API, free)
+            if self.llm_provider == "kimi":
+                kimi_vision_model = self.config.get("kimi", "vision_model", "moonshot-v1-32k-vision-preview")
+                if self.vision_model == "auto":
+                    self.vision_model = kimi_vision_model
+                
+                # Use Kimi vision if configured, otherwise fall back to OpenAI
+                if self.vision_model in kimi_vision_models or self.vision_model.startswith("moonshot"):
+                    self.vision_client = OpenAIClient(
+                        api_key=self.openai_api_key,  # Same Moonshot API key
+                        model=self.vision_model,
+                        max_tokens=4096,
+                        temperature=0.3,
+                        logger=self.logger.getChild("vision_client"),
+                        base_url=self.base_url,  # Same Kimi base URL
+                    )
+                    self.logger.info(f"Kimi vision enabled: {self.vision_model} for images, {model_name} for reasoning (all free)")
+                else:
+                    # Fall back to OpenAI for vision
+                    openai_api_key = os.environ.get("OPENAI_API_KEY")
+                    if openai_api_key:
+                        self.vision_client = OpenAIClient(
+                            api_key=openai_api_key,
+                            model=self.vision_model if self.vision_model != "auto" else "gpt-4o-mini",
+                            max_tokens=4096,
+                            temperature=0.3,
+                            logger=self.logger.getChild("vision_client"),
+                            base_url=None,
+                        )
+                        self.logger.info(f"Hybrid vision enabled: {self.vision_model} for images, {model_name} for reasoning")
+                    else:
+                        self.logger.warning("OPENAI_API_KEY not set - vision fallback unavailable")
             else:
-                self.logger.warning("OPENAI_API_KEY not set - vision fallback unavailable")
+                # Non-Kimi provider without vision: use OpenAI fallback
+                openai_api_key = os.environ.get("OPENAI_API_KEY")
+                if openai_api_key:
+                    self.vision_client = OpenAIClient(
+                        api_key=openai_api_key,
+                        model=self.vision_model if self.vision_model != "auto" else "gpt-4o-mini",
+                        max_tokens=4096,
+                        temperature=0.3,
+                        logger=self.logger.getChild("vision_client"),
+                        base_url=None,
+                    )
+                    self.logger.info(f"Hybrid vision enabled: {self.vision_model} for images, {model_name} for reasoning")
+                else:
+                    self.logger.warning("OPENAI_API_KEY not set - vision fallback unavailable")
 
         # Initialize data manager
         self.data_manager = ForecastDataManager(
