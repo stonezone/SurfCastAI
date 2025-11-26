@@ -168,6 +168,7 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
             nearshore_data = data.get("nearshore_data", [])
             upper_air_data = data.get("upper_air_data", [])
             climatology_data = data.get("climatology_data", [])
+            marine_forecast_data = data.get("marine_forecast_data", [])
 
             # Score all data sources for reliability weighting
             self.logger.info("Scoring data sources for reliability weighting")
@@ -192,7 +193,7 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
             }
 
             # Identify swell events from all sources
-            swell_events = self._identify_swell_events(buoy_data, model_data)
+            swell_events = self._identify_swell_events(buoy_data, model_data, marine_forecast_data)
 
             # Add events to forecast
             for event in swell_events:
@@ -358,7 +359,10 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
                 forecast.locations.append(location)
 
     def _identify_swell_events(
-        self, buoy_data_list: list[BuoyData], model_data_list: list[ModelData]
+        self,
+        buoy_data_list: list[BuoyData],
+        model_data_list: list[ModelData],
+        marine_forecast_data: list[dict] | None = None,
     ) -> list[SwellEvent]:
         """
         Identify swell events from multiple data sources.
@@ -366,6 +370,7 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
         Args:
             buoy_data_list: List of buoy data
             model_data_list: List of model data
+            marine_forecast_data: List of Open-Meteo marine forecast JSON data
 
         Returns:
             List of identified swell events
@@ -382,6 +387,12 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
         # Merge similar events (from the same source type)
         model_events = self._merge_similar_events(model_events)
         swell_events.extend(model_events)
+
+        # Extract events from marine forecast data (Open-Meteo 7-day forecasts)
+        if marine_forecast_data:
+            marine_events = self._extract_marine_forecast_events(marine_forecast_data)
+            marine_events = self._merge_similar_events(marine_events)
+            swell_events.extend(marine_events)
 
         # Sort events by time and significance
         swell_events.sort(
@@ -829,6 +840,130 @@ class DataFusionSystem(DataProcessor[dict[str, Any], SwellForecast]):
                     events.append(event)
 
         return events
+
+    def _extract_marine_forecast_events(self, marine_data_list: list[dict]) -> list[SwellEvent]:
+        """
+        Extract swell events from Open-Meteo marine forecast data.
+
+        Args:
+            marine_data_list: List of Open-Meteo marine forecast JSON dicts
+
+        Returns:
+            List of swell events
+        """
+        events = []
+
+        for marine_data in marine_data_list:
+            if not marine_data:
+                continue
+
+            # Get hourly data
+            hourly = marine_data.get("hourly", {})
+            times = hourly.get("time", [])
+            heights = hourly.get("wave_height", [])
+            periods = hourly.get("wave_period", [])
+            directions = hourly.get("wave_direction", [])
+
+            if not times or not heights:
+                continue
+
+            # Identify swell events by looking for significant height increases
+            # and long-period energy (> 12s) from NW directions (270-360 degrees)
+            min_swell_period = 11.0  # Minimum period for true swell (not wind chop)
+
+            # Process in 12-hour windows to find swell events
+            window_size = 12
+            for i in range(0, len(times) - window_size, window_size):
+                window_times = times[i : i + window_size]
+                window_heights = heights[i : i + window_size]
+                window_periods = periods[i : i + window_size] if periods else [0] * window_size
+                window_dirs = directions[i : i + window_size] if directions else [0] * window_size
+
+                # Find max height in window
+                max_height = max(window_heights) if window_heights else 0
+                max_idx = window_heights.index(max_height) if max_height > 0 else 0
+                max_period = window_periods[max_idx] if max_idx < len(window_periods) else 0
+                max_dir = window_dirs[max_idx] if max_idx < len(window_dirs) else 0
+                peak_time = window_times[max_idx] if max_idx < len(window_times) else None
+
+                # Check if this window has a significant swell event
+                # - Height > 1.2m (4ft)
+                # - Period > 11s (true swell)
+                # - Direction from NW quadrant (270-360) or N (0-45)
+                is_nw_swell = (270 <= max_dir <= 360) or (0 <= max_dir <= 45)
+                is_significant = max_height > 1.2 and max_period > min_swell_period
+
+                if is_significant:
+                    # Convert height from meters to feet
+                    height_ft = max_height * 3.28084
+
+                    # Get cardinal direction
+                    cardinal = self._degrees_to_cardinal(max_dir)
+
+                    event = SwellEvent(
+                        event_id=f"marine_openmeteo_{peak_time}",
+                        start_time=window_times[0] + "Z" if window_times else "",
+                        peak_time=peak_time + "Z" if peak_time else "",
+                        end_time=window_times[-1] + "Z" if window_times else "",
+                        primary_direction=max_dir,
+                        significance=self._calculate_significance(height_ft, max_period),
+                        hawaii_scale=self._convert_to_hawaii_scale(
+                            height_ft, shore=None, direction=max_dir
+                        ),
+                        source="marine_forecast",
+                        metadata={
+                            "source": "open-meteo",
+                            "confidence": 0.65,  # Medium confidence for Open-Meteo
+                            "type": "forecast",
+                            "is_nw_swell": is_nw_swell,
+                            "direction_cardinal": cardinal,
+                            "significant_height_ft": height_ft,
+                            "dominant_period": max_period,
+                            "lat": marine_data.get("latitude"),
+                            "lon": marine_data.get("longitude"),
+                        },
+                    )
+
+                    # Add primary component
+                    event.primary_components.append(
+                        SwellComponent(
+                            height=height_ft,
+                            period=max_period,
+                            direction=max_dir,
+                            confidence=0.65,
+                            source="marine_forecast",
+                        )
+                    )
+
+                    events.append(event)
+
+        self.logger.info(f"Extracted {len(events)} swell events from marine forecasts")
+        return events
+
+    def _degrees_to_cardinal(self, degrees: float) -> str:
+        """Convert degrees to cardinal direction."""
+        if degrees is None:
+            return "N/A"
+        directions = [
+            "N",
+            "NNE",
+            "NE",
+            "ENE",
+            "E",
+            "ESE",
+            "SE",
+            "SSE",
+            "S",
+            "SSW",
+            "SW",
+            "WSW",
+            "W",
+            "WNW",
+            "NW",
+            "NNW",
+        ]
+        idx = round(degrees / 22.5) % 16
+        return directions[idx]
 
     def _merge_similar_events(self, events: list[SwellEvent]) -> list[SwellEvent]:
         """

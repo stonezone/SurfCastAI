@@ -150,6 +150,7 @@ async def process_data(
     nearshore_data = _load_agent_json("nearshore_buoys", "metadata.json")
     upper_air_data = _load_agent_json("upper_air", "metadata.json")
     climatology_data = _load_agent_json("climatology", "metadata.json")
+    marine_forecast_data = _load_agent_json("marine_forecasts/marine_forecasts", "*.json")
 
     # Fuse the data
     logger.info("Fusing data from multiple sources")
@@ -172,6 +173,7 @@ async def process_data(
         "nearshore_data": nearshore_data,
         "upper_air_data": upper_air_data,
         "climatology_data": climatology_data,
+        "marine_forecast_data": marine_forecast_data,
     }
 
     # Process fusion
@@ -828,13 +830,18 @@ def main():
     )
     run_parser.add_argument(
         "--model",
-        choices=["gpt-5", "gpt-5-mini", "gpt-5-nano"],
-        help="Override OpenAI model for this run",
+        choices=["gpt-5", "gpt-5-mini", "gpt-5-nano", "kimi-k2"],
+        help="Override model for this run (OpenAI or Kimi K2)",
     )
     run_parser.add_argument(
         "--specialists",
         choices=["on", "off"],
         help="Enable or disable specialist team for this run",
+    )
+    run_parser.add_argument(
+        "--provider",
+        choices=["openai", "kimi"],
+        help="LLM provider to use (default: openai). Requires MOONSHOT_API_KEY env var for kimi.",
     )
 
     # List bundles command
@@ -928,6 +935,16 @@ def main():
                 logger.info(
                     "Specialist team %s via CLI", "enabled" if use_specialists else "disabled"
                 )
+
+            # Handle provider selection (openai or kimi)
+            if hasattr(args, "provider") and args.provider:
+                config._config["llm_provider"] = args.provider
+                logger.info(f"Using LLM provider: {args.provider}")
+
+                # Set default model if using kimi and no model specified
+                if args.provider == "kimi" and not (hasattr(args, "model") and args.model):
+                    config.set("openai", "model", "kimi-k2-0711-preview")
+                    logger.info("Auto-selecting kimi-k2-0711-preview model for Kimi provider")
 
             # Auto-collect fresh data before forecast unless --skip-collection is set
             if args.mode == "forecast" and not args.skip_collection:
