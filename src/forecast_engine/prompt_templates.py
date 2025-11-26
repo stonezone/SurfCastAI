@@ -141,6 +141,8 @@ class PromptTemplates:
         self._use_default_template("caldwell")
         self._use_default_template("north_shore")
         self._use_default_template("south_shore")
+        self._use_default_template("east_shore")
+        self._use_default_template("west_shore")
         self._use_default_template("daily")
 
     def _use_default_template(self, template_name: str):
@@ -292,6 +294,76 @@ SHORE SNAPSHOT:
 {shore_digest}
 
 Write the complete South Shore forecast now using Pat Caldwell's technical style.
+""",
+            }
+        elif template_name == "east_shore":
+            self.templates[template_name] = {
+                "system_prompt": """
+Generate a detailed East Shore (Windward)-specific surf forecast in Pat Caldwell's style. Focus on:
+
+1. Wave heights in Hawaiian scale
+2. Trade wind swell analysis (primary source for East Shore)
+3. Wind and weather effects specific to Windward/East Shore
+4. Timing information (building, peaking, dropping)
+5. Break-specific details for Makapuu, Sandy Beach, and other notable East side spots
+6. Trade wind patterns and their effect on surf quality
+
+The East Shore receives primarily trade wind swell from 60-90 degrees. Keep technical accuracy as the top priority while providing practical information for surfers.
+""",
+                "user_prompt": """
+Generate a detailed East Shore surf forecast for {start_date} to {end_date}.
+
+EAST SHORE SWELLS:
+{east_shore_swells}
+
+WEATHER:
+{weather_conditions}
+
+NOTABLE BREAKS:
+{popular_breaks}
+
+DATA DIGEST:
+{data_digest}
+
+SHORE SNAPSHOT:
+{shore_digest}
+
+Write the complete East Shore forecast now using Pat Caldwell's technical style.
+""",
+            }
+        elif template_name == "west_shore":
+            self.templates[template_name] = {
+                "system_prompt": """
+Generate a detailed West Shore (Leeward)-specific surf forecast in Pat Caldwell's style. Focus on:
+
+1. Wave heights in Hawaiian scale
+2. NW swell wrap analysis (secondary to North Shore but can be significant)
+3. Wind and weather effects specific to Leeward/West Shore
+4. Timing information (building, peaking, dropping)
+5. Break-specific details for Makaha, Yokohama, and other notable West side spots
+6. Shadow effects from neighboring islands and how they affect swell arrival
+
+The West Shore receives NW-WNW swell wrap from 270-315 degrees, typically smaller than direct North Shore hits. Keep technical accuracy as the top priority while providing practical information for surfers.
+""",
+                "user_prompt": """
+Generate a detailed West Shore surf forecast for {start_date} to {end_date}.
+
+WEST SHORE SWELLS:
+{west_shore_swells}
+
+WEATHER:
+{weather_conditions}
+
+NOTABLE BREAKS:
+{popular_breaks}
+
+DATA DIGEST:
+{data_digest}
+
+SHORE SNAPSHOT:
+{shore_digest}
+
+Write the complete West Shore forecast now using Pat Caldwell's technical style.
 """,
             }
         elif template_name == "daily":

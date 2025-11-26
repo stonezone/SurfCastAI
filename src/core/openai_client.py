@@ -16,7 +16,7 @@ from typing import Any
 
 class OpenAIClient:
     """
-    Centralized OpenAI API client with cost and token tracking.
+    Centralized OpenAI-compatible API client with cost and token tracking.
 
     Features:
     - Text and multimodal (vision) API calls
@@ -24,13 +24,23 @@ class OpenAIClient:
     - Thread-safe token/cost tracking
     - Graceful handling of model parameter differences
     - Support for local file paths (converts to base64 data URLs)
+    - Support for alternative providers (Kimi K2) via custom base_url
 
     Usage:
+        # OpenAI (default)
         client = OpenAIClient(
             api_key="sk-...",
             model="gpt-5-nano",
             max_tokens=32768,
             temperature=None  # GPT-5 uses default
+        )
+
+        # Kimi K2 (Moonshot AI)
+        client = OpenAIClient(
+            api_key="your-moonshot-key",
+            model="kimi-k2-0711-preview",
+            max_tokens=4000,
+            base_url="https://api.moonshot.ai/v1"
         )
 
         response = await client.call_openai_api(
@@ -45,11 +55,16 @@ class OpenAIClient:
     """
 
     # Model pricing (per 1M tokens)
-    # Source: https://openai.com/pricing
+    # Source: https://openai.com/pricing, https://platform.moonshot.ai/pricing
     MODEL_PRICING = {
+        # OpenAI models
         "gpt-5-nano": {"input": 0.05, "output": 0.40},
         "gpt-5-mini": {"input": 0.25, "output": 2.00},
         "gpt-5": {"input": 1.25, "output": 10.00},
+        # Kimi K2 (Moonshot AI) - essentially free tier
+        # 3M tokens/day free, 6 req/min limit
+        "kimi-k2-0711-preview": {"input": 0.00, "output": 0.00},
+        "kimi-k2": {"input": 0.00, "output": 0.00},
         "default": {"input": 0.01, "output": 0.03},  # GPT-4 pricing
     }
 
@@ -68,22 +83,25 @@ class OpenAIClient:
         max_tokens: int,
         temperature: float | None = None,
         logger: logging.Logger | None = None,
+        base_url: str | None = None,
     ):
         """
-        Initialize OpenAI API client.
+        Initialize OpenAI-compatible API client.
 
         Args:
-            api_key: OpenAI API key
-            model: Model name (e.g., 'gpt-5-nano', 'gpt-5-mini', 'gpt-5')
+            api_key: API key (OpenAI or Moonshot/Kimi)
+            model: Model name (e.g., 'gpt-5-nano', 'gpt-5-mini', 'gpt-5', 'kimi-k2-0711-preview')
             max_tokens: Maximum output tokens
             temperature: Sampling temperature (None = use model default, recommended for GPT-5)
             logger: Optional logger instance (creates one if not provided)
+            base_url: Optional custom API base URL (e.g., 'https://api.moonshot.ai/v1' for Kimi)
         """
         self.api_key = api_key
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.logger = logger or logging.getLogger("openai.client")
+        self.base_url = base_url
 
         # Initialize cost tracking
         self.total_cost = 0.0
@@ -96,8 +114,9 @@ class OpenAIClient:
         temp_str = (
             f"temperature={temperature}" if temperature is not None else "default temperature"
         )
+        provider_str = f", base_url={base_url}" if base_url else ""
         self.logger.info(
-            f"OpenAI client initialized: model={model}, max_tokens={max_tokens}, {temp_str}"
+            f"OpenAI client initialized: model={model}, max_tokens={max_tokens}, {temp_str}{provider_str}"
         )
 
     async def call_openai_api(
@@ -139,8 +158,11 @@ class OpenAIClient:
             self.logger.debug(f"User prompt length: {len(user_prompt)} chars")
             self.logger.debug(f"User prompt preview: {user_prompt[:500]}...")
 
-            # Initialize client
-            client = AsyncOpenAI(api_key=self.api_key)
+            # Initialize client with optional custom base URL (for Kimi K2, etc.)
+            client_kwargs = {"api_key": self.api_key}
+            if self.base_url:
+                client_kwargs["base_url"] = self.base_url
+            client = AsyncOpenAI(**client_kwargs)
 
             # Build message content
             if image_urls:
@@ -358,7 +380,9 @@ class OpenAIClient:
         # Determine pricing tier
         model_lower = self.model.lower()
 
-        if "gpt-5-mini" in model_lower:
+        if "kimi-k2" in model_lower:
+            pricing = self.MODEL_PRICING["kimi-k2"]
+        elif "gpt-5-mini" in model_lower:
             pricing = self.MODEL_PRICING["gpt-5-mini"]
         elif "gpt-5-nano" in model_lower:
             pricing = self.MODEL_PRICING["gpt-5-nano"]

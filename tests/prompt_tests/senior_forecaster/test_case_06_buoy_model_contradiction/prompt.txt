@@ -161,7 +161,7 @@ None
 SHORE BREAKDOWN:
 {
   "north_shore": {
-    "size_range": "8-13ft",
+    "size_range": "4-6ft",
     "conditions": "fair to choppy",
     "timing": "New swell arriving 2025-11-05T12:00-18:00Z, building thereafter",
     "confidence": 0.88
@@ -179,7 +179,7 @@ SHORE BREAKDOWN:
     "confidence": 0.5
   },
   "west_shore": {
-    "size_range": "8-13ft",
+    "size_range": "4-6ft",
     "conditions": "fair to choppy",
     "timing": "New swell arriving 2025-11-05T12:00-18:00Z, building thereafter",
     "confidence": 0.88

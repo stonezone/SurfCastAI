@@ -191,13 +191,13 @@ None
 SHORE BREAKDOWN:
 {
   "north_shore": {
-    "size_range": "5-8ft",
+    "size_range": "2-4ft",
     "conditions": "fair to choppy",
     "timing": "Steady through period",
     "confidence": 0.55
   },
   "south_shore": {
-    "size_range": "8-12ft",
+    "size_range": "2-3ft",
     "conditions": "fair to choppy",
     "timing": "Steady through period",
     "confidence": 0.39
@@ -209,7 +209,7 @@ SHORE BREAKDOWN:
     "confidence": 0.5
   },
   "west_shore": {
-    "size_range": "5-8ft",
+    "size_range": "2-4ft",
     "conditions": "fair to choppy",
     "timing": "Steady through period",
     "confidence": 0.55

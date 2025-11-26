@@ -201,25 +201,25 @@ None
 SHORE BREAKDOWN:
 {
   "north_shore": {
-    "size_range": "10-16ft",
+    "size_range": "4-6ft",
     "conditions": "clean",
     "timing": "Building through the period, peak in 12-24 hours",
     "confidence": 0.9
   },
   "south_shore": {
-    "size_range": "7-11ft",
+    "size_range": "2-4ft",
     "conditions": "clean",
     "timing": "New swell arriving 2025-02-09T18:00-2025-02-10T06:00Z, building thereafter",
     "confidence": 0.88
   },
   "east_shore": {
-    "size_range": "9-14ft",
+    "size_range": "2-3ft",
     "conditions": "clean",
     "timing": "Steady through period",
     "confidence": 0.78
   },
   "west_shore": {
-    "size_range": "8-12ft",
+    "size_range": "3-5ft",
     "conditions": "clean",
     "timing": "Building through the period, peak in 12-24 hours",
     "confidence": 0.87

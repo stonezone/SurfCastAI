@@ -193,6 +193,16 @@ class ForecastFormatter:
             formatted_ss = self._format_forecast_text(south_shore)
             markdown_parts.append(f"## South Shore Forecast\n\n{formatted_ss}\n\n")
 
+        east_shore = forecast_data.get("east_shore", "")
+        if east_shore:
+            formatted_es = self._format_forecast_text(east_shore)
+            markdown_parts.append(f"## East Shore Forecast\n\n{formatted_es}\n\n")
+
+        west_shore = forecast_data.get("west_shore", "")
+        if west_shore:
+            formatted_ws = self._format_forecast_text(west_shore)
+            markdown_parts.append(f"## West Shore Forecast\n\n{formatted_ws}\n\n")
+
         daily = forecast_data.get("daily", "")
         if daily:
             formatted_daily = self._format_forecast_text(daily)
@@ -423,7 +433,9 @@ class ForecastFormatter:
 
         north_shore = forecast_data.get("north_shore", "")
         south_shore = forecast_data.get("south_shore", "")
-        if north_shore or south_shore:
+        east_shore = forecast_data.get("east_shore", "")
+        west_shore = forecast_data.get("west_shore", "")
+        if north_shore or south_shore or east_shore or west_shore:
             shore_sections: list[str] = ['    <div class="shore-specific">']
             if north_shore:
                 formatted_ns = self._markdown_to_html(self._format_forecast_text(north_shore))
@@ -443,6 +455,28 @@ class ForecastFormatter:
                         f"""        <div class="forecast-section shore-forecast">
             <h2>South Shore Forecast</h2>
             {formatted_ss}
+        </div>
+"""
+                    ).rstrip("\n")
+                )
+            if east_shore:
+                formatted_es = self._markdown_to_html(self._format_forecast_text(east_shore))
+                shore_sections.append(
+                    dedent(
+                        f"""        <div class="forecast-section shore-forecast">
+            <h2>East Shore Forecast</h2>
+            {formatted_es}
+        </div>
+"""
+                    ).rstrip("\n")
+                )
+            if west_shore:
+                formatted_ws = self._markdown_to_html(self._format_forecast_text(west_shore))
+                shore_sections.append(
+                    dedent(
+                        f"""        <div class="forecast-section shore-forecast">
+            <h2>West Shore Forecast</h2>
+            {formatted_ws}
         </div>
 """
                     ).rstrip("\n")
@@ -635,8 +669,9 @@ class ForecastFormatter:
         formatted_text = "\n".join(formatted_lines)
 
         # Highlight important terms (feet, wave heights, etc.)
+        # Pattern matches: 8.5ft, 8-10ft, 8ft, 8.5 feet, etc.
         formatted_text = re.sub(
-            r"(\d+[\-\–]?\d*\s*(?:feet|foot|ft)(?:\s*\(Hawaiian\s*(?:scale)?\)?)?)",
+            r"(\d+\.?\d*[\-\–]?\d*\.?\d*\s*(?:feet|foot|ft)(?:\s*\(Hawaiian\s*(?:scale)?\)?)?)",
             r"**\1**",
             formatted_text,
             flags=re.IGNORECASE,

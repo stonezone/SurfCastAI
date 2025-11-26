@@ -31,7 +31,7 @@ The two Priority 1 critical fixes from the Implementation TODO have been success
 **config/config.yaml (before):**
 ```yaml
 openai:
-  api_key: sk-proj-ECscEhR0FjHRG-1SPQxJJ8jHQ2V-Jd... # EXPOSED!
+  api_key: sk-proj-REDACTED-KEY-DO-NOT-COMMIT # EXPOSED!
 ```
 
 **config/config.yaml (after):**
@@ -59,7 +59,7 @@ self.openai_api_key = self.config.get('openai', 'api_key') or os.environ.get('OP
 **.env (new file, git-ignored):**
 ```
 # SurfCastAI Environment Variables
-OPENAI_API_KEY=sk-proj-ECscEhR0FjHRG-1SPQxJJ8jHQ2V-Jd...
+OPENAI_API_KEY=sk-proj-REDACTED-KEY-DO-NOT-COMMIT
 ```
 
 **.env.example (new file, committed):**

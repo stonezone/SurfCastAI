@@ -178,7 +178,7 @@ None
 SHORE BREAKDOWN:
 {
   "north_shore": {
-    "size_range": "22-33ft",
+    "size_range": "8-12ft",
     "conditions": "clean",
     "timing": "Building through the period, peak in 12-24 hours",
     "confidence": 0.97
@@ -196,7 +196,7 @@ SHORE BREAKDOWN:
     "confidence": 0.5
   },
   "west_shore": {
-    "size_range": "22-33ft",
+    "size_range": "8-12ft",
     "conditions": "clean",
     "timing": "Building through the period, peak in 12-24 hours",
     "confidence": 0.97

@@ -35,7 +35,7 @@ SurfCastAI demonstrates **strong security fundamentals** with comprehensive SSRF
 
 **Finding:** The `.env` file contains a **live OpenAI API key** that is readable:
 ```
-OPENAI_API_KEY=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
+OPENAI_API_KEY=sk-proj-REDACTED-KEY-DO-NOT-COMMIT
 ```
 
 **Impact:**
