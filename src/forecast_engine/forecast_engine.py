@@ -69,11 +69,24 @@ class ForecastEngine:
             if replacements:
                 self.templates.update_templates(replacements)
 
-        # Load OpenAI configuration
-        # Try config first, then fall back to environment variable
-        self.openai_api_key = self.config.get("openai", "api_key") or os.environ.get(
-            "OPENAI_API_KEY"
-        )
+        # Load LLM provider configuration (openai or kimi)
+        self.llm_provider = self.config.get("llm_provider", None, "openai")
+        self.base_url = None  # Default for OpenAI
+
+        if self.llm_provider == "kimi":
+            # Kimi K2 (Moonshot AI) configuration
+            self.openai_api_key = os.environ.get("MOONSHOT_API_KEY")
+            self.base_url = self.config.get("kimi", "base_url", "https://api.moonshot.ai/v1")
+            if not self.openai_api_key:
+                self.logger.warning("MOONSHOT_API_KEY not set - Kimi K2 will not work")
+            else:
+                self.logger.info(f"Using Kimi K2 provider at {self.base_url}")
+        else:
+            # OpenAI configuration (default)
+            # Try config first, then fall back to environment variable
+            self.openai_api_key = self.config.get("openai", "api_key") or os.environ.get(
+                "OPENAI_API_KEY"
+            )
 
         # Get model name and set appropriate max_tokens
         model_name = self.config.get("openai", "model", "gpt-5-nano")
@@ -87,6 +100,9 @@ class ForecastEngine:
             "gpt-5-nano": 32768,
             "gpt-5-mini": 32768,
             "gpt-5": 32768,
+            # Kimi K2 models
+            "kimi-k2-0711-preview": 32768,
+            "kimi-k2": 32768,
         }
 
         # Determine max_tokens: config value, or model-specific limit, or 4096 default
@@ -103,8 +119,8 @@ class ForecastEngine:
             "reasoning_effort": self.config.get("openai", "reasoning_effort", "medium"),
         }
 
-        # GPT-5-nano only supports temperature=1 (default), skip for this model
-        if "gpt-5" in model_name.lower():
+        # GPT-5 and Kimi K2 models work best with default temperature
+        if "gpt-5" in model_name.lower() or "kimi-k2" in model_name.lower():
             self.temperature = None  # Use model default
         else:
             self.temperature = self.config.getfloat("openai", "temperature", 0.7)
@@ -135,10 +151,10 @@ class ForecastEngine:
             self.logger.info("Using local forecast generator (OpenAI disabled)")
 
         # Set up iterative refinement
-        # Disable refinement for GPT-5 models - they work better with single strong prompts
-        if "gpt-5" in model_name.lower():
+        # Disable refinement for GPT-5 and Kimi K2 models - they work better with single strong prompts
+        if "gpt-5" in model_name.lower() or "kimi-k2" in model_name.lower():
             self.refinement_cycles = 0
-            self.logger.info("Refinement cycles disabled for GPT-5 model")
+            self.logger.info(f"Refinement cycles disabled for {model_name} model")
         else:
             self.refinement_cycles = self.config.getint("forecast", "refinement_cycles", 2)
         self.quality_threshold = self.config.getfloat("forecast", "quality_threshold", 0.8)
@@ -164,14 +180,40 @@ class ForecastEngine:
             f"sst={self.image_detail_sst}"
         )
 
-        # Initialize OpenAI client
+        # Initialize OpenAI-compatible client (works with OpenAI and Kimi K2)
         self.openai_client = OpenAIClient(
             api_key=self.openai_api_key,
             model=self.openai_model,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
             logger=self.logger.getChild("openai_client"),
+            base_url=self.base_url,  # None for OpenAI, custom URL for Kimi K2
         )
+
+        # Hybrid Vision Architecture: GPT-4o-mini for image analysis when primary doesn't support vision
+        # This enables "GPT Eyes + Kimi Brain" - cheaper vision with powerful reasoning
+        self.vision_client = None
+        self.vision_model = self.config.get("forecast", "vision_fallback_model", "gpt-4o-mini")
+        
+        # Check if primary model supports vision
+        vision_capable_models = {"gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-5", "gpt-5-mini", "gpt-5-nano"}
+        self.primary_has_vision = model_name.lower() in vision_capable_models
+        
+        # Create vision fallback client if needed (Kimi K2 doesn't support vision)
+        if self.llm_provider == "kimi" or not self.primary_has_vision:
+            openai_api_key = os.environ.get("OPENAI_API_KEY")
+            if openai_api_key:
+                self.vision_client = OpenAIClient(
+                    api_key=openai_api_key,
+                    model=self.vision_model,
+                    max_tokens=4096,  # Smaller for vision analysis
+                    temperature=0.3,  # More deterministic for image description
+                    logger=self.logger.getChild("vision_client"),
+                    base_url=None,  # Always use OpenAI for vision
+                )
+                self.logger.info(f"Hybrid vision enabled: {self.vision_model} for images, {model_name} for reasoning")
+            else:
+                self.logger.warning("OPENAI_API_KEY not set - vision fallback unavailable")
 
         # Initialize data manager
         self.data_manager = ForecastDataManager(
@@ -319,10 +361,18 @@ class ForecastEngine:
             # Generate derivative forecasts in parallel to reduce total latency
             north_task = self._generate_shore_forecast("north_shore", forecast_data)
             south_task = self._generate_shore_forecast("south_shore", forecast_data)
+            east_task = self._generate_shore_forecast("east_shore", forecast_data)
+            west_task = self._generate_shore_forecast("west_shore", forecast_data)
             daily_task = self._generate_daily_forecast(forecast_data)
 
-            north_shore_forecast, south_shore_forecast, daily_forecast = await asyncio.gather(
-                north_task, south_task, daily_task
+            (
+                north_shore_forecast,
+                south_shore_forecast,
+                east_shore_forecast,
+                west_shore_forecast,
+                daily_forecast,
+            ) = await asyncio.gather(
+                north_task, south_task, east_task, west_task, daily_task
             )
 
             # Get API usage metrics
@@ -364,6 +414,8 @@ class ForecastEngine:
                 "main_forecast": main_forecast,
                 "north_shore": north_shore_forecast,
                 "south_shore": south_shore_forecast,
+                "east_shore": east_shore_forecast,
+                "west_shore": west_shore_forecast,
                 "daily": daily_forecast,
                 "metadata": fused_metadata,
             }
@@ -496,14 +548,22 @@ class ForecastEngine:
             self.logger.info(f"Created debug directory: {debug_dir}")
 
         # Generate image analysis first (if images available)
+        # Use vision_client for images when primary model lacks vision (Kimi K2 hybrid mode)
         image_analysis = ""
         if pressure_charts:
             from .prompt_templates import PRESSURE_CHART_ANALYSIS_PROMPT
 
             try:
+                # Select vision-capable client (hybrid architecture)
+                vision_api = self.vision_client if self.vision_client else self.openai_client
+                vision_model_name = self.vision_model if self.vision_client else self.openai_model
+                
                 self.logger.info(
-                    f"Calling {self.openai_model} for pressure chart analysis ({len(pressure_charts)} charts)..."
+                    f"Calling {vision_model_name} for pressure chart analysis ({len(pressure_charts)} charts)..."
                 )
+                if self.vision_client:
+                    self.logger.info("  [HYBRID MODE: GPT vision -> Kimi reasoning]")
+                    
                 # Get detail level for pressure charts
                 pressure_detail = next(
                     (
@@ -514,7 +574,7 @@ class ForecastEngine:
                     "high",
                 )
                 analysis = await asyncio.wait_for(
-                    self.openai_client.call_openai_api(
+                    vision_api.call_openai_api(
                         system_prompt=self.templates.get_template("caldwell").get(
                             "system_prompt", ""
                         ),
@@ -568,15 +628,22 @@ class ForecastEngine:
             from .prompt_templates import SATELLITE_IMAGE_ANALYSIS_PROMPT
 
             try:
+                # Select vision-capable client (hybrid architecture)
+                vision_api = self.vision_client if self.vision_client else self.openai_client
+                vision_model_name = self.vision_model if self.vision_client else self.openai_model
+                
                 self.logger.info(
-                    f"Calling {self.openai_model} for satellite image analysis ({len(satellite_imgs)} images)..."
+                    f"Calling {vision_model_name} for satellite image analysis ({len(satellite_imgs)} images)..."
                 )
+                if self.vision_client:
+                    self.logger.info("  [HYBRID MODE: GPT vision -> Kimi reasoning]")
+                    
                 # Get detail level for satellite images
                 satellite_detail = next(
                     (img["detail"] for img in selected_images if img["type"] == "satellite"), "auto"
                 )
                 analysis = await asyncio.wait_for(
-                    self.openai_client.call_openai_api(
+                    vision_api.call_openai_api(
                         system_prompt=self.templates.get_template("caldwell").get(
                             "system_prompt", ""
                         ),
@@ -614,15 +681,22 @@ class ForecastEngine:
             from .prompt_templates import SST_CHART_ANALYSIS_PROMPT
 
             try:
+                # Select vision-capable client (hybrid architecture)
+                vision_api = self.vision_client if self.vision_client else self.openai_client
+                vision_model_name = self.vision_model if self.vision_client else self.openai_model
+                
                 self.logger.info(
-                    f"Calling {self.openai_model} for SST chart analysis ({len(sst_charts)} charts)..."
+                    f"Calling {vision_model_name} for SST chart analysis ({len(sst_charts)} charts)..."
                 )
+                if self.vision_client:
+                    self.logger.info("  [HYBRID MODE: GPT vision -> Kimi reasoning]")
+                    
                 # Get detail level for SST charts
                 sst_detail = next(
                     (img["detail"] for img in selected_images if img["type"] == "sst_chart"), "low"
                 )
                 analysis = await asyncio.wait_for(
-                    self.openai_client.call_openai_api(
+                    vision_api.call_openai_api(
                         system_prompt=self.templates.get_template("caldwell").get(
                             "system_prompt", ""
                         ),
@@ -733,8 +807,14 @@ class ForecastEngine:
         if arrival_context:
             prompt = f"{prompt}\n\n{arrival_context}"
 
-        # Get template
-        template_name = "north_shore" if "north" in shore.lower() else "south_shore"
+        # Get template - map shore to template name
+        shore_to_template = {
+            "north_shore": "north_shore",
+            "south_shore": "south_shore",
+            "east_shore": "east_shore",
+            "west_shore": "west_shore",
+        }
+        template_name = shore_to_template.get(shore, "north_shore")
         template = self.templates.get_template(template_name)
         system_prompt = template.get("system_prompt", "")
 
