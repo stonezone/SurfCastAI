@@ -93,14 +93,23 @@ class ForecastEngine:
 
         # Model-specific max_tokens limits
         model_limits = {
-            "gpt-4o-mini": 16384,
+            # GPT-5 family (August 2025) - 256K context, vision-capable
+            "gpt-5": 32768,
+            "gpt-5-mini": 32768,
+            "gpt-5-nano": 32768,  # Default - cheapest
+            # GPT-4.1 family (April 2025) - 1M token context, vision-capable
+            "gpt-4.1": 32768,
+            "gpt-4.1-mini": 32768,
+            "gpt-4.1-nano": 16384,
+            # GPT-4o family - multimodal (text + vision + audio)
             "gpt-4o": 16384,
+            "chatgpt-4o-latest": 16384,
+            "gpt-4o-mini": 16384,
+            "gpt-4o-nano": 8192,
+            # Legacy models
             "gpt-4-turbo": 4096,
             "gpt-4": 8192,
-            "gpt-5-nano": 32768,
-            "gpt-5-mini": 32768,
-            "gpt-5": 32768,
-            # Kimi K2 models
+            # Kimi K2 models (Moonshot AI) - free tier
             "kimi-k2-0711-preview": 32768,
             "kimi-k2": 32768,
         }
@@ -194,22 +203,47 @@ class ForecastEngine:
         # Supports: Kimi vision (moonshot-v1-*-vision) or OpenAI (gpt-4o-mini) fallback
         self.vision_client = None
         self.vision_model = self.config.get("forecast", "vision_fallback_model", "auto")
-        
+
         # Check if primary model supports vision
-        vision_capable_models = {"gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-5", "gpt-5-mini", "gpt-5-nano"}
-        kimi_vision_models = {"moonshot-v1-128k-vision-preview", "moonshot-v1-32k-vision-preview", "moonshot-v1-8k-vision-preview"}
+        # All GPT-4o, GPT-4.1, and GPT-5 families support vision/image understanding
+        vision_capable_models = {
+            # GPT-5 family
+            "gpt-5",
+            "gpt-5-mini",
+            "gpt-5-nano",
+            # GPT-4.1 family (1M context, excellent vision)
+            "gpt-4.1",
+            "gpt-4.1-mini",
+            "gpt-4.1-nano",
+            # GPT-4o family (native multimodal)
+            "gpt-4o",
+            "chatgpt-4o-latest",
+            "gpt-4o-mini",
+            "gpt-4o-nano",
+            # Legacy
+            "gpt-4-turbo",
+        }
+        kimi_vision_models = {
+            "moonshot-v1-128k-vision-preview",
+            "moonshot-v1-32k-vision-preview",
+            "moonshot-v1-8k-vision-preview",
+        }
         self.primary_has_vision = model_name.lower() in vision_capable_models
-        
+
         # Create vision fallback client if needed
         if self.llm_provider == "kimi" or not self.primary_has_vision:
             # For Kimi: prefer Kimi's own vision model (same API, free)
             if self.llm_provider == "kimi":
-                kimi_vision_model = self.config.get("kimi", "vision_model", "moonshot-v1-32k-vision-preview")
+                kimi_vision_model = self.config.get(
+                    "kimi", "vision_model", "moonshot-v1-32k-vision-preview"
+                )
                 if self.vision_model == "auto":
                     self.vision_model = kimi_vision_model
-                
+
                 # Use Kimi vision if configured, otherwise fall back to OpenAI
-                if self.vision_model in kimi_vision_models or self.vision_model.startswith("moonshot"):
+                if self.vision_model in kimi_vision_models or self.vision_model.startswith(
+                    "moonshot"
+                ):
                     self.vision_client = OpenAIClient(
                         api_key=self.openai_api_key,  # Same Moonshot API key
                         model=self.vision_model,
@@ -218,20 +252,26 @@ class ForecastEngine:
                         logger=self.logger.getChild("vision_client"),
                         base_url=self.base_url,  # Same Kimi base URL
                     )
-                    self.logger.info(f"Kimi vision enabled: {self.vision_model} for images, {model_name} for reasoning (all free)")
+                    self.logger.info(
+                        f"Kimi vision enabled: {self.vision_model} for images, {model_name} for reasoning (all free)"
+                    )
                 else:
                     # Fall back to OpenAI for vision
                     openai_api_key = os.environ.get("OPENAI_API_KEY")
                     if openai_api_key:
                         self.vision_client = OpenAIClient(
                             api_key=openai_api_key,
-                            model=self.vision_model if self.vision_model != "auto" else "gpt-4o-mini",
+                            model=(
+                                self.vision_model if self.vision_model != "auto" else "gpt-4o-mini"
+                            ),
                             max_tokens=4096,
                             temperature=0.3,
                             logger=self.logger.getChild("vision_client"),
                             base_url=None,
                         )
-                        self.logger.info(f"Hybrid vision enabled: {self.vision_model} for images, {model_name} for reasoning")
+                        self.logger.info(
+                            f"Hybrid vision enabled: {self.vision_model} for images, {model_name} for reasoning"
+                        )
                     else:
                         self.logger.warning("OPENAI_API_KEY not set - vision fallback unavailable")
             else:
@@ -246,7 +286,9 @@ class ForecastEngine:
                         logger=self.logger.getChild("vision_client"),
                         base_url=None,
                     )
-                    self.logger.info(f"Hybrid vision enabled: {self.vision_model} for images, {model_name} for reasoning")
+                    self.logger.info(
+                        f"Hybrid vision enabled: {self.vision_model} for images, {model_name} for reasoning"
+                    )
                 else:
                     self.logger.warning("OPENAI_API_KEY not set - vision fallback unavailable")
 
@@ -406,9 +448,7 @@ class ForecastEngine:
                 east_shore_forecast,
                 west_shore_forecast,
                 daily_forecast,
-            ) = await asyncio.gather(
-                north_task, south_task, east_task, west_task, daily_task
-            )
+            ) = await asyncio.gather(north_task, south_task, east_task, west_task, daily_task)
 
             # Get API usage metrics
             metrics = await self.openai_client.get_metrics()
@@ -592,13 +632,13 @@ class ForecastEngine:
                 # Select vision-capable client (hybrid architecture)
                 vision_api = self.vision_client if self.vision_client else self.openai_client
                 vision_model_name = self.vision_model if self.vision_client else self.openai_model
-                
+
                 self.logger.info(
                     f"Calling {vision_model_name} for pressure chart analysis ({len(pressure_charts)} charts)..."
                 )
                 if self.vision_client:
                     self.logger.info("  [HYBRID MODE: GPT vision -> Kimi reasoning]")
-                    
+
                 # Get detail level for pressure charts
                 pressure_detail = next(
                     (
@@ -666,13 +706,13 @@ class ForecastEngine:
                 # Select vision-capable client (hybrid architecture)
                 vision_api = self.vision_client if self.vision_client else self.openai_client
                 vision_model_name = self.vision_model if self.vision_client else self.openai_model
-                
+
                 self.logger.info(
                     f"Calling {vision_model_name} for satellite image analysis ({len(satellite_imgs)} images)..."
                 )
                 if self.vision_client:
                     self.logger.info("  [HYBRID MODE: GPT vision -> Kimi reasoning]")
-                    
+
                 # Get detail level for satellite images
                 satellite_detail = next(
                     (img["detail"] for img in selected_images if img["type"] == "satellite"), "auto"
@@ -719,13 +759,13 @@ class ForecastEngine:
                 # Select vision-capable client (hybrid architecture)
                 vision_api = self.vision_client if self.vision_client else self.openai_client
                 vision_model_name = self.vision_model if self.vision_client else self.openai_model
-                
+
                 self.logger.info(
                     f"Calling {vision_model_name} for SST chart analysis ({len(sst_charts)} charts)..."
                 )
                 if self.vision_client:
                     self.logger.info("  [HYBRID MODE: GPT vision -> Kimi reasoning]")
-                    
+
                 # Get detail level for SST charts
                 sst_detail = next(
                     (img["detail"] for img in selected_images if img["type"] == "sst_chart"), "low"

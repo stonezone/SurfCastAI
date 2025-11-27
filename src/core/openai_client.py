@@ -57,15 +57,24 @@ class OpenAIClient:
     # Model pricing (per 1M tokens)
     # Source: https://openai.com/pricing, https://platform.moonshot.ai/pricing
     MODEL_PRICING = {
-        # OpenAI models
-        "gpt-5-nano": {"input": 0.05, "output": 0.40},
-        "gpt-5-mini": {"input": 0.25, "output": 2.00},
+        # GPT-5 family (August 2025) - all vision-capable
         "gpt-5": {"input": 1.25, "output": 10.00},
+        "gpt-5-mini": {"input": 0.25, "output": 2.00},
+        "gpt-5-nano": {"input": 0.05, "output": 0.40},  # Default - cheapest
+        # GPT-4.1 family (April 2025) - 1M token context, vision-capable
+        "gpt-4.1": {"input": 2.00, "output": 8.00},
+        "gpt-4.1-mini": {"input": 0.40, "output": 1.60},
+        "gpt-4.1-nano": {"input": 0.10, "output": 0.40},
+        # GPT-4o family - multimodal (text + vision + audio)
+        "gpt-4o": {"input": 2.50, "output": 10.00},
+        "chatgpt-4o-latest": {"input": 5.00, "output": 15.00},
+        "gpt-4o-mini": {"input": 0.15, "output": 0.60},
+        "gpt-4o-nano": {"input": 0.05, "output": 0.20},
         # Kimi K2 (Moonshot AI) - essentially free tier
         # 3M tokens/day free, 6 req/min limit
         "kimi-k2-0711-preview": {"input": 0.00, "output": 0.00},
         "kimi-k2": {"input": 0.00, "output": 0.00},
-        "default": {"input": 0.01, "output": 0.03},  # GPT-4 pricing
+        "default": {"input": 0.10, "output": 0.40},  # Fallback pricing
     }
 
     # Supported image formats
@@ -377,17 +386,34 @@ class OpenAIClient:
         Returns:
             Cost in USD
         """
-        # Determine pricing tier
+        # Determine pricing tier - check most specific matches first
         model_lower = self.model.lower()
 
         if "kimi-k2" in model_lower:
             pricing = self.MODEL_PRICING["kimi-k2"]
-        elif "gpt-5-mini" in model_lower:
-            pricing = self.MODEL_PRICING["gpt-5-mini"]
+        # GPT-5 family
         elif "gpt-5-nano" in model_lower:
             pricing = self.MODEL_PRICING["gpt-5-nano"]
+        elif "gpt-5-mini" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-5-mini"]
         elif "gpt-5" in model_lower:
             pricing = self.MODEL_PRICING["gpt-5"]
+        # GPT-4.1 family
+        elif "gpt-4.1-nano" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-4.1-nano"]
+        elif "gpt-4.1-mini" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-4.1-mini"]
+        elif "gpt-4.1" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-4.1"]
+        # GPT-4o family
+        elif "gpt-4o-nano" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-4o-nano"]
+        elif "gpt-4o-mini" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-4o-mini"]
+        elif "chatgpt-4o-latest" in model_lower:
+            pricing = self.MODEL_PRICING["chatgpt-4o-latest"]
+        elif "gpt-4o" in model_lower:
+            pricing = self.MODEL_PRICING["gpt-4o"]
         else:
             pricing = self.MODEL_PRICING["default"]
             self.logger.debug(f"Using default pricing for unknown model: {self.model}")

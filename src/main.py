@@ -830,7 +830,7 @@ def main():
     )
     run_parser.add_argument(
         "--model",
-        choices=["gpt-5", "gpt-5-mini", "gpt-5-nano", "kimi-k2"],
+        choices=["gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-4o", "gpt-4o-mini", "kimi-k2"],
         help="Override model for this run (OpenAI or Kimi K2)",
     )
     run_parser.add_argument(

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections import defaultdict
 from collections.abc import Iterable
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 try:  # Python 3.9+
@@ -15,6 +17,9 @@ try:  # Python 3.9+
 except Exception:  # pragma: no cover - fallback on platforms without zoneinfo
     ZoneInfo = None  # type: ignore
     HAWAII_TZ = None  # type: ignore
+
+# Path to climatology lookup file
+CLIMATOLOGY_LOOKUP_PATH = Path(__file__).parent.parent.parent / "data" / "climatology_lookup.json"
 
 
 def build_context(forecast_data: dict[str, Any]) -> dict[str, Any]:
@@ -302,6 +307,15 @@ def _build_upper_air_section(metadata: dict[str, Any]) -> str:
 
 
 def _build_climatology_section(metadata: dict[str, Any]) -> str:
+    """Build historical climatology context in Caldwell style."""
+    lines: list[str] = []
+
+    # Load the climatology lookup data
+    historical_context = _load_historical_climatology()
+    if historical_context:
+        lines.append(historical_context)
+
+    # Also include any collected climatology references
     references = _extract_metadata_list(
         metadata,
         [
@@ -310,17 +324,115 @@ def _build_climatology_section(metadata: dict[str, Any]) -> str:
             "climatology_stats",
         ],
     )
-    if not references:
+
+    if references:
+        lines.append("")
+        lines.append("Available climatology references:")
+        for entry in references:
+            if not isinstance(entry, dict):
+                continue
+            source_id = entry.get("source_id") or entry.get("name") or "unknown source"
+            description = entry.get("description") or entry.get("summary") or "reference dataset"
+            fmt = entry.get("format") or entry.get("type") or "text"
+            lines.append(f"  - {source_id}: {description} (format: {fmt}).")
+
+    if not lines:
         return "Climatology references unavailable."
 
-    lines: list[str] = []
-    for entry in references:
-        if not isinstance(entry, dict):
-            continue
-        source_id = entry.get("source_id") or entry.get("name") or "unknown source"
-        description = entry.get("description") or entry.get("summary") or "reference dataset"
-        fmt = entry.get("format") or entry.get("type") or "text"
-        lines.append(f"{source_id}: {description} (format: {fmt}).")
+    return "\n".join(lines)
+
+
+def _load_historical_climatology() -> str:
+    """Load historical climatology data and generate Caldwell-style context for today's date."""
+    if not CLIMATOLOGY_LOOKUP_PATH.exists():
+        return ""
+
+    try:
+        with open(CLIMATOLOGY_LOOKUP_PATH) as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return ""
+
+    # Get current date in Hawaii time
+    now = datetime.now()
+    if HAWAII_TZ:
+        now = datetime.now(HAWAII_TZ)
+
+    month_names = {
+        1: "january",
+        2: "february",
+        3: "march",
+        4: "april",
+        5: "may",
+        6: "june",
+        7: "july",
+        8: "august",
+        9: "september",
+        10: "october",
+        11: "november",
+        12: "december",
+    }
+    month_name = month_names.get(now.month, "november")
+    day_str = str(now.day)
+
+    lines = ["HISTORICAL CONTEXT (Goddard-Caldwell Database, 1968-present):"]
+    lines.append(f"Date: {now.strftime('%B %d')} ({month_name.title()})")
+
+    # North Shore historical data
+    ns_data = data.get("north_shore", {}).get(month_name, {})
+    if ns_data:
+        ns_daily = ns_data.get("daily", {}).get(day_str, {})
+        ns_avg = ns_daily.get("avg", ns_data.get("monthly_average_h1_10", 0))
+        ns_max = ns_daily.get("max", ns_data.get("monthly_record_h1_10", 0))
+        ns_max_year = ns_daily.get("max_year", ns_data.get("monthly_record_year", ""))
+
+        # Calculate peak face (approximately 2x H1/10 for big surf)
+        ns_avg_face = round(ns_avg * 2, 0) if ns_avg else 0
+        ns_max_face = round(ns_max * 2, 0) if ns_max else 0
+
+        lines.append("")
+        lines.append(f"NORTH SHORE on {now.strftime('%b %d')}:")
+        lines.append(
+            f"  • Historical H1/10 average: {ns_avg:.1f} ft ({int(ns_avg_face)}' peak face)"
+        )
+        lines.append(
+            f"  • Largest on this date: {ns_max:.0f} ft H1/10 ({int(ns_max_face)}' peak face) in {ns_max_year}"
+        )
+
+        # Monthly category breakdown if available
+        categories = ns_data.get("days_by_category", {})
+        if categories:
+            lines.append(f"  • {month_name.title()} typical distribution:")
+            lines.append(
+                f"    Small (<8'): {categories.get('small_under_8ft', 'n/a')} days, "
+                f"Medium (8-14'): {categories.get('medium_8_14ft', 'n/a')} days, "
+                f"High (15-24'): {categories.get('high_15_24ft', 'n/a')} days, "
+                f"XL (25+): {categories.get('extra_large_25_39ft', 0) + categories.get('giant_40_plus_ft', 0)} days"
+            )
+
+    # South Shore historical data
+    ss_data = data.get("south_shore", {}).get(month_name, {})
+    if ss_data:
+        ss_daily = ss_data.get("daily", {}).get(day_str, {})
+        ss_avg = ss_daily.get("avg", ss_data.get("monthly_average_h1_10", 0))
+        ss_max = ss_daily.get("max", ss_data.get("monthly_record_h1_10", 0))
+        ss_max_year = ss_daily.get("max_year", ss_data.get("monthly_record_year", ""))
+
+        ss_avg_face = round(ss_avg * 2, 0) if ss_avg else 0
+        ss_max_face = round(ss_max * 2, 0) if ss_max else 0
+
+        lines.append("")
+        lines.append(f"SOUTH SHORE on {now.strftime('%b %d')}:")
+        lines.append(
+            f"  • Historical H1/10 average: {ss_avg:.1f} ft (~{int(ss_avg_face)}' peak face)"
+        )
+        lines.append(
+            f"  • Largest on this date: {ss_max:.0f} ft H1/10 ({int(ss_max_face)}' peak face) in {ss_max_year}"
+        )
+
+        notes = ss_data.get("notes")
+        if notes:
+            lines.append(f"  • Note: {notes}")
 
     return "\n".join(lines)
 

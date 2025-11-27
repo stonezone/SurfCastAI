@@ -100,11 +100,13 @@ class ModelAgent(BaseAgent):
                         resolved_url, model_dir, model_type, location
                     )
                 # Check for data files - handle both direct extensions and query string formats (ERDDAP)
+                # Added .bull for GFS-Wave station bulletins
                 elif (
-                    resolved_url.endswith((".json", ".txt", ".csv"))
+                    resolved_url.endswith((".json", ".txt", ".csv", ".bull"))
                     or ".csv?" in resolved_url
                     or ".json?" in resolved_url
                     or ".txt?" in resolved_url
+                    or ".bull" in resolved_url
                 ):
                     result = await self._process_model_data_file(
                         resolved_url, model_dir, model_type, location
@@ -184,6 +186,8 @@ class ModelAgent(BaseAgent):
             extension = ".json"
         elif ".txt" in url:
             extension = ".txt"
+        elif ".bull" in url:
+            extension = ".bull"
         else:
             extension = ""
 
@@ -204,6 +208,8 @@ class ModelAgent(BaseAgent):
                 data_type = "json"
             elif ".csv" in url or "text/csv" in (result.content_type or ""):
                 data_type = "csv"
+            elif ".bull" in url:
+                data_type = "bulletin"
             else:
                 data_type = "text"
 
@@ -222,6 +228,20 @@ class ModelAgent(BaseAgent):
                     parsed_summary = self._parse_ww3_csv(Path(result.file_path))
                 except Exception as e:  # pragma: no cover - defensive
                     self.logger.warning(f"Failed to parse WW3 CSV {url}: {e}")
+            elif data_type == "bulletin" or model_type == "gfswave":
+                # Parse GFS-Wave station bulletin files
+                try:
+                    parsed_summary = self._parse_gfswave_bull(Path(result.file_path))
+                    # Extract key metadata for quick access
+                    if parsed_summary.get("metadata"):
+                        model_metadata = {
+                            "model_type": "gfswave",
+                            "station_id": parsed_summary["metadata"].get("station_id"),
+                            "run_time": parsed_summary["metadata"].get("cycle"),
+                            "forecast_days": parsed_summary.get("forecast_days"),
+                        }
+                except Exception as e:  # pragma: no cover - defensive
+                    self.logger.warning(f"Failed to parse GFS-Wave bulletin {url}: {e}")
 
             return self.create_metadata(
                 name=f"model_{model_type}_{location}",
@@ -311,6 +331,12 @@ class ModelAgent(BaseAgent):
         """Determine the type of wave model from the URL."""
         url_lower = url.lower()
 
+        # GFS-Wave station bulletins (new primary source)
+        if "gfswave" in url_lower and ".bull" in url_lower:
+            return "gfswave"
+        if "/wave/station/bulls" in url_lower:
+            return "gfswave"
+
         if "erddap" in url_lower:
             if "ww3" in url_lower or "wavewatch" in url_lower:
                 return "ww3"
@@ -331,6 +357,29 @@ class ModelAgent(BaseAgent):
     def _extract_location(self, url: str, model_type: str) -> str:
         """Extract location information from the URL."""
         url_lower = url.lower()
+
+        # Handle GFS-Wave station bulletins - extract station ID
+        if model_type == "gfswave" or "gfswave." in url_lower:
+            # URL pattern: .../gfswave.51001.bull
+            # Extract station ID from filename
+            import re
+
+            match = re.search(r"gfswave\.(\d+)\.bull", url_lower)
+            if match:
+                station_id = match.group(1)
+                # Map known Hawaii buoy IDs to descriptive names
+                station_names = {
+                    "51001": "nw_hawaii",  # NW Hawaii - primary for NW swell
+                    "51002": "sw_hawaii",  # SW Hawaii
+                    "51003": "se_hawaii",  # SE Hawaii
+                    "51004": "se_hawaii_alt",  # SE Hawaii alternate
+                    "51101": "n_molokai",  # N of Molokai
+                    "51200": "kaneohe",  # Kaneohe Bay
+                    "51201": "waimea",  # Waimea Bay
+                    "51202": "mokapu",  # Mokapu Point
+                    "51204": "kaneohe_deep",  # Kaneohe Deep
+                }
+                return station_names.get(station_id, f"station_{station_id}")
 
         # Handle ERDDAP URLs - check more specific patterns first
         if "erddap" in url_lower:
@@ -700,3 +749,195 @@ class ModelAgent(BaseAgent):
             return float(value)
         except (TypeError, ValueError):
             return None
+
+    def _parse_gfswave_bull(self, file_path: Path) -> dict[str, Any]:
+        """
+        Parse GFS-Wave station bulletin file into structured summary.
+
+        Format is pipe-delimited with:
+        - Header: Location, Model, Cycle info
+        - Data: day hour | Hst n x | partition1 (Hs Tp dir) | ... up to 6 partitions
+        - Asterisk (*) marks wind-driven seas
+
+        Returns dict with forecasts and metadata suitable for extended swell prediction.
+        """
+        summary: dict[str, Any] = {
+            "format": "gfswave_bull",
+            "rows": 0,
+            "forecasts": [],
+            "metadata": {},
+        }
+
+        if not file_path.exists():
+            return summary
+
+        forecasts: list[dict[str, Any]] = []
+        metadata: dict[str, Any] = {}
+
+        with open(file_path, encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+
+                # Parse header lines
+                if line.startswith("Location"):
+                    # "Location : 51001      (23.43N 162.21W)"
+                    parts = line.split(":", 1)
+                    if len(parts) > 1:
+                        loc_info = parts[1].strip()
+                        # Extract station ID and coordinates
+                        if "(" in loc_info:
+                            station_part = loc_info.split("(")[0].strip()
+                            coord_part = loc_info.split("(")[1].rstrip(")")
+                            metadata["station_id"] = station_part
+                            metadata["coordinates"] = coord_part
+                elif line.startswith("Model"):
+                    parts = line.split(":", 1)
+                    if len(parts) > 1:
+                        metadata["model"] = parts[1].strip()
+                elif line.startswith("Cycle"):
+                    parts = line.split(":", 1)
+                    if len(parts) > 1:
+                        cycle_info = parts[1].strip()
+                        metadata["cycle"] = cycle_info
+                        # Parse cycle time "20251126 12 UTC"
+                        try:
+                            cycle_parts = cycle_info.split()
+                            if len(cycle_parts) >= 2:
+                                metadata["run_date"] = cycle_parts[0]
+                                metadata["run_hour"] = cycle_parts[1]
+                        except (IndexError, ValueError):
+                            pass
+
+                # Skip header/separator lines
+                if line.startswith("+") or line.startswith("|") and "day" in line.lower():
+                    continue
+                if "Hst" in line and "Total" in line:
+                    continue  # Footer explanation
+
+                # Parse data lines: | DD HH | Hst n x | Hs Tp dir | ...
+                if line.startswith("|") and not ("day" in line.lower() or "Hst" in line):
+                    # Remove leading/trailing pipes and split
+                    cells = [c.strip() for c in line.strip("|").split("|")]
+
+                    if len(cells) < 2:
+                        continue
+
+                    # First cell: day and hour
+                    time_cell = cells[0].strip()
+                    time_parts = time_cell.split()
+                    if len(time_parts) < 2:
+                        continue
+
+                    try:
+                        day = int(time_parts[0])
+                        hour = int(time_parts[1])
+                    except (ValueError, IndexError):
+                        continue
+
+                    # Second cell: Hst (total), n (partitions), x (overflow)
+                    total_cell = cells[1].strip()
+                    total_parts = total_cell.split()
+
+                    hst = None
+                    n_partitions = None
+                    if len(total_parts) >= 1:
+                        hst = self._to_float(total_parts[0])
+                    if len(total_parts) >= 2:
+                        try:
+                            n_partitions = int(total_parts[1])
+                        except ValueError:
+                            pass
+
+                    # Remaining cells: wave partitions (Hs Tp dir)
+                    partitions: list[dict[str, Any]] = []
+                    for i in range(2, len(cells)):
+                        part_cell = cells[i].strip()
+                        if not part_cell:
+                            continue
+
+                        # Check for wind-sea marker (*)
+                        is_wind_sea = part_cell.startswith("*")
+                        part_cell = part_cell.lstrip("* ")
+
+                        part_parts = part_cell.split()
+                        if len(part_parts) >= 3:
+                            # Parse direction and convert from oceanographic (TO) to
+                            # meteorological (FROM) convention per NCEP TPB 494.
+                            # GFS-Wave web bulletins report "direction waves travel TO",
+                            # but forecasters use "direction waves come FROM".
+                            # Example: 127° (TO ESE) → 307° (FROM WNW)
+                            raw_dir = self._to_float(part_parts[2])
+                            dir_from = (raw_dir + 180) % 360 if raw_dir is not None else None
+
+                            partition = {
+                                "hs_m": self._to_float(part_parts[0]),
+                                "tp_s": self._to_float(part_parts[1]),
+                                "dir_deg": dir_from,
+                                "is_wind_sea": is_wind_sea,
+                            }
+                            if partition["hs_m"] is not None:
+                                partitions.append(partition)
+
+                    # Build forecast record
+                    forecast = {
+                        "day": day,
+                        "hour": hour,
+                        "hst_m": hst,
+                        "n_partitions": n_partitions,
+                        "partitions": partitions,
+                    }
+
+                    # Add Hs in feet for convenience
+                    if hst is not None:
+                        forecast["hst_ft"] = round(hst * 3.28084, 1)
+
+                    # Identify dominant swell (longest period, excluding wind seas)
+                    swell_partitions = [p for p in partitions if not p.get("is_wind_sea")]
+                    if swell_partitions:
+                        # Sort by period descending to get dominant long-period swell
+                        swell_partitions.sort(key=lambda p: p.get("tp_s") or 0, reverse=True)
+                        dominant = swell_partitions[0]
+                        forecast["dominant_swell"] = {
+                            "hs_m": dominant.get("hs_m"),
+                            "hs_ft": round((dominant.get("hs_m") or 0) * 3.28084, 1),
+                            "tp_s": dominant.get("tp_s"),
+                            "dir_deg": dominant.get("dir_deg"),
+                        }
+
+                    forecasts.append(forecast)
+
+        summary["rows"] = len(forecasts)
+        summary["forecasts"] = forecasts
+        summary["metadata"] = metadata
+
+        # Compute overall statistics
+        if forecasts:
+            hst_values = [f["hst_m"] for f in forecasts if f.get("hst_m") is not None]
+            if hst_values:
+                summary["max_hst_m"] = max(hst_values)
+                summary["max_hst_ft"] = round(max(hst_values) * 3.28084, 1)
+                summary["min_hst_m"] = min(hst_values)
+
+            # Find peak event (maximum Hst)
+            peak_forecast = max(forecasts, key=lambda f: f.get("hst_m") or 0)
+            if peak_forecast.get("hst_m"):
+                summary["peak_event"] = {
+                    "day": peak_forecast["day"],
+                    "hour": peak_forecast["hour"],
+                    "hst_m": peak_forecast["hst_m"],
+                    "hst_ft": peak_forecast.get("hst_ft"),
+                    "dominant_swell": peak_forecast.get("dominant_swell"),
+                }
+
+            # Calculate forecast horizon
+            if len(forecasts) >= 2:
+                first_day = forecasts[0]["day"]
+                last_day = forecasts[-1]["day"]
+                # Handle month rollover (day numbers wrap around)
+                if last_day < first_day:
+                    last_day += 30  # Approximate
+                summary["forecast_days"] = last_day - first_day + 1
+
+        return summary
